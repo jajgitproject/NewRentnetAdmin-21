@@ -2056,6 +2056,13 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   min-height: 0;
   overflow: hidden;
 }
+/* Blur page behind batch details while Dynamics sync is processing */
+.cdk-overlay-container .cdk-overlay-backdrop.dsb-sync-processing-backdrop {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(15, 23, 42, 0.62) !important;
+  transition: backdrop-filter 0.35s ease, background-color 0.35s ease;
+}
 
 /* One scrollbar: only mat-dialog-content scrolls (not surface/container/nested lists). */
 .cdk-overlay-container .cdk-overlay-pane.sdd-invoice-sync-details-panel .mat-mdc-dialog-container .mat-mdc-dialog-content,

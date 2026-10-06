@@ -17,6 +17,10 @@ import { SendDataToDynamicsInvoice } from './sendDataToDynamics.model';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
+import {
+  isCustomerSegmentConfigurationMessage,
+  openCustomerSegmentErrorDialog
+} from '../dynamicsSyncBatch/dialogs/customer-segment-error-dialog.component';
 
 @Component({
   standalone: false,
@@ -314,6 +318,10 @@ export class SendDataToDynamicsComponent implements OnInit {
       error: (err: unknown) => {
         this.sending = false;
         const message = this.resolveSendErrorMessage(err);
+        if (isCustomerSegmentConfigurationMessage(message)) {
+          openCustomerSegmentErrorDialog(this.dialog, message);
+          return;
+        }
         this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     });

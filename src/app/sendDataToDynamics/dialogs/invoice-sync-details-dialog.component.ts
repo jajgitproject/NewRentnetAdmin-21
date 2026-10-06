@@ -4,6 +4,8 @@ import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 
+import { applyCreatedSyncPresentation } from '../../dynamicsSyncBatch/dynamicsSyncBatch.model';
+
 import { SendDataToDynamicsService } from '../sendDataToDynamics.service';
 
 import { SendCreditNotesToDynamicsService } from '../../sendCreditNotesToDynamics/sendCreditNotesToDynamics.service';
@@ -204,21 +206,21 @@ export class InvoiceSyncDetailsDialogComponent implements OnInit {
 
 
 
-    const emptyDynamics = {
+    const fromRow = {
 
-      syncDate: null,
+      syncDate: row.syncDate ?? row.SyncDate ?? null,
 
-      syncTime: null,
+      syncTime: row.syncTime ?? row.SyncTime ?? null,
 
-      dynamicsResponse: null,
+      dynamicsResponse: row.dynamicsResponse ?? row.DynamicsResponse ?? row.response ?? null,
 
-      dynamicsResponseCode: null,
+      dynamicsResponseCode: row.dynamicsResponseCode ?? row.DynamicsResponseCode ?? row.responseCode ?? null,
 
-      dynamicsResponseStatus: null,
+      dynamicsResponseStatus: row.dynamicsResponseStatus ?? row.DynamicsResponseStatus ?? row.responseStatus ?? null,
 
-      dynamicsResponseDate: null,
+      dynamicsResponseDate: row.dynamicsResponseDate ?? row.DynamicsResponseDate ?? row.responseDate ?? null,
 
-      dynamicsResponseTime: null
+      dynamicsResponseTime: row.dynamicsResponseTime ?? row.DynamicsResponseTime ?? row.responseTime ?? null
 
     };
 
@@ -240,7 +242,7 @@ export class InvoiceSyncDetailsDialogComponent implements OnInit {
 
         syncStatus: row.creditNoteSyncStatus ?? row.CreditNoteSyncStatus ?? 'Unprocessed',
 
-        ...emptyDynamics
+        ...fromRow
 
       };
 
@@ -258,11 +260,13 @@ export class InvoiceSyncDetailsDialogComponent implements OnInit {
 
         syncStatus: row.invoiceSyncStatus ?? row.InvoiceSyncStatus ?? 'Unprocessed',
 
-        ...emptyDynamics
+        ...fromRow
 
       };
 
     }
+
+    this.normalizeDisplayedSync();
 
     this.changeDetectorRef.markForCheck();
 
@@ -342,7 +346,53 @@ export class InvoiceSyncDetailsDialogComponent implements OnInit {
 
     }
 
+    this.normalizeDisplayedSync();
+
     this.finishLoading();
+
+  }
+
+
+
+  private normalizeDisplayedSync(): void {
+
+    if (!this.details) {
+
+      return;
+
+    }
+
+    const documentNumber = this.isCreditNote
+
+      ? this.details.creditNoteNumberWithPrefix
+
+      : this.details.invoiceNumberWithPrefix;
+
+    const presented = applyCreatedSyncPresentation({
+
+      responseCode: this.details.dynamicsResponseCode,
+
+      responseStatus: this.details.dynamicsResponseStatus,
+
+      response: this.details.dynamicsResponse,
+
+      syncStatus: this.details.syncStatus,
+
+      invoiceNumberWithPrefix: documentNumber
+
+    }, this.isCreditNote ? 'creditNote' : 'invoice');
+
+    this.details.dynamicsResponseCode = presented.responseCode;
+
+    this.details.dynamicsResponseStatus = presented.responseStatus;
+
+    this.details.dynamicsResponse = presented.response;
+
+    if (presented.syncStatus) {
+
+      this.details.syncStatus = presented.syncStatus;
+
+    }
 
   }
 
@@ -620,7 +670,39 @@ export class InvoiceSyncDetailsDialogComponent implements OnInit {
 
   getDynamicsResponsePresentation(): DynamicsResponsePresentation {
 
-    const raw = this.details?.dynamicsResponse;
+    const presented = applyCreatedSyncPresentation({
+
+      responseCode: this.details?.dynamicsResponseCode,
+
+      responseStatus: this.details?.dynamicsResponseStatus,
+
+      response: this.details?.dynamicsResponse,
+
+      syncStatus: this.details?.syncStatus,
+
+      invoiceNumberWithPrefix: this.isCreditNote
+
+        ? this.details?.creditNoteNumberWithPrefix
+
+        : this.details?.invoiceNumberWithPrefix
+
+    }, this.isCreditNote ? 'creditNote' : 'invoice');
+
+    if (presented.responseStatus === 'Created' && presented.responseCode === '201') {
+
+      const summary = String(presented.response || '').trim()
+
+        || (this.isCreditNote ? 'Credit note created in Dynamics.' : 'Invoice created in Dynamics.');
+
+      if (!summary.startsWith('{') && !summary.startsWith('[')) {
+
+        return { summary, details: [], isError: false };
+
+      }
+
+    }
+
+    const raw = presented.response ?? this.details?.dynamicsResponse;
 
     if (raw === null || raw === undefined || String(raw).trim() === '') {
 

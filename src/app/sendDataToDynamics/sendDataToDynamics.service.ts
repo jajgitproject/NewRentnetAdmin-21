@@ -45,6 +45,19 @@ export class SendDataToDynamicsService {
     return this.toRouteParam(text.replace(/\//g, '-'));
   }
 
+  /** Comma-separated invoice numbers (slashes encoded as `-`, commas as `~`). */
+  private toInvoiceListRouteParam(value: any): string {
+    if (value === null || value === undefined) {
+      return 'null';
+    }
+    const text = String(value).trim();
+    if (text === '' || text === 'null') {
+      return 'null';
+    }
+    const encoded = text.replace(/,/g, '~').replace(/\//g, '-');
+    return this.toRouteParam(encoded);
+  }
+
   private toIdRouteParam(value: string): string {
     if (value === null || value === undefined) {
       return 'null';
@@ -95,7 +108,7 @@ export class SendDataToDynamicsService {
       + '/' + this.toInvoiceTypeRouteParam(searchInvoiceType)
       + '/' + this.toRouteParam(searchCustomerName)
       + '/' + this.toRouteParam(searchCustomerGroup)
-      + '/' + this.toInvoiceRouteParam(searchInvoiceNo)
+      + '/' + this.toInvoiceListRouteParam(searchInvoiceNo)
       + '/' + this.toRouteParam(searchBranch)
       + '/' + this.toRouteParam(searchFromDate)
       + '/' + this.toRouteParam(searchToDate)

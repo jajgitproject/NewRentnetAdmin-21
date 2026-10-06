@@ -51,9 +51,9 @@
           <dt>Sync time</dt>
           <dd>{{ displayTime(details.syncTime) }}</dd>
           <dt>Response code</dt>
-          <dd><span [ngClass]="getResponseCodeBadgeClass()">{{ displayText(details.dynamicsResponseCode) }}</span></dd>
+          <dd><span [ngClass]="getResponseCodeBadgeClass()">{{ loading ? '…' : displayText(details.dynamicsResponseCode) }}</span></dd>
           <dt>Response status</dt>
-          <dd>{{ displayText(details.dynamicsResponseStatus) }}</dd>
+          <dd>{{ loading ? '…' : displayText(details.dynamicsResponseStatus) }}</dd>
           <dt>Response date</dt>
           <dd>{{ displayDate(details.dynamicsResponseDate) }}</dd>
           <dt>Response time</dt>
@@ -63,7 +63,7 @@
     </div>
 
     <section
-      *ngIf="details"
+      *ngIf="details && !loading"
       class="isdd-dialog__response"
       [class.isdd-dialog__panels--loading]="loading"
       aria-labelledby="isdd-dynamics-response-heading">

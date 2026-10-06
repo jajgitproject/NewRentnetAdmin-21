@@ -111,6 +111,7 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Address</mat-label>
                         <input required matInput formControlName="billingAddress">
+                        <mat-hint>From Customer, State, and City</mat-hint>
                         <mat-error *ngIf="advanceTableForm.get('billingAddress').hasError('required')">
                             Billing Address is required
                         </mat-error>

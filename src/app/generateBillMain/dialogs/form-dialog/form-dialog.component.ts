@@ -136,6 +136,57 @@ export class FormDialogComponent
         this.advanceTableForm = this.createContactForm();
           this.advanceTable.activationStatus=true;
         this.advanceTableForm.controls["invoiceDate"].disable();
+        if (this.action === 'edit') {
+          this.organizationalEntityID =
+            this.advanceTable.organizationalEntityID ?? this.advanceTable.branchID;
+        }
+        this.lockEcoBillingBranchIfInvoiceGenerated();
+        this.lockBillingAddressField();
+  }
+
+  get ecoBillingBranchLocked(): boolean {
+    return this.isInvoiceNumberGenerated();
+  }
+
+  private isInvoiceNumberGenerated(): boolean {
+    const raw =
+      this.advanceTable?.invoiceNumberWithPrefix ??
+      this.advanceTable?.InvoiceNumberWithPrefix ??
+      '';
+    return String(raw ?? '').trim().length > 0;
+  }
+
+  private lockEcoBillingBranchIfInvoiceGenerated(): void {
+    if (!this.isInvoiceNumberGenerated()) {
+      return;
+    }
+    const branchControl = this.advanceTableForm.get('organizationalEntityName');
+    if (branchControl && !branchControl.disabled) {
+      branchControl.disable({ emitEvent: false });
+    }
+  }
+
+  /** Billing address is derived from Customer + State + City; not editable manually. */
+  private lockBillingAddressField(): void {
+    const billingAddressControl = this.advanceTableForm.get('billingAddress');
+    if (billingAddressControl && !billingAddressControl.disabled) {
+      billingAddressControl.disable({ emitEvent: false });
+    }
+  }
+
+  private setBillingAddressFromSelection(address: string | null | undefined): void {
+    const billingAddressControl = this.advanceTableForm.get('billingAddress');
+    if (!billingAddressControl) {
+      return;
+    }
+    const wasDisabled = billingAddressControl.disabled;
+    if (wasDisabled) {
+      billingAddressControl.enable({ emitEvent: false });
+    }
+    billingAddressControl.setValue(address ?? '', { emitEvent: false });
+    if (wasDisabled) {
+      billingAddressControl.disable({ emitEvent: false });
+    }
   }
   
   createContactForm(): FormGroup 
@@ -334,6 +385,7 @@ export class FormDialogComponent
           startWith(""),
           map(value => this._filterOrganizational(value || ''))
         );
+        this.lockEcoBillingBranchIfInvoiceGenerated();
       });
   }
 
@@ -351,6 +403,9 @@ export class FormDialogComponent
 
   getorganizationalEntityID(organizationalEntityID: any) 
   {
+    if (this.ecoBillingBranchLocked) {
+      return;
+    }
     this.organizationalEntityID = organizationalEntityID;
     this.advanceTableForm.patchValue({ecoBillingBranchID:this.organizationalEntityID});
   }
@@ -442,13 +497,13 @@ export class FormDialogComponent
       stateID: '',
       city: '',
       cityID: '',
-      billingAddress: '',
       pinCode: '',
       isSEZ: '',
       passengerName: '',
       passengerID: null,
       customerPersonNameID: null
     });
+    this.setBillingAddressFromSelection('');
     this.stateID = null;
     this.cityID = null;
     this.CustomerPersonList = [];
@@ -499,16 +554,18 @@ export class FormDialogComponent
             customerDetails.customerCity || 
             customerDetails.billingCity || '',
             
-      billingAddress: customerDetails.billingAddress || 
-                     customerDetails.address || 
-                     customerDetails.customerAddress || 
-                     customerDetails.fullAddress || '',
-                     
       pinCode: customerDetails.pinCode || 
                customerDetails.pin || 
                customerDetails.zipCode || 
                customerDetails.postalCode || ''
     });
+    this.setBillingAddressFromSelection(
+      customerDetails.billingAddress ||
+        customerDetails.address ||
+        customerDetails.customerAddress ||
+        customerDetails.fullAddress ||
+        ''
+    );
 
     // Update the IDs for autocomplete
     if (customerDetails.stateID || customerDetails.state_ID) {
@@ -551,9 +608,9 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({
       state: 'Delhi',
       city: 'New Delhi',
-      billingAddress: `Customer Address for ID: ${customerID}`,
       pinCode: '110001'
     });
+    this.setBillingAddressFromSelection(`Customer Address for ID: ${customerID}`);
     
     this.clearAddressValidationErrors();
   }
@@ -588,7 +645,6 @@ export class FormDialogComponent
       stateID: '',
       city: '',
       cityID: '',
-      billingAddress: '',
       pinCode: '',
       customerID: '',
       isSEZ: '',
@@ -610,6 +666,7 @@ export class FormDialogComponent
     this.advanceTableForm.get('passengerName')?.disable({ emitEvent: false });
 
     this.clearBillToShipToSection();
+    this.setBillingAddressFromSelection('');
 
     // Clear validation errors
     this.clearAddressValidationErrors();
@@ -1130,10 +1187,11 @@ export class FormDialogComponent
   getTitle(geoPointID: any,option) 
   {
     this.cityID=geoPointID;
-    this.advanceTableForm.patchValue({cityID:this.cityID,
-       billingAddress: option.billingAddress,
-    pinCode: option.billingPin
+    this.advanceTableForm.patchValue({
+      cityID: this.cityID,
+      pinCode: option.billingPin
     });
+    this.setBillingAddressFromSelection(option.billingAddress);
   }
   cityValidator(CityList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
