@@ -267,7 +267,7 @@ export class ReservationGroupModel {
       this.bookingGroupType = reservation.bookingGroupType || '';
       this.bookingID = reservation.bookingID || '';
       this.kam = reservation.kam || '';
-      this.kamID = reservation.kamID || '';
+      this.kamID = reservation.kamID || 0;
       this.customerTravelRequestNumber = reservation.customerTravelRequestNumber || '';
       this.reservationStartDate=new Date();
       this.reservationEndDate=new Date();

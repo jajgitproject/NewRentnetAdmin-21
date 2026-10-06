@@ -166,7 +166,7 @@ export class BookingConfigurationComponent implements OnInit {
     salesExecutive:[''],
     salesExecutiveID:[''],
     kam:[''],
-    kamID:[''],
+    kamID:[0],
     reservationExecutiveID:[''],
     customerTypeID:[''],
     emailLink: [''],
@@ -671,7 +671,9 @@ private extractTime(dateTime: Date): Date {
 
       const kam = this.customerKamList[0].firstName + ' ' + this.customerKamList[0].lastName + '-' + this.customerKamList[0].mobile + '-' + this.customerKamList[0].email;
       this.advanceTableForm.patchValue({kam});
-      this.advanceTableForm.patchValue({kamID:this.customerKamList[0]?.kamID});
+      this.advanceTableForm.patchValue({
+        kamID: this.customerKamList[0]?.kamID || this.customerKamList[0]?.employeeID || 0
+      });
       const kamControl = this.advanceTableForm.controls['kam'];
       if (kamControl) {
         kamControl.setValidators([this.customerKAMValidator(this.customerKamList)]);
@@ -898,6 +900,7 @@ private extractTime(dateTime: Date): Date {
       dropOffCityID: this.normalizeOptionalInt(this.advanceTableForm.value.dropOffCityID),
     });
     const payload: any = this.advanceTableForm.getRawValue();
+    payload.kamID = this.normalizeOptionalInt(payload.kamID);
     payload.reservationStops = this.reservationStops;
     this.bookingConfigurationService.add(payload)  
     .subscribe(
