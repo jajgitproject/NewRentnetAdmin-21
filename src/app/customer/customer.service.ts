@@ -204,6 +204,16 @@ export class CustomerService
       isFeedbackEmailAllowed: raw.isFeedbackEmailAllowed === null || raw.isFeedbackEmailAllowed === undefined || raw.isFeedbackEmailAllowed === ''
         ? null
         : toBool(raw.isFeedbackEmailAllowed, true),
+      isCPEmailMandatry: (() => {
+        const v = raw.isCPEmailMandatry ?? raw.isCPEmailIDMandatory ?? raw.IsCPEmailIDMandatory
+          ?? raw.IsCPEmailMandatry;
+        return v === null || v === undefined || v === '' ? null : toBool(v, false);
+      })(),
+      isCPEmailIDMandatory: (() => {
+        const v = raw.isCPEmailMandatry ?? raw.isCPEmailIDMandatory ?? raw.IsCPEmailIDMandatory
+          ?? raw.IsCPEmailMandatry;
+        return v === null || v === undefined || v === '' ? null : toBool(v, false);
+      })(),
       isBillToShipToCustomer: toBool(raw.isBillToShipToCustomer, false),
       isAggregator: toBool(raw.isAggregator, false),
       aggregatorCustomerID:

@@ -50,6 +50,7 @@ export class Customer {
       isBookerAllowedToBeCreatedFromReservation:boolean;
       isPostPickUpCallAllowed:boolean;
       isFeedbackEmailAllowed:boolean;
+      isCPEmailMandatry:boolean;
       panNo:string;
       customerIdentityNumber:string;
       gstCustomerType:string;
@@ -100,6 +101,10 @@ export class Customer {
        this.isPostPickUpCallAllowed = customer.isPostPickUpCallAllowed ?? false;
        this.isFeedbackEmailAllowed = customer.isFeedbackEmailAllowed === true || customer.isFeedbackEmailAllowed === false
          ? customer.isFeedbackEmailAllowed
+         : null;
+       const cpEmailMandatory = customer.isCPEmailMandatry ?? customer.isCPEmailIDMandatory;
+       this.isCPEmailMandatry = cpEmailMandatory === true || cpEmailMandatory === false
+         ? cpEmailMandatory
          : null;
        this.customerSector = customer.customerSector || '';
        this.contactPerson = customer.contactPerson || '';

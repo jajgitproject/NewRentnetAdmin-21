@@ -139,6 +139,8 @@ export class FormDialogComponent
               ? this.advanceTable.aggregatorCustomerName
               : 'None',
             isAggregator: this.advanceTable.isAggregator ?? false,
+            isCPEmailMandatry: this.resolveCpEmailMandatoryFormValue(this.advanceTable),
+            isFeedbackEmailAllowed: this.optionalBool(this.advanceTable.isFeedbackEmailAllowed),
           }, { emitEvent: false });
           this.aggregatorCustomerID = this.advanceTable.aggregatorCustomerID || null;
         } else 
@@ -209,7 +211,7 @@ checkDuplicateCustomer()
   onNoClick(action: string) {
     if(action === 'add') {
       this.advanceTableForm.reset();
-      this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: '' });
+      this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: '', isCPEmailMandatry: '' });
     } else {
       this.dialogRef.close();
     }
@@ -785,6 +787,38 @@ getBusinessTypeID(businessTypeID: any)
       : '';
   }
 
+  private resolveCpEmailMandatoryFormValue(source: any): boolean | '' {
+    return this.optionalBool(
+      source?.isCPEmailMandatry ?? source?.IsCPEmailMandatry
+        ?? source?.isCPEmailIDMandatory ?? source?.IsCPEmailIDMandatory
+    );
+  }
+
+  private optionalBool(value: any): boolean | '' {
+    if (value === null || value === undefined || value === '') {
+      return '';
+    }
+    if (value === true || value === false) {
+      return value;
+    }
+    if (value === 1) {
+      return true;
+    }
+    if (value === 0) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+        return true;
+      }
+      if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+        return false;
+      }
+    }
+    return '';
+  }
+
   private coerceBool(value: any, fallback: boolean): boolean {
     if (value === null || value === undefined || value === '') {
       return fallback;
@@ -866,6 +900,7 @@ getBusinessTypeID(businessTypeID: any)
           ? this.advanceTable.isFeedbackEmailAllowed
           : ''
       ],
+      isCPEmailMandatry: [this.resolveCpEmailMandatoryFormValue(this.advanceTable)],
       panNo: [this.advanceTable.panNo],
       customerIdentityNumber: [this.advanceTable.customerIdentityNumber],
       gstCustomerType: [this.advanceTable.gstCustomerType],
@@ -983,6 +1018,10 @@ onLatLonRequiredChange() {
     const feedbackValue = this.advanceTableForm.get('isFeedbackEmailAllowed').value;
     if (feedbackValue === '' || feedbackValue === undefined) {
       this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: null });
+    }
+    const cpEmailMandatoryValue = this.advanceTableForm.get('isCPEmailMandatry').value;
+    if (cpEmailMandatoryValue === '' || cpEmailMandatoryValue === undefined) {
+      this.advanceTableForm.patchValue({ isCPEmailMandatry: null });
     }
     const aggregatorName = this.advanceTableForm.get('aggregatorCustomerName').value;
     if (!aggregatorName || aggregatorName.toLowerCase() === 'none') {

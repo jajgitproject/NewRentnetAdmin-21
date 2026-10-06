@@ -160,6 +160,7 @@ export class FormDialogComponentCustomerPerson
           this.PrimaryMobile=data.PrimaryMobile;
           this.dialogTitle ='Customer Person for';       
           this.advanceTable = data.advanceTable;
+          this.customerID = this.advanceTable.customerID;
 
           // Fallback for list APIs that send phone instead of primaryMobile
           if (!this.advanceTable.primaryMobile && data?.advanceTable?.phone) {
@@ -334,10 +335,14 @@ export class FormDialogComponentCustomerPerson
   }
   
   InitCustomer(){
-    this._generalService.GetCustomersForCP(this.data.CustomerGroupID).subscribe
+    const customerGroupId = this.data?.CustomerGroupID ?? this.CustomerGroupID;
+    if (!customerGroupId) {
+      return;
+    }
+    this._generalService.GetCustomersForCP(customerGroupId).subscribe
     (
       data=>{
-        this.CustomerList=data;
+        this.CustomerList = this.normalizeCustomerList(data);
         this.advanceTableForm.controls['customerName'].setValidators([Validators.required,
           this.customerValidator(this.CustomerList)
         ]);
@@ -346,7 +351,11 @@ export class FormDialogComponentCustomerPerson
         this.filteredCustomerOptions = this.advanceTableForm.controls["customerName"].valueChanges.pipe(
           startWith(""),
           map(value => this._filterCustomer(value || ''))
-        ); 
+        );
+        this.advanceTableForm.controls['customerName'].valueChanges.subscribe(() => {
+          this.updatePrimaryEmailValidators();
+        });
+        this.updatePrimaryEmailValidators();
       }
     );
   }
@@ -368,14 +377,103 @@ export class FormDialogComponentCustomerPerson
     const CustomerName = this.CustomerList.find(
       data => data.customerName === selectedCustomer
     );
-    if (selectedCustomer) 
+    if (CustomerName) 
     {
       this.getCustomerID(CustomerName.customerID);
     }
+    else
+    {
+      this.updatePrimaryEmailValidators();
+    }
   }  
+
+  private normalizeCustomerList(customers: any[]): any[] {
+    return (customers || []).map((customer) => ({
+      ...customer,
+      customerID: customer.customerID ?? customer.CustomerID,
+      customerName: customer.customerName ?? customer.CustomerName,
+      isCPEmailMandatry: this.readCpEmailMandatoryFlag(customer),
+      isCPEmailIDMandatory: this.readCpEmailMandatoryFlag(customer),
+    }));
+  }
+
+  private readCpEmailMandatoryFlag(source: any): boolean | null {
+    const value = source?.isCPEmailMandatry ?? source?.IsCPEmailMandatry
+      ?? source?.isCPEmailIDMandatory ?? source?.IsCPEmailIDMandatory;
+    if (value === true || value === false) {
+      return value;
+    }
+    if (value === 1) {
+      return true;
+    }
+    if (value === 0) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+        return true;
+      }
+      if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+        return false;
+      }
+    }
+    return null;
+  }
   getCustomerID(customerID: any) 
   {
     this.customerID=customerID;
+    this.updatePrimaryEmailValidators();
+  }
+
+  private resolveSelectedCustomer(): any {
+    const id = this.customerID || this.advanceTableForm?.get('customerID')?.value;
+    if (id && this.CustomerList?.length) {
+      const byId = this.CustomerList.find((data) => this.sameCustomerId(data.customerID, id));
+      if (byId) {
+        return byId;
+      }
+    }
+    const name = this.advanceTableForm?.get('customerName')?.value;
+    if (name && this.CustomerList?.length) {
+      return this.CustomerList.find((data) => data.customerName === name);
+    }
+    return null;
+  }
+
+  private sameCustomerId(left: any, right: any): boolean {
+    const leftId = Number(left);
+    const rightId = Number(right);
+    return Number.isFinite(leftId) && Number.isFinite(rightId) && leftId > 0 && leftId === rightId;
+  }
+
+  private isCustomerCpEmailMandatory(customer?: any): boolean {
+    return this.readCpEmailMandatoryFlag(customer) === true;
+  }
+
+  private trimPrimaryEmailControl(): void {
+    const control = this.advanceTableForm?.get('primaryEmail');
+    if (!control || control.value == null) {
+      return;
+    }
+    const trimmed = String(control.value).trim();
+    if (trimmed !== control.value) {
+      control.setValue(trimmed, { emitEvent: false });
+    }
+  }
+
+  updatePrimaryEmailValidators(): void {
+    const control = this.advanceTableForm?.get('primaryEmail');
+    if (!control) {
+      return;
+    }
+    const customer = this.resolveSelectedCustomer();
+    if (this.isCustomerCpEmailMandatory(customer)) {
+      control.setValidators([Validators.required, Validators.email]);
+    } else {
+      control.setValidators([Validators.email]);
+    }
+    control.updateValueAndValidity({ emitEvent: false });
   }
 
   customerValidator(CustomerList: any[]): ValidatorFn {
@@ -787,6 +885,19 @@ export class FormDialogComponentCustomerPerson
   // }
 
 public Post(): void {
+  this.trimPrimaryEmailControl();
+  this.updatePrimaryEmailValidators();
+  if (this.isCustomerCpEmailMandatory(this.resolveSelectedCustomer())) {
+    const email = (this.advanceTableForm.get('primaryEmail')?.value || '').toString().trim();
+    if (!email) {
+      this.advanceTableForm.get('primaryEmail')?.setErrors({ required: true });
+      this.advanceTableForm.get('primaryEmail')?.markAsTouched();
+      this.showNotification('snackbar-warning', 'Primary Email is required', 'bottom', 'center');
+      this.isSaving = false;
+      return;
+    }
+  }
+
   // Helper function to format phone numbers with country code safely
   const formatPhone = (countryCodeControl: string, phoneControl: string): string => {
     const codeValue = this.advanceTableForm.get(countryCodeControl)?.value || '';
@@ -1002,10 +1113,22 @@ public Post(): void {
         return; // Prevent multiple clicks if already saving
     }
 
+    this.trimPrimaryEmailControl();
+    this.updatePrimaryEmailValidators();
+
+    if (this.isCustomerCpEmailMandatory(this.resolveSelectedCustomer())) {
+      const email = (this.advanceTableForm.get('primaryEmail')?.value || '').toString().trim();
+      if (!email) {
+        this.advanceTableForm.get('primaryEmail')?.setErrors({ required: true });
+        this.advanceTableForm.get('primaryEmail')?.markAsTouched();
+      }
+    }
+
     if (this.advanceTableForm.invalid) 
       {
         this.advanceTableForm.markAllAsTouched();
         this.saveDisabled = true;
+        this.isSaving = false;
         const firstError = this.validationMessages[0];
         this.showNotification(
           'snackbar-warning',
@@ -1154,6 +1277,7 @@ public Post(): void {
           }
           if (this.advanceTableForm.get('primaryEmail')?.hasError('duplicate')) {
             this.advanceTableForm.get('primaryEmail')?.setErrors(null);
+            this.advanceTableForm.get('primaryEmail')?.updateValueAndValidity({ emitEvent: false });
           }
         }
       });
@@ -1189,6 +1313,9 @@ checkDuplicateCustomerPerson() {
           ['customerPersonName', 'primaryMobile', 'primaryEmail'].forEach(field => {
             if (this.advanceTableForm.get(field)?.hasError('duplicate')) {
               this.advanceTableForm.get(field)?.setErrors(null);
+              if (field === 'primaryEmail') {
+                this.advanceTableForm.get(field)?.updateValueAndValidity({ emitEvent: false });
+              }
             }
           });
         }
@@ -1314,6 +1441,9 @@ private getOldRentNetID(): number {
       }
       if (control.hasError('pattern')) {
         messages.push(`${label} is invalid`);
+      }
+      if (control.hasError('email')) {
+        messages.push(`${label} is not a valid email`);
       }
     });
 

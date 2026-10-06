@@ -490,6 +490,31 @@ export class CustomerComponent implements OnInit {
     this.loadData();
   }
 
+  private coerceOptionalBoolFlag(value: any): boolean | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    if (value === true || value === false) {
+      return value;
+    }
+    if (value === 1) {
+      return true;
+    }
+    if (value === 0) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+        return true;
+      }
+      if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+        return false;
+      }
+    }
+    return null;
+  }
+
   /** API may return camelCase or PascalCase manager name fields. */
   private normalizeCustomerGridRows(rows: any[]): any[] {
     if (!Array.isArray(rows)) {
@@ -506,10 +531,16 @@ export class CustomerComponent implements OnInit {
         null;
       const kamText = kam != null ? String(kam).trim() : '';
       const salesText = sales != null ? String(sales).trim() : '';
+      const cpEmailMandatory = this.coerceOptionalBoolFlag(
+        row?.isCPEmailMandatry ?? row?.IsCPEmailMandatry
+          ?? row?.isCPEmailIDMandatory ?? row?.IsCPEmailIDMandatory
+      );
       return {
         ...row,
         keyAccountManagerName: kamText || null,
         salesManagerName: salesText || null,
+        isCPEmailMandatry: cpEmailMandatory,
+        isCPEmailIDMandatory: cpEmailMandatory,
       };
     });
   }
@@ -544,7 +575,7 @@ export class CustomerComponent implements OnInit {
       this.PageNumber).subscribe(
       data =>
       {
-      let filteredData: any = data;
+      let filteredData: any = Array.isArray(data) ? data : [];
 
 // ✅ PARTIAL MATCH (Typing time)
 if (!exactMatch) {
