@@ -12,6 +12,7 @@ import {
   exportJobAcceptedSnackbarMessage,
   exportSearchButtonLabel,
   formatExportElapsedTime,
+  formatMisSearchDateForApi,
   IN_FLIGHT_EXPORT_MESSAGE,
   isExportJobCancelled,
   isExportJobNotFoundError,
@@ -113,8 +114,8 @@ export class PostPickupCallMisComponent implements OnInit, OnDestroy {
         this.dataSource = [];
         const message = typeof error === 'string'
           ? error
-          : (error?.error || error?.message || 'Post Pickup Call MIS search failed');
-        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+          : (error?.error?.message ?? error?.error ?? error?.message ?? 'Post Pickup Call MIS search failed');
+        this.showNotification('snackbar-danger', String(message), 'bottom', 'center');
       }
     );
   }
@@ -291,8 +292,8 @@ export class PostPickupCallMisComponent implements OnInit, OnDestroy {
 
   private buildSearchCriteria(): PostPickupCallMisSearchCriteria {
     return {
-      pickupDateFrom: this.searchPickupDateFrom ? moment(this.searchPickupDateFrom).format('MMM DD yyyy') : '',
-      pickupDateTo: this.searchPickupDateTo ? moment(this.searchPickupDateTo).format('MMM DD yyyy') : '',
+      pickupDateFrom: formatMisSearchDateForApi(this.searchPickupDateFrom),
+      pickupDateTo: formatMisSearchDateForApi(this.searchPickupDateTo),
       postPickupCallFilter: this.searchPostPickupCallFilter || 'All'
     };
   }
@@ -391,8 +392,11 @@ export class PostPickupCallMisComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.exportJobRunning = true;
-        this.startExportPolling(jobId);
+        persistExportJobId(this.exportJobPageKey, null);
+        this.exportJobId = null;
+        this.exportJobStatus = null;
+        this.exportJobRunning = false;
+        this.exportJobError = '';
       }
     );
   }
