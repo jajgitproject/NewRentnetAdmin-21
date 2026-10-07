@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import moment from 'moment';
@@ -13,12 +13,15 @@ import { StoredMisExportsService } from './stored-mis-exports.service';
   imports: [CommonModule, MatButtonModule, MatSnackBarModule],
   template: `
     <div class="stored-mis-exports" *ngIf="loaded">
-      <div class="stored-mis-exports-title">Stored exports ({{ storedFileCount }}/{{ storedFileLimit }})</div>
-      <p class="stored-mis-exports-hint" *ngIf="storedFileCount >= storedFileLimit">
+      <div class="stored-mis-exports-title">Stored exports ({{ listedFileCount }}/{{ storedFileLimit }})</div>
+      <p class="stored-mis-exports-hint" *ngIf="storedFileCount >= storedFileLimit && jobType && listedFileCount < storedFileCount">
+        You already have {{ storedFileCount }} stored exports. Delete one before starting another export.
+      </p>
+      <p class="stored-mis-exports-hint" *ngIf="storedFileCount >= storedFileLimit && (!jobType || listedFileCount >= storedFileCount)">
         Delete one file before starting another export.
       </p>
-      <p class="stored-mis-exports-empty" *ngIf="!files.length">No stored CSV files yet.</p>
-      <div class="stored-mis-exports-row" *ngFor="let file of files">
+      <p class="stored-mis-exports-empty" *ngIf="!listedFileCount">No stored CSV files yet.</p>
+      <div class="stored-mis-exports-row" *ngFor="let file of visibleFiles">
         <div class="stored-mis-exports-meta">
           <strong>{{ file.jobTypeLabel || file.JobTypeLabel || file.jobType || file.JobType }}</strong>
           <span>{{ file.fileName || file.FileName }}</span>
@@ -42,6 +45,7 @@ import { StoredMisExportsService } from './stored-mis-exports.service';
   `]
 })
 export class StoredMisExportsComponent implements OnInit {
+  @Input() jobType = '';
   @Output() changed = new EventEmitter<void>();
   files: any[] = [];
   storedFileCount = 0;
@@ -56,6 +60,21 @@ export class StoredMisExportsComponent implements OnInit {
 
   ngOnInit() {
     this.refresh();
+  }
+
+  get visibleFiles() {
+    if (!this.jobType) {
+      return this.files;
+    }
+    const wanted = this.jobType.trim().toLowerCase();
+    return this.files.filter((file) => {
+      const type = (file?.jobType || file?.JobType || '').toString().trim().toLowerCase();
+      return type === wanted;
+    });
+  }
+
+  get listedFileCount() {
+    return this.jobType ? this.visibleFiles.length : this.storedFileCount;
   }
 
   refresh() {

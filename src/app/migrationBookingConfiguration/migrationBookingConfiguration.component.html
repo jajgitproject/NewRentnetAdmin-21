@@ -17,8 +17,20 @@
               <span class="bc-value">{{ displayOrDash(customerDetails?.customerTravelRequestNumber) }}</span>
             </div>
             <div class="bc-summary-item">
+              <span class="bc-label">TRN</span>
+              <span class="bc-value">{{ displayOrDash(summaryTrn) }}</span>
+            </div>
+            <div class="bc-summary-item">
               <span class="bc-label">Customer</span>
               <span class="bc-value">{{ displayOrDash(customerDetails?.customerName) }}</span>
+            </div>
+            <div class="bc-summary-item">
+              <span class="bc-label">Email</span>
+              <span class="bc-value">{{ displayOrDash(summaryEmail) }}</span>
+            </div>
+            <div class="bc-summary-item">
+              <span class="bc-label">Mobile</span>
+              <span class="bc-value">{{ displayOrDash(summaryMobile) }}</span>
             </div>
             <div class="bc-summary-item">
               <span class="bc-label">City</span>
@@ -35,6 +47,18 @@
             <div class="bc-summary-item">
               <span class="bc-label">Package (Requested)</span>
               <span class="bc-value">{{ displayOrDash(customerDetails?.package) }}</span>
+            </div>
+            <div class="bc-summary-item">
+              <span class="bc-label">Pickup Date</span>
+              <span class="bc-value">{{ summaryPickupDateTime }}</span>
+            </div>
+            <div class="bc-summary-item">
+              <span class="bc-label">Pickup Address</span>
+              <span class="bc-value">{{ displayOrDash(summaryPickupAddress) }}</span>
+            </div>
+            <div class="bc-summary-item">
+              <span class="bc-label">Drop Address</span>
+              <span class="bc-value">{{ displayOrDash(summaryDropoffAddress) }}</span>
             </div>
             <div class="bc-summary-item">
               <span class="bc-label">Total Passengers</span>
@@ -54,6 +78,14 @@
             <div class="bc-passenger-trip-grid">
               <div class="bc-passenger-trip-col">
                 <div class="bc-passenger-trip-heading">Pickup</div>
+                <div class="bc-passenger-row">
+                  <div class="bc-label">Email</div>
+                  <div class="bc-value">{{ displayOrDash(passenger?.integrationRequestPassengerEmail || customerDetails?.bookerEmail) }}</div>
+                </div>
+                <div class="bc-passenger-row">
+                  <div class="bc-label">Mobile</div>
+                  <div class="bc-value">{{ displayOrDash(passenger?.integrationRequestPassengerMobile || customerDetails?.bookerMobile) }}</div>
+                </div>
                 <div class="bc-passenger-row">
                   <div class="bc-label">Date &amp; Time</div>
                   <div class="bc-value">{{ getPassengerPickupDateTime(passenger) }}</div>

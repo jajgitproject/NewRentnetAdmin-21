@@ -590,6 +590,18 @@ const routes: Routes = [
       },
 
       {
+        path: 'gtrackRunningDetails',
+        loadChildren: () =>
+          import('./gtrackRunningDetails/gtrackRunningDetails.module').then(
+            (m) => m.GtrackRunningDetailsModule
+          ),
+        data: {
+          requiredPageKey: 'Gtrack Running Details',
+          alternatePageKeys: ['gtrackRunningDetails', 'bulkInvoice', 'Closing', 'closingOne'],
+        },
+      },
+
+      {
         path: 'dynamicEInvoice',
         loadChildren: () =>
           import('./dynamicEInvoice/dynamicEInvoice.module').then(

@@ -2,6 +2,7 @@
 import { formatDate } from '@angular/common';
 export class MigrationBookingConfigurationCustomerDetails {
   customerTravelRequestNumber :string;
+  trn:string;
   customerID : number;
   customerName : string;
   aggregatorName:string;
@@ -31,11 +32,19 @@ export class MigrationBookingConfigurationCustomerDetails {
   gstin:string;
   location:string;
   specialRequest:string;
+  bookerEmail:string;
+  bookerMobile:string;
+  bookerName:string;
   
   constructor(migrationBookingConfigurationCustomerDetails) {
     {
 
       this.customerTravelRequestNumber = migrationBookingConfigurationCustomerDetails.customerTravelRequestNumber || '';
+      this.trn = migrationBookingConfigurationCustomerDetails.trn
+        || migrationBookingConfigurationCustomerDetails.tRN
+        || migrationBookingConfigurationCustomerDetails.TRN
+        || migrationBookingConfigurationCustomerDetails.Trn
+        || '';
       this.customerID  = migrationBookingConfigurationCustomerDetails.customerID || '';
       this.customerName = migrationBookingConfigurationCustomerDetails.customerName || '';
       this.aggregatorName = migrationBookingConfigurationCustomerDetails.aggregatorName || '';
@@ -64,6 +73,9 @@ export class MigrationBookingConfigurationCustomerDetails {
       this.gstin = migrationBookingConfigurationCustomerDetails.gstin || '';
       this.location = migrationBookingConfigurationCustomerDetails.location || '';
       this.specialRequest = migrationBookingConfigurationCustomerDetails.specialRequest || '';
+      this.bookerEmail = migrationBookingConfigurationCustomerDetails.bookerEmail || '';
+      this.bookerMobile = migrationBookingConfigurationCustomerDetails.bookerMobile || '';
+      this.bookerName = migrationBookingConfigurationCustomerDetails.bookerName || '';
     }
   } 
 }

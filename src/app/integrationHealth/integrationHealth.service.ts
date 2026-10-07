@@ -54,6 +54,6 @@ export class IntegrationHealthService {
   }
 
   getCustomersForAutocomplete(prefix: string): Observable<any[]> {
-    return this.generalService.GetCustomerDropDownForControlPanel(prefix);
+    return this.http.get<any[]>(`${this.baseUrl}customers?prefix=${encodeURIComponent(prefix || '')}`);
   }
 }

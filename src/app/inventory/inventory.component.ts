@@ -28,7 +28,6 @@ import { RegistrationDropDown } from '../interstateTaxEntry/registrationDropDown
 import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
 import { formatSupplierDisplay } from '../supplier/supplier-display.util';
 import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
-import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 interface MenuItem {
   label: string;
   action: (item: any) => void;
@@ -51,7 +50,6 @@ export class InventoryComponent implements OnInit, OnDestroy {
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
   private readonly exportJobPageKey = 'inventoryMaster';
-  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   displayedColumns = [
     'registrationNumber',
     'vehicle',
@@ -611,7 +609,6 @@ export class InventoryComponent implements OnInit, OnDestroy {
           this.exportJobRunning = false;
           this.showNotification('snackbar-success', status?.message ?? 'Export ready. Click Download CSV.', 'bottom', 'center');
           this.stopExportPolling();
-          this.storedExports?.refresh();
         }
       },
       async (error) => {

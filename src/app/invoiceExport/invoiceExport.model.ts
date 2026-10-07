@@ -1,3 +1,10 @@
+export interface DriverAppVersionSummaryRow {
+  appVersion?: string;
+  driveCount?: number;
+  AppVersion?: string;
+  DriveCount?: number;
+}
+
 export interface InvoiceExportRow {
   invoiceID: number;
   invoicePrefix: string;

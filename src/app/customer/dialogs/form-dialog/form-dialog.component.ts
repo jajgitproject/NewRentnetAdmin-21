@@ -910,6 +910,7 @@ getBusinessTypeID(businessTypeID: any)
       businessServices: [this.advanceTable.businessServices],
       isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
       showBillingInApp: [this.advanceTable.showBillingInApp ?? false],
+      geocage: [this.advanceTable.geocage ?? false],
       isAggregator: [this.advanceTable.isAggregator ?? false, Validators.required],
       aggregatorCustomerID: [this.advanceTable.aggregatorCustomerID],
       aggregatorCustomerName: [this.advanceTable.aggregatorCustomerName || 'None', Validators.required],

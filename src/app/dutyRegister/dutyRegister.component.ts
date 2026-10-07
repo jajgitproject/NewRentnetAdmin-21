@@ -183,7 +183,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
 
   SearchSupplier: FormControl = new FormControl();
   public SupplierList?: SupplierDropDown[] = [];
-  filteredSupplierOptions: Observable<SupplierDropDown[]>;
+  filteredSupplierOptions: Observable<SupplierDropDown[]>;  
   SearchSupplierID: number = 0;  
 
   SearchClosureType : FormControl = new FormControl();
@@ -481,7 +481,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     if (this.exportJobRunning) {
       this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
-    }
+  }
 
     const dateRangeError = this.validatePickupDateRange();
     if (dateRangeError) {
@@ -581,8 +581,8 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
             }
           }
           this.showNotification('snackbar-danger', message, 'bottom', 'center');
-          return;
-        }
+              return;
+            }
 
         const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
         this.triggerCsvDownload(blob, fileName);
@@ -661,8 +661,8 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
             this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
             this.stopExportPolling();
             persistExportJobId(this.exportJobPageKey, null);
-            return;
-          }
+          return;
+        }
 
           if (isExportJobCancelled(status)) {
             this.exportJobRunning = false;

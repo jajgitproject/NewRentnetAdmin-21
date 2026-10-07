@@ -22,7 +22,7 @@
     <div class="br-filter-card" *ngIf="!filtersCollapsed">
       <div class="br-filter-bar">
         <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Booking Date</mat-label>
+          <mat-label>Pickup Date</mat-label>
           <mat-date-range-input [rangePicker]="requestRangePicker">
             <input matStartDate [(ngModel)]="SearchRequestFromDate" placeholder="From" />
             <input matEndDate [(ngModel)]="SearchRequestToDate" placeholder="To" />
@@ -44,7 +44,7 @@
         </mat-form-field>
 
         <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
-          <mat-label>iTravel Request No.</mat-label>
+          <mat-label>TRN</mat-label>
           <mat-icon matIconPrefix>show_chart</mat-icon>
           <input matInput [(ngModel)]="SearchiTRN" />
         </mat-form-field>
@@ -129,6 +129,11 @@
           <ng-container matColumnDef="CustomerTravelRequestNumber">
             <mat-header-cell *matHeaderCellDef mat-sort-header>TR No.</mat-header-cell>
             <mat-cell *matCellDef="let row">{{ row.customerTravelRequestNumber }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="TRN">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>TRN</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.trn || '' }}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="CustomerName">

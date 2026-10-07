@@ -24,7 +24,7 @@ export class IntegrationHealthComponent implements OnInit {
 
   vendors: VendorCard[] = [];
 
-  vendorOptions = ['MoveInSync', 'MMT', 'MYF', 'Indecab', 'Adobe', 'CitiBank', 'GTrack', 'Dynamics'];
+  vendorOptions = ['MoveInSync', 'MMT', 'MYF', 'Indecab', 'Adobe', 'CitiBank', 'GTrack', 'Dynamics', 'EcoAggregator'];
   aggregatorFilterOptions = [...this.vendorOptions, '(unknown)'];
   driverEndpointOptions = [
     'dispatchByApp',
@@ -61,7 +61,7 @@ export class IntegrationHealthComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadDashboard();
+    this.loadSummary();
   }
 
   private startOfToday(): Date {
@@ -143,7 +143,11 @@ export class IntegrationHealthComponent implements OnInit {
       return byName.get(name.toLowerCase()) || this.emptyVendorCard(name);
     });
     mapped.forEach((v) => {
-      if (v.name && !this.vendorOptions.some((n) => n.toLowerCase() === String(v.name).toLowerCase())) {
+      const name = String(v.name || '').trim();
+      if (!name || name.toLowerCase() === '(unknown)') {
+        return;
+      }
+      if (!this.vendorOptions.some((n) => n.toLowerCase() === name.toLowerCase())) {
         cards.push(v);
       }
     });
@@ -170,6 +174,11 @@ export class IntegrationHealthComponent implements OnInit {
   }
 
   loadDashboard(): void {
+    this.loadSummary();
+    this.loadEvents();
+  }
+
+  private loadSummary(): void {
     const { from, to } = this.range();
     this.integrationHealthService.getSummary(from, to).subscribe(
       (summary) => {
@@ -189,7 +198,6 @@ export class IntegrationHealthComponent implements OnInit {
         this.kpis[0].value = '0';
       }
     );
-    this.loadEvents();
   }
 
   private loadEvents(): void {

@@ -1292,6 +1292,19 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'gtrackRunningDetails',
+        title: 'Gtrack Running Details',
+        pageKey: 'Gtrack Running Details',
+        moduleName: 'gtrackRunningDetails',
+        alternateAccessPageKeys: ['gtrackRunningDetails', 'bulkInvoice', 'Closing', 'closingOne'],
+        icon: 'fas fa-route',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
 
       {
         path: 'gstPercentage',

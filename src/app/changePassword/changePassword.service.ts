@@ -22,7 +22,11 @@ export class ChangePasswordService
 
   resetPassword(model: ChangePasswordModel) 
   {
-    model.userID=this.generalService.getUserID();
+    // userID is ignored by the API — password change is bound to the JWT employee identity.
+    if (model) {
+      delete (model as any).userID;
+      delete (model as any).UserID;
+    }
     return this.httpClient.post<any>(this.API_URL + "ResetPassword", model);
   }
 

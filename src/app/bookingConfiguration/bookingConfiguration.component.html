@@ -17,6 +17,10 @@
               <span class="bc-value">{{ displayOrDash(customerDetails?.customerTravelRequestNumber) }}</span>
             </div>
             <div class="bc-summary-item">
+              <span class="bc-label">TRN</span>
+              <span class="bc-value">{{ displayOrDash(customerDetails?.trn) }}</span>
+            </div>
+            <div class="bc-summary-item">
               <span class="bc-label">Customer</span>
               <span class="bc-value">{{ displayOrDash(customerDetails?.customerName) }}</span>
             </div>
@@ -51,6 +55,10 @@
           <h3 class="bc-section-title">Passenger Details</h3>
           <div class="bc-passenger-card" *ngFor="let passenger of passengerDetailsList; index as i">
             <h4 class="bc-passenger-title">{{ getPassengerDisplayName(passenger, i) }}</h4>
+            <div class="bc-passenger-row">
+              <div class="bc-label">Gender</div>
+              <div class="bc-value">{{ displayOrDash(passenger.integrationRequestPassengerGender) }}</div>
+            </div>
             <div class="bc-passenger-trip-grid">
               <div class="bc-passenger-trip-col">
                 <div class="bc-passenger-trip-heading">Pickup</div>

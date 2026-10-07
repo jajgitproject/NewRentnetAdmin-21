@@ -630,8 +630,21 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
-
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Show Billing In App</mat-label>
+                        <mat-select formControlName="showBillingInApp">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Geocage</mat-label>
+                        <mat-select formControlName="geocage">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                    </mat-form-field>
 
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>

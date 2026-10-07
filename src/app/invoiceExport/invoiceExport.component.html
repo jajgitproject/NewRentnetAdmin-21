@@ -35,6 +35,16 @@
                   {{ globalOtpToggleLabel }}
                 </button>
               </div>
+              <div class="col-auto">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  type="button"
+                  (click)="showDriveVersionDetails()"
+                  [disabled]="exporting">
+                  Drive Version Details
+                </button>
+              </div>
               <div class="col">
                 <span class="export-hint">
                   {{

@@ -1976,17 +1976,20 @@ OnDropOffGeoLocationClick(option:any)
     if (!stop) {
       return '';
     }
-    return stop.integrationRequestStopGeoLocation
-      || stop.integrationRequestStopAddress
-      || '';
+    const address = (stop.integrationRequestStopAddress || '').trim();
+    const geo = (stop.integrationRequestStopGeoLocation || '').trim();
+    if (!address) {
+      return geo;
+    }
+    if (!geo || address.toLowerCase() === geo.toLowerCase()) {
+      return address;
+    }
+    return `${address} | ${geo}`;
   }
 
   getStopLandmark(stop: MigrationBookingConfigurationStopDetails | null | undefined): string {
     if (!stop) {
       return '';
-    }
-    if (stop.integrationRequestStopGeoLocation) {
-      return stop.integrationRequestStopAddress || stop.landmark || '';
     }
     return stop.landmark || '';
   }
@@ -2026,14 +2029,14 @@ OnDropOffGeoLocationClick(option:any)
   }
 
   getPassengerPickupAddress(passenger: MigrationBookingConfigurationPassengerDetails): string {
-    return this.getStopAddress(this.getPassengerPickupStop(passenger))
-      || passenger?.pickupAddress
+    return passenger?.pickupAddress
+      || this.getStopAddress(this.getPassengerPickupStop(passenger))
       || '';
   }
 
   getPassengerDropoffAddress(passenger: MigrationBookingConfigurationPassengerDetails): string {
-    return this.getStopAddress(this.getPassengerDropoffStop(passenger))
-      || passenger?.dropoffAddress
+    return passenger?.dropoffAddress
+      || this.getStopAddress(this.getPassengerDropoffStop(passenger))
       || '';
   }
 
@@ -2052,11 +2055,43 @@ OnDropOffGeoLocationClick(option:any)
     if (pickupStop?.integrationRequestStopCity) {
       return pickupStop.integrationRequestStopCity;
     }
+    if (this.customerDetails?.location) {
+      return this.customerDetails.location;
+    }
     return this.advanceTableForm?.value?.pickupCity || '--';
   }
 
   get requestedCarType(): string {
-    return this.b2cDetails?.vehicleCategory || this.customerDetails?.vehicle || '--';
+    return this.customerDetails?.vehicle || this.b2cDetails?.vehicleCategory || '--';
+  }
+
+  get summaryEmail(): string {
+    return this.customerDetails?.bookerEmail
+      || this.passengerDetailsList?.[0]?.integrationRequestPassengerEmail
+      || '';
+  }
+
+  get summaryMobile(): string {
+    return this.customerDetails?.bookerMobile
+      || this.passengerDetailsList?.[0]?.integrationRequestPassengerMobile
+      || '';
+  }
+
+  get summaryTrn(): string {
+    const details = this.customerDetails as any;
+    return details?.trn || details?.tRN || details?.TRN || details?.Trn || '';
+  }
+
+  get summaryPickupDateTime(): string {
+    return this.getPassengerPickupDateTime(this.passengerDetailsList?.[0]);
+  }
+
+  get summaryPickupAddress(): string {
+    return this.getPassengerPickupAddress(this.passengerDetailsList?.[0]);
+  }
+
+  get summaryDropoffAddress(): string {
+    return this.getPassengerDropoffAddress(this.passengerDetailsList?.[0]);
   }
 
   get passengerCount(): number {

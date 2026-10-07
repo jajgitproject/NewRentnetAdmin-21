@@ -33,6 +33,7 @@ export class BookingRequestComponent implements OnInit {
   columnDefinitions = [
     { key: 'IntegrationRequestID', label: 'Request No.', visible: true },
     { key: 'CustomerTravelRequestNumber', label: 'TR No.', visible: true },
+    { key: 'TRN', label: 'TRN', visible: true },
     { key: 'CustomerName', label: 'Customer Name', visible: true },
     { key: 'RequestDate', label: 'Booking Date Time', visible: true },
     { key: 'PickupDate', label: 'Pickup Date Time', visible: true },
@@ -178,6 +179,7 @@ export class BookingRequestComponent implements OnInit {
     const headers = [
       'Request No.',
       'TR No.',
+      'TRN',
       'Customer Name',
       'Booking Date Time',
       'Pickup Date Time',
@@ -190,6 +192,7 @@ export class BookingRequestComponent implements OnInit {
     const rows = this.dataSource.map(row => [
       `${row.integrationRequestGroupID || ''}${row.integrationRequestGroupID ? '.' : ''}${row.integrationRequestID}`,
       row.customerTravelRequestNumber || '',
+      row.trn || 'N/A',
       row.customerName || 'N/A',
       this.formatDateTime(row.requestDate, row.requestTime),
       this.formatDateTime(row.pickupDate, row.pickupTime),

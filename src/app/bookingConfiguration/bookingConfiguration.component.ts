@@ -251,7 +251,7 @@ googlePlacesForm = this.fb.group({
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
     this.route.queryParams.subscribe(paramsData =>{
-      this.BookingID = paramsData.BookingID;
+      this.BookingID = paramsData.BookingID;     
       this.returnUrl = this.resolveReturnUrl(paramsData.returnUrl);
     });
     this.advanceTableForm.patchValue({reservationSourceID:22});
@@ -373,9 +373,9 @@ toggleStopFold() {
             this.customerDetails.pickupDate,
             pickupTime24
           ) ?? this.mergeDateAndTime(
-            this.customerDetails.pickupDate,
-            this.customerDetails.pickupTime
-          );
+          this.customerDetails.pickupDate,
+          this.customerDetails.pickupTime
+        );
           const dropOffDateSource = this.isMissingDate(this.customerDetails.dropOffDate)
             ? this.customerDetails.pickupDate
             : this.customerDetails.dropOffDate;
@@ -395,8 +395,8 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({pickupTime:this.extractTime(pickupDateTime)});
           this.advanceTableForm.patchValue({dropOffDateTime:dropOffDateTime});
           if (dropOffDateTime) {
-            this.advanceTableForm.patchValue({dropOffDate:this.extractDate(dropOffDateTime)});
-            this.advanceTableForm.patchValue({dropOffTime:this.extractTime(dropOffDateTime)});
+          this.advanceTableForm.patchValue({dropOffDate:this.extractDate(dropOffDateTime)});
+          this.advanceTableForm.patchValue({dropOffTime:this.extractTime(dropOffDateTime)});
           }
           this.advanceTableForm.patchValue({customerGroupID:this.customerDetails.customerGroupID});
           this.advanceTableForm.patchValue({customerTypeID:this.customerDetails.customerTypeID});
@@ -539,7 +539,7 @@ toggleStopFold() {
     second: 0,
     millisecond: 0,
   }).toDate();
- }
+  }
 
  private mergeDateAndTime(pickupDate: any, pickupTime: any): Date {
   const time24 = this.formatTime24(pickupTime);
@@ -634,8 +634,8 @@ private extractTime(dateTime: Date): Date {
         salesExecutiveControl.setValidators([this.salesExecutiveValidator(this.salesManagerList)]);
         salesExecutiveControl.updateValueAndValidity();
         this.filteredEmployeeOptions = salesExecutiveControl.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCustomerSE(value || ''))
+        startWith(""),
+        map(value => this._filterCustomerSE(value || ''))
         );
       }
     })
@@ -679,8 +679,8 @@ private extractTime(dateTime: Date): Date {
         kamControl.setValidators([this.customerKAMValidator(this.customerKamList)]);
         kamControl.updateValueAndValidity();
         this.filteredEmployeesOptions = kamControl.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCustomerKAM(value || ''))
+        startWith(""),
+        map(value => this._filterCustomerKAM(value || ''))
         );
       }
     })
@@ -876,7 +876,7 @@ private extractTime(dateTime: Date): Date {
       this.customerDetails?.customerTravelRequestNumber ||
       this.advanceTableForm.value.customerTravelRequestNumber ||
       '';
-
+    
     this.advanceTableForm.patchValue({reservationExecutiveID:this._generalService.getUserID()});
     this.advanceTableForm.patchValue({bookingID:this.BookingID});
     this.advanceTableForm.patchValue({customerTravelRequestNumber: ctrn});
@@ -1435,7 +1435,7 @@ private extractTime(dateTime: Date): Date {
 
 
   InitGoogleAddress() {
-    this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
+        this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
       startWith(''),
       debounceTime(300),
       distinctUntilChanged(),
@@ -1734,7 +1734,7 @@ private extractTime(dateTime: Date): Date {
 
 
  InitDropOffGoogleAddress() {
-  this.filteredDropOffGoogleAddressOptions = this.advanceTableForm.controls['dropOffAddress'].valueChanges.pipe(
+      this.filteredDropOffGoogleAddressOptions = this.advanceTableForm.controls['dropOffAddress'].valueChanges.pipe(
     startWith(''),
     debounceTime(300),
     distinctUntilChanged(),

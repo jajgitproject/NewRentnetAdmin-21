@@ -1,9 +1,10 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { formatDate } from '@angular/common';
 export class MigrationBookingRequest {
   integrationRequestID:number;
   integrationRequestGroupID?: number;
   customerTravelRequestNumber :string;
+  trn:string;
   customerID : number;
   customerName : string;
   requestDate : Date;
@@ -25,6 +26,11 @@ export class MigrationBookingRequest {
        this.integrationRequestID = migrationBookingRequest.integrationRequestID || '';
        this.integrationRequestGroupID = migrationBookingRequest.integrationRequestGroupID || '';
        this.customerTravelRequestNumber = migrationBookingRequest.customerTravelRequestNumber || '';
+       this.trn = migrationBookingRequest.trn
+         || migrationBookingRequest.tRN
+         || migrationBookingRequest.TRN
+         || migrationBookingRequest.Trn
+         || '';
        this.customerID  = migrationBookingRequest.customerID || '';
        this.customerName = migrationBookingRequest.customerName || '';
        this.requestDate = migrationBookingRequest.requestDate || '';

@@ -163,6 +163,80 @@ export class InvoiceExportComponent implements OnInit {
     });
   }
 
+  showDriveVersionDetails(): void {
+    this.exporting = true;
+    this.invoiceExportService.getDriverAppVersionSummary().subscribe({
+      next: (rows) => {
+        this.exporting = false;
+        const parsed = (rows || [])
+          .map((row) => ({
+            appVersion: row?.appVersion ?? row?.AppVersion ?? 'Not set',
+            driveCount: Number(row?.driveCount ?? row?.DriveCount ?? 0),
+          }))
+          .filter((row) => row.driveCount > 0);
+        const total = parsed.reduce((sum, row) => sum + row.driveCount, 0);
+        if (!total) {
+          Swal.fire({
+            title: 'Drive Version Details',
+            text: 'No active drivers found.',
+            icon: 'info',
+            confirmButtonText: 'Ok',
+          });
+          return;
+        }
+
+        const body = parsed
+          .map(
+            (row) => `<tr>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;">${this.escapeHtml(row.appVersion)}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${row.driveCount}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${this.formatDrivePercent(row.driveCount, total)}</td>
+            </tr>`
+          )
+          .join('');
+
+        Swal.fire({
+          title: 'Drive Version Details',
+          width: 640,
+          html: `
+            <table style="width:100%;border-collapse:collapse;text-align:left;">
+              <thead>
+                <tr>
+                  <th style="padding:6px 8px;border-bottom:1px solid #ddd;">App Version</th>
+                  <th style="padding:6px 8px;border-bottom:1px solid #ddd;text-align:right;">Number of Drives</th>
+                  <th style="padding:6px 8px;border-bottom:1px solid #ddd;text-align:right;">% of Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${body}
+                <tr>
+                  <td style="padding:6px 8px;border-top:1px solid #ddd;"><strong>Total</strong></td>
+                  <td style="padding:6px 8px;border-top:1px solid #ddd;text-align:right;"><strong>${total}</strong></td>
+                  <td style="padding:6px 8px;border-top:1px solid #ddd;text-align:right;"><strong>100.0%</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          `,
+          confirmButtonText: 'Ok',
+        });
+      },
+      error: (error) => {
+        this.exporting = false;
+        const text = typeof error === 'string'
+          ? error
+          : (error?.error?.message || error?.error?.Message || error?.message || 'Could not fetch drive version details.');
+        Swal.fire({
+          title: 'Failed to load drive versions',
+          text: text.includes('not found') || text.includes('404')
+            ? 'The API does not have Drive Version Details yet. Restart the API in Visual Studio, then try again.'
+            : text,
+          icon: 'error',
+          confirmButtonText: 'Ok',
+        });
+      },
+    });
+  }
+
   showVerifiedGfbNotCalculatedCount(): void {
     const validationError = this.validateDates();
     if (validationError) {
@@ -287,6 +361,21 @@ export class InvoiceExportComponent implements OnInit {
       'Invoice ID': row.invoiceID ?? '',
     }));
     TableExportUtil.exportToExcel(exportRows, 'Verified-GFB-Not-Calculated');
+  }
+
+  private formatDrivePercent(count: number, total: number): string {
+    if (!total) {
+      return '0.0%';
+    }
+    return `${((count / total) * 100).toFixed(1)}%`;
+  }
+
+  private escapeHtml(value: string): string {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   private formatDisplayDate(value: string): string {
