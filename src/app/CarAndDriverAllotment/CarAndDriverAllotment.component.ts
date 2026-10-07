@@ -88,6 +88,7 @@ import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
 import { SoftToHardDialogComponent } from '../cancelAllotment/dialogs/softToHard-Dialog/softToHard-Dialog.component';
 import { CancelAllotmentService } from '../cancelAllotment/cancelAllotment.service';
 import { UpdateDriverMobileComponent } from '../driverInventoryAssociation/dialogs/updateDriverMobile/updateDriverMobile.component';
+import { AllotmentHistoryDialogComponent } from './allotmentHistory/allotmentHistory.component';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -2991,6 +2992,23 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   submit() {
 
   }
+  openAllotmentHistory() {
+    const row = this.reservationInfo?.[0];
+    const reservationID =
+      Number(row?.reservationID) || Number(this.reservationID);
+    if (!reservationID) {
+      this.showNotification('snackbar-danger', 'Reservation not available.', 'top', 'center');
+      return;
+    }
+    this.dialog.open(AllotmentHistoryDialogComponent, {
+      width: '1200px',
+      maxWidth: '95vw',
+      panelClass: 'allotment-history-dialog-panel',
+      autoFocus: false,
+      data: { reservationID, row }
+    });
+  }
+
   UpdateDriverMobile() {
 
     const dialogRef = this.dialog.open(UpdateDriverMobileComponent,
