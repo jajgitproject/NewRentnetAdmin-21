@@ -1,0 +1,80 @@
+<div class="modalHeader">
+  <div class="editRowModal">
+    <div class="modalHeader clearfix">
+      <div class="modal-about">
+        <div class="font-weight-bold p-t-5 font-17">
+          {{ dialogTitle }}-{{ reservationID }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button (click)="onNoClick()" aria-label="Close dialog">
+    <mat-icon class="small-close-icon">close</mat-icon>
+  </button>
+</div>
+
+<div mat-dialog-content class="allotment-history-content">
+  <mat-card class="allotment-history-card">
+    <div *ngIf="isLoading" class="allotment-history-loading">
+      <mat-progress-spinner mode="indeterminate" diameter="36" strokeWidth="4"></mat-progress-spinner>
+    </div>
+
+    <mat-card-content *ngIf="!isLoading && (!dataSource || !dataSource.length)">
+      <p>No data found.</p>
+    </mat-card-content>
+
+    <mat-card-content *ngIf="!isLoading && dataSource?.length" class="allotment-history-card-content">
+      <div class="table-responsive allotment-history-table-wrap">
+        <table class="allotment-history-table">
+          <thead>
+            <tr>
+              <th>Reservation Id</th>
+              <th>Allotment Id</th>
+              <th>Allotment Date</th>
+              <th>Allotment Time</th>
+              <th>Allotment By</th>
+              <th>Car Reg. No.</th>
+              <th>Vehicle</th>
+              <th>Car Category</th>
+              <th>Driver Name</th>
+              <th>Driver Mobile</th>
+              <th>Car Supplier Name</th>
+              <th>Car Supplier Mobile</th>
+              <th>Driver Supplier Name</th>
+              <th>Driver Supplier Mobile</th>
+              <th>Allotment Type</th>
+              <th>Allotment Status</th>
+              <th>Cancellation Date</th>
+              <th>Cancellation Remark</th>
+              <th>Cancellation By</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of dataSource">
+              <td>{{ row.reservationID || 'N/A' }}</td>
+              <td>{{ row.allotmentID || 'N/A' }}</td>
+              <td>{{ formatDate(row.dateOfAllotment) }}</td>
+              <td>{{ formatTime(row.timeofAllotment) }}</td>
+              <td>{{ row.allotmentBy || 'N/A' }}</td>
+              <td>{{ row.registrationNumber || 'N/A' }}</td>
+              <td>{{ row.vehicleName || 'N/A' }}</td>
+              <td>{{ row.vehicleCategoryName || 'N/A' }}</td>
+              <td>{{ row.driverName || 'N/A' }}</td>
+              <td>{{ row.driverMobile || 'N/A' }}</td>
+              <td>{{ row.supplierName || 'N/A' }}</td>
+              <td>{{ row.supplierMobile || 'N/A' }}</td>
+              <td>{{ row.driverSupplierName || 'N/A' }}</td>
+              <td>{{ row.driverSupplierMobile || 'N/A' }}</td>
+              <td>{{ row.allotmentType || 'N/A' }}</td>
+              <td>{{ row.allotmentStatus || 'N/A' }}</td>
+              <td>{{ formatDate(row.dateOfCancellation) }}</td>
+              <td>{{ row.cancellationRemark || 'N/A' }}</td>
+              <td>{{ row.cancellationBy || 'N/A' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
