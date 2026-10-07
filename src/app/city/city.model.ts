@@ -26,6 +26,7 @@ export class City {
   userID:number;
   googlePlacesID:string;
   oldRentNetGeoPointName:string;
+  chargeHigherExtraKMorHR: boolean;
   constructor(city) {
     {
        this.geoPointID = city.geoPointID || -1;
@@ -50,6 +51,7 @@ export class City {
        this.iconAltTag =city.iconAltTag;
        this.activationStatus = city.activationStatus || '';
        this.googlePlacesID = city.googlePlacesID  || '';
+       this.chargeHigherExtraKMorHR = city.chargeHigherExtraKMorHR === true || city.chargeHigherExtraKMorHR === 'true';
     }
   }
   

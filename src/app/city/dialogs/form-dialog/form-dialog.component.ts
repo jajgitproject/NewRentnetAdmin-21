@@ -134,6 +134,7 @@ export class FormDialogComponent {
       this.dialogTitle = 'City';
       this.advanceTable = new City({});
       this.advanceTable.activationStatus = true;
+      this.advanceTable.chargeHigherExtraKMorHR = false;
     }
     this.advanceTableForm = this.createContactForm();
    
@@ -173,7 +174,8 @@ export class FormDialogComponent {
         iconAltTag: [this.advanceTable.iconAltTag],
         countryID: [this.advanceTable.countryID],
         activationStatus: [this.advanceTable.activationStatus],
-        googlePlacesID:[this.advanceTable.googlePlacesID]
+        googlePlacesID:[this.advanceTable.googlePlacesID],
+        chargeHigherExtraKMorHR: [this.advanceTable.chargeHigherExtraKMorHR ?? false]
       });
   }
 
