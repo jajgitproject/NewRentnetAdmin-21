@@ -1455,6 +1455,14 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     return value == null ? '' : String(value).trim();
   }
 
+  private remarkBoxValue(runningDetails: unknown, vendorRemark: unknown): string {
+    const running = this.normalizeRemark(runningDetails);
+    if (running.startsWith('[') || running.startsWith('{')) {
+      return this.normalizeRemark(vendorRemark);
+    }
+    return running;
+  }
+
   private syncLoadedRemarksFromForm(): void {
     const form = this.advanceTableForm?.getRawValue();
     this.loadedRunningDetails = this.normalizeRemark(form?.runningDetails);
@@ -1691,8 +1699,11 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.readyForBulkGfb = !!billing?.readyForBulkGfb && !goodForBilling && !this.hasActiveInvoiceLock;
     this.advanceTableForm.patchValue({ verifyDuty });
     this.advanceTableForm.patchValue({dsClosing : this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing});
-    this.advanceTableForm.patchValue({runningDetails : this.advanceTableClosingOne.closingDutySlipForBillingModel.runningDetails});
-    this.advanceTableForm.patchValue({vendorRemark : this.advanceTableClosingOne.closingDutySlipForBillingModel.vendorRemark});
+    const billingModel = this.advanceTableClosingOne.closingDutySlipForBillingModel;
+    this.advanceTableForm.patchValue({
+      runningDetails: this.remarkBoxValue(billingModel.runningDetails, billingModel.vendorRemark),
+      vendorRemark: billingModel.vendorRemark
+    });
     this.syncLoadedRemarksFromForm();
     this.advanceTableForm.patchValue({physicalDutySlipReceived : this.advanceTableClosingOne.closingDutySlipForBillingModel?.physicalDutySlipReceived});
     this.advanceTableForm.patchValue({goodForBilling : this.advanceTableClosingOne.closingDutySlipForBillingModel.goodForBilling});
@@ -2513,8 +2524,11 @@ public resetVerificationForEcoStateChange(): void {
       locationInLatLongForBilling: form.locationInLatLongForBilling,
     }).subscribe(
       response => {
-        const runningDetails = response?.runningDetails ?? form.runningDetails ?? '';
         const vendorRemark = response?.vendorRemark ?? form.vendorRemark ?? '';
+        const runningDetails = this.remarkBoxValue(
+          response?.runningDetails ?? form.runningDetails,
+          vendorRemark
+        );
         const kmPatch: Record<string, unknown> = {};
         for (const name of this.alwaysEditableKmControls) {
           kmPatch[name] = response?.[name] ?? form[name];

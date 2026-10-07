@@ -866,7 +866,12 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
     if (!jobId) return;
 
     this.service.downloadZip(jobId).subscribe(
-      (blob) => this.triggerBlobDownload(blob, `bulk-bills-download-${jobId}.zip`),
+      (blob) => {
+        this.triggerBlobDownload(blob, `bulk-bills-download-${jobId}.zip`);
+        if (this.activeJob) {
+          this.activeJob = { ...this.activeJob, resultFilePath: null, ResultFilePath: null };
+        }
+      },
       () => this.snackBar.open('ZIP download failed.', 'Close', { duration: 5000 })
     );
   }
@@ -884,6 +889,9 @@ export class BulkBillsDownloadComponent implements OnInit, OnDestroy, AfterViewI
   canDownloadZip(): boolean {
     const jobType = this.activeJob?.jobType || this.activeJob?.JobType || '';
     if (jobType === 'IrnBackfill' || this.isClosingDutySlipJob() || this.isVerifiedDutySlipJob() || this.isTollInterstateJob()) return false;
+
+    const resultFilePath = this.activeJob?.resultFilePath || this.activeJob?.ResultFilePath;
+    if (!resultFilePath) return false;
 
     const status = this.getJobStatus();
     return status === 'Completed' || status === 'Partial';
