@@ -18,9 +18,12 @@
           <div class="card">
               <div class="body">
                   <div class="responsive_table">
-                      
 
-                      <p *ngIf="dataSource === null || dataSource.length === 0; then thenBlock2 else elseBlock2">
+                      <div class="message-log-loading" *ngIf="isLoading">
+                          <mat-spinner diameter="36"></mat-spinner>
+                      </div>
+
+                      <p *ngIf="!isLoading && (dataSource === null || dataSource.length === 0); then thenBlock2 else elseBlock2">
                           This is not rendered
                       </p>
 
