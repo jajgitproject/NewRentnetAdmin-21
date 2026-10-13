@@ -50,11 +50,6 @@ export class DynamicsSyncBatchComponent implements OnInit, OnDestroy {
     this.loadBatches();
     this.startPolling();
 
-    const batchId = Number(this.route.snapshot.queryParamMap.get('batchId') || 0);
-    if (batchId > 0) {
-      this.openDetails({ dynamicsSyncBatchID: batchId } as DynamicsSyncBatch);
-    }
-
     this.route.queryParamMap.subscribe((params) => {
       const previous = this.syncSource;
       this.applySyncSourceFromQuery(params.get('syncSource'));

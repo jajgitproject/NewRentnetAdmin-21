@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { OverlayRef } from '@angular/cdk/overlay';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { InvoiceSyncDetailsDialogComponent } from '../../sendDataToDynamics/dialogs/invoice-sync-details-dialog.component';
 import {
@@ -52,9 +51,6 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
   private customerSegmentErrorShown = false;
   private readonly batchId: number;
   readonly syncSource: 'invoice' | 'creditNote';
-  readonly transientSyncProcessingMessage =
-    'The process is currently being synced. Please do not consider this the final response. Please wait 2–3 seconds. The system will provide the final status shortly.';
-
   constructor(
     public dialogRef: MatDialogRef<BatchDetailsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) private data: BatchDetailsDialogData,
@@ -100,17 +96,8 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
       : 'No invoice items loaded for this batch.';
   }
 
-  /** Shown while the batch is still running or has pending line items. */
-  get showSyncProcessingNotice(): boolean {
+  private get isBatchStillSyncing(): boolean {
     return this.isBatchStillSettling(this.selectedBatch);
-  }
-
-  /** Stronger flash when a row briefly shows E-Invoicing Y/N bad request before retry. */
-  get syncProcessingNoticeFlashing(): boolean {
-    if (!this.isBatchStillSettling(this.selectedBatch)) {
-      return false;
-    }
-    return (this.selectedBatch?.items || []).some((item) => this.isEInvoicingYnTransientItem(item));
   }
 
   ngOnInit(): void {
@@ -125,7 +112,6 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.pollSub?.unsubscribe();
-    this.setSyncBackdropBlur(false);
   }
 
   refreshDetails(): void {
@@ -412,40 +398,9 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
     });
   }
 
-  private isEInvoicingYnTransientItem(item: DynamicsSyncItem): boolean {
-    if (!item || !this.isBadRequestSyncItem(item)) {
-      return false;
-    }
-    const haystack = [
-      item.response,
-      item.responseStatus,
-      this.formatResponseBody(item.response)
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-    return haystack.includes('e-invoicing') || haystack.includes('einvoicing');
-  }
-
-  private isBadRequestSyncItem(item: DynamicsSyncItem): boolean {
-    const syncStatus = String(item.syncStatus || '').trim().toLowerCase();
-    if (syncStatus === 'successful') {
-      return false;
-    }
-    const code = String(item.responseCode || '').trim();
-    const statusKey = String(item.responseStatus || '').replace(/\s+/g, '').toLowerCase();
-    const statusText = String(item.responseStatus || '').toLowerCase();
-    return (
-      code === '400'
-      || statusKey === 'badrequest'
-      || statusKey.includes('400')
-      || statusText.includes('bad request')
-    );
-  }
-
   private startBatchPolling(): void {
     this.pollSub?.unsubscribe();
-    this.pollIntervalMs = this.showSyncProcessingNotice ? 3000 : 10000;
+    this.pollIntervalMs = this.isBatchStillSyncing ? 3000 : 10000;
     this.pollSub = timer(this.pollIntervalMs, this.pollIntervalMs)
       .pipe(switchMap(() => this.service.getBatch(this.batchId)))
       .subscribe({
@@ -453,7 +408,6 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
           this.selectedBatch = detail;
           this.data?.onBatchLoaded?.(detail);
           this.reconcileBatchPollingInterval();
-          this.applySyncProcessingUiState();
           this.tryShowCustomerSegmentErrorPopup(detail);
           this.changeDetectorRef.markForCheck();
         },
@@ -462,42 +416,16 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
   }
 
   private reconcileBatchPollingInterval(): void {
-    const desiredMs = this.showSyncProcessingNotice ? 3000 : 10000;
+    const desiredMs = this.isBatchStillSyncing ? 3000 : 10000;
     if (desiredMs === this.pollIntervalMs) {
       return;
     }
     this.startBatchPolling();
   }
 
-  private applySyncProcessingUiState(): void {
-    this.setSyncBackdropBlur(this.showSyncProcessingNotice);
-  }
-
-  private setSyncBackdropBlur(active: boolean): void {
-    const backdrop = this.getDialogBackdropElement();
-    if (!backdrop) {
-      return;
-    }
-    backdrop.classList.toggle('dsb-sync-processing-backdrop', active);
-  }
-
-  private getDialogBackdropElement(): HTMLElement | null {
-    const overlayRef = this.getDialogOverlayRef();
-    return overlayRef?.backdropElement ?? null;
-  }
-
-  private getDialogOverlayRef(): OverlayRef | null {
-    const ref = this.dialogRef as MatDialogRef<BatchDetailsDialogComponent> & {
-      _overlayRef?: OverlayRef;
-      overlayRef?: OverlayRef;
-    };
-    return ref._overlayRef ?? ref.overlayRef ?? null;
-  }
-
   private loadDetails(): void {
     this.detailLoading = true;
     this.errorMessage = '';
-    this.applySyncProcessingUiState();
     this.changeDetectorRef.markForCheck();
     this.service.getBatch(this.batchId).subscribe({
       next: (detail) => {
@@ -505,7 +433,6 @@ export class BatchDetailsDialogComponent implements OnInit, OnDestroy {
         this.selectedBatch = detail;
         this.data?.onBatchLoaded?.(detail);
         this.reconcileBatchPollingInterval();
-        this.applySyncProcessingUiState();
         this.tryShowCustomerSegmentErrorPopup(detail);
         this.changeDetectorRef.detectChanges();
       },

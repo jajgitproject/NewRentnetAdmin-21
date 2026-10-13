@@ -1,4 +1,4 @@
-<div class="dsb-detail-dialog" [class.dsb-detail-dialog--sync-processing]="showSyncProcessingNotice">
+<div class="dsb-detail-dialog">
   <div class="dsb-detail-head-card">
     <div class="dsb-detail-actions">
       <button mat-stroked-button class="dsb-btn-ghost-dark" type="button" (click)="refreshDetails()">
@@ -30,38 +30,8 @@
   <mat-dialog-content class="dsb-detail-dialog__content">
     <p *ngIf="errorMessage" class="dsb-detail-dialog__error">{{ errorMessage }}</p>
 
-    <div
-      *ngIf="showSyncProcessingNotice && !selectedBatch"
-      class="dsb-sync-processing-banner dsb-sync-processing-banner--pulse"
-      role="status"
-      aria-live="polite">
-      <div class="dsb-sync-processing-banner__icon" aria-hidden="true">
-        <i class="fas fa-sync-alt dsb-sync-processing-banner__spin"></i>
-      </div>
-      <div class="dsb-sync-processing-banner__text">
-        <strong class="dsb-sync-processing-banner__title">Sync in progress</strong>
-        <span>{{ transientSyncProcessingMessage }}</span>
-      </div>
-    </div>
-
-    <div
-      *ngIf="showSyncProcessingNotice && selectedBatch"
-      class="dsb-sync-processing-banner dsb-sync-processing-banner--overlay"
-      [class.dsb-sync-processing-banner--pulse]="!syncProcessingNoticeFlashing"
-      [class.dsb-sync-processing-banner--flash]="syncProcessingNoticeFlashing"
-      role="status"
-      aria-live="polite">
-      <div class="dsb-sync-processing-banner__icon" aria-hidden="true">
-        <i class="fas fa-sync-alt dsb-sync-processing-banner__spin"></i>
-      </div>
-      <div class="dsb-sync-processing-banner__text">
-        <strong class="dsb-sync-processing-banner__title">Sync in progress</strong>
-        <span>{{ transientSyncProcessingMessage }}</span>
-      </div>
-    </div>
-
     <div class="dsb-detail-body" *ngIf="selectedBatch as batch">
-      <div class="dsb-detail-body__main" [class.dsb-detail-body__main--blurred]="showSyncProcessingNotice">
+      <div class="dsb-detail-body__main">
       <div class="dsb-detail-stats">
         <div class="dsb-detail-stat">
           <span class="dsb-detail-stat__label">Total Items</span>
