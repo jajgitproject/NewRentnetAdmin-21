@@ -31,7 +31,8 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
   displayedColumns = [
     'GeoPoint.GeoPointName',
     'PackageType.PackageType',
-    'VehicleCategory.VehicleCategory',
+    'CustomerGroupReservationCapping.CappingType',
+    'Vehicle.Vehicle',
     'CustomerGroupReservationCapping.MondayCap',
     'CustomerGroupReservationCapping.TuesdayCap',
     'CustomerGroupReservationCapping.WednesdayCap',
@@ -47,7 +48,7 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
 
   SearchCity: string = '';
   SearchPackageType: string = '';
-  SearchVehicleCategory: string = '';
+  SearchVehicle: string = '';
   SearchActivationStatus : boolean=true;
   PageNumber: number = 0;
   activation: string;
@@ -90,7 +91,7 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
   {
     this.SearchCity = '';
     this.SearchPackageType = '';
-    this.SearchVehicleCategory = '';
+    this.SearchVehicle = '';
     this.SearchActivationStatus = true;
     this.PageNumber=0;
     this.searchTerm = '';
@@ -159,14 +160,14 @@ public Filter()
       case 'packageType':
         this.SearchPackageType = this.searchTerm;
         break;
-      case 'vehicleCategory':
-        this.SearchVehicleCategory = this.searchTerm;
+      case 'vehicle':
+        this.SearchVehicle = this.searchTerm;
         break;  
       default:
         this.searchTerm = '';
         break;
     }  
-    this.customerGroupReservationCappingService.getTableData(this.customerGroup_ID,this.SearchCity,this.SearchPackageType,this.SearchVehicleCategory,this.SearchActivationStatus, this.PageNumber).subscribe
+    this.customerGroupReservationCappingService.getTableData(this.customerGroup_ID,this.SearchCity,this.SearchPackageType,this.SearchVehicle,this.SearchActivationStatus, this.PageNumber).subscribe
     (
       data =>   
       {
@@ -340,7 +341,7 @@ public Filter()
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.customerGroupReservationCappingService.getTableDataSort(this.customerGroup_ID,this.SearchCity,this.SearchPackageType,this.SearchVehicleCategory,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
+    this.customerGroupReservationCappingService.getTableDataSort(this.customerGroup_ID,this.SearchCity,this.SearchPackageType,this.SearchVehicle,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
     (
       data =>   
       {

@@ -19,7 +19,7 @@ export class CustomerGroupReservationCappingService
   }
 
   /** CRUD METHODS */
-  getTableData(CustomerGroupID:number,SearchCity:string,SearchPackageType:string,SearchVehicleCategory:string,SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
+  getTableData(CustomerGroupID:number,SearchCity:string,SearchPackageType:string,SearchVehicle:string,SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
   {
     if(SearchCity === "")
     {
@@ -29,18 +29,18 @@ export class CustomerGroupReservationCappingService
     {
       SearchPackageType = null;
     }
-    if(SearchVehicleCategory === "")
+    if(SearchVehicle === "")
     {
-      SearchVehicleCategory = null;
+      SearchVehicle = null;
     }
     if(SearchActivationStatus === null)
     {
       SearchActivationStatus = null;
     }
-    return this.httpClient.get(this.API_URL + "/" + CustomerGroupID + '/' + SearchCity + '/' + SearchPackageType + '/' + SearchVehicleCategory + '/' + SearchActivationStatus +'/' + PageNumber + '/CustomerGroupReservationCappingID/Ascending');
+    return this.httpClient.get(this.API_URL + "/" + CustomerGroupID + '/' + SearchCity + '/' + SearchPackageType + '/' + SearchVehicle + '/' + SearchActivationStatus +'/' + PageNumber + '/CustomerGroupReservationCappingID/Ascending');
   }
 
-  getTableDataSort(CustomerGroupID:number,SearchCity:string,SearchPackageType:string,SearchVehicleCategory:string,SearchActivationStatus:Boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
+  getTableDataSort(CustomerGroupID:number,SearchCity:string,SearchPackageType:string,SearchVehicle:string,SearchActivationStatus:Boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
   {
     if(SearchCity === "")
     {
@@ -50,15 +50,15 @@ export class CustomerGroupReservationCappingService
     {
       SearchPackageType = null;
     }
-    if(SearchVehicleCategory === "")
+    if(SearchVehicle === "")
     {
-      SearchVehicleCategory = null;
+      SearchVehicle = null;
     }
     if(SearchActivationStatus === null)
     {
       SearchActivationStatus = null;
     }
-    return this.httpClient.get(this.API_URL + "/" + CustomerGroupID + '/' + SearchCity + '/' + SearchPackageType + '/' + SearchVehicleCategory + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
+    return this.httpClient.get(this.API_URL + "/" + CustomerGroupID + '/' + SearchCity + '/' + SearchPackageType + '/' + SearchVehicle + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 
   add(advanceTable: CustomerGroupReservationCappingModel) 
@@ -80,11 +80,20 @@ export class CustomerGroupReservationCappingService
     return this.httpClient.delete(this.API_URL + '/'+ customerGroupReservationCappingID + '/'+ userID);
   }
 
-  GetCityForCustomerGroupCapping(CustomerGroupID:number,PackageTypeID:number,VehicleCategoryID:number): Observable<CityDropDown[]> 
+  GetCityForCustomerGroupCapping(CustomerGroupID:number,PackageTypeID:number,VehicleID:number,CappingType:string): Observable<CityDropDown[]> 
   {
-      return this.httpClient.get<CityDropDown[]>(this.API_URL + '/'+ "GetCityForCustomerGroupCapping/" + CustomerGroupID + '/'+ PackageTypeID + '/'+ VehicleCategoryID);
+      const capType = CappingType ? encodeURIComponent(CappingType) : 'null';
+      return this.httpClient.get<CityDropDown[]>(this.API_URL + '/'+ "GetCityForCustomerGroupCapping/" + CustomerGroupID + '/'+ PackageTypeID + '/'+ VehicleID + '/' + capType);
+  }
+
+  existsSoftCappingForCustomerGroupAndVehicle(
+    customerGroupID: number,
+    vehicleID: number
+  ): Observable<{ exists: boolean }> {
+    return this.httpClient.get<{ exists: boolean }>(
+      `${this.API_URL}/ExistsSoftCapping/${customerGroupID}/${vehicleID}`
+    );
   }
 
 }
   
-

@@ -1859,7 +1859,7 @@ toArray<T>(value: any): T[] {
     this.InitPassenger();
     this.InitProjectCode();
     this.InitCompanyForCustomer();
-    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
   }
 
   getStopReservationReason(customerID)
@@ -2340,7 +2340,7 @@ toArray<T>(value: any): T[] {
     this.pickupCitySet(this.cityID,this.packageType);
     //this.InitReservationInvoiceGSTDetails( this.customerID);
     //this.InitResrvationGSTForCityID(this.customerID,this.cityID);
-    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
     // Recalculate drop-off time in case the user picked the city last; the
     // guard inside getETRDropOffTime skips the API call until every required
     // input is populated, so this is safe to call unconditionally.
@@ -2694,7 +2694,7 @@ toArray<T>(value: any): T[] {
     this.advanceTableForm.patchValue({vehicleID:this.vehicleID});
     this.advanceTableForm.patchValue({vehicleCategoryID:this.vehicleCategoryID});
     this.getETRDropOffTime();
-    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
   }
 
   //------------ Type -----------------
@@ -2816,7 +2816,7 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
     this.InitPackage();
     this.ETRDropoffDateSet(packageType);
     this.changeDropOffDate(packageType);
-    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
   }
   //----------DropOFFDate-------------
 
@@ -5916,7 +5916,7 @@ ShowDataForStops()
     this.onPickupDateChangeAndLocationTimeSet(value);
   }
   this.pickupDate = value;
-  this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+  this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
 }
 
 private isValidPickupDateInput(value: string): boolean {
@@ -6004,7 +6004,7 @@ private canThisRoleCreateBackDateBooking(): boolean {
           this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
           this.InitReservationInvoiceGSTDetails( this.customerID);
           this.InitCustomerCustomerGroup();
-          this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+          this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
           this.getETRDropOffTime();
         },
       (error: HttpErrorResponse) => {
@@ -6054,24 +6054,33 @@ private canThisRoleCreateBackDateBooking(): boolean {
   }
 
   //---------- Reservation Capping ----------
-  public GetReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleCategoryID)
+  public GetReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleID)
   {
     // All 6 params are path segments; any missing value produces URLs like
     // /CheckReservationCapping/4616/9/Invalid%20date/undefined/... and 400s.
-    if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleCategoryID) {
+    if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleID) {
       return;
     }
     const formattedDate = moment(pickupDate, "DD/MM/YYYY");
     if (!formattedDate.isValid()) { return; }
     pickupDate = formattedDate.format("YYYY-MM-DD");
-    this.reservationService.getReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleCategoryID).subscribe(
+    this.reservationService.getReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleID).subscribe(
       (data: any) =>   
       {
         if (data) 
         {
           this.bookingCount = data.bookingCount;
           this.cap = data.cap;
-          if((this.bookingCount >= this.cap) && (this.bookingCount != 0) && (this.cap != null && this.cap != 0)) 
+          if (this.cap === 0)
+          {
+            Swal.fire({
+              title: '',
+              text: `No cars can be provided for ${this.customer} on the selected date (capping is zero).`,
+              icon: 'warning',
+            });
+            return false;
+          }
+          if (this.cap != null && this.cap > 0 && this.bookingCount >= this.cap) 
           {
             Swal.fire({
               title: '',

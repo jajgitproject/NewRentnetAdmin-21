@@ -451,9 +451,9 @@ export class ReservationService
     return this.httpClient.delete(this.API_URL + '/'+ reservationID);
   }
 
-  getReservationCapping(CustomerGroupID:number,CustomerID:number,PickupDate:string,CityID:number,PackageTypeID:number,VehicleCategoryID:number):  Observable<any> 
+  getReservationCapping(CustomerGroupID:number,CustomerID:number,PickupDate:string,CityID:number,PackageTypeID:number,VehicleID:number):  Observable<any> 
   {
-    return this.httpClient.get(this.API_URL_CustomerGroupReservationCapping + "/CheckReservationCapping/" + CustomerGroupID + '/' + CustomerID + '/' + PickupDate + '/' + CityID + '/' + PackageTypeID + '/' + VehicleCategoryID);
+    return this.httpClient.get(this.API_URL_CustomerGroupReservationCapping + "/CheckReservationCapping/" + CustomerGroupID + '/' + CustomerID + '/' + PickupDate + '/' + CityID + '/' + PackageTypeID + '/' + VehicleID);
   }
   GetResrvationGSTForCityID(customerID:number,cityID:number): Observable<any> {
     return this.httpClient.get(this.generalService.BaseURL + "customerConfigurationInvoicing/GetResrvationGSTForCityID/"+customerID +'/'+cityID);

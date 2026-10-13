@@ -39,7 +39,7 @@
                                                             <option value="search" hidden>Search By</option>                                                          
                                                             <option value="city">City</option>
                                                             <option value="packageType">Package Type</option>
-                                                            <option value="vehicleCategory">Vehicle Category</option>                                                                                                               
+                                                            <option value="vehicle">Vehicle</option>                                                                                                               
                                                         </select>
                                                     </div>
                                         
@@ -111,10 +111,16 @@
                                         {{row.packageType}}</mat-cell>
                                 </ng-container>
 
-                                <ng-container matColumnDef="VehicleCategory.VehicleCategory">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Vehicle Category</mat-header-cell>
+                                <ng-container matColumnDef="CustomerGroupReservationCapping.CappingType">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Capping Type</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.vehicleCategory}}</mat-cell>
+                                        {{row.cappingType}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Vehicle.Vehicle">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Vehicle</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{row.vehicle}}</mat-cell>
                                 </ng-container>
                                 
                                 <ng-container matColumnDef="CustomerGroupReservationCapping.MondayCap">

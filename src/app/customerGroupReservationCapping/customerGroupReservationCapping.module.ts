@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CustomerGroupReservationCappingComponent } from './customerGroupReservationCapping.component';
 import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
+import { CappingMessageDialogComponent } from './dialogs/message-dialog/message-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -31,7 +32,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
   declarations: [
     CustomerGroupReservationCappingComponent,
     advanceTableForm,
-    DeleteDialogComponent
+    DeleteDialogComponent,
+    CappingMessageDialogComponent
   ],
   imports: [
     CommonModule,

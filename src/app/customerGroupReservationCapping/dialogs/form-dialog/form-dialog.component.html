@@ -2,7 +2,6 @@
     <div class="modalHeader">
         <div class="editRowModal">
             <div class="modalHeader clearfix">
-                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
                 <div class="modal-about">
                     <div class="font-weight-bold p-t-5 font-17">
                         {{dialogTitle}} for {{CustomerGroupName}}
@@ -18,19 +17,16 @@
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
-                        <mat-label>Customer Group</mat-label>    
-                        <input required type="text" matInput formControlName="customerGroup">                   
-                        <!-- <input required type="text" matInput [matAutocomplete]="auto1" formControlName="customerGroup">
-                        <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="OnCustomerGroupSelect($event.option.value)">
-                            <mat-option *ngFor="let options of filteredCustomerGroupOptions | async"
-                                [value]="options.customerGroup" (click)="getCustomerGroupID(options.customerGroupID)">
-                                {{options.customerGroup}}
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Capping Type</mat-label>
+                        <mat-select formControlName="cappingType" required>
+                            <mat-option *ngFor="let option of cappingTypeOptions" [value]="option">
+                                {{ option }}
                             </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['customerGroup'].hasError('customerGroupInvalid')">
-                            Please select a Customer Group
-                        </mat-error> -->
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.controls['cappingType'].hasError('required')">
+                            Please select a Capping Type
+                        </mat-error>
                     </mat-form-field>
                 </div>
 
@@ -51,18 +47,24 @@
             </div>
 
             <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.action === 'add'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Vehicle Category</mat-label>
-                        <input type="text" matInput formControlName="vehicleCategory" [matAutocomplete]="auto4" required>
-                        <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="onVehicleCategorySelected($event.option.value)">
-                            <mat-option *ngFor="let option of filteredVehicleCategoryOptions | async" [value]="option.vehicleCategory" (click)="getVehicleCategoryID(option.vehicleCategoryID)">
-                                {{option.vehicleCategory}}
+                        <mat-label>Vehicle</mat-label>
+                        <mat-select multiple formControlName="vehicleID" required #vehicleVal [class.is-invalid]="vehicleVal.invalid && vehicleVal.touched">
+                            <mat-option [value]="getVehicleOptionId(option)" *ngFor="let option of VehicleList">
+                                {{ getVehicleOptionName(option) }}
                             </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['vehicleCategory'].hasError('vehicleCategoryTypeInvalid')">
-                            Please select a Vehicle Category
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.controls['vehicleID'].hasError('required')">
+                            Please select a Vehicle
                         </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.action === 'edit'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Vehicle</mat-label>
+                        <input type="text" matInput formControlName="vehicle" readonly>
                     </mat-form-field>
                 </div>
 
@@ -78,26 +80,16 @@
                             Please select a City
                         </mat-error>
                     </mat-form-field>
+                    <div *ngIf="existCityMessage">
+                      <span style="color: red;"> No cities available for this combination</span>
+                    </div>
                 </div>
                   
-                  <!-- For Edit Action -->
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.action === 'edit'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>City</mat-label>
-                        <input required type="text" matInput [matAutocomplete]="auto2" formControlName="city">
-                        <mat-autocomplete #auto2="matAutocomplete"  (optionSelected)="onCitySelected($event.option.value)">
-                            <mat-option *ngFor="let options of filteredCityOptions | async"
-                                [value]="options.geoPointName" (click)="getCityID(options.geoPointID,options.geoPointName)">
-                                {{ options.geoPointName }}
-                            </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['city'].hasError('invalidCitySelection')">
-                            Please Select City
-                        </mat-error>
+                        <input type="text" matInput formControlName="city" readonly>
                     </mat-form-field>
-                    <div *ngIf="existCityMessage">
-                      <span style="color: red;"> City already exists</span>
-                    </div>
                 </div>
             </div>
 
@@ -157,7 +149,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.action === 'add'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
                         <mat-select formControlName="activationStatus">
@@ -173,16 +165,13 @@
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <!-- Save button with loading state -->
                         <button mat-raised-button *ngIf="saveDisabled" color="primary" [type]="submit"  (click)="confirmAdd()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
 
-                        <!-- Reset button -->
-                        <button *ngIf="action === 'add'" mat-raised-button color="warn" (click)="reset()" tabindex="-1">
+                        <button *ngIf="action === 'add'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">
                             Reset
                         </button>
 
-                        <!-- Cancel button -->
                         <button *ngIf="action === 'edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">
                             Cancel
                         </button>
@@ -191,3 +180,4 @@
             </div>
         </form>
     </div>
+</div>
