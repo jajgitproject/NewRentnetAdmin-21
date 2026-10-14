@@ -1476,6 +1476,18 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'sendDataToMyf',
+        title: 'Duties → MYF',
+        pageKey: 'Send Data To MYF',
+        moduleName: 'sendDataToMyf',
+        alternateAccessPageKeys: ['Send Data To MYF', 'sendDataToMyf'],
+        icon: 'fas fa-location-arrow',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoicePaidStatus',
         title: 'Invoice Paid Status',
         moduleName: 'invoicePaidStatus',

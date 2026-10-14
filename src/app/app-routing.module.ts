@@ -174,6 +174,17 @@ const routes: Routes = [
           )
       },
       {
+        path: 'sendDataToMyf',
+        loadChildren: () =>
+          import('./sendDataToMyf/sendDataToMyf.module').then(
+            (m) => m.SendDataToMyfModule
+          ),
+        data: {
+          requiredPageKey: 'Send Data To MYF',
+          alternatePageKeys: ['sendDataToMyf', 'Send Data To MYF'],
+        },
+      },
+      {
         path: 'sendDataToDynamics',
         loadChildren: () =>
           import('./sendDataToDynamics/sendDataToDynamics.module').then(
