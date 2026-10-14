@@ -1,252 +1,242 @@
-<section class="content">
+<section class="content br-page cg-cap-page">
     <div class="container-fluid">
-        <div class="block-header">
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <ul>
-                        <li class="breadcrumb-item bcrumb-1">
-                            <a routerLink="/dashboard/main">
-                                <i class="fas fa-home"></i> Home</a>|
-                            <a href="#" onClick="return false;">Admin</a>|
-                            <a href="#" onClick="return false;">Customer Group Reservation Capping</a>
-                        </li>
-                    </ul>
-                    <ul class="breadcrumb breadcrumb-style ">
-                        <li class="breadcrumb-item">
-                            <h2>Customer Group Reservation Capping for <b>{{customerGroup_Name}}</b></h2>
-                        </li>
-                    </ul>
-                </div>
+        <div class="br-header">
+            <div class="br-header-left">
+                <ul class="br-breadcrumb">
+                    <li>
+                        <a routerLink="/dashboard/main">Home</a>
+                        <span class="br-breadcrumb-sep">&gt;</span>
+                        <span>Admin</span>
+                        <span class="br-breadcrumb-sep">&gt;</span>
+                        <span>Customer Group Reservation Capping</span>
+                    </li>
+                </ul>
+                <h2 class="br-title">Reservation Capping — {{ customerGroup_Name }}</h2>
             </div>
+            <button type="button" class="br-collapse-btn" (click)="toggleFilters()">
+                {{ filtersCollapsed ? 'Show filters' : 'Hide filters' }}
+                <mat-icon>{{ filtersCollapsed ? 'expand_more' : 'expand_less' }}</mat-icon>
+            </button>
         </div>
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="card">
-                    <div class="body">
-                        <div class="responsive_table">
-                            <div class="materialTableHeader">
-                                <div class="row">
-                                    <!-- <div style="width: 70%; float:left;padding-top: 15px;padding-left: 22px;">
-                                        <div style="float:left" *ngIf="SearchSAC"><b>CustomerGroupReservationCapping Number</b> : {{SearchSAC}}</div>
-                                    </div> -->
-                                    <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <div class="input-group">
-                                                    <!-- Dropdown for selecting Type, Parent, City -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <select style="height: 40px; width: 170px;" class="form-control" [(ngModel)]="selectedFilter">
-                                                            <option value="search" hidden>Search By</option>                                                          
-                                                            <option value="city">City</option>
-                                                            <option value="packageType">Package Type</option>
-                                                            <option value="vehicle">Vehicle</option>                                                                                                               
-                                                        </select>
-                                                    </div>
-                                        
-                                                    <!-- Input field for filtering -->
-                                                    <input type="text" style="height: 40px; width: 300px;padding-left: 5px;" class="form-control" placeholder="Filter" id="inputGroup"
-                                                        (keyup)="onBackPress($event)" (input)="loadData()" [(ngModel)]="searchTerm" />
-                                        
-                                                    <!-- Search button -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <span class="input-group-text" style="cursor: pointer; height: 40px; width: 40px; text-align: center;" (click)="loadData()">
-                                                            <i class="fas fa-search"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                    </div>
-                                    <div style="width: 30%; text-align:right;">
-                                        <button mat-raised-button color="primary"
-                                            data-dismiss="modal" data-toggle="modal" data-backdrop="false"
-                                            data-target="#exampleModalCenter">
-                                            Search
-                                        </button>
-                                        &nbsp;
-                                        <button mat-mini-fab color="primary" (click)="addNew()">
-                                            <mat-icon class="col-white">add</mat-icon>
-                                        </button>
-                                        &nbsp;
-                                        <button mat-mini-fab color="primary" (click)="refresh()">
-                                            <mat-icon class="col-white">refresh</mat-icon>
-                                        </button>
-                                        &nbsp;
-                                    </div>
-                                </div>
-                            </div>
 
-                            <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
-                                This is not rendered
-                            </p>
-
-                            <ng-template #thenBlock2>
-                                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
-                                <div class="body">
-                                    <div class="example-button-row">    
-                                        <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
-                                        <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-                                    </div>
-                                </div>
-                            </ng-template>
-
-                            <ng-template #elseBlock2>
-                                <div class="scrollable-table-container">
-                                <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
-                                <ng-container matColumnDef="id">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
-                                    <mat-cell *matCellDef="let row">{{row.customerGroupReservationCappingID}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="GeoPoint.GeoPointName">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.city}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="PackageType.PackageType">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Package Type</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.packageType}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="CustomerGroupReservationCapping.CappingType">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Capping Type</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.cappingType}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="Vehicle.Vehicle">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Vehicle</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.vehicle}}</mat-cell>
-                                </ng-container>
-                                
-                                <ng-container matColumnDef="CustomerGroupReservationCapping.MondayCap">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Monday Cap</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.mondayCap}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="CustomerGroupReservationCapping.TuesdayCap">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Tuesday Cap</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.tuesdayCap}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="CustomerGroupReservationCapping.WednesdayCap">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Wednesday Cap</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.wednesdayCap}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="CustomerGroupReservationCapping.ThursdayCap">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Thursday Cap</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.thursdayCap}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="CustomerGroupReservationCapping.FridayCap">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Friday Cap</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.fridayCap}}</mat-cell>
-                                </ng-container>
-                                <ng-container matColumnDef="CustomerGroupReservationCapping.SaturdayCap">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Saturday Cap</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.saturdayCap}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="CustomerGroupReservationCapping.SundayCap">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Sunday Cap</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.sundayCap}}</mat-cell>
-                                </ng-container>
-
-                                <ng-container matColumnDef="status">
-                                    <mat-header-cell *matHeaderCellDef>Activation Status</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                        {{row.activationStatus===true ? 'Active' : 'Deleted'}}</mat-cell>
-                                </ng-container>
-                                <!-- actions -->
-                                <ng-container matColumnDef="actions">
-                                    <mat-header-cell *matHeaderCellDef class="pr-0" [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
-                                    <mat-cell *matCellDef="let row; let i=index;" class="pr-0" [ngClass]="'tbl-col-width-per-9'">
-                                        <button mat-raised-button color="primary" (contextmenu)="onContextMenu($event, row)" (click)="onContextMenu($event, row)">
-                                            Actions
-                                    </button>
-                                    </mat-cell>
-                                </ng-container>
-                                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                                <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'" matRipple>
-                                </mat-row>
-                            </mat-table>
-                                </div>
-
-                            <!-- context menu start -->
-                            <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
-                            </div>
-                            <mat-menu #contextMenu="matMenu">
-                                <ng-template matMenuContent let-item="item">
-                                    <button mat-menu-item (click)="editCall(item)">
-                                        <mat-icon>create</mat-icon>
-                                        <span>Edit</span>
-                                    </button>
-                                    <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item (click)="deleteItem(item)">
-                                        <mat-icon>delete</mat-icon>
-                                        <span>Delete</span>
-                                    </button>
-                                </ng-template>
-                            </mat-menu>
-
-                            <!-- context menu end -->
-
-                            <div class="body">
-                                <div class="example-button-row">
-                                    <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
-                                    <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-                                </div>
-                            </div>
-                        </ng-template>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- modelpopup -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Customer Group Reservation Capping</h5>
-                <button type="button" class="close" data-dismiss="modal"aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-
-                <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                    <mat-label>CustomerGroupReservationCapping</mat-label>
-                    <input type="text" matInput [(ngModel)]="Search">
-                </mat-form-field> -->
-
-                <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
-                    <mat-label>Activation Status</mat-label>
-                    <mat-select [(value)]="SearchActivationStatus">
-                        <mat-option [value]=true>Active</mat-option>
-                        <mat-option [value]=false>Deleted</mat-option>
+        <div class="br-filter-card" *ngIf="!filtersCollapsed">
+            <div class="br-filter-bar">
+                <mat-form-field class="br-field br-field-required" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Capping Type *</mat-label>
+                    <mat-select [(ngModel)]="filterCappingType" (selectionChange)="onCappingTypeChanged()">
+                        <mat-option *ngFor="let opt of cappingTypeOptions" [value]="opt">{{ opt }}</mat-option>
                     </mat-select>
                 </mat-form-field>
 
+                <mat-form-field class="br-field br-field-package cg-filter-package-multi" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Package Type</mat-label>
+                    <mat-select multiple [(ngModel)]="filterPackageTypeIDs" (openedChange)="onPackageFilterPanelOpen($event)">
+                        <mat-option class="select-filter-option" disabled>
+                            <input class="select-filter-input" matInput placeholder="Search package"
+                                [(ngModel)]="packageFilterText" [ngModelOptions]="{standalone: true}"
+                                (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                        </mat-option>
+                        <mat-option *ngIf="filteredPackageList.length === 0" disabled>No package found</mat-option>
+                        <mat-option *ngFor="let pkg of filteredPackageList" [value]="pkg.packageTypeID">
+                            {{ pkg.packageType }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="br-field br-field-city cg-filter-city-multi" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>City</mat-label>
+                    <mat-select multiple [(ngModel)]="filterCityIDs" (openedChange)="onCityFilterPanelOpen($event)">
+                        <mat-option class="select-filter-option" disabled>
+                            <input class="select-filter-input" matInput placeholder="Search city"
+                                [(ngModel)]="cityFilterText" [ngModelOptions]="{standalone: true}"
+                                (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                        </mat-option>
+                        <mat-option *ngIf="filteredCityList.length === 0" disabled>No city found</mat-option>
+                        <mat-option [value]="getCityOptionId(city)" *ngFor="let city of filteredCityList">
+                            {{ getCityOptionName(city) }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="br-field cg-filter-vehicle-multi" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Vehicle</mat-label>
+                    <mat-select multiple [(ngModel)]="filterVehicleIDs" (ngModelChange)="onVehicleFilterIdsChange($event)"
+                        (openedChange)="onVehicleFilterPanelOpen($event)">
+                        <mat-select-trigger>
+                            <span class="cg-vehicle-filter-trigger-text">{{ vehicleFilterTriggerText }}</span>
+                        </mat-select-trigger>
+                        <mat-option class="select-filter-option" disabled>
+                            <input class="select-filter-input" matInput placeholder="Search vehicle"
+                                [(ngModel)]="vehicleFilterText" [ngModelOptions]="{standalone: true}"
+                                (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                        </mat-option>
+                        <mat-option [value]="vehicleFilterAllValue">All</mat-option>
+                        <mat-option *ngIf="filteredVehicleList.length === 0" disabled>No vehicle found</mat-option>
+                        <mat-option *ngFor="let v of filteredVehicleList" [value]="getVehicleOptionId(v)">
+                            {{ getVehicleOptionName(v) }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="br-field br-field-confirm" appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Status</mat-label>
+                    <mat-select [(ngModel)]="filterStatus">
+                        <mat-option value="Active">Active</mat-option>
+                        <mat-option value="Deactive">Deactive</mat-option>
+                    </mat-select>
+                </mat-form-field>
             </div>
-            <div class="modal-footer">
-                <button mat-raised-button color="primary" (click)="SearchData()"
-                    data-dismiss="modal">Search</button>
+
+            <div class="br-filter-actions">
+                <button mat-flat-button color="primary" class="br-btn-search" type="button" (click)="SearchData()">
+                    <mat-icon>search</mat-icon>
+                    Search
+                </button>
+                <button mat-stroked-button type="button" class="br-btn-reset" (click)="resetFilters()">
+                    <mat-icon>refresh</mat-icon>
+                    Reset
+                </button>
             </div>
         </div>
+
+        <div class="br-table-card">
+            <div class="br-table-toolbar cg-cap-table-toolbar">
+                <div class="cg-cap-toolbar-spacer"></div>
+                <div class="cg-cap-toolbar-actions">
+                    <button mat-mini-fab color="primary" type="button" title="Add Capping" (click)="addNew()">
+                        <mat-icon>add</mat-icon>
+                    </button>
+                    <button mat-mini-fab color="primary" type="button" title="Edit selected records" [disabled]="selectedCount === 0" (click)="bulkEdit()">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" title="Refresh list" (click)="SearchData()" [disabled]="!filterCappingType">
+                        <mat-icon>refresh</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div *ngIf="!tableVisible" class="cg-cap-hint">
+                <mat-icon>info_outline</mat-icon>
+                <span *ngIf="!filterCappingType">Please select <strong>Capping Type</strong>, then click <strong>Search</strong>.</span>
+                <span *ngIf="filterCappingType && !hasSearched">Filters are set. Click <strong>Search</strong> to load records.</span>
+            </div>
+
+            <div *ngIf="tableVisible && dataSource && dataSource.length === 0" class="br-empty-state">
+                No records found for the current filters.
+            </div>
+
+            <div *ngIf="tableVisible && dataSource && dataSource.length > 0" class="br-table-wrap">
+                <mat-table #table [dataSource]="tableDataSource" matSort class="mat-cell br-table" (matSortChange)="SortingData($event)">
+                    <ng-container matColumnDef="select">
+                        <mat-header-cell *matHeaderCellDef class="cg-cap-select-col">
+                            <mat-checkbox
+                                [checked]="isAllPageSelected()"
+                                [indeterminate]="isPageSelectionIndeterminate()"
+                                (change)="masterToggle()">
+                            </mat-checkbox>
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="cg-cap-select-col">
+                            <mat-checkbox
+                                [checked]="isRowSelected(row)"
+                                (change)="toggleRow(row)">
+                            </mat-checkbox>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="GeoPoint.GeoPointName">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.city }}</mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="PackageType.PackageType">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Package</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.packageType }}</mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="CustomerGroupReservationCapping.CappingType">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Capping</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ formatCappingTypeShort(row.cappingType) }}</mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="Vehicle.Vehicle">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Vehicle</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.vehicle }}</mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="CustomerGroupReservationCapping.MondayCap">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Mon</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.mondayCap }}</mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="CustomerGroupReservationCapping.TuesdayCap">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Tue</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.tuesdayCap }}</mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="CustomerGroupReservationCapping.WednesdayCap">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Wed</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.wednesdayCap }}</mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="CustomerGroupReservationCapping.ThursdayCap">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Thu</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.thursdayCap }}</mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="CustomerGroupReservationCapping.FridayCap">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Fri</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.fridayCap }}</mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="CustomerGroupReservationCapping.SaturdayCap">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Sat</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.saturdayCap }}</mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="CustomerGroupReservationCapping.SundayCap">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Sun</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.sundayCap }}</mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            <span class="br-status-pill" [ngClass]="row.activationStatus === true ? 'br-status-confirmed' : 'br-status-neutral'">
+                                {{ row.activationStatus === true ? 'Active' : 'Deactive' }}
+                            </span>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                        <mat-header-cell *matHeaderCellDef class="pr-0 br-actions-header" [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="pr-0 br-actions-cell" [ngClass]="'tbl-col-width-per-9'">
+                            <button mat-raised-button color="primary" type="button"
+                                (contextmenu)="onContextMenu($event, row)"
+                                (click)="onContextMenu($event, row)">
+                                Actions
+                            </button>
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                </mat-table>
+            </div>
+
+            <div class="br-pagination cg-cap-pagination" *ngIf="tableVisible && dataSource && dataSource.length > 0">
+                <button mat-stroked-button type="button" (click)="PreviousCall()" [disabled]="PageNumber === 0">Previous</button>
+                <span class="cg-cap-page-label">Page {{ PageNumber + 1 }} · Showing {{ dataSource.length }} of {{ pageSize }}</span>
+                <button mat-stroked-button type="button" (click)="NextCall()" [disabled]="!hasNextPage">Next</button>
+            </div>
+        </div>
+
+        <div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x" [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
+        </div>
+        <mat-menu #contextMenu="matMenu">
+            <ng-template matMenuContent let-item="item">
+                <button mat-menu-item (click)="editCall(item)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Edit</span>
+                </button>
+                <button *ngIf="shouldShowDeleteButton(item)" mat-menu-item (click)="deleteItem(item)">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                </button>
+            </ng-template>
+        </mat-menu>
     </div>
-</div>
+</section>

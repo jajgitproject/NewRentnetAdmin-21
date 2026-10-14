@@ -4,7 +4,8 @@
             <div class="modalHeader clearfix">
                 <div class="modal-about">
                     <div class="font-weight-bold p-t-5 font-17">
-                        {{dialogTitle}} for {{CustomerGroupName}}
+                        <span *ngIf="action !== 'bulk'">{{dialogTitle}} for {{CustomerGroupName}}</span>
+                        <span *ngIf="action === 'bulk'">{{dialogTitle}} — {{ bulkIds.length }} records</span>
                     </div>
                 </div>
             </div>
@@ -15,7 +16,13 @@
     </div>
     <div mat-dialog-content>
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
-            <div class="row">
+            <div class="row" *ngIf="action === 'bulk'">
+                <div class="col-xl-12 mb-2">
+                    <p class="cg-bulk-hint">Details are shown for reference. Only weekday caps will be updated on save.</p>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="action === 'add'">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Capping Type</mat-label>
@@ -46,50 +53,95 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.action === 'add'">
+            <div class="row" *ngIf="action === 'edit' || action === 'bulk'">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Capping Type</mat-label>
+                        <mat-select formControlName="cappingType">
+                            <mat-option *ngFor="let option of cappingTypeOptions" [value]="option">
+                                {{ option }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Package Type</mat-label>
+                        <input type="text" matInput formControlName="packageType">
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'add'">
+                    <mat-form-field class="example-full-width cg-vehicle-multi" appearance="outline" floatLabel="always">
                         <mat-label>Vehicle</mat-label>
-                        <mat-select multiple formControlName="vehicleID" required #vehicleVal [class.is-invalid]="vehicleVal.invalid && vehicleVal.touched">
-                            <mat-option [value]="getVehicleOptionId(option)" *ngFor="let option of VehicleList">
+                        <mat-select multiple formControlName="vehicleID" required #vehicleVal [class.is-invalid]="vehicleVal.invalid && vehicleVal.touched"
+                            (selectionChange)="onVehicleSelectionChange()"
+                            (openedChange)="onVehiclePanelOpen($event)">
+                            <mat-option class="select-filter-option" disabled>
+                                <input class="select-filter-input" matInput placeholder="Search vehicle"
+                                    [(ngModel)]="vehicleFilterText" [ngModelOptions]="{standalone: true}"
+                                    (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                            </mat-option>
+                            <mat-option [value]="getVehicleOptionId(option)" *ngFor="let option of filteredVehicleList">
                                 {{ getVehicleOptionName(option) }}
                             </mat-option>
                         </mat-select>
+                        <mat-hint>Select one or more vehicles</mat-hint>
                         <mat-error *ngIf="advanceTableForm.controls['vehicleID'].hasError('required')">
-                            Please select a Vehicle
+                            Please select at least one Vehicle
                         </mat-error>
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.action === 'edit'">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit' || action === 'bulk'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Vehicle</mat-label>
                         <input type="text" matInput formControlName="vehicle" readonly>
                     </mat-form-field>
+                    <button *ngIf="action === 'bulk'" mat-stroked-button type="button" class="cg-view-selected-cities-btn"
+                        (click)="openViewSelectedVehicles()">
+                        View Selected Vehicles
+                    </button>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.action === 'add'">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'add'">
+                    <mat-form-field class="example-full-width cg-city-multi" appearance="outline" floatLabel="always">
                         <mat-label>City</mat-label>
-                        <mat-select multiple formControlName="cityID" required #cityVal [class.is-invalid]="cityVal.invalid && cityVal.touched">
-                            <mat-option [value]="city.geoPointID" *ngFor="let city of CityLists">
-                                {{ city.geoPointName }}
+                        <mat-select multiple formControlName="cityID" required #cityVal
+                            [class.is-invalid]="cityVal.invalid && cityVal.touched"
+                            (openedChange)="onCityPanelOpen($event)">
+                            <mat-option class="select-filter-option" disabled>
+                                <input class="select-filter-input" matInput placeholder="Search city"
+                                    [(ngModel)]="cityFilterText" [ngModelOptions]="{standalone: true}"
+                                    (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                            </mat-option>
+                            <mat-option *ngIf="filteredCityList.length === 0" disabled>No city found</mat-option>
+                            <mat-option [value]="getCityOptionId(city)" *ngFor="let city of filteredCityList">
+                                {{ getCityOptionName(city) }}
                             </mat-option>
                         </mat-select>
+                        <mat-hint>Select one or more cities</mat-hint>
                         <mat-error *ngIf="advanceTableForm.controls['cityID'].hasError('required')">
-                            Please select a City
+                            Please select at least one City
                         </mat-error>
                     </mat-form-field>
                     <div *ngIf="existCityMessage">
                       <span style="color: red;"> No cities available for this combination</span>
                     </div>
                 </div>
-                  
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.action === 'edit'">
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit' || action === 'bulk'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>City</mat-label>
                         <input type="text" matInput formControlName="city" readonly>
                     </mat-form-field>
+                    <button *ngIf="action === 'bulk'" mat-stroked-button type="button" class="cg-view-selected-cities-btn"
+                        (click)="openViewSelectedCities()">
+                        View Selected Cities
+                    </button>
                 </div>
             </div>
 
@@ -149,7 +201,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="this.action === 'add'">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'add'">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Activation Status</mat-label>
                         <mat-select formControlName="activationStatus">
@@ -161,7 +213,25 @@
                         </mat-error>
                     </mat-form-field>
                 </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'edit'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
+                            <mat-option [value]=false>Deactive</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="action === 'bulk'">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <input matInput [value]="getBulkActivationDisplay()" readonly>
+                    </mat-form-field>
+                </div>
             </div>
+
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
@@ -172,7 +242,7 @@
                             Reset
                         </button>
 
-                        <button *ngIf="action === 'edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">
+                        <button *ngIf="action === 'edit' || action === 'bulk'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">
                             Cancel
                         </button>
                     </div>

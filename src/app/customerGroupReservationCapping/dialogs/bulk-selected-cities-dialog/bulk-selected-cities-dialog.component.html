@@ -1,0 +1,25 @@
+<div class="cg-msg-dialog cg-bulk-cities-dialog">
+  <div class="cg-msg-dialog__header">
+    <div class="cg-msg-dialog__icon" aria-hidden="true">
+      <mat-icon>location_city</mat-icon>
+    </div>
+    <h2 class="cg-msg-dialog__title">Selected Cities</h2>
+    <button mat-icon-button type="button" class="cg-msg-dialog__close" (click)="onClose()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div mat-dialog-content class="cg-bulk-cities-dialog__content">
+    <p class="cg-bulk-cities-dialog__hint" *ngIf="cities.length">
+      {{ cities.length }} unique city(ies) across the selected records:
+    </p>
+    <p class="cg-bulk-cities-dialog__empty" *ngIf="!cities.length">No city names found on the selected records.</p>
+    <ul class="cg-bulk-cities-dialog__list" *ngIf="cities.length">
+      <li *ngFor="let city of cities">
+        <mat-checkbox [checked]="true" disabled>{{ city }}</mat-checkbox>
+      </li>
+    </ul>
+  </div>
+  <div mat-dialog-actions class="cg-msg-dialog__actions">
+    <button mat-flat-button color="primary" type="button" (click)="onClose()">Close</button>
+  </div>
+</div>

@@ -51,3 +51,20 @@ export class CustomerGroupReservationCappingModel {
   }
   
 }
+
+export type CappingListStatusFilter = 'Active' | 'Deactive';
+
+export interface BulkUpdateRequest {
+  ids: number[];
+  mondayCap?: number | null;
+  tuesdayCap?: number | null;
+  wednesdayCap?: number | null;
+  thursdayCap?: number | null;
+  fridayCap?: number | null;
+  saturdayCap?: number | null;
+  sundayCap?: number | null;
+}
+
+export interface BulkUpdateResponse {
+  updatedCount: number;
+}

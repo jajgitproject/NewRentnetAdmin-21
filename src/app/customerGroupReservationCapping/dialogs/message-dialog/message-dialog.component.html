@@ -1,37 +1,17 @@
-<div class="addContainer capping-message-dialog">
-  <div class="modalHeader">
-    <div class="editRowModal">
-      <div class="modalHeader clearfix">
-        <div class="modal-about">
-          <div class="font-weight-bold p-t-5 font-17">{{ dialogTitle }}</div>
-        </div>
-      </div>
+<div class="cg-msg-dialog">
+  <div class="cg-msg-dialog__header">
+    <div class="cg-msg-dialog__icon" aria-hidden="true">
+      <mat-icon>info</mat-icon>
     </div>
-    <button mat-icon-button type="button" (click)="onClose()" aria-label="Close dialog">
+    <h2 class="cg-msg-dialog__title">{{ data.title || 'Notice' }}</h2>
+    <button mat-icon-button type="button" class="cg-msg-dialog__close" (click)="onClose()" aria-label="Close">
       <mat-icon>close</mat-icon>
     </button>
   </div>
-
-  <div mat-dialog-content>
-    <div class="register-form m-4">
-      <mat-card class="message-card" [ngClass]="'message-card--' + variant">
-        <mat-card-content>
-          <div class="message-body">
-            <div class="message-icon-wrap" [ngClass]="'message-icon-wrap--' + variant">
-              <mat-icon class="message-icon">{{ iconName }}</mat-icon>
-            </div>
-            <p class="message-text">{{ data.message }}</p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <div class="row">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
-          <div class="example-button-row message-actions">
-            <button mat-raised-button color="primary" type="button" (click)="onClose()">OK</button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div mat-dialog-content class="cg-msg-dialog__content">
+    <p class="cg-msg-dialog__message">{{ data.message }}</p>
+  </div>
+  <div mat-dialog-actions class="cg-msg-dialog__actions">
+    <button mat-flat-button color="primary" type="button" (click)="onClose()">OK</button>
   </div>
 </div>

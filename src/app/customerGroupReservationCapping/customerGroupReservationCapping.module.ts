@@ -6,6 +6,9 @@ import { CustomerGroupReservationCappingComponent } from './customerGroupReserva
 import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { CappingMessageDialogComponent } from './dialogs/message-dialog/message-dialog.component';
+import { BulkSelectedCitiesDialogComponent } from './dialogs/bulk-selected-cities-dialog/bulk-selected-cities-dialog.component';
+import { BulkSelectedVehiclesDialogComponent } from './dialogs/bulk-selected-vehicles-dialog/bulk-selected-vehicles-dialog.component';
+import { SearchableCityDropdownComponent } from './components/searchable-city-dropdown/searchable-city-dropdown.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -33,7 +36,10 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     CustomerGroupReservationCappingComponent,
     advanceTableForm,
     DeleteDialogComponent,
-    CappingMessageDialogComponent
+    CappingMessageDialogComponent,
+    BulkSelectedCitiesDialogComponent,
+    BulkSelectedVehiclesDialogComponent,
+    SearchableCityDropdownComponent
   ],
   imports: [
     CommonModule,

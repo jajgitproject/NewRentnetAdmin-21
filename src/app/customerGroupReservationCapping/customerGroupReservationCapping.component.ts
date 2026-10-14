@@ -1,25 +1,25 @@
 // @ts-nocheck
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CustomerGroupReservationCappingService } from './customerGroupReservationCapping.service';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { CustomerGroupReservationCappingModel } from './customerGroupReservationCapping.model';
-import { DataSource } from '@angular/cdk/collections';
+import { MatTableDataSource } from '@angular/material/table';
+import { CustomerGroupReservationCappingModel, CappingListStatusFilter } from './customerGroupReservationCapping.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
+import { Subscription } from 'rxjs';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
-import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
-import { MyUploadComponent } from '../myupload/myupload.component';
 import { FormDialogComponent } from '../customerGroupReservationCapping/dialogs/form-dialog/form-dialog.component';
-import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/delete-city/delete-city.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
-import { FormControl } from '@angular/forms';
+import { CappingMessageDialogComponent } from './dialogs/message-dialog/message-dialog.component';
 import { ActivatedRoute } from '@angular/router';
+import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
+import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
+import { CityDropDown } from '../city/cityDropDown.model';
+
 @Component({
   standalone: false,
   selector: 'app-customerGroupReservationCapping',
@@ -29,6 +29,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class CustomerGroupReservationCappingComponent implements OnInit {
   displayedColumns = [
+    'select',
     'GeoPoint.GeoPointName',
     'PackageType.PackageType',
     'CustomerGroupReservationCapping.CappingType',
@@ -43,32 +44,47 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
     'status',
     'actions'
   ];
-  dataSource: CustomerGroupReservationCappingModel[] | null;
+  dataSource: CustomerGroupReservationCappingModel[] | null = null;
+  tableDataSource = new MatTableDataSource<CustomerGroupReservationCappingModel>([]);
   advanceTable: CustomerGroupReservationCappingModel | null;
 
-  SearchCity: string = '';
-  SearchPackageType: string = '';
-  SearchVehicle: string = '';
-  SearchActivationStatus : boolean=true;
+  cappingTypeOptions: string[] = ['Hard Capping', 'Soft Capping'];
+  filterCappingType: string = 'Hard Capping';
+  filterPackageTypeIDs: number[] = [];
+  packageFilterText = '';
+  filterCityIDs: number[] = [];
+  cityFilterText = '';
+  allCitiesLoaded = false;
+  /** Sentinel for “All vehicles” in the multi-select (not sent to API). */
+  readonly vehicleFilterAllValue = -1;
+  filterVehicleIDs: number[] = [this.vehicleFilterAllValue];
+  vehicleFilterText = '';
+  filterStatus: CappingListStatusFilter = 'Active';
+
+  packageList: PackageTypeDropDown[] = [];
+  vehicleList: VehicleDropDown[] = [];
+  cityList: CityDropDown[] = [];
+
   PageNumber: number = 0;
-  activation: string;
+  readonly pageSize = 10;
+  hasNextPage = false;
   sortingData: number;
-  sortType: string;
-  search : FormControl = new FormControl();
-  sacID: number;
-  searchTerm: any = '';
-  selectedFilter: string = 'search';
-  filterSelected:boolean = true;
+  sortType: string = 'Ascending';
+  sortColumn: string = 'CustomerGroupReservationCappingID';
   customerGroup_ID: any;
   customerGroup_Name: any;
 
+  selectedIds = new Set<number>();
+  filtersCollapsed = false;
+  hasSearched = false;
+  selectedRows = new Map<number, CustomerGroupReservationCappingModel>();
+
   constructor(
-    public httpClient: HttpClient,
     public dialog: MatDialog,
     public customerGroupReservationCappingService: CustomerGroupReservationCappingService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService,
-    public route:ActivatedRoute
+    public route: ActivatedRoute
   ) {}
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -76,6 +92,7 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+
   ngOnInit() 
   {
     this.route.queryParams.subscribe(paramsData =>{
@@ -84,24 +101,304 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
       this.customerGroup_ID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerGroupID));
       this.customerGroup_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerGroupName));
     });
-    this.loadData();
+    this.setVehicleFilterToAll();
+    this.loadMasterData();
     this.SubscribeUpdateService();
   }
-  refresh() 
-  {
-    this.SearchCity = '';
-    this.SearchPackageType = '';
-    this.SearchVehicle = '';
-    this.SearchActivationStatus = true;
-    this.PageNumber=0;
-    this.searchTerm = '';
-    this.selectedFilter = 'search';
+
+  toggleFilters(): void {
+    this.filtersCollapsed = !this.filtersCollapsed;
+  }
+
+  loadMasterData(): void {
+    this._generalService.GetPackgeType().subscribe((data) => {
+      this.packageList = data || [];
+    });
+    this._generalService.GetVehicle().subscribe((data) => {
+      this.vehicleList = data || [];
+      this.filterVehicleIDs = this.normalizeVehicleFilterIds(this.filterVehicleIDs);
+    });
+  }
+
+  ensureCityMasterLoaded(): void {
+    if (this.allCitiesLoaded) {
+      return;
+    }
+    this._generalService.GetCitys().subscribe((data) => {
+      this.cityList = (data || []).map((c) => this.normalizeCityDropDown(c)).filter((c) => c.geoPointID > 0);
+      this.allCitiesLoaded = true;
+    });
+  }
+
+  normalizeCityDropDown(city: any): CityDropDown {
+    return {
+      geoPointID: Number(city?.geoPointID ?? city?.GeoPointID ?? -1),
+      geoPointName: city?.geoPointName ?? city?.GeoPointName ?? ''
+    };
+  }
+
+  get filteredPackageList(): PackageTypeDropDown[] {
+    const term = (this.packageFilterText || '').trim().toLowerCase();
+    const list = this.packageList || [];
+    if (!term) {
+      return list;
+    }
+    return list.filter((pkg) => (pkg.packageType || '').toLowerCase().includes(term));
+  }
+
+  onPackageFilterPanelOpen(opened: boolean): void {
+    if (!opened) {
+      this.packageFilterText = '';
+    }
+  }
+
+  get filteredCityList(): CityDropDown[] {
+    const term = (this.cityFilterText || '').trim().toLowerCase();
+    const list = this.cityList || [];
+    if (!term) {
+      return list;
+    }
+    return list.filter((city) => (this.getCityOptionName(city) || '').toLowerCase().includes(term));
+  }
+
+  getCityOptionId(city: CityDropDown): number {
+    return Number(city?.geoPointID ?? city?.GeoPointID);
+  }
+
+  getCityOptionName(city: CityDropDown): string {
+    return city?.geoPointName ?? city?.GeoPointName ?? '';
+  }
+
+  onCityFilterPanelOpen(opened: boolean): void {
+    if (opened) {
+      this.ensureCityMasterLoaded();
+    } else {
+      this.cityFilterText = '';
+    }
+  }
+
+  get filteredVehicleList(): VehicleDropDown[] {
+    const term = (this.vehicleFilterText || '').trim().toLowerCase();
+    const list = this.vehicleList || [];
+    if (!term) {
+      return list;
+    }
+    return list.filter((v) => (this.getVehicleOptionName(v) || '').toLowerCase().includes(term));
+  }
+
+  onVehicleFilterPanelOpen(opened: boolean): void {
+    if (!opened) {
+      this.vehicleFilterText = '';
+    }
+  }
+
+  get isVehicleFilterAll(): boolean {
+    const ids = this.filterVehicleIDs || [];
+    return !ids.length || ids.includes(this.vehicleFilterAllValue);
+  }
+
+  get vehicleFilterDisplayText(): string {
+    const ids = (this.filterVehicleIDs || []).filter(
+      (id) => id !== this.vehicleFilterAllValue && id > 0
+    );
+    if (!ids.length) {
+      return '';
+    }
+    return ids
+      .map((id) => this.getVehicleNameById(id))
+      .filter((name) => !!name)
+      .join(', ');
+  }
+
+  /** Closed-field label (matches Capping Type / Status style). */
+  get vehicleFilterTriggerText(): string {
+    if (this.isVehicleFilterAll) {
+      return 'All';
+    }
+    return this.vehicleFilterDisplayText;
+  }
+
+  getVehicleNameById(id: number): string {
+    const match = (this.vehicleList || []).find((v) => this.getVehicleOptionId(v) === id);
+    return match ? this.getVehicleOptionName(match) : '';
+  }
+
+  setVehicleFilterToAll(): void {
+    this.filterVehicleIDs = [this.vehicleFilterAllValue];
+    this.vehicleFilterText = '';
+  }
+
+  private getAllVehicleFilterIds(): number[] {
+    return (this.vehicleList || [])
+      .map((v) => this.getVehicleOptionId(v))
+      .filter((id) => Number.isFinite(id) && id > 0);
+  }
+
+  private collapseToAllIfEveryVehicleSelected(specifics: number[]): number[] {
+    const selected = [...new Set(specifics.filter((id) => id > 0))];
+    const allIds = this.getAllVehicleFilterIds();
+    if (
+      allIds.length &&
+      selected.length >= allIds.length &&
+      allIds.every((id) => selected.includes(id))
+    ) {
+      return [this.vehicleFilterAllValue];
+    }
+    return selected;
+  }
+
+  private normalizeVehicleFilterIds(ids: number[] | null | undefined): number[] {
+    const allToken = this.vehicleFilterAllValue;
+    const raw = (ids || []).map((id) => Number(id));
+    if (!raw.length) {
+      return [allToken];
+    }
+    const hasAll = raw.includes(allToken);
+    const specifics = raw.filter((id) => id !== allToken && id > 0);
+    if (hasAll && !specifics.length) {
+      return [allToken];
+    }
+    if (!specifics.length) {
+      return [allToken];
+    }
+    return this.collapseToAllIfEveryVehicleSelected(specifics);
+  }
+
+  vehicleFilterIdsForApi(): number[] | null {
+    const specifics = (this.filterVehicleIDs || []).filter(
+      (id) => id !== this.vehicleFilterAllValue && id > 0
+    );
+    return specifics.length ? specifics : null;
+  }
+
+  onVehicleFilterIdsChange(ids: number[]): void {
+    const allToken = this.vehicleFilterAllValue;
+    const next = (ids || []).map((id) => Number(id));
+    if (!next.length) {
+      this.filterVehicleIDs = [allToken];
+      return;
+    }
+    const hasAll = next.includes(allToken);
+    const specifics = next.filter((id) => id !== allToken && id > 0);
+    if (hasAll && specifics.length) {
+      this.filterVehicleIDs = this.collapseToAllIfEveryVehicleSelected(specifics);
+      return;
+    }
+    if (hasAll) {
+      this.filterVehicleIDs = [allToken];
+      return;
+    }
+    this.filterVehicleIDs = this.collapseToAllIfEveryVehicleSelected(specifics);
+  }
+
+  get tableVisible(): boolean {
+    return this.hasSearched && !!this.filterCappingType;
+  }
+
+  get statusIsActive(): boolean {
+    return this.filterStatus === 'Active';
+  }
+
+  onCappingTypeChanged(): void {
+    if (!this.filterCappingType) {
+      this.hasSearched = false;
+      this.dataSource = null;
+      this.clearSelection();
+    }
+  }
+
+  SearchData(): void {
+    if (!this.filterCappingType) {
+      this.showNotification('snackbar-danger', 'Please select Capping Type before searching.', 'bottom', 'center');
+      return;
+    }
+    this.PageNumber = 0;
+    this.hasSearched = true;
+    this.clearSelection();
     this.loadData();
+  }
+
+  resetFilters(): void {
+    this.filterCappingType = 'Hard Capping';
+    this.filterPackageTypeIDs = [];
+    this.packageFilterText = '';
+    this.filterCityIDs = [];
+    this.cityFilterText = '';
+    this.setVehicleFilterToAll();
+    this.filterStatus = 'Active';
+    this.PageNumber = 0;
+    this.hasSearched = false;
+    this.dataSource = null;
+    this.clearSelection();
+  }
+
+  clearSelection(): void {
+    this.selectedIds.clear();
+    this.selectedRows.clear();
+  }
+
+  get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+
+  isRowSelected(row: CustomerGroupReservationCappingModel): boolean {
+    return this.selectedIds.has(row.customerGroupReservationCappingID);
+  }
+
+  toggleRow(row: CustomerGroupReservationCappingModel): void {
+    const id = row.customerGroupReservationCappingID;
+    if (this.selectedIds.has(id)) {
+      this.selectedIds.delete(id);
+      this.selectedRows.delete(id);
+    } else {
+      this.selectedIds.add(id);
+      this.selectedRows.set(id, row);
+    }
+  }
+
+  isAllPageSelected(): boolean {
+    if (!this.dataSource?.length) {
+      return false;
+    }
+    return this.dataSource.every((row) => this.selectedIds.has(row.customerGroupReservationCappingID));
+  }
+
+  isPageSelectionIndeterminate(): boolean {
+    if (!this.dataSource?.length) {
+      return false;
+    }
+    const selectedOnPage = this.dataSource.filter((row) => this.selectedIds.has(row.customerGroupReservationCappingID)).length;
+    return selectedOnPage > 0 && selectedOnPage < this.dataSource.length;
+  }
+
+  masterToggle(): void {
+    if (!this.dataSource?.length) {
+      return;
+    }
+    if (this.isAllPageSelected()) {
+      this.dataSource.forEach((row) => {
+        this.selectedIds.delete(row.customerGroupReservationCappingID);
+        this.selectedRows.delete(row.customerGroupReservationCappingID);
+      });
+    } else {
+      this.dataSource.forEach((row) => {
+        this.selectedIds.add(row.customerGroupReservationCappingID);
+        this.selectedRows.set(row.customerGroupReservationCappingID, row);
+      });
+    }
+  }
+
+  getVehicleOptionId(option: VehicleDropDown): number {
+    return Number(option?.vehicleID ?? option?.VehicleID);
+  }
+
+  getVehicleOptionName(option: VehicleDropDown): string {
+    return option?.vehicle ?? option?.Vehicle ?? '';
   }
 
   addNew()
   {
-    const dialogRef = this.dialog.open(FormDialogComponent, 
+    this.dialog.open(FormDialogComponent, 
     {
       data: 
         {
@@ -114,66 +411,153 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
   }
 
   editCall(row) {
-  this.sacID = row.id;
-  const dialogRef = this.dialog.open(FormDialogComponent, {
-    data: {
-      advanceTable: row,
-      action: 'edit',
-      CustomerGroupID:this.customerGroup_ID,
-      CustomerGroupName:this.customerGroup_Name
-    }
-  });
-
-}
-
-deleteItem(row)
-{
-  this.sacID = row.id;
-  const dialogRef = this.dialog.open(DeleteDialogComponent, 
-  {
-    data: row
-  });
-}
-
-shouldShowDeleteButton(item: any): boolean {
-  return item.activationStatus !== false; // Only show delete button if activationStatus is not false (not deleted)
-}
-onBackPress(event) {
-  if (event.keyCode === 8) 
-  {
-    this.loadData();
+    this.dialog.open(FormDialogComponent, {
+      data: {
+        advanceTable: row,
+        action: 'edit',
+        CustomerGroupID:this.customerGroup_ID,
+        CustomerGroupName:this.customerGroup_Name
+      }
+    });
   }
-}
-public Filter()
-{
-  this.PageNumber = 0;
-  this.loadData();
-}
+
+  private getPackageTypeKey(row: CustomerGroupReservationCappingModel): string {
+    const id = Number(row?.packageTypeID ?? row?.PackageTypeID ?? 0);
+    if (Number.isFinite(id) && id > 0) {
+      return `id:${id}`;
+    }
+    const name = (row?.packageType ?? row?.PackageType ?? '').toString().trim().toLowerCase();
+    return name ? `name:${name}` : '';
+  }
+
+  private selectedRowsShareSamePackageType(): boolean {
+    const rows = Array.from(this.selectedRows.values());
+    if (rows.length <= 1) {
+      return true;
+    }
+    const keys = rows.map((row) => this.getPackageTypeKey(row)).filter((key) => key !== '');
+    if (!keys.length) {
+      return true;
+    }
+    return new Set(keys).size === 1;
+  }
+
+  private showBulkPackageTypeMessage(): void {
+    this.dialog.open(CappingMessageDialogComponent, {
+      width: '440px',
+      panelClass: 'cg-cap-message-dialog',
+      autoFocus: false,
+      data: {
+        title: 'Bulk Edit',
+        message: 'Bulk Capping records will be edit based on same Package Type'
+      }
+    });
+  }
+
+  bulkEdit(): void {
+    if (this.selectedIds.size === 0) {
+      return;
+    }
+    if (!this.selectedRowsShareSamePackageType()) {
+      this.showBulkPackageTypeMessage();
+      return;
+    }
+    this.dialog.open(FormDialogComponent, {
+      data: {
+        action: 'bulk',
+        bulkIds: Array.from(this.selectedIds),
+        bulkRows: Array.from(this.selectedRows.values()),
+        CustomerGroupID: this.customerGroup_ID,
+        CustomerGroupName: this.customerGroup_Name
+      }
+    });
+  }
+
+  deleteItem(row)
+  {
+    this.dialog.open(DeleteDialogComponent, 
+    {
+      data: row
+    });
+  }
+
+  shouldShowDeleteButton(item: any): boolean {
+    return item.activationStatus !== false;
+  }
+
+  formatCappingTypeShort(value: string): string {
+    const text = (value || '').toLowerCase();
+    if (text.includes('hard')) {
+      return 'Hard';
+    }
+    if (text.includes('soft')) {
+      return 'Soft';
+    }
+    return value || '';
+  }
+
+  private normalizeListRow(raw: any): CustomerGroupReservationCappingModel {
+    const city =
+      raw?.city ??
+      raw?.City ??
+      raw?.geoPointName ??
+      raw?.GeoPointName ??
+      '';
+    return {
+      ...raw,
+      customerGroupReservationCappingID: raw?.customerGroupReservationCappingID ?? raw?.CustomerGroupReservationCappingID,
+      customerGroupID: raw?.customerGroupID ?? raw?.CustomerGroupID,
+      customerGroup: raw?.customerGroup ?? raw?.CustomerGroup,
+      cityID: raw?.cityID ?? raw?.CityID,
+      city,
+      packageTypeID: raw?.packageTypeID ?? raw?.PackageTypeID,
+      packageType: raw?.packageType ?? raw?.PackageType,
+      cappingType: raw?.cappingType ?? raw?.CappingType,
+      vehicleID: raw?.vehicleID ?? raw?.VehicleID,
+      vehicle: raw?.vehicle ?? raw?.Vehicle,
+      mondayCap: raw?.mondayCap ?? raw?.MondayCap,
+      tuesdayCap: raw?.tuesdayCap ?? raw?.TuesdayCap,
+      wednesdayCap: raw?.wednesdayCap ?? raw?.WednesdayCap,
+      thursdayCap: raw?.thursdayCap ?? raw?.ThursdayCap,
+      fridayCap: raw?.fridayCap ?? raw?.FridayCap,
+      saturdayCap: raw?.saturdayCap ?? raw?.SaturdayCap,
+      sundayCap: raw?.sundayCap ?? raw?.SundayCap,
+      activationStatus: raw?.activationStatus ?? raw?.ActivationStatus
+    };
+  }
+
+  private applyListResponse(data: any): void {
+    const rows = Array.isArray(data) ? data.map((item) => this.normalizeListRow(item)) : [];
+    this.dataSource = rows;
+    this.tableDataSource.data = rows;
+    this.hasNextPage = rows.length >= this.pageSize;
+  }
 
   public loadData() 
   {
-    switch (this.selectedFilter)
-    {
-      case 'city':
-        this.SearchCity = this.searchTerm;
-        break;
-      case 'packageType':
-        this.SearchPackageType = this.searchTerm;
-        break;
-      case 'vehicle':
-        this.SearchVehicle = this.searchTerm;
-        break;  
-      default:
-        this.searchTerm = '';
-        break;
-    }  
-    this.customerGroupReservationCappingService.getTableData(this.customerGroup_ID,this.SearchCity,this.SearchPackageType,this.SearchVehicle,this.SearchActivationStatus, this.PageNumber).subscribe
-    (
-      data =>   
-      {
-        this.dataSource = data;
-      },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+    if (!this.filterCappingType) {
+      this.dataSource = null;
+      this.tableDataSource.data = [];
+      return;
+    }
+    this.customerGroupReservationCappingService.getTableDataFilter(
+      Number(this.customerGroup_ID),
+      this.filterCappingType,
+      this.filterPackageTypeIDs?.length ? this.filterPackageTypeIDs : null,
+      this.filterCityIDs?.length ? this.filterCityIDs : null,
+      this.vehicleFilterIdsForApi(),
+      this.statusIsActive,
+      this.PageNumber,
+      this.sortColumn,
+      this.sortType,
+      this.pageSize
+    ).subscribe(
+      data => this.applyListResponse(data),
+      (error: HttpErrorResponse) => {
+        this.dataSource = [];
+        this.tableDataSource.data = [];
+        this.hasNextPage = false;
+      }
     );
   }
 
@@ -197,7 +581,7 @@ public Filter()
 
   NextCall()
   {
-    if (this.dataSource?.length>0) 
+    if (this.hasNextPage)
     {
       this.PageNumber++;
       this.loadData();
@@ -213,26 +597,9 @@ public Filter()
     } 
   }
 
-  public SearchData()
-  {
-    this.loadData();
-    //this.SearchCustomerGroupReservationCapping='';
-    
-  }
-
-/////////////////for Image Upload////////////////////////////
-  public response: { dbPath: '' };
-  public ImagePath: string;
-  public uploadFinished = (event) => {
-  this.response = event;
-  this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
-  }
-/////////////////for Image Upload ends////////////////////////////
-
-  /////////////////To Recieve Updates Start////////////////////////////
   messageReceived: string;
   MessageArray:string[]=[];
-  private subscriptionName: Subscription; //important to create a subscription
+  private subscriptionName: Subscription;
 
   SubscribeUpdateService()
   {
@@ -240,7 +607,6 @@ public Filter()
     (
       message => 
       { 
-        //message contains the data sent from service
         this.messageReceived = message.text;
         this.MessageArray=this.messageReceived.split(":");
         if(this.MessageArray.length==3)
@@ -251,29 +617,27 @@ public Filter()
             {
               if(this.MessageArray[2]=="Success")
               {
-                this.refresh();
-                this.showNotification(
-                'snackbar-success',
-                'Customer Group Reservation Capping Created...!!!',
-                'bottom',
-                'center'
-              );
+                if (this.filterCappingType) {
+                  this.hasSearched = true;
+                }
+                this.clearSelection();
+                this.loadData();
+                this.showNotification('snackbar-success', 'Customer Group Reservation Capping Created...!!!', 'bottom', 'center');
               }
             }
           }
-          else if(this.MessageArray[0]=="CustomerGroupReservationCappingUpdate")
+          else if(this.MessageArray[0]=="CustomerGroupReservationCappingUpdate" || this.MessageArray[0]=="CustomerGroupReservationCappingBulkUpdate")
           {
             if(this.MessageArray[1]=="CustomerGroupReservationCappingView")
             {
               if(this.MessageArray[2]=="Success")
               {
-               this.refresh();
-               this.showNotification(
-                'snackbar-success',
-                'Customer Group Reservation Capping Updated...!!!',
-                'bottom',
-                'center'
-              );
+               if (this.filterCappingType) {
+                 this.hasSearched = true;
+               }
+               this.clearSelection();
+               this.loadData();
+               this.showNotification('snackbar-success', 'Customer Group Reservation Capping Updated...!!!', 'bottom', 'center');
               }
             }
           }
@@ -283,13 +647,12 @@ public Filter()
             {
               if(this.MessageArray[2]=="Success")
               {
-               this.refresh();
-               this.showNotification(
-                'snackbar-success',
-                'Customer Group Reservation Capping Deleted...!!!',
-                'bottom',
-                'center'
-              );
+               if (this.filterCappingType) {
+                 this.hasSearched = true;
+               }
+               this.clearSelection();
+               this.loadData();
+               this.showNotification('snackbar-success', 'Customer Group Reservation Capping Deleted...!!!', 'bottom', 'center');
               }
             }
           }
@@ -299,13 +662,7 @@ public Filter()
             {
               if(this.MessageArray[2]=="Failure")
               {
-               this.refresh();
-               this.showNotification(
-                'snackbar-danger',
-                'Operation Failed.....!!!',
-                'bottom',
-                'center'
-              );
+               this.showNotification('snackbar-danger', 'Operation Failed.....!!!', 'bottom', 'center');
               }
             }
           }
@@ -315,13 +672,7 @@ public Filter()
             {
               if(this.MessageArray[2]=="Failure")
               {
-               this.refresh();
-               this.showNotification(
-                'snackbar-danger',
-                'Duplicate Value Found.....!!!',
-                'bottom',
-                'center'
-              );
+               this.showNotification('snackbar-danger', 'Duplicate Value Found.....!!!', 'bottom', 'center');
               }
             }
           }
@@ -331,27 +682,35 @@ public Filter()
   }
 
   SortingData(coloumName:any) {
-   
-    if (this.sortingData == 1) {
-
-      this.sortingData = 0;
-      this.sortType = "Ascending"
+    if (!this.filterCappingType) {
+      return;
     }
-    else {
+    if (this.sortingData == 1) {
+      this.sortingData = 0;
+      this.sortType = "Ascending";
+    } else {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.customerGroupReservationCappingService.getTableDataSort(this.customerGroup_ID,this.SearchCity,this.SearchPackageType,this.SearchVehicle,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
-    (
-      data =>   
-      {
-        this.dataSource = data;
-      
-      },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+    this.sortColumn = coloumName.active;
+    this.customerGroupReservationCappingService.getTableDataFilterSort(
+      Number(this.customerGroup_ID),
+      this.filterCappingType,
+      this.filterPackageTypeIDs?.length ? this.filterPackageTypeIDs : null,
+      this.filterCityIDs?.length ? this.filterCityIDs : null,
+      this.vehicleFilterIdsForApi(),
+      this.statusIsActive,
+      this.PageNumber,
+      this.sortColumn,
+      this.sortType,
+      this.pageSize
+    ).subscribe(
+      data => this.applyListResponse(data),
+      (error: HttpErrorResponse) => {
+        this.dataSource = [];
+        this.tableDataSource.data = [];
+        this.hasNextPage = false;
+      }
     );
   }
 }
-
-
-

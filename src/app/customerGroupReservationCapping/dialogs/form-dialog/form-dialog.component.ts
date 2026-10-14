@@ -1,20 +1,18 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import {
-  CappingMessageDialogComponent,
-  CappingMessageDialogVariant
-} from '../message-dialog/message-dialog.component';
 import { Component, Inject } from '@angular/core';
 import { FormControl, Validators, FormGroup, FormBuilder, ValidatorFn, AbstractControl, ValidationErrors} from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { GeneralService } from '../../../general/general.service';
 import { CustomerGroupReservationCappingModel } from '../../customerGroupReservationCapping.model';
 import { CustomerGroupReservationCappingService } from '../../customerGroupReservationCapping.service';
-import { finalize, map, startWith } from 'rxjs/operators';
-import { forkJoin, Observable, of } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { forkJoin, Observable } from 'rxjs';
 import { CityDropDown } from 'src/app/city/cityDropDown.model';
 import { PackageTypeDropDown } from 'src/app/packageType/packageTypeDropDown.model';
 import { VehicleDropDown } from 'src/app/vehicle/vehicleDropDown.model';
+import { BulkSelectedCitiesDialogComponent } from '../bulk-selected-cities-dialog/bulk-selected-cities-dialog.component';
+import { BulkSelectedVehiclesDialogComponent } from '../bulk-selected-vehicles-dialog/bulk-selected-vehicles-dialog.component';
 
 @Component({
   standalone: false,
@@ -44,21 +42,32 @@ export class FormDialogComponent
 
   public VehicleList?: VehicleDropDown[] = [];
   vehicleID:any;
+  cityFilterText = '';
+  vehicleFilterText = '';
   CustomerGroupID: any;
   CustomerGroupName: any;
   cappingType: string;
-  private readonly softCappingExistsMessage = 'Record with Soft Capping is already Exist.';
+  bulkIds: number[] = [];
+  bulkRows: CustomerGroupReservationCappingModel[] = [];
 
   constructor(public dialogRef: MatDialogRef<FormDialogComponent>, 
               @Inject(MAT_DIALOG_DATA) public data: any,
               public advanceTableService: CustomerGroupReservationCappingService,
               private fb: FormBuilder,
-              private messageDialog: MatDialog,
+              private matDialog: MatDialog,
   public _generalService:GeneralService)
   {
     this.CustomerGroupID=data.CustomerGroupID;
     this.CustomerGroupName=data.CustomerGroupName;
     this.action = data.action;
+    if (this.action === 'bulk') {
+      this.dialogTitle = 'Bulk Edit';
+      this.bulkIds = data.bulkIds || [];
+      this.bulkRows = data.bulkRows || [];
+      this.advanceTable = this.bulkRows[0] || new CustomerGroupReservationCappingModel({});
+      this.advanceTableForm = this.createContactForm();
+      return;
+    }
     if (this.action === 'edit') 
     {
       this.dialogTitle ='Customer Group Reservation Capping';       
@@ -72,7 +81,6 @@ export class FormDialogComponent
       this.dialogTitle = 'Customer Group Reservation Capping';
       this.advanceTable = new CustomerGroupReservationCappingModel({});
       this.advanceTable.activationStatus=true;
-      this.advanceTable.cappingType = 'Hard Capping';
     }
     this.advanceTableForm = this.createContactForm();
   }
@@ -86,22 +94,30 @@ export class FormDialogComponent
         this.advanceTable.CustomerGroupReservationCappingID ??
         -1
       ],
-      customerGroupID: [this.CustomerGroupID],
+      customerGroupID: [Number(this.CustomerGroupID) || 0],
       customerGroup: [this.CustomerGroupName],
-      cityID: [this.advanceTable.cityID],
-      city: [this.advanceTable.city],
+      cityID: [this.action === 'add' ? [] : this.advanceTable.cityID],
+      city: [this.action === 'bulk' ? this.getBulkDisplayValue('city') : this.advanceTable.city],
       packageTypeID: [this.advanceTable.packageTypeID],
-      packageType: [this.advanceTable.packageType],
-      cappingType: [this.advanceTable.cappingType || 'Hard Capping', Validators.required],
-      vehicleID: [this.action === 'add' ? [] : this.advanceTable.vehicleID, Validators.required],
-      vehicle: [this.advanceTable.vehicle],
-      mondayCap: [this.formatCapValue(this.advanceTable?.mondayCap)],
-      tuesdayCap: [this.formatCapValue(this.advanceTable?.tuesdayCap)],
-      wednesdayCap: [this.formatCapValue(this.advanceTable?.wednesdayCap)],
-      thursdayCap: [this.formatCapValue(this.advanceTable?.thursdayCap)],
-      fridayCap: [this.formatCapValue(this.advanceTable?.fridayCap)],
-      saturdayCap: [this.formatCapValue(this.advanceTable?.saturdayCap)],      
-      sundayCap: [this.formatCapValue(this.advanceTable?.sundayCap)],
+      packageType: [this.action === 'bulk' ? this.getBulkDisplayValue('packageType') : this.advanceTable.packageType],
+      cappingType: [
+        this.action === 'bulk'
+          ? this.getBulkDisplayValue('cappingType')
+          : (this.advanceTable.cappingType || (this.action === 'add' ? 'Hard Capping' : null)),
+        this.action === 'bulk' ? [] : Validators.required
+      ],
+      vehicleID: [
+        this.action === 'add' ? [] : this.advanceTable.vehicleID,
+        this.action === 'add' ? Validators.required : []
+      ],
+      vehicle: [this.action === 'bulk' ? this.getBulkDisplayValue('vehicle') : this.advanceTable.vehicle],
+      mondayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.mondayCap)],
+      tuesdayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.tuesdayCap)],
+      wednesdayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.wednesdayCap)],
+      thursdayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.thursdayCap)],
+      fridayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.fridayCap)],
+      saturdayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.saturdayCap)],
+      sundayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.sundayCap)],
       activationStatus: [this.advanceTable.activationStatus]
     });
   }
@@ -133,8 +149,122 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue(patch);
   }
 
+  private getCityNameFromRow(row: CustomerGroupReservationCappingModel): string {
+    const name =
+      row?.city ??
+      row?.City ??
+      row?.geoPointName ??
+      row?.GeoPointName ??
+      '';
+    return String(name).trim();
+  }
+
+  getUniqueBulkCityNames(): string[] {
+    if (!this.bulkRows?.length) {
+      return [];
+    }
+    const seen = new Set<string>();
+    const names: string[] = [];
+    for (const row of this.bulkRows) {
+      const name = this.getCityNameFromRow(row);
+      if (!name) {
+        continue;
+      }
+      const key = name.toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      names.push(name);
+    }
+    return names.sort((a, b) => a.localeCompare(b));
+  }
+
+  openViewSelectedCities(): void {
+    this.matDialog.open(BulkSelectedCitiesDialogComponent, {
+      width: '440px',
+      panelClass: 'cg-cap-message-dialog',
+      autoFocus: false,
+      data: { cities: this.getUniqueBulkCityNames() }
+    });
+  }
+
+  private getVehicleNameFromRow(row: CustomerGroupReservationCappingModel): string {
+    const name = row?.vehicle ?? row?.Vehicle ?? '';
+    return String(name).trim();
+  }
+
+  getUniqueBulkVehicleNames(): string[] {
+    if (!this.bulkRows?.length) {
+      return [];
+    }
+    const seen = new Set<string>();
+    const names: string[] = [];
+    for (const row of this.bulkRows) {
+      const name = this.getVehicleNameFromRow(row);
+      if (!name) {
+        continue;
+      }
+      const key = name.toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      names.push(name);
+    }
+    return names.sort((a, b) => a.localeCompare(b));
+  }
+
+  openViewSelectedVehicles(): void {
+    this.matDialog.open(BulkSelectedVehiclesDialogComponent, {
+      width: '440px',
+      panelClass: 'cg-cap-message-dialog',
+      autoFocus: false,
+      data: { vehicles: this.getUniqueBulkVehicleNames() }
+    });
+  }
+
+  getBulkDisplayValue(field: string): string {
+    if (!this.bulkRows?.length) {
+      return '';
+    }
+    const values = this.bulkRows
+      .map((row) => row?.[field])
+      .filter((value) => value !== null && value !== undefined && value !== '');
+    const unique = [...new Set(values.map((value) => String(value)))];
+    if (!unique.length) {
+      return '';
+    }
+    if (unique.length === 1) {
+      return unique[0];
+    }
+    return `Multiple (${this.bulkRows.length} records)`;
+  }
+
+  getBulkActivationDisplay(): string {
+    if (!this.bulkRows?.length) {
+      return '';
+    }
+    const labels = this.bulkRows.map((row) => (row.activationStatus === true ? 'Active' : 'Deactive'));
+    const unique = [...new Set(labels)];
+    return unique.length === 1 ? unique[0] : 'Multiple';
+  }
+
+  private disableBulkReadOnlyFields(): void {
+    const capFields = ['mondayCap', 'tuesdayCap', 'wednesdayCap', 'thursdayCap', 'fridayCap', 'saturdayCap', 'sundayCap'];
+    Object.keys(this.advanceTableForm.controls).forEach((key) => {
+      if (!capFields.includes(key)) {
+        this.advanceTableForm.get(key)?.disable({ emitEvent: false });
+      }
+    });
+  }
+
   public ngOnInit(): void
   {
+    if (this.action === 'bulk') {
+      this.disableBulkReadOnlyFields();
+      return;
+    }
     this.InitPackageType();
     this.InitVehicle();
     if (this.action === 'edit') {
@@ -146,11 +276,9 @@ export class FormDialogComponent
       this.advanceTableForm.controls['city'].disable();
       this.advanceTableForm.controls['activationStatus'].disable();
     } else {
+      this.cappingType = this.advanceTableForm.get('cappingType')?.value || 'Hard Capping';
       this.advanceTableForm.controls['cappingType'].valueChanges.subscribe(value => {
         this.cappingType = value;
-        this.refreshCityList();
-      });
-      this.advanceTableForm.controls['vehicleID'].valueChanges.subscribe(() => {
         this.refreshCityList();
       });
     }
@@ -162,12 +290,75 @@ export class FormDialogComponent
     }
     const capType = this.advanceTableForm.get('cappingType').value;
     const pkgId = this.packageTypeID || this.advanceTableForm.get('packageTypeID').value;
-    const vehicleSelection = this.advanceTableForm.get('vehicleID').value;
-    const vehId = Array.isArray(vehicleSelection) && vehicleSelection.length > 0
-      ? vehicleSelection[0]
-      : (this.vehicleID || vehicleSelection);
-    if (this.CustomerGroupID && pkgId && vehId && capType) {
-      this.InitCity(this.CustomerGroupID, pkgId, vehId, capType);
+    const vehicleIds = this.normalizeIdArray(this.advanceTableForm.get('vehicleID')?.value);
+    if (this.CustomerGroupID && pkgId && vehicleIds.length && capType) {
+      this.loadCitiesForVehicles(this.CustomerGroupID, pkgId, vehicleIds, capType);
+    }
+  }
+
+  private loadCitiesForVehicles(customerGroupID: number, packageTypeID: number, vehicleIds: number[], cappingType: string): void {
+    const requests = vehicleIds.map((vehicleID) =>
+      this.advanceTableService.GetCityForCustomerGroupCapping(customerGroupID, packageTypeID, vehicleID, cappingType)
+    );
+    forkJoin(requests).subscribe(
+      (results) => {
+        const merged = new Map<number, CityDropDown>();
+        (results || []).forEach((data) => {
+          (data || []).forEach((city) => {
+            const normalized = this.normalizeCityDropDown(city);
+            if (normalized.geoPointID > 0) {
+              merged.set(normalized.geoPointID, normalized);
+            }
+          });
+        });
+        this.CityLists = Array.from(merged.values()).sort((a, b) =>
+          (a.geoPointName || '').localeCompare(b.geoPointName || '')
+        );
+        this.existCityMessage = this.CityLists.length === 0;
+      },
+      () => {
+        this.CityLists = [];
+        this.existCityMessage = true;
+      }
+    );
+  }
+
+  private getFirstSelectedVehicleId(): number {
+    const raw = this.advanceTableForm.get('vehicleID')?.value;
+    if (Array.isArray(raw) && raw.length > 0) {
+      return Number(raw[0]);
+    }
+    const single = Number(this.vehicleID ?? raw);
+    return Number.isFinite(single) && single > 0 ? single : 0;
+  }
+
+  get filteredCityList(): CityDropDown[] {
+    const term = (this.cityFilterText || '').trim().toLowerCase();
+    const list = this.CityLists || [];
+    if (!term) {
+      return list;
+    }
+    return list.filter((city) => (city.geoPointName || '').toLowerCase().includes(term));
+  }
+
+  get filteredVehicleList(): VehicleDropDown[] {
+    const term = (this.vehicleFilterText || '').trim().toLowerCase();
+    const list = this.VehicleList || [];
+    if (!term) {
+      return list;
+    }
+    return list.filter((option) => this.getVehicleOptionName(option).toLowerCase().includes(term));
+  }
+
+  onCityPanelOpen(opened: boolean): void {
+    if (!opened) {
+      this.cityFilterText = '';
+    }
+  }
+
+  onVehiclePanelOpen(opened: boolean): void {
+    if (!opened) {
+      this.vehicleFilterText = '';
     }
   }
 
@@ -179,10 +370,49 @@ export class FormDialogComponent
     {
       this.advanceTableForm.reset();
     }
-    else if(this.action==='edit')
+    else if(this.action==='edit' || this.action==='bulk')
     {
       this.dialogRef.close();
     }
+  }
+
+  public BulkPut(): void {
+    this.applyCapValuesToForm();
+    const caps = {
+      mondayCap: this.parseCapInput(this.advanceTableForm.get('mondayCap').value),
+      tuesdayCap: this.parseCapInput(this.advanceTableForm.get('tuesdayCap').value),
+      wednesdayCap: this.parseCapInput(this.advanceTableForm.get('wednesdayCap').value),
+      thursdayCap: this.parseCapInput(this.advanceTableForm.get('thursdayCap').value),
+      fridayCap: this.parseCapInput(this.advanceTableForm.get('fridayCap').value),
+      saturdayCap: this.parseCapInput(this.advanceTableForm.get('saturdayCap').value),
+      sundayCap: this.parseCapInput(this.advanceTableForm.get('sundayCap').value)
+    };
+    const hasAnyCap = Object.values(caps).some((v) => v !== null && v !== undefined);
+    if (!hasAnyCap) {
+      this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+      this.saveDisabled = true;
+      return;
+    }
+    const invalidCap = Object.values(caps).some((v) => v !== null && v !== undefined && Number(v) < 0);
+    if (invalidCap) {
+      this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+      this.saveDisabled = true;
+      return;
+    }
+    this.advanceTableService.bulkUpdate({
+      ids: this.bulkIds,
+      ...caps
+    }).subscribe(
+      () => {
+        this.dialogRef.close();
+        this._generalService.sendUpdate('CustomerGroupReservationCappingBulkUpdate:CustomerGroupReservationCappingView:Success');
+        this.saveDisabled = true;
+      },
+      () => {
+        this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+        this.saveDisabled = true;
+      }
+    );
   }
 
   private resolveRecordId(): number {
@@ -206,193 +436,84 @@ export class FormDialogComponent
     return match?.packageTypeID ? Number(match.packageTypeID) : 0;
   }
 
-  private resolveVehicleId(vehicleName: string): number {
-    const fromForm = Number(this.advanceTableForm.get('vehicleID')?.value);
-    if (Number.isFinite(fromForm) && fromForm > 0) {
-      return fromForm;
+  private normalizeIdArray(value: any): number[] {
+    if (!Array.isArray(value)) {
+      const single = Number(value);
+      return Number.isFinite(single) && single > 0 ? [single] : [];
     }
-    const match = this.VehicleList?.find(
-      (v) => v.vehicle?.toLowerCase() === (vehicleName || '').toLowerCase()
-    );
-    const id = match?.vehicleID ?? match?.VehicleID;
-    return id ? Number(id) : 0;
+    return value.map((id) => Number(id)).filter((id) => Number.isFinite(id) && id > 0);
   }
 
   private buildPayload(): any {
     this.applyCapValuesToForm();
     const raw = this.advanceTableForm.getRawValue();
-    raw.customerGroupID = Number(raw.customerGroupID);
+    raw.customerGroupID = Number(this.CustomerGroupID ?? raw.customerGroupID);
     raw.packageTypeID = this.resolvePackageTypeId(raw.packageType);
-    if (this.action === 'add') {
-      raw.vehicleID = Array.isArray(raw.vehicleID) ? raw.vehicleID.map((id) => Number(id)).filter((id) => id > 0) : [];
-      raw.cityID = Array.isArray(raw.cityID) ? raw.cityID.map((id) => Number(id)).filter((id) => id > 0) : [];
-    } else {
-      raw.vehicleID = Number(raw.vehicleID) || this.resolveVehicleId(raw.vehicle);
+    if (!raw.cappingType) {
+      raw.cappingType = null;
     }
     this.advanceTableForm.patchValue({
       packageTypeID: raw.packageTypeID
     });
+    if (this.action === 'add') {
+      raw.cityID = this.normalizeIdArray(raw.cityID);
+      raw.vehicleID = this.normalizeIdArray(raw.vehicleID);
+      raw.activationStatus = raw.activationStatus !== false && raw.activationStatus !== 'false';
+    }
     if (this.action === 'edit') {
       raw.customerGroupReservationCappingID = this.resolveRecordId();
     }
     return raw;
   }
 
-  private stopSaveLoading(): void {
-    this.saveDisabled = true;
-  }
-
-  private showMessagePopup(
-    message: string,
-    title: string = 'Message',
-    variant: CappingMessageDialogVariant = 'info'
-  ): void {
-    this.stopSaveLoading();
-    this.messageDialog.open(CappingMessageDialogComponent, {
-      width: '520px',
-      maxWidth: '95vw',
-      panelClass: 'capping-message-dialog-panel',
-      disableClose: true,
-      autoFocus: false,
-      data: { title, message, variant }
-    });
-  }
-
-  private showSoftCappingExistsPopup(): void {
-    this.showMessagePopup(
-      this.softCappingExistsMessage,
-      'Customer Group Reservation Capping',
-      'warning'
-    );
-  }
-
-  /** ErrorInterceptor passes a plain string, not HttpErrorResponse. */
-  private getErrorMessage(error: any): string {
-    if (typeof error === 'string') {
-      return error;
-    }
-    const body = error?.error;
-    if (typeof body === 'string') {
-      return body;
-    }
-    if (body?.message) {
-      return String(body.message);
-    }
-    if (body?.title) {
-      return String(body.title);
-    }
-    return error?.message ? String(error.message) : '';
-  }
-
-  private isSoftCappingConflictError(error: any): boolean {
-    return this.getErrorMessage(error).includes(this.softCappingExistsMessage);
-  }
-
-  private isSoftCappingConflictResponse(response: any): boolean {
-    const status = response?.activationStatus;
-    return typeof status === 'string' && status.includes(this.softCappingExistsMessage);
-  }
-
-  private handleSaveFailure(error: any, fallbackNotify: boolean = true): void {
-    const msg = this.getErrorMessage(error);
-    if (msg.includes(this.softCappingExistsMessage)) {
-      this.showSoftCappingExistsPopup();
-    } else if (msg) {
-      this.showMessagePopup(msg, 'Customer Group Reservation Capping', 'error');
-    } else if (fallbackNotify) {
-      this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
-    }
-    this.stopSaveLoading();
-  }
-
-  private validateHardAgainstSoftCapping(payload: any): Observable<boolean> {
-    if (payload.cappingType !== 'Hard Capping') {
-      return of(true);
-    }
-    const checks: Observable<{ exists: boolean }>[] = [];
-    payload.vehicleID.forEach((vehicleId: number) => {
-      checks.push(
-        this.advanceTableService.existsSoftCappingForCustomerGroupAndVehicle(
-          payload.customerGroupID,
-          vehicleId
-        )
-      );
-    });
-    if (checks.length === 0) {
-      return of(true);
-    }
-    return new Observable((observer) => {
-      forkJoin(checks).subscribe({
-        next: (results) => {
-          const conflict = results.some((r) => r?.exists === true || r?.Exists === true);
-          if (conflict) {
-            this.showSoftCappingExistsPopup();
-            observer.next(false);
-          } else {
-            observer.next(true);
-          }
-          observer.complete();
-        },
-        error: () => {
-          observer.next(true);
-          observer.complete();
-        }
-      });
-    });
-  }
-
   public Post(): void {
     if (this.advanceTableForm.invalid) {
       this.advanceTableForm.markAllAsTouched();
-      this.stopSaveLoading();
+      this.saveDisabled = true;
       return;
     }
     const payload = this.buildPayload();
-    if (!payload.packageTypeID || !payload.vehicleID || payload.vehicleID.length === 0) {
-      this.showMessagePopup(
-        'Please select a valid Package Type and at least one Vehicle.',
-        'Validation',
-        'warning'
-      );
-      this.stopSaveLoading();
+    if (!payload.customerGroupID || payload.customerGroupID <= 0) {
+      this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+      this.saveDisabled = true;
       return;
     }
-    if (!payload.cityID || payload.cityID.length === 0) {
-      this.showMessagePopup('Please select at least one City.', 'Validation', 'warning');
-      this.stopSaveLoading();
+    if (!payload.packageTypeID || !payload.vehicleID?.length) {
+      this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+      this.saveDisabled = true;
       return;
     }
-    this.validateHardAgainstSoftCapping(payload).subscribe((canProceed) => {
-      if (!canProceed) {
-        this.stopSaveLoading();
-        return;
-      }
-      this.submitCreate(payload);
-    });
-  }
-
-  private submitCreate(payload: any): void {
-    this.saveDisabled = false;
-    this.advanceTableService.add(payload).pipe(
-      finalize(() => this.stopSaveLoading())
-    ).subscribe(
+    if (!payload.cityID?.length) {
+      this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+      this.saveDisabled = true;
+      return;
+    }
+    this.advanceTableService.add(payload).subscribe(
       response => {
-        if (this.isSoftCappingConflictResponse(response)) {
-          this.showSoftCappingExistsPopup();
+        const savedId = Number(
+          response?.customerGroupReservationCappingID ?? response?.CustomerGroupReservationCappingID
+        );
+        if (response?.activationStatus === 'Duplicate Data' || response?.message?.includes?.('Duplicate')) {
+          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
+          this.saveDisabled = true;
           return;
         }
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
-        {
-          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
+        if (!Number.isFinite(savedId) || savedId <= 0) {
+          this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+          this.saveDisabled = true;
+          return;
         }
-        else
-        {
-          this.dialogRef.close();
-          this._generalService.sendUpdate('CustomerGroupReservationCappingCreate:CustomerGroupReservationCappingView:Success');
-        } 
+        this.dialogRef.close();
+        this._generalService.sendUpdate('CustomerGroupReservationCappingCreate:CustomerGroupReservationCappingView:Success');
+        this.saveDisabled = true;
       },
       error => {
-        this.handleSaveFailure(error, true);
+        if (error?.status === 409) {
+          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
+        } else {
+          this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+        }
+        this.saveDisabled = true;
       }
     );
   }
@@ -400,39 +521,42 @@ export class FormDialogComponent
   public Put(): void {
     if (this.advanceTableForm.invalid) {
       this.advanceTableForm.markAllAsTouched();
-      this.stopSaveLoading();
+      this.saveDisabled = true;
       return;
     }
     const payload = this.buildPayload();
     if (!payload.customerGroupReservationCappingID) {
       this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
-      this.stopSaveLoading();
+      this.saveDisabled = true;
       return;
     }
-    this.saveDisabled = false;
-    this.advanceTableService.update(payload).pipe(
-      finalize(() => this.stopSaveLoading())
-    ).subscribe(
+    this.advanceTableService.update(payload).subscribe(
       response => {
         if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
         {
           this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
+          this.saveDisabled = true;
         }
         else
         {
           this.dialogRef.close();
           this._generalService.sendUpdate('CustomerGroupReservationCappingUpdate:CustomerGroupReservationCappingView:Success');
+          this.saveDisabled = true;
         }
       },
       error => {
-        this.handleSaveFailure(error, true);
+        this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+        this.saveDisabled = true;
       }
     );
   }
 
   public confirmAdd(): void 
   {
-    if(this.action=="edit")
+    this.saveDisabled = false;
+    if (this.action === 'bulk') {
+      this.BulkPut();
+    } else if(this.action=="edit")
     {
       this.Put();
     }
@@ -495,6 +619,14 @@ export class FormDialogComponent
       return option?.vehicle ?? option?.Vehicle ?? '';
     }
 
+    getCityOptionId(city: CityDropDown): number {
+      return Number(city?.geoPointID ?? city?.GeoPointID);
+    }
+
+    getCityOptionName(city: CityDropDown): string {
+      return city?.geoPointName ?? city?.GeoPointName ?? '';
+    }
+
     InitVehicle()
     {
       this._generalService.GetVehicle().subscribe(
@@ -502,19 +634,48 @@ export class FormDialogComponent
       {
         this.VehicleList = data || [];
         if (this.action === 'add') {
-          this.advanceTableForm.controls['vehicleID'].setValidators([Validators.required]);
+          this.advanceTableForm.controls['vehicleID'].setValidators([
+            Validators.required,
+            this.nonEmptyArrayValidator()
+          ]);
+          this.advanceTableForm.controls['cityID'].setValidators([
+            Validators.required,
+            this.nonEmptyArrayValidator()
+          ]);
           this.advanceTableForm.controls['vehicleID'].updateValueAndValidity();
+          this.advanceTableForm.controls['cityID'].updateValueAndValidity();
         }
       });
+    }
+
+    nonEmptyArrayValidator(): ValidatorFn {
+      return (control: AbstractControl): ValidationErrors | null => {
+        const value = control.value;
+        return Array.isArray(value) && value.length > 0 ? null : { required: true };
+      };
+    }
+
+    onVehicleSelectionChange(): void
+    {
+      this.vehicleID = this.getFirstSelectedVehicleId();
+      this.refreshCityList();
+    }
+
+    private normalizeCityDropDown(city: any): CityDropDown {
+      return {
+        geoPointID: Number(city?.geoPointID ?? city?.GeoPointID ?? -1),
+        geoPointName: city?.geoPointName ?? city?.GeoPointName ?? ''
+      };
     }
 
     InitCity(CustomerGroupID,packageTypeID,vehicleID,cappingType) 
     {
       this.advanceTableService.GetCityForCustomerGroupCapping(CustomerGroupID,packageTypeID,vehicleID,cappingType).subscribe(
         data => {
-          if(data)
+          const list = (data || []).map((c) => this.normalizeCityDropDown(c)).filter((c) => c.geoPointID > 0);
+          if(list.length)
           {
-            this.CityLists = data;
+            this.CityLists = list;
             this.existCityMessage = false;
           }
           else
