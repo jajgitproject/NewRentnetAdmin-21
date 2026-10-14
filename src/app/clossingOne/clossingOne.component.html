@@ -111,6 +111,7 @@
         [canEditDSAfterGoodForBilling]="hasDsEditPermission"
         [dutyBillingSummary]="dutyBillingSummary"
         [activeDutyNightNumberOnNights]="activeDutyNightNumberOnNights"
+        [isMyfAggregator]="isMyfAggregator"
         (dataSaved)="onDataSaved()"
         (dutyStatusChanged)="onDutyStatusChanged($event)"></app-dutySlipForBilling>
     </div>
@@ -382,6 +383,11 @@
       <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
         <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="LoadLTR()"
           [type]="submit" [disabled]="isDutySlipEditBlocked">Add LTR Details</button>
+      </div>
+
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="isMyfAggregator">
+        <button mat-flat-button style="width: 180px;text-align: center;" color="primary" (click)="sendMyfLatLon()"
+          [disabled]="sendingMyfLatLon">Send MYF Lat Lon</button>
       </div>
     </div>
   </div>

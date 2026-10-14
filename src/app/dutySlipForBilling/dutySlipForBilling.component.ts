@@ -60,6 +60,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   @Input() canEditDSAfterGoodForBilling = false;
   @Input() dutyBillingSummary: any = null;
   @Input() activeDutyNightNumberOnNights: number | null = null;
+  @Input() isMyfAggregator = false;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string, invoiceCalculated?: boolean}>();
   //@Output() dutyMessage = new EventEmitter<string>();
@@ -2066,6 +2067,9 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
           this.advanceTableForm.patchValue({ goodForBilling: false });
           return false;
         }
+        if (this.isMyfAggregator) {
+          await this.sendMyfClosedAfterGfb();
+        }
       }
       if(isChecked === false)
       {
@@ -3023,6 +3027,24 @@ onChange() {
           );
         },
       });
+  }
+
+  /** MYF closed event after Good for Billing. A failure leaves the local save and checkbox as they are. */
+  private async sendMyfClosedAfterGfb(): Promise<void> {
+    if (!this.DutySlipID) {
+      return;
+    }
+    try {
+      const data = await firstValueFrom(this.clossingOneService.sendMyfClosed(this.DutySlipID));
+      const message = (data && (data.message || data.Message)) || 'success';
+      this.showNotification('snackbar-success', message, 'bottom', 'center');
+    } catch (error) {
+      const body = error && error.error !== undefined ? error.error : error;
+      const message = typeof body === 'string'
+        ? body
+        : (body && (body.message || body.Message)) || 'MYF closed event could not be sent.';
+      this.showNotification('snackbar-danger', message, 'bottom', 'center');
+    }
   }
 
   /** GFB calculate: persist already ran if the form was dirty. Do not open Dummy Invoice. Skip extra allowance GET. */

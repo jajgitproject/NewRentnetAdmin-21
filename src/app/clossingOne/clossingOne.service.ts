@@ -73,6 +73,18 @@ export class ClossingOneService
     return this.httpClient.get<any>(this.API_URL +"/"+DutySlipID);
   }
 
+  getMyfLatLonEligibility(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.get(this.API_URL + '/myfLatLon/' + dutySlipID);
+  }
+
+  sendMyfLatLon(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.post(this.API_URL + '/sendMyfLatLon/' + dutySlipID, {});
+  }
+
+  sendMyfClosed(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.post(this.API_URL + '/sendMyfClosed/' + dutySlipID, {});
+  }
+
   getTableDataForDriver(dutySlipID: number | string): Observable<any> {
     return this.httpClient.get(this.API_URL_CurrentDutyInfo + '/GetDataforDriver/' + dutySlipID);
   }

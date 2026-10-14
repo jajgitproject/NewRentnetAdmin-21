@@ -169,6 +169,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   DropOffDate: Date;
   PickupDate: Date;
   closureStatus: string;
+  isMyfAggregator = false;
+  sendingMyfLatLon = false;
   PickupTime: Date;
   DropOffTime: Date;
   LocationOutDate: Date;
@@ -374,6 +376,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initialLoadsStarted = true;
     this.checkVerifyDutyBeforeFormOpen();
     this.GetClosingData();
+    this.loadMyfLatLonEligibility();
     this.disputeService.disputeData$.subscribe(data => {
       this.disputeAdvanceTable = data ?? [];
     });
@@ -494,6 +497,41 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
         this.applyEditBlockStatus();
         this.loadDataForBillNo();
         this.refreshHasActiveInvoiceCalculation();
+      }
+    );
+  }
+
+  loadMyfLatLonEligibility() {
+    if (!this.DutySlipID) {
+      this.isMyfAggregator = false;
+      return;
+    }
+    this.clossingOneService.getMyfLatLonEligibility(this.DutySlipID).subscribe(
+      data => {
+        this.isMyfAggregator = !!(data && (data.isMyf === true || data.IsMyf === true));
+      },
+      () => {
+        this.isMyfAggregator = false;
+      }
+    );
+  }
+
+  sendMyfLatLon() {
+    if (!this.DutySlipID || this.sendingMyfLatLon) {
+      return;
+    }
+    this.sendingMyfLatLon = true;
+    this.clossingOneService.sendMyfLatLon(this.DutySlipID).subscribe(
+      data => {
+        this.sendingMyfLatLon = false;
+        const message = (data && (data.message || data.Message)) || 'success';
+        this.showNotification('snackbar-success', message, 'bottom', 'center');
+      },
+      (error: HttpErrorResponse) => {
+        this.sendingMyfLatLon = false;
+        const body = error && error.error;
+        const message = (body && (body.message || body.Message)) || 'MYF lat lon could not be sent.';
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
   }
