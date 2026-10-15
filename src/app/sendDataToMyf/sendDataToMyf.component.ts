@@ -56,7 +56,7 @@ export class SendDataToMyfComponent implements OnInit, OnDestroy {
   batchSizeOptions = [50, 100, 200, 300, 500];
   batchSizeChoice: number | string = 100;
   recordsPerBatch = 100;
-  private hasSearched = false;
+  hasSearched = false;
   searchFromDate: Date = myfToday();
   searchToDate: Date = myfToday();
   searchDutySlip = '';

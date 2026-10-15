@@ -85,6 +85,10 @@ export class ClossingOneService
     return this.httpClient.post(this.API_URL + '/sendMyfClosed/' + dutySlipID, {});
   }
 
+  sendMoveInSyncOnGfb(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.post(this.API_URL + '/sendMoveInSyncOnGfb/' + dutySlipID, {});
+  }
+
   getTableDataForDriver(dutySlipID: number | string): Observable<any> {
     return this.httpClient.get(this.API_URL_CurrentDutyInfo + '/GetDataforDriver/' + dutySlipID);
   }

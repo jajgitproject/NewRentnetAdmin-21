@@ -170,6 +170,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   PickupDate: Date;
   closureStatus: string;
   isMyfAggregator = false;
+  isMoveInSync = false;
   sendingMyfLatLon = false;
   PickupTime: Date;
   DropOffTime: Date;
@@ -504,14 +505,17 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   loadMyfLatLonEligibility() {
     if (!this.DutySlipID) {
       this.isMyfAggregator = false;
+      this.isMoveInSync = false;
       return;
     }
     this.clossingOneService.getMyfLatLonEligibility(this.DutySlipID).subscribe(
       data => {
         this.isMyfAggregator = !!(data && (data.isMyf === true || data.IsMyf === true));
+        this.isMoveInSync = !!(data && (data.isMoveInSync === true || data.IsMoveInSync === true));
       },
       () => {
         this.isMyfAggregator = false;
+        this.isMoveInSync = false;
       }
     );
   }
