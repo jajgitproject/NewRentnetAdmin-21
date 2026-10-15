@@ -3907,6 +3907,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'reservationCappingLog',
+        loadChildren: () =>
+          import('./reservationCappingLog/reservationCappingLog.module').then(
+            (m) => m.ReservationCappingLogModule
+          )
+      },
+
+      {
         path: 'customerReservationCapping',
         loadChildren: () =>
           import('./customerReservationCapping/customerReservationCapping.module').then(

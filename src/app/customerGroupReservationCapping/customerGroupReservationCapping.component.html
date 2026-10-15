@@ -1,17 +1,23 @@
 <section class="content br-page cg-cap-page">
     <div class="container-fluid">
-        <div class="br-header">
-            <div class="br-header-left">
-                <ul class="br-breadcrumb">
-                    <li>
-                        <a routerLink="/dashboard/main">Home</a>
-                        <span class="br-breadcrumb-sep">&gt;</span>
-                        <span>Admin</span>
-                        <span class="br-breadcrumb-sep">&gt;</span>
-                        <span>Customer Group Reservation Capping</span>
-                    </li>
-                </ul>
-                <h2 class="br-title">Reservation Capping — {{ customerGroup_Name }}</h2>
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main">
+                                <i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Customer Group Reservation Capping</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style ">
+                        <li class="breadcrumb-item">
+                            <h2>Customer Group Reservation Capping for <b>{{customerGroup_Name}}</b></h2>
+                            <a routerLink="/reservationCappingLog" style="margin-left: 12px;">View capping attempt log</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <button type="button" class="br-collapse-btn" (click)="toggleFilters()">
                 {{ filtersCollapsed ? 'Show filters' : 'Hide filters' }}

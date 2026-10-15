@@ -303,7 +303,10 @@ advanceTableIN: InternalNoteDetails | null;
       isTimeNotConfirmed:[''],
       isAddressCorrectionRequiredByKAM:[false],
       tripTo:[''],
-      tripType:['']
+      tripType:[''],
+      softCappingByPassReason: [''],
+      softCappingByPassDetails: [''],
+      softCappingByPassApproverID: ['']
   })
 
   googlePlacesForm = this.fb.group({
@@ -3748,18 +3751,7 @@ public validateCustomerSpecificFields(): boolean {
        //this._generalService.sendUpdate('QualificationCreate:QualificationView:Success');//To Send Updates  
     
     },
-    error =>
-    {
-      // The API now reports partial saves (e.g. stops/passenger rows rolled
-      // back) as a structured error - show its message when available.
-      this.showNotification(
-        'snackbar-danger',
-        error?.error?.message || 'Operation Failed.....!!!',
-        'bottom',
-        'center'
-      );
-      // this._generalService.sendUpdate('QualificationAll:QualificationView:Failure');//To Send Updates  
-    }
+    error => this.showReservationSaveError(error)
   )
   }
 
@@ -3830,16 +3822,7 @@ public validateCustomerSpecificFields(): boolean {
         }
       });
     },
-    error =>
-    {
-      this.showNotification(
-        'snackbar-danger',
-        error?.error?.message || 'Operation Failed.....!!!',
-        'bottom',
-        'center'
-      );
-      // this._generalService.sendUpdate('QualificationAll:QualificationView:Failure');//To Send Updates  
-    }
+    error => this.showReservationSaveError(error)
   )
   }
 
@@ -5607,12 +5590,11 @@ private patchDropOffAddress(res: any) {
     }    
     if (this.action === 'edit') 
     {
-      this.PutForReservationEdit();
+      this.runReservationCappingBeforeSave(() => this.PutForReservationEdit());
     } 
     else 
     {
-      this.CheckValidationForSameReservation();
-      //this.Put();
+      this.runReservationCappingBeforeSave(() => this.CheckValidationForSameReservation());
     }
   }
 
@@ -6056,56 +6038,519 @@ private canThisRoleCreateBackDateBooking(): boolean {
   //---------- Reservation Capping ----------
   public GetReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleID)
   {
-    // All 6 params are path segments; any missing value produces URLs like
-    // /CheckReservationCapping/4616/9/Invalid%20date/undefined/... and 400s.
     if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleID) {
       return;
     }
     const formattedDate = moment(pickupDate, "DD/MM/YYYY");
-    if (!formattedDate.isValid()) { return; }
-    pickupDate = formattedDate.format("YYYY-MM-DD");
-    this.reservationService.getReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleID).subscribe(
-      (data: any) =>   
-      {
-        if (data) 
-        {
-          this.bookingCount = data.bookingCount;
-          this.cap = data.cap;
-          if (this.cap === 0)
-          {
-            Swal.fire({
-              title: '',
-              text: `No cars can be provided for ${this.customer} on the selected date (capping is zero).`,
-              icon: 'warning',
-            });
-            return false;
-          }
-          if (this.cap != null && this.cap > 0 && this.bookingCount >= this.cap) 
-          {
-            Swal.fire({
-              title: '',
-              text: `The maximum booking limit ${this.bookingCount} for ${this.customer} is exhausted.`,
-              icon: 'warning',
-            });
-            return false;
-          }
-          return true;
-          // if((this.bookingCount > this.cap) && (this.bookingCount != 0) && (this.cap != null && this.cap != 0))
-          // {
-          //   this.CapMessageShow = true;
-          //   this.CapMessage = "You have exceeded your booking limit.";
-          // }
-          // else
-          // {
-          //   this.CapMessageShow = false;
-          // }
-        }
-        else 
-        {
+    if (!formattedDate.isValid()) {
+      const alt = this.parseFlexibleDate(pickupDate);
+      if (!alt) { return; }
+      pickupDate = alt.format('YYYY-MM-DD');
+    } else {
+      pickupDate = formattedDate.format("YYYY-MM-DD");
+    }
+    const context = this.resolveCappingContextFromForm();
+    if (!context) {
+      return;
+    }
+    this.reservationService.evaluateReservationCapping({
+      customerGroupID: context.customerGroupID,
+      customerID: context.customerID,
+      pickupDate: context.pickupDateIso,
+      pickupDateString: context.pickupDateIso,
+      cityID: context.cityID,
+      packageTypeID: context.packageTypeID,
+      vehicleID: context.vehicleID,
+      userID: this._generalService.getUserID(),
+      reservationID: context.reservationID,
+      logAttempt: false
+    }).subscribe(
+      (evaluation: any) => {
+        if (!evaluation) { return; }
+        this.bookingCount = evaluation.bookingCount ?? evaluation.BookingCount;
+        this.cap = evaluation.cap ?? evaluation.Cap;
+        const alertType = this.normalizeCappingAlertType(evaluation.alertType ?? evaluation.AlertType);
+        const message = evaluation.message ?? evaluation.Message;
+        if (alertType === 'Hard' || alertType === 'Soft') {
+          Swal.fire({
+            title: '',
+            text: message,
+            icon: 'warning',
+          });
         }
       },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+      () => {}
     );
+  }
+
+  private getReservationSaveErrorMessage(error: any): string {
+    if (error?.error?.message) {
+      return error.error.message;
+    }
+    if (typeof error?.error === 'string') {
+      return error.error;
+    }
+    if (error?.message) {
+      return error.message;
+    }
+    return 'Operation Failed.....!!!';
+  }
+
+  private showReservationSaveError(error: any): void {
+    const message = this.getReservationSaveErrorMessage(error);
+    if (message && message.toLowerCase().includes('booking limit')) {
+      Swal.fire({
+        title: '',
+        text: message,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+    this.showNotification('snackbar-danger', message, 'bottom', 'center');
+  }
+
+  private resolveCappingContextFromForm(): {
+    customerGroupID: number;
+    customerID: number;
+    cityID: number;
+    packageTypeID: number;
+    vehicleID: number;
+    pickupDateIso: string;
+    reservationID: number | null;
+  } | null {
+    const raw = this.advanceTableForm.getRawValue();
+    const customerGroupID = Number(raw.customerGroupID ?? this.customerGroupID ?? 0);
+    const customerID = Number(raw.customerID ?? this.customerID ?? 0);
+    const cityID = Number(raw.pickupCityID ?? this.cityID ?? 0);
+    const packageTypeID = Number(raw.packageTypeID ?? this.packageTypeID ?? 0);
+    const vehicleID = Number(raw.vehicleID ?? this.vehicleID ?? 0);
+    const pickupMoment = this.parseFlexibleDate(raw.pickupDate);
+    if (!customerGroupID || !pickupMoment || !cityID || !packageTypeID || !vehicleID) {
+      return null;
+    }
+    const reservationID = Number(this.getCurrentReservationID()) || Number(raw.reservationID) || null;
+    return {
+      customerGroupID,
+      customerID,
+      cityID,
+      packageTypeID,
+      vehicleID,
+      pickupDateIso: pickupMoment.format('YYYY-MM-DD'),
+      reservationID: reservationID > 0 ? reservationID : null
+    };
+  }
+
+  private normalizeCappingAlertType(alertType: any): string {
+    const value = String(alertType ?? '').trim();
+    if (!value || value.toLowerCase() === 'none') {
+      return 'None';
+    }
+    if (value.toLowerCase() === 'soft') {
+      return 'Soft';
+    }
+    if (value.toLowerCase() === 'hard') {
+      return 'Hard';
+    }
+    return value;
+  }
+
+  private runReservationCappingBeforeSave(onAllowed: () => void): void {
+    const context = this.resolveCappingContextFromForm();
+    if (!context) {
+      onAllowed();
+      return;
+    }
+
+    this.reservationService.evaluateReservationCapping({
+      customerGroupID: context.customerGroupID,
+      customerID: context.customerID,
+      pickupDate: context.pickupDateIso,
+      pickupDateString: context.pickupDateIso,
+      cityID: context.cityID,
+      packageTypeID: context.packageTypeID,
+      vehicleID: context.vehicleID,
+      userID: this._generalService.getUserID(),
+      reservationID: context.reservationID,
+      logAttempt: true
+    }).subscribe(
+      (evaluation: any) => {
+        const alertType = this.normalizeCappingAlertType(evaluation?.alertType ?? evaluation?.AlertType);
+        if (alertType === 'None') {
+          onAllowed();
+          return;
+        }
+        const message = evaluation?.message ?? evaluation?.Message;
+        if (alertType === 'Hard') {
+          Swal.fire({
+            title: '',
+            text: message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+          return;
+        }
+        if (alertType === 'Soft') {
+          this.promptSoftCappingBypass({ ...evaluation, message }, onAllowed);
+        }
+      },
+      () => {
+        Swal.fire({
+          title: '',
+          text: 'Could not verify reservation capping. Please try again.',
+          icon: 'warning'
+        });
+      }
+    );
+  }
+
+  private escapeHtmlForCappingModal(value: string): string {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  private formatCappingPickupDate(evaluation: any): string {
+    const raw = evaluation?.pickupDate ?? evaluation?.PickupDate;
+    if (!raw) {
+      return '';
+    }
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    return String(raw);
+  }
+
+  private getEmployeeDisplayName(employee: any): string {
+    const direct = String(employee?.name ?? employee?.Name ?? '').trim();
+    if (direct) {
+      return direct;
+    }
+    const first = String(
+      employee?.firstName ?? employee?.FirstName ?? employee?.employeeFirstName ?? employee?.EmployeeFirstName ?? ''
+    ).trim();
+    const last = String(
+      employee?.lastName ?? employee?.LastName ?? employee?.employeeLastName ?? employee?.EmployeeLastName ?? ''
+    ).trim();
+    return `${first} ${last}`.trim();
+  }
+
+  private normalizeCappingApproverEmployees(employees: any[]): { id: number; name: string; meta: string }[] {
+    return (employees || [])
+      .map((e) => {
+        const id = Number(e?.employeeID ?? e?.EmployeeID ?? 0);
+        const name = this.getEmployeeDisplayName(e);
+        const mobile = String(e?.mobile ?? e?.Mobile ?? '').trim();
+        const email = String(e?.email ?? e?.Email ?? '').trim();
+        const meta = [mobile, email].filter(Boolean).join(' · ');
+        return { id, name, meta };
+      })
+      .filter((e) => e.id > 0 && e.name)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private buildSoftCappingBypassModalHtml(evaluation: any, reasons: string[]): string {
+    const customerGroup = this.escapeHtmlForCappingModal(evaluation?.customerGroup ?? evaluation?.CustomerGroup ?? '');
+    const city = this.escapeHtmlForCappingModal(evaluation?.city ?? evaluation?.City ?? '');
+    const packageType = this.escapeHtmlForCappingModal(evaluation?.packageType ?? evaluation?.PackageType ?? '');
+    const vehicle = this.escapeHtmlForCappingModal(evaluation?.vehicle ?? evaluation?.Vehicle ?? '');
+    const pickupDate = this.escapeHtmlForCappingModal(this.formatCappingPickupDate(evaluation));
+    const cap = Number(evaluation?.cap ?? evaluation?.Cap ?? 0);
+    const bookingCount = Number(evaluation?.bookingCount ?? evaluation?.BookingCount ?? 0);
+    const projected = Number(evaluation?.projectedBookingCount ?? evaluation?.ProjectedBookingCount ?? bookingCount + 1);
+    const fillPct = cap > 0 ? Math.min(100, Math.round((projected / cap) * 100)) : 100;
+    const reasonOptions = reasons
+      .map((r) => `<option value="${this.escapeHtmlForCappingModal(r)}">${this.escapeHtmlForCappingModal(r)}</option>`)
+      .join('');
+
+    return `
+      <div class="capping-bypass-swal__scroll">
+      <div class="capping-bypass-modal">
+        <div class="capping-bypass-summary">
+          <div class="capping-bypass-summary__badge">Soft capping</div>
+          <p class="capping-bypass-summary__lead">
+            This booking goes over the configured daily cap. Add a reason and approver to continue.
+          </p>
+          <dl class="capping-bypass-details-grid">
+            <dt>Customer group</dt><dd>${customerGroup || '—'}</dd>
+            <dt>City</dt><dd>${city || '—'}</dd>
+            <dt>Duty type</dt><dd>${packageType || '—'}</dd>
+            <dt>Vehicle</dt><dd>${vehicle || '—'}</dd>
+            <dt>Pickup date</dt><dd>${pickupDate || '—'}</dd>
+          </dl>
+          <div class="capping-bypass-meter">
+            <div class="capping-bypass-meter__bar" aria-hidden="true">
+              <span class="capping-bypass-meter__fill" style="width:${fillPct}%"></span>
+            </div>
+            <span class="capping-bypass-meter__label">Booking ${projected} of ${cap}</span>
+          </div>
+        </div>
+        <div class="capping-bypass-form">
+          <div class="capping-bypass-field">
+            <label for="swal-capping-reason">Reason <span class="required">*</span></label>
+            <select id="swal-capping-reason">${reasonOptions}</select>
+          </div>
+          <div class="capping-bypass-field">
+            <label for="swal-capping-details">Details <span class="required">*</span></label>
+            <textarea id="swal-capping-details" placeholder="Brief justification (minimum 10 characters)"></textarea>
+          </div>
+          <div class="capping-bypass-field capping-bypass-autocomplete">
+            <label for="swal-capping-approver-search">Approver <span class="required">*</span></label>
+            <input type="hidden" id="swal-capping-approver-id" value="" />
+            <input
+              type="text"
+              id="swal-capping-approver-search"
+              class="capping-bypass-input"
+              placeholder="Type at least 3 characters to search…"
+              autocomplete="off"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-controls="swal-capping-approver-list"
+              aria-expanded="false"
+            />
+            <div class="capping-bypass-autocomplete__hint">Enter 3 or more characters; results load from the server as you type.</div>
+            <div id="swal-capping-approver-results" class="capping-bypass-results-panel" hidden>
+              <div class="capping-bypass-results-panel__label">Matching employees</div>
+              <ul id="swal-capping-approver-list" class="capping-bypass-autocomplete__list" role="listbox"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>`;
+  }
+
+  private renderCappingApproverListItems(
+    list: HTMLUListElement,
+    matches: { id: number; name: string; meta: string }[]
+  ): void {
+    if (!matches.length) {
+      list.innerHTML = '<li class="is-empty" role="option">No matching employees</li>';
+      return;
+    }
+    list.innerHTML = matches
+      .map((a, i) => {
+        const metaHtml = a.meta
+          ? `<span class="capping-bypass-autocomplete__meta">${this.escapeHtmlForCappingModal(a.meta)}</span>`
+          : '';
+        return `<li data-id="${a.id}" data-name="${this.escapeHtmlForCappingModal(a.name)}" data-index="${i}" role="option">${this.escapeHtmlForCappingModal(a.name)}${metaHtml}</li>`;
+      })
+      .join('');
+  }
+
+  private attachSoftCappingApproverAutocomplete(): void {
+    const input = document.getElementById('swal-capping-approver-search') as HTMLInputElement | null;
+    const list = document.getElementById('swal-capping-approver-list') as HTMLUListElement | null;
+    const panel = document.getElementById('swal-capping-approver-results') as HTMLDivElement | null;
+    const hidden = document.getElementById('swal-capping-approver-id') as HTMLInputElement | null;
+    const scrollHost = document.querySelector('.capping-bypass-swal__scroll') as HTMLElement | null;
+    if (!input || !list || !panel || !hidden) {
+      return;
+    }
+
+    let activeIndex = -1;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let searchSeq = 0;
+
+    const hideList = () => {
+      panel.setAttribute('hidden', '');
+      input.setAttribute('aria-expanded', 'false');
+      activeIndex = -1;
+    };
+
+    const showList = () => {
+      panel.removeAttribute('hidden');
+      input.setAttribute('aria-expanded', 'true');
+      if (scrollHost) {
+        requestAnimationFrame(() => {
+          panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        });
+      }
+    };
+
+    const showListMessage = (message: string) => {
+      list.innerHTML = `<li class="is-empty" role="option">${this.escapeHtmlForCappingModal(message)}</li>`;
+      showList();
+      activeIndex = -1;
+    };
+
+    const fetchApproversFromServer = (prefix: string) => {
+      const query = prefix.trim();
+      if (query.length < 3) {
+        hideList();
+        return;
+      }
+      const seq = ++searchSeq;
+      showListMessage('Searching…');
+      this._generalService.GetEmployeesForVehicleCategoryPrefix(query).subscribe(
+        (employees) => {
+          if (seq !== searchSeq) {
+            return;
+          }
+          if ((input.value || '').trim() !== query) {
+            return;
+          }
+          const matches = this.normalizeCappingApproverEmployees(employees);
+          this.renderCappingApproverListItems(list, matches);
+          showList();
+          activeIndex = -1;
+        },
+        () => {
+          if (seq !== searchSeq) {
+            return;
+          }
+          showListMessage('Unable to load employees. Try again.');
+        }
+      );
+    };
+
+    const selectApprover = (id: number, name: string) => {
+      hidden.value = String(id);
+      input.value = name;
+      hideList();
+      input.focus();
+    };
+
+    input.addEventListener('input', () => {
+      hidden.value = '';
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      const value = input.value || '';
+      if (value.trim().length < 3) {
+        hideList();
+        return;
+      }
+      debounceTimer = setTimeout(() => fetchApproversFromServer(value), 300);
+    });
+
+    input.addEventListener('keydown', (ev: KeyboardEvent) => {
+      const items = Array.from(list.querySelectorAll('li:not(.is-empty)')) as HTMLLIElement[];
+      if (!items.length || panel.hasAttribute('hidden')) {
+        return;
+      }
+      if (ev.key === 'ArrowDown') {
+        ev.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, items.length - 1);
+      } else if (ev.key === 'ArrowUp') {
+        ev.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+      } else if (ev.key === 'Enter' && activeIndex >= 0) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const li = items[activeIndex];
+        selectApprover(Number(li.getAttribute('data-id')), li.getAttribute('data-name') || '');
+        return;
+      } else if (ev.key === 'Escape') {
+        ev.preventDefault();
+        hideList();
+        return;
+      } else {
+        return;
+      }
+      items.forEach((li, idx) => li.classList.toggle('is-active', idx === activeIndex));
+      if (activeIndex >= 0 && items[activeIndex]) {
+        items[activeIndex].scrollIntoView({ block: 'nearest' });
+      }
+    });
+
+    const onListPointerDown = (ev: Event) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const li = (ev.target as HTMLElement).closest('li');
+      if (!li || li.classList.contains('is-empty')) {
+        return;
+      }
+      selectApprover(Number(li.getAttribute('data-id')), li.getAttribute('data-name') || '');
+    };
+    list.addEventListener('pointerdown', onListPointerDown);
+    list.addEventListener('mousedown', onListPointerDown);
+
+    const onDocumentMouseDown = (ev: MouseEvent) => {
+      const target = ev.target as Node;
+      if (!panel.contains(target) && target !== input) {
+        hideList();
+      }
+    };
+    document.addEventListener('mousedown', onDocumentMouseDown, true);
+
+    (input as any).__cappingApproverTeardown = () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      searchSeq++;
+      document.removeEventListener('mousedown', onDocumentMouseDown, true);
+      list.removeEventListener('pointerdown', onListPointerDown);
+      list.removeEventListener('mousedown', onListPointerDown);
+      hideList();
+    };
+  }
+
+  private promptSoftCappingBypass(evaluation: any, onAllowed: () => void): void {
+    const reasons = ['VIP customer', 'Corporate commitment', 'Fleet available', 'Other'];
+    Swal.fire({
+      title: 'Booking limit crossed',
+      html: this.buildSoftCappingBypassModalHtml(evaluation, reasons),
+      icon: false,
+      width: '38em',
+      customClass: {
+        popup: 'capping-bypass-swal',
+        confirmButton: 'btn btn-primary',
+        cancelButton: 'btn btn-danger'
+      },
+      buttonsStyling: false,
+      showCancelButton: true,
+      confirmButtonText: 'Continue booking',
+      cancelButtonText: 'Cancel',
+      focusConfirm: false,
+      allowOutsideClick: (event) => {
+        const target = event?.target as HTMLElement | null;
+        return !target?.closest?.('#swal-capping-approver-results')
+          && !target?.closest?.('#swal-capping-approver-search');
+      },
+      didOpen: () => {
+        setTimeout(() => this.attachSoftCappingApproverAutocomplete(), 0);
+      },
+      willClose: () => {
+        const input = document.getElementById('swal-capping-approver-search') as any;
+        if (input?.__cappingApproverTeardown) {
+          input.__cappingApproverTeardown();
+          delete input.__cappingApproverTeardown;
+        }
+      },
+      preConfirm: () => {
+        const reasonEl = document.getElementById('swal-capping-reason') as HTMLSelectElement;
+        const detailsEl = document.getElementById('swal-capping-details') as HTMLTextAreaElement;
+        const hiddenEl = document.getElementById('swal-capping-approver-id') as HTMLInputElement;
+        const reason = reasonEl?.value || '';
+        const details = (detailsEl?.value || '').trim();
+        const approverId = Number(hiddenEl?.value || 0);
+        if (!reason) {
+          Swal.showValidationMessage('Reason is required');
+          return false;
+        }
+        if (details.length < 10) {
+          Swal.showValidationMessage('Details must be at least 10 characters');
+          return false;
+        }
+        if (!approverId) {
+          Swal.showValidationMessage('Search and select an approver from the list');
+          return false;
+        }
+        return { reason, details, approverId };
+      }
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        this.advanceTableForm.patchValue({
+          softCappingByPassReason: result.value.reason,
+          softCappingByPassDetails: result.value.details,
+          softCappingByPassApproverID: result.value.approverId
+        });
+        onAllowed();
+      }
+    });
   }
 
   //--------------------GST For Billing------------------

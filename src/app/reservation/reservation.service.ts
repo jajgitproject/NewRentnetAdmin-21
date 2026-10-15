@@ -65,6 +65,28 @@ export class ReservationService
     return this.httpClient.get(this.Duplicate_API_URL+'/'+ReservationID);
   }
 
+  private normalizeSoftCappingBypassPayload(advanceTable: any): void {
+    if (!advanceTable) {
+      return;
+    }
+    const reason = advanceTable.softCappingByPassReason;
+    const details = advanceTable.softCappingByPassDetails;
+    const approver = advanceTable.softCappingByPassApproverID;
+    const hasReason = reason !== null && reason !== undefined && String(reason).trim() !== '';
+    if (!hasReason) {
+      advanceTable.softCappingByPassReason = null;
+      advanceTable.softCappingByPassDetails = null;
+      advanceTable.softCappingByPassApproverID = null;
+      return;
+    }
+    if (approver === '' || approver === undefined || approver === null) {
+      advanceTable.softCappingByPassApproverID = null;
+    }
+    if (details === '') {
+      advanceTable.softCappingByPassDetails = null;
+    }
+  }
+
   add(advanceTable: any) 
   {
     
@@ -150,6 +172,7 @@ export class ReservationService
     {
       advanceTable.dropOffTimeString=this.generalService.getTimeApplicable(advanceTable.dropOffTime);
     }   
+    this.normalizeSoftCappingBypassPayload(advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
 
@@ -265,6 +288,7 @@ export class ReservationService
     {
       advanceTable.etrTimeString=this.generalService.getTimeApplicable(advanceTable.etrTime);
     }   
+    this.normalizeSoftCappingBypassPayload(advanceTable);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
 
@@ -357,6 +381,7 @@ export class ReservationService
       {
         advanceTable.etrTimeString=this.generalService.getTimeApplicable(advanceTable.etrTime);
       }
+    this.normalizeSoftCappingBypassPayload(advanceTable);
     return this.httpClient.put<any>(this.API_URL+'/'+'UpdateReservationForEdit' , advanceTable);
   }
 
@@ -454,6 +479,24 @@ export class ReservationService
   getReservationCapping(CustomerGroupID:number,CustomerID:number,PickupDate:string,CityID:number,PackageTypeID:number,VehicleID:number):  Observable<any> 
   {
     return this.httpClient.get(this.API_URL_CustomerGroupReservationCapping + "/CheckReservationCapping/" + CustomerGroupID + '/' + CustomerID + '/' + PickupDate + '/' + CityID + '/' + PackageTypeID + '/' + VehicleID);
+  }
+
+  evaluateReservationCapping(payload: {
+    customerGroupID: number;
+    customerID: number;
+    pickupDate?: string;
+    pickupDateString?: string;
+    cityID: number;
+    packageTypeID: number;
+    vehicleID: number;
+    userID: number;
+    reservationID?: number | null;
+    logAttempt?: boolean;
+  }): Observable<any> {
+    return this.httpClient.post(
+      this.API_URL_CustomerGroupReservationCapping + '/EvaluateReservationCapping',
+      payload
+    );
   }
   GetResrvationGSTForCityID(customerID:number,cityID:number): Observable<any> {
     return this.httpClient.get(this.generalService.BaseURL + "customerConfigurationInvoicing/GetResrvationGSTForCityID/"+customerID +'/'+cityID);
