@@ -1,0 +1,169 @@
+<section class="content myf-page">
+  <div class="container-fluid">
+    <div class="block-header myf-crumb-wrap">
+      <ul class="myf-crumb">
+        <li>
+          <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>
+          <span>|</span>
+          <a href="#" onclick="return false;">Admin</a>
+          <span>|</span>
+          <a href="#" onclick="return false;">Send Vendor Closing Data</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="myf-shell card">
+      <div class="myf-hero">
+        <div>
+          <p class="myf-kicker">Vendor closing</p>
+          <h1>Send Vendor Closing Data</h1>
+          <p class="myf-lead">Good for Billing MYF and MoveInSync duties. Sending continues in the background if you leave this page.</p>
+        </div>
+        <div class="myf-stats">
+          <div><span>Results</span><strong>{{ totalCount }}</strong></div>
+          <div class="is-accent"><span>Selected</span><strong>{{ selectedCount() }}</strong></div>
+          <div><span>Batches</span><strong>{{ batchCount() }}</strong></div>
+          <div><span>Page</span><strong>{{ pageNumber + 1 }}</strong></div>
+        </div>
+      </div>
+
+      <div class="myf-filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Pickup date from</mat-label>
+          <input matInput [matDatepicker]="fromPicker" [(ngModel)]="searchFromDate" />
+          <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Pickup date to</mat-label>
+          <input matInput [matDatepicker]="toPicker" [(ngModel)]="searchToDate" />
+          <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Customer name</mat-label>
+          <input matInput [matAutocomplete]="customerAuto" [ngModel]="customerSearch" (ngModelChange)="onCustomerInput($event)" placeholder="Type 3 characters" />
+          <mat-autocomplete #customerAuto="matAutocomplete" class="vendor-closing-customer-panel" panelWidth="720px" (optionSelected)="selectCustomer($event.option.value)">
+            <mat-option *ngFor="let option of customerOptions" [value]="option.label">{{ option.label }}</mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Duty slip IDs</mat-label>
+          <input matInput [(ngModel)]="searchDutySlip" placeholder="101, 102, 103" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Reservation IDs</mat-label>
+          <input matInput [(ngModel)]="searchReservation" placeholder="501, 502" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Vendor</mat-label>
+          <mat-select [(ngModel)]="searchVendor">
+            <mat-option *ngFor="let option of vendorOptions" [value]="option">{{ option }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="searchStatus">
+            <mat-option *ngFor="let option of statusOptions" [value]="option">{{ option }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="myf-filter-actions">
+          <button type="button" mat-raised-button color="primary" (click)="searchData()">Search</button>
+          <button type="button" mat-raised-button color="primary" (click)="refresh()">Reset</button>
+          <button type="button" mat-raised-button color="primary" (click)="downloadExcel()" [disabled]="downloading">Download Excel</button>
+        </div>
+      </div>
+
+      <div class="myf-batch">
+        <div>
+          <p class="myf-kicker">Batch calculator</p>
+          <h2>Records per batch</h2>
+          <p>{{ batchSplitLabel() }}</p>
+        </div>
+        <div class="myf-batch-size">
+          <mat-form-field appearance="outline">
+            <mat-label>Records</mat-label>
+            <mat-select [(ngModel)]="batchSizeChoice" (selectionChange)="onBatchSizeChoice()">
+              <mat-option *ngFor="let size of batchSizeOptions" [value]="size">{{ size }}</mat-option>
+              <mat-option value="custom">Custom</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <label *ngIf="batchSizeChoice === 'custom'">
+            <input type="number" min="1" max="1000" [(ngModel)]="recordsPerBatch" (change)="clampBatchSize()" />
+            <span>1 – 1000</span>
+          </label>
+        </div>
+        <button type="button" mat-raised-button color="primary" [disabled]="sending || !selectedCount()" (click)="send()">
+          {{ sending ? 'Starting…' : 'Send closing data' }}
+        </button>
+      </div>
+
+      <div class="myf-progress" *ngIf="sendSummary || batchStatus.running || batchStatus.successful || batchStatus.failed">
+        <strong>{{ sendSummary || 'Batch running' }}</strong>
+        <span class="is-success">Successful {{ batchStatus.successful }}</span>
+        <span class="is-failed">Failed {{ batchStatus.failed }}</span>
+        <span class="is-running">Pending {{ batchStatus.pending }}</span>
+      </div>
+
+      <div class="myf-table-wrap">
+        <div class="myf-loading" *ngIf="loading">Loading duties…</div>
+        <table mat-table [dataSource]="dataSource" *ngIf="!loading">
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox [checked]="allSelected()" (change)="toggleAll()"></mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox [checked]="selection.isSelected(row)" [disabled]="!row.canSelect" (change)="selection.toggle(row)"></mat-checkbox>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="dutySlipID">
+            <th mat-header-cell *matHeaderCellDef (click)="sort('DutySlipID')">Duty slip</th>
+            <td mat-cell *matCellDef="let row">{{ row.dutySlipID }}</td>
+          </ng-container>
+          <ng-container matColumnDef="reservationID">
+            <th mat-header-cell *matHeaderCellDef (click)="sort('ReservationID')">Reservation</th>
+            <td mat-cell *matCellDef="let row">{{ row.reservationID }}</td>
+          </ng-container>
+          <ng-container matColumnDef="pickupDate">
+            <th mat-header-cell *matHeaderCellDef (click)="sort('PickupDate')">Pickup date</th>
+            <td mat-cell *matCellDef="let row">{{ formatPickup(row.pickupDate) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="customerName">
+            <th mat-header-cell *matHeaderCellDef (click)="sort('CustomerName')">Customer</th>
+            <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="tallyCustomerID">
+            <th mat-header-cell *matHeaderCellDef>Tally code</th>
+            <td mat-cell *matCellDef="let row">{{ tallyLabel(row.tallyCustomerID) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="vendor">
+            <th mat-header-cell *matHeaderCellDef>Vendor</th>
+            <td mat-cell *matCellDef="let row">{{ row.vendor }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="myf-chip" [ngClass]="statusClass(row.status)">{{ row.status }}</span>
+              <div class="myf-fail" *ngIf="row.status === 'Failed' && row.failure" [title]="row.failure">{{ row.failure }}</div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="payload">
+            <th mat-header-cell *matHeaderCellDef>Request and response</th>
+            <td mat-cell *matCellDef="let row">
+              <button type="button" class="myf-link" [disabled]="!row.hasPayload" (click)="openPayload(row)">View</button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+        <p class="myf-empty" *ngIf="hasSearched && !loading && !dataSource.length">No Good for Billing vendor duties match these filters.</p>
+      </div>
+
+      <div class="myf-pager">
+        <button type="button" mat-raised-button color="primary" [disabled]="pageNumber === 0" (click)="previousPage()">Previous</button>
+        <span>{{ pageStart() }}–{{ pageEnd() }} of {{ totalCount }}</span>
+        <button type="button" mat-raised-button color="primary" [disabled]="(pageNumber + 1) * pageSize() >= totalCount" (click)="nextPage()">Next</button>
+      </div>
+    </div>
+  </div>
+</section>

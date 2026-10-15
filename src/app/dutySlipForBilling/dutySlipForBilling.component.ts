@@ -2031,6 +2031,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   async onGFBChange(event: any)
     {
+      try {
       if(this.advanceTableForm.value.verifyDuty===false || this.advanceTableForm.value.verifyDuty==='' || this.advanceTableForm.value.verifyDuty===null)
       {
         Swal.fire('', 'Please Verify Duty Before Good For Billing.', 'warning');
@@ -2068,12 +2069,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
           this.advanceTableForm.patchValue({ goodForBilling: false });
           return false;
         }
-        if (this.isMyfAggregator) {
-          await this.sendMyfClosedAfterGfb();
-        }
-        if (this.isMoveInSync) {
-          await this.sendMoveInSyncAfterGfb();
-        }
       }
       if(isChecked === false)
       {
@@ -2101,6 +2096,10 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       if(isChecked !==null)
       {
         this.SaveDataInBillingHistory({ skipGfbLock: true });
+      }
+      } finally {
+        this.showSpinner = false;
+        this.showSpinnerForVDGB = false;
       }
   }
 
@@ -3032,76 +3031,6 @@ onChange() {
           );
         },
       });
-  }
-
-  /** MoveInSync endDuty and invoice payload after Good for Billing. A failure leaves the checkbox checked. */
-  private async sendMoveInSyncAfterGfb(): Promise<void> {
-    if (!this.DutySlipID) {
-      return;
-    }
-    try {
-      const data = await firstValueFrom(this.clossingOneService.sendMoveInSyncOnGfb(this.DutySlipID));
-      const message = (data && (data.message || data.Message)) || 'MoveInSync closing data sent.';
-      this.showNotification('snackbar-success', message, 'bottom', 'center');
-    } catch (error) {
-      const body = error && error.error !== undefined ? error.error : error;
-      const message = typeof body === 'string'
-        ? body
-        : (body && (body.message || body.Message)) || 'MoveInSync closing data could not be sent.';
-      this.showNotification('snackbar-danger', message, 'bottom', 'center');
-    }
-  }
-
-  /** MYF closed event after Good for Billing. A failure leaves the local save and checkbox as they are. */
-  private async sendMyfClosedAfterGfb(): Promise<void> {
-    if (!this.DutySlipID) {
-      return;
-    }
-    try {
-      const data = await firstValueFrom(this.clossingOneService.sendMyfClosed(this.DutySlipID));
-      const varies = !!(data && (data.varies || data.Varies));
-      const note = varies ? '' : '<p>No variations found in closing data.</p>';
-      Swal.fire({
-        title: 'Closing Data ECO vs MYF',
-        html: note + this.closingCompareHtml(data),
-        width: 860
-      });
-    } catch (error) {
-      const body = error && error.error !== undefined ? error.error : error;
-      const message = typeof body === 'string'
-        ? body
-        : (body && (body.message || body.Message)) || 'MYF closed event could not be sent.';
-      Swal.fire({
-        icon: 'error',
-        title: 'Duty Closed Error. Pls Try Again....',
-        text: message
-      });
-    }
-  }
-
-  private closingCompareHtml(data: any): string {
-    const eco = (data && (data.eco || data.Eco)) || {};
-    const myf = (data && (data.myf || data.Myf)) || {};
-    return '<b>ECO Closing Data</b>' + this.closingCompareTable(eco)
-      + '<br><b>MYF Closing Data</b>' + this.closingCompareTable(myf);
-  }
-
-  private closingCompareTable(row: any): string {
-    const cell = (value: any) => {
-      const text = value === undefined || value === null ? '' : String(value);
-      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-    };
-    const pick = (name: string) => cell(row[name] !== undefined ? row[name] : row[name.charAt(0).toUpperCase() + name.slice(1)]);
-    return '<table border="1" style="width:100%;margin-top:8px;text-align:center"><tr>'
-      + '<th>Garage-Pickup Kms</th><th>Pickup-Drop Kms</th><th>Drop-Garage Kms</th>'
-      + '<th>Main Fare</th><th>Tax Amount</th><th>Discount Amount</th></tr><tr>'
-      + '<td>' + pick('garagePickup') + '</td>'
-      + '<td>' + pick('pickupDrop') + '</td>'
-      + '<td>' + pick('dropGarage') + '</td>'
-      + '<td>' + pick('mainFare') + '</td>'
-      + '<td>' + pick('taxAmount') + '</td>'
-      + '<td>' + pick('discountAmount') + '</td>'
-      + '</tr></table>';
   }
 
   /** GFB calculate: persist already ran if the form was dirty. Do not open Dummy Invoice. Skip extra allowance GET. */

@@ -1488,6 +1488,18 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'sendVendorClosingData',
+        title: 'Send Vendor Closing Data',
+        pageKey: 'Send Vendor Closing Data',
+        moduleName: 'sendVendorClosingData',
+        alternateAccessPageKeys: ['Send Vendor Closing Data', 'sendVendorClosingData'],
+        icon: 'fas fa-paper-plane',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoicePaidStatus',
         title: 'Invoice Paid Status',
         moduleName: 'invoicePaidStatus',

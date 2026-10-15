@@ -185,6 +185,17 @@ const routes: Routes = [
         },
       },
       {
+        path: 'sendVendorClosingData',
+        loadChildren: () =>
+          import('./sendVendorClosingData/sendVendorClosingData.module').then(
+            (m) => m.SendVendorClosingDataModule
+          ),
+        data: {
+          requiredPageKey: 'Send Vendor Closing Data',
+          alternatePageKeys: ['sendVendorClosingData', 'Send Vendor Closing Data'],
+        },
+      },
+      {
         path: 'sendDataToDynamics',
         loadChildren: () =>
           import('./sendDataToDynamics/sendDataToDynamics.module').then(

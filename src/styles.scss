@@ -865,6 +865,29 @@ mat-option {
   white-space: nowrap !important;
 }
 
+.vendor-closing-customer-panel.mat-mdc-autocomplete-panel {
+  width: max-content !important;
+  min-width: 210px !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.vendor-closing-customer-panel) {
+  width: max-content !important;
+  min-width: 210px !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.vendor-closing-customer-panel) .vendor-closing-customer-panel .mat-mdc-option,
+.cdk-overlay-container .cdk-overlay-pane:has(.vendor-closing-customer-panel) .vendor-closing-customer-panel .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  width: max-content !important;
+  max-width: none !important;
+}
+
 /* All Material autocomplete panels (except Google Places fixed-width): width follows longest option. */
 .mat-mdc-autocomplete-panel:not(.google-autocomplete-panel) {
   width: max-content !important;
