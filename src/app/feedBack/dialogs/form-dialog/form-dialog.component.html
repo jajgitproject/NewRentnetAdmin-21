@@ -97,11 +97,18 @@
         <div class="attachments-header">
           <div>
             <div class="section-title">Feedback Attachments</div>
-            <div class="section-hint">Add supporting images for this trip feedback</div>
+            <div class="section-hint">Choose a file below and Save, or use + after feedback exists for more attachments</div>
           </div>
           <button mat-mini-fab color="primary" class="add-attachment-btn" (click)="tripFeedBackAttachment()" aria-label="Add attachment">
             <mat-icon>add</mat-icon>
           </button>
+        </div>
+
+        <div class="pending-attachment-row">
+          <input type="file" accept="image/*" (change)="onPendingAttachmentSelected($event)">
+          <span *ngIf="pendingAttachmentFileName" class="pending-attachment-name">{{ pendingAttachmentFileName }}</span>
+          <button mat-stroked-button type="button" *ngIf="pendingAttachmentFile" (click)="clearPendingAttachment()">Remove</button>
+          <img *ngIf="pendingAttachmentPreviewUrl" [src]="pendingAttachmentPreviewUrl" alt="Pending attachment preview" class="pending-attachment-preview">
         </div>
 
         <div *ngIf="!attachmentDataSource?.length" class="attachments-empty">

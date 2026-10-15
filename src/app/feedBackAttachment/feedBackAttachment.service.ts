@@ -46,14 +46,48 @@ export class FeedBackAttachmentService
     }
     return this.httpClient.get(this.API_URL + "/" +SearchRate + '/'+Service_ID + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
-  add(advanceTable: FeedBackAttachment) 
+  private buildFormData(advanceTable: FeedBackAttachment, file?: File | null): FormData {
+    const formData = new FormData();
+    const attachmentId = advanceTable.tripFeedBackAttachmentID ?? -1;
+    formData.append('tripFeedBackAttachmentID', String(attachmentId));
+    formData.append('tripFeedBackID', String(advanceTable.tripFeedBackID ?? ''));
+    if (advanceTable.activationStatus !== undefined && advanceTable.activationStatus !== null && advanceTable.activationStatus !== '') {
+      formData.append('activationStatus', String(advanceTable.activationStatus));
+    }
+    if (!file && advanceTable.tripFeedBackAttachment) {
+      formData.append('tripFeedBackAttachment', String(advanceTable.tripFeedBackAttachment));
+    }
+    if (file) {
+      formData.append('file', file, file.name);
+      formData.append('File', file, file.name);
+    }
+    return formData;
+  }
+
+  private logFormDataPayload(action: string, advanceTable: FeedBackAttachment, file?: File | null): void {
+    console.log(`[FeedBackAttachmentService] ${action} multipart payload`, {
+      tripFeedBackAttachmentID: advanceTable.tripFeedBackAttachmentID,
+      tripFeedBackID: advanceTable.tripFeedBackID,
+      activationStatus: advanceTable.activationStatus,
+      hasFile: !!file,
+      fileName: file?.name,
+      fileSize: file?.size,
+      hasExistingPath: !!advanceTable.tripFeedBackAttachment,
+    });
+  }
+
+  add(advanceTable: FeedBackAttachment, file?: File | null) 
   {
     advanceTable.tripFeedBackAttachmentID=-1;
-    return this.httpClient.post<any>(this.API_URL , advanceTable);
+    const formData = this.buildFormData(advanceTable, file);
+    this.logFormDataPayload('POST', advanceTable, file);
+    return this.httpClient.post<any>(this.API_URL, formData);
   }
-  update(advanceTable: FeedBackAttachment)
+  update(advanceTable: FeedBackAttachment, file?: File | null)
   {
-    return this.httpClient.put<any>(this.API_URL , advanceTable);
+    const formData = this.buildFormData(advanceTable, file);
+    this.logFormDataPayload('PUT', advanceTable, file);
+    return this.httpClient.put<any>(this.API_URL, formData);
   }
   delete(tripFeedBackAttachmentID: number):  Observable<any> 
   {

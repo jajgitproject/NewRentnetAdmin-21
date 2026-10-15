@@ -28,6 +28,7 @@ import { EmployeesDropDown } from '../../employeeDropDown.model';
 import { tripFeedBackAttachmentFormDialogComponent } from 'src/app/feedBackAttachment/dialogs/form-dialog/form-dialog.component';
 import { FeedBackAttachmentService } from 'src/app/feedBackAttachment/feedBackAttachment.service';
 import { DeleteDialogComponent as DeleteDialogComponentForfeedBackAttachment } from 'src/app/feedBackAttachment/dialogs/delete/delete.component';
+import { FeedBackAttachment } from 'src/app/feedBackAttachment/feedBackAttachment.model';
 @Component({
   standalone: false,
     selector: 'app-form-dialog',
@@ -110,6 +111,9 @@ export class FormDialogComponent {
   saveDisabled:boolean=true;
   verifyDutyStatusAndCacellationStatus: string;
   isSaveAllowed: boolean = false;
+  pendingAttachmentFile: File | null = null;
+  pendingAttachmentPreviewUrl: string = '';
+  pendingAttachmentFileName: string = '';
   //dialog: any;
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
@@ -460,10 +464,7 @@ export class FormDialogComponent {
     if (!value || /^(null|undefined)$/i.test(value)) {
       return null;
     }
-    if (/^https?:\/\//i.test(value) || value.startsWith('data:')) {
-      return value;
-    }
-    return this._generalService.resolveStaticImageUrl(value) || (this._generalService.getImageURL() + value.replace(/^\/+/, ''));
+    return this._generalService.resolveStaticImageUrl(value);
   }
 
   private getAttachmentImageKey(row: any): string {
@@ -488,7 +489,37 @@ export class FormDialogComponent {
     this.brokenAttachmentImageKeys.add(key);
     this.cdr.detectChanges();
   }
-  public Post(): void {
+  onPendingAttachmentSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input?.files;
+    if (!files?.length) {
+      this.pendingAttachmentFile = null;
+      this.pendingAttachmentPreviewUrl = '';
+      this.pendingAttachmentFileName = '';
+      return;
+    }
+    this.pendingAttachmentFile = files[0];
+    this.pendingAttachmentFileName = this.pendingAttachmentFile.name;
+    console.log('[TripFeedback] pending attachment selected', {
+      name: this.pendingAttachmentFile.name,
+      size: this.pendingAttachmentFile.size,
+      type: this.pendingAttachmentFile.type,
+    });
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.pendingAttachmentPreviewUrl = (e.target?.result as string) || '';
+      this.cdr.detectChanges();
+    };
+    reader.readAsDataURL(this.pendingAttachmentFile);
+  }
+
+  clearPendingAttachment(): void {
+    this.pendingAttachmentFile = null;
+    this.pendingAttachmentPreviewUrl = '';
+    this.pendingAttachmentFileName = '';
+  }
+
+  private patchFeedbackFormIds(): void {
     this.advanceTableForm.patchValue({ customerPersonID: this.CustomerPersonID });
     this.advanceTableForm.patchValue({ dutySlipID: this.DutySlipID });
     this.advanceTableForm.patchValue({ reservationID: this.ReservationID });
@@ -496,23 +527,72 @@ export class FormDialogComponent {
     this.advanceTableForm.patchValue({ allotmentID: this.AllotmentID });
     this.advanceTableForm.patchValue({ inventoryID: this.InventoryID });
     this.advanceTableForm.patchValue({ driverID: this.DriverID });
+  }
 
-    this.advanceTableService.add(this.advanceTableForm.getRawValue()).subscribe(
-      (response) => {
-        this.messageSubject.next(this.advanceTableForm.getRawValue());
-        this._generalService.sendUpdate('FeedBackCreate:FeedBackView:Success');
-        this.loadData();
+  private uploadPendingAttachmentIfNeeded(tripFeedBackId: number, onComplete: () => void): void {
+    if (!this.pendingAttachmentFile || !tripFeedBackId) {
+      onComplete();
+      return;
+    }
+    const attachmentPayload = new FeedBackAttachment({});
+    attachmentPayload.tripFeedBackID = tripFeedBackId;
+    attachmentPayload.activationStatus = true;
+    console.log('[TripFeedback] uploading pending attachment after feedback save', {
+      tripFeedBackID: tripFeedBackId,
+      fileName: this.pendingAttachmentFile.name,
+    });
+    this.feedBackAttachmentService.add(attachmentPayload, this.pendingAttachmentFile).subscribe(
+      (attachResponse) => {
+        console.log('[TripFeedback] pending attachment upload succeeded', attachResponse);
+        this.clearPendingAttachment();
+        onComplete();
+      },
+      (attachError) => {
+        console.error('[TripFeedback] pending attachment upload failed', attachError);
         this.showNotification(
-          'snackbar-success',
-          'Tripfeedback Created ...!!!',
+          'snackbar-danger',
+          'Feedback saved but attachment upload failed. Please try Add attachment again.',
           'bottom',
           'center'
         );
-
         this.saveDisabled = true;
-        this.dialogRef.close();
+      }
+    );
+  }
+
+  private finishFeedbackSave(isCreate: boolean): void {
+    this.messageSubject.next(this.advanceTableForm.getRawValue());
+    this._generalService.sendUpdate(isCreate ? 'FeedBackCreate:FeedBackView:Success' : 'FeedBackUpdate:FeedBackView:Success');
+    this.loadData();
+    this.showNotification(
+      'snackbar-success',
+      isCreate ? 'Tripfeedback Created ...!!!' : 'Tripfeedback Updated ...!!!',
+      'bottom',
+      'center'
+    );
+    this.saveDisabled = true;
+    this.dialogRef.close();
+  }
+
+  private handleFeedbackSaveResponse(response: any, isCreate: boolean): void {
+    const createdId = response?.tripFeedBackID ?? response?.TripFeedBackID ?? this.tripFeedBackID;
+    if (createdId) {
+      this.tripFeedBackID = createdId;
+      this.advanceTableForm.patchValue({ tripFeedBackID: createdId });
+      this.action = 'edit';
+      console.log('[TripFeedback] feedback saved', { tripFeedBackID: createdId, isCreate });
+    }
+    this.uploadPendingAttachmentIfNeeded(createdId, () => this.finishFeedbackSave(isCreate));
+  }
+
+  public Post(): void {
+    this.patchFeedbackFormIds();
+    this.advanceTableService.add(this.advanceTableForm.getRawValue()).subscribe(
+      (response) => {
+        this.handleFeedbackSaveResponse(response, true);
       },
       (error) => {
+        console.error('[TripFeedback] feedback create failed', error);
         this._generalService.sendUpdate('FeedBackAll:FeedBackView:Failure');
         this.saveDisabled = true;
       }
@@ -520,29 +600,14 @@ export class FormDialogComponent {
   }
 
   public Put(): void {
-    this.advanceTableForm.patchValue({ customerPersonID: this.CustomerPersonID });
-    this.advanceTableForm.patchValue({ reservationID: this.ReservationID });
-    this.advanceTableForm.patchValue({ allotmentID: this.AllotmentID });
-    this.advanceTableForm.patchValue({ inventoryID: this.InventoryID });
-    this.advanceTableForm.patchValue({ driverID: this.DriverID });
-    this.advanceTableForm.patchValue({ passengerID: this.ReservationPassengerID });
+    this.patchFeedbackFormIds();
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
-
-          this.messageSubject.next(this.advanceTableForm.getRawValue());
-          this._generalService.sendUpdate('FeedBackUpdate:FeedBackView:Success');//To Send Updates 
-          this.loadData();
-          this.showNotification(
-            'snackbar-success',
-            'Tripfeedback Updated ...!!!',
-            'bottom',
-            'center'
-          );//To Send Updates
-          this.saveDisabled = true;
-          this.dialogRef.close();
+          this.handleFeedbackSaveResponse(response, false);
         },
         error => {
+          console.error('[TripFeedback] feedback update failed', error);
           this._generalService.sendUpdate('FeedBackAll:FeedBackView:Failure');//To Send Updates  
           this.saveDisabled = true;
         }
@@ -610,6 +675,16 @@ export class FormDialogComponent {
   }
 
   tripFeedBackAttachment() {
+    if (!this.tripFeedBackID || Number(this.tripFeedBackID) === 0) {
+      console.warn('[TripFeedback] Add attachment dialog requires tripFeedBackID; use "Choose attachment file" and Save on this form for new feedback.');
+      this.showNotification(
+        'snackbar-warning',
+        'For new feedback, choose a file below and click Save. Use + after feedback is saved for more attachments.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
     const dialogRef = this.dialog.open(tripFeedBackAttachmentFormDialogComponent, {
       width: '500px',
       data: {

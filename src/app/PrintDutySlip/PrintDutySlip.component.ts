@@ -102,6 +102,7 @@ export class PrintDutySlipComponent {
       data =>   
       {
         this.dataSource = data;
+        this.normalizeDutySlipPrintFlags(this.dataSource);
         if (this.dataSource?.customerSignatureImage) {
           this.dataSource.customerSignatureImage = this._generalService.resolveStaticImageUrl(
             this.dataSource.customerSignatureImage
@@ -149,7 +150,58 @@ export class PrintDutySlipComponent {
         }
       }
       return '';
-    }  
+    }
+
+    private normalizeDutySlipPrintFlags(data: any): void {
+      if (!data) {
+        return;
+      }
+      const showOtp =
+        data.showOTPOnDutySlip ?? data.ShowOTPOnDutySlip;
+      data.showOTPOnDutySlip =
+        showOtp === true || showOtp === 'true' || showOtp === 1 || showOtp === '1';
+
+      data.startTripOTP = data.startTripOTP ?? data.StartTripOTP;
+      data.endTripOTP = data.endTripOTP ?? data.EndTripOTP;
+      data.startTripOTPGeneratedAt =
+        data.startTripOTPGeneratedAt ?? data.StartTripOTPGeneratedAt;
+      data.endTripOTPGeneratedAt =
+        data.endTripOTPGeneratedAt ?? data.EndTripOTPGeneratedAt;
+    }
+
+    formatOtpDisplayTime(
+      generatedAt: unknown,
+      otp: unknown,
+      datePart: unknown,
+      timePart: unknown
+    ): string {
+      const fromApi = this.formatOtpGeneratedAt(generatedAt);
+      if (fromApi) {
+        return fromApi;
+      }
+      const otpText = (otp ?? '').toString().trim();
+      if (!otpText) {
+        return '';
+      }
+      const dateMoment = moment(datePart);
+      const timeMoment = moment(timePart);
+      if (!dateMoment.isValid() && !timeMoment.isValid()) {
+        return '';
+      }
+      const combined = dateMoment.isValid() ? dateMoment.clone() : moment().startOf('day');
+      if (timeMoment.isValid()) {
+        combined.hour(timeMoment.hour()).minute(timeMoment.minute()).second(0);
+      }
+      return combined.isValid() ? combined.format('HH:mm') : '';
+    }
+
+    formatOtpGeneratedAt(value: unknown): string {
+      if (value == null || value === '') {
+        return '';
+      }
+      const parsed = moment(value);
+      return parsed.isValid() ? parsed.format('HH:mm') : '';
+    }
   
     getTime() 
     {
