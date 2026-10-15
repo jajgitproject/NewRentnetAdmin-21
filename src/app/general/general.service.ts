@@ -466,13 +466,13 @@ export class GeneralService {
     return base + 'StaticFiles/Images/' + path.replace(/^\/+/, '');
   }
 
-  /** Build URL for StaticFiles/Images assets; absolute URLs from the API are returned as-is. */
+  /** Build URL for StaticFiles/Images assets using the configured ImageURL base. */
   resolveStaticImageUrl(path: string | null | undefined): string | null {
     const value = (path ?? '').toString().trim();
     if (!value || /^(null|undefined)$/i.test(value)) {
       return null;
     }
-    if (/^https?:\/\//i.test(value)) {
+    if (value.startsWith('data:')) {
       return value;
     }
 
