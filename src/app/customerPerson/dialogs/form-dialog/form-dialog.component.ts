@@ -219,6 +219,7 @@ export class FormDialogComponentCustomerPerson
           this.advanceTable.maskMobileNumber=false;
           this.advanceTable.isPostPickUpCallAllowed=false;
           this.advanceTable.sendSMSWhatsApp=true;
+          this.advanceTable.reservationConfirmationWhatsApp=false;
           this.advanceTable.sendEmail=true;
           this.advanceTable.preferAppBasedDriver=this.fromGeneralBill ? false : true;
           if (this.fromGeneralBill) {
@@ -737,6 +738,7 @@ export class FormDialogComponentCustomerPerson
           : ''
       ],
       sendSMSWhatsApp: [this.advanceTable.sendSMSWhatsApp, [Validators.required]],
+      reservationConfirmationWhatsApp: [this.advanceTable.reservationConfirmationWhatsApp === true, [Validators.required]],
       sendEmail: [this.advanceTable.sendEmail, [Validators.required]],
       employeeCode: [this.advanceTable.employeeCode],
       costCenter: [this.advanceTable.costCenter],
@@ -931,6 +933,7 @@ public Post(): void {
       isAdmin: false,
       maskMobileNumber: false,
       sendSMSWhatsApp: true,
+      reservationConfirmationWhatsApp: false,
       sendEmail: true,
       preferAppBasedDriver: false,
       loyalGuest: false,
@@ -952,6 +955,7 @@ public Post(): void {
       isAdmin: false,
       maskMobileNumber: false,
       sendSMSWhatsApp: true,
+      reservationConfirmationWhatsApp: false,
       sendEmail: true,
       preferAppBasedDriver: false,
       loyalGuest: false,
@@ -1345,6 +1349,7 @@ private getOldRentNetID(): number {
       isPassenger: !isBooker,
       isAdmin: false,
       sendSMSWhatsApp: true,
+      reservationConfirmationWhatsApp: false,
       sendEmail: true,
       preferAppBasedDriver: this.fromGeneralBill ? false : (this.advanceTableForm.value.preferAppBasedDriver ?? false),
       isDefaultForIntegrationRequest: false,
@@ -1386,6 +1391,7 @@ private getOldRentNetID(): number {
       isAdmin: 'Is Admin',
       maskMobileNumber: 'Mask Mobile Number',
       sendSMSWhatsApp: 'Send SMS-Whats App',
+      reservationConfirmationWhatsApp: 'Reservation Confirmation WhatsApp',
       sendEmail: 'Send Email',
       customerDesignation: 'Customer Designation',
       confirmPassword: 'Confirm Password',

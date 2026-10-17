@@ -22,6 +22,7 @@ export class CustomerPerson {
   isPostPickUpCallAllowed:boolean;
   isFeedbackEmailAllowed:boolean;
   sendSMSWhatsApp:boolean;
+  reservationConfirmationWhatsApp:boolean;
   sendEmail:boolean;
   customerDesignationID:number;
   customerDepartmentID:number;
@@ -68,6 +69,7 @@ export class CustomerPerson {
          ? customerPerson.isFeedbackEmailAllowed
          : null;
        this.sendSMSWhatsApp = customerPerson.sendSMSWhatsApp ?? null;
+       this.reservationConfirmationWhatsApp = customerPerson.reservationConfirmationWhatsApp === true;
        this.sendEmail = customerPerson.sendEmail ?? null;
        this.customerDesignationID = customerPerson.customerDesignationID || 0;
        this.employeeCode = customerPerson.employeeCode || '';
