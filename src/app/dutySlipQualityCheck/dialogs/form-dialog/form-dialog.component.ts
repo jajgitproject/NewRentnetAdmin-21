@@ -190,6 +190,27 @@ this.buttonDisabled = normalized !== 'changes allow';
       }
     );
   }
+
+  verdictClass(verdict: string): string {
+    const value = String(verdict || '').trim().toLowerCase();
+    if (value === 'good') {
+      return 'is-good';
+    }
+    if (value === 'bad') {
+      return 'is-bad';
+    }
+    return '';
+  }
+
+  qcVerdict(key: string): string {
+    const row = this.driverQualityCheckData && this.driverQualityCheckData[0];
+    if (!row) {
+      return '';
+    }
+    const pascal = key.charAt(0).toUpperCase() + key.slice(1);
+    const value = row[key] != null && String(row[key]).trim() !== '' ? row[key] : row[pascal];
+    return value == null ? '' : String(value);
+  }
   
   formControl = new FormControl('', 
   [

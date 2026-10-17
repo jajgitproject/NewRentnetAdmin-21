@@ -493,7 +493,7 @@
                       *ngIf="CustomerSignatureImage">
                       <mat-label>Signature</mat-label>
                       <div>
-                        <app-static-image [src]="CustomerSignatureImage" alt="Signature" maxWidth="25%" height="25%"></app-static-image>
+                        <app-static-image [src]="CustomerSignatureImage" alt="Signature" maxWidth="160px" maxHeight="80px" height="auto" (failed)="useProdSignature()"></app-static-image>
                         <span><a [href]="CustomerSignatureImage"
                             target="_blank" style="cursor: pointer;color: #007bff;">View</a></span>
                       </div>

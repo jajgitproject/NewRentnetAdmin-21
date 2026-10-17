@@ -483,6 +483,18 @@ export class GeneralService {
     return this.buildStaticImageUrlFromPath(relativePath, this.ImageURL);
   }
 
+  /** Driver-app host first, production admin host when that file is missing. */
+  signatureImageUrls(path: string | null | undefined): { driver: string | null; prod: string | null } {
+    const relativePath = this.normalizeStaticImagePath(path);
+    if (!relativePath) {
+      return { driver: null, prod: null };
+    }
+    return {
+      driver: this.buildStaticImageUrlFromPath(relativePath, 'https://newdriverapp.ecoserp.in/'),
+      prod: this.buildStaticImageUrlFromPath(relativePath, 'https://prodapi.ecoserp.in/')
+    };
+  }
+
   /** Rejects empty paths and folder-only StaticFiles/Images URLs with no filename. */
   isValidStaticImageUrl(path: string | null | undefined): boolean {
     const value = (path ?? '').trim();

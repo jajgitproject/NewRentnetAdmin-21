@@ -17,7 +17,15 @@ mat-dialog-content
   width: auto
   height: auto
   object-fit: contain
-  border: 1px solid #dcdcdc
+  border: 2px solid #dcdcdc
   border-radius: 4px
   cursor: pointer
   display: block
+
+:host ::ng-deep .qc-image-wrap.is-good .qc-image,
+:host ::ng-deep .qc-image-wrap.is-good app-static-image img.qc-image
+  border: 3px solid #16a34a
+
+:host ::ng-deep .qc-image-wrap.is-bad .qc-image,
+:host ::ng-deep .qc-image-wrap.is-bad app-static-image img.qc-image
+  border: 3px solid #dc2626

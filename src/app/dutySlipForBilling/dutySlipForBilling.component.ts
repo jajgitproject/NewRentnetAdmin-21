@@ -138,6 +138,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
  ];
  advanceTableBH : BillingHistory | null;
  CustomerSignatureImage :string = null;
+ signatureDriverUrl: string = null;
+ signatureProdUrl: string = null;
  buttonText: string = 'Save';
   selectedClosureType: string;
   DutySlipID: number;
@@ -235,9 +237,12 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.advanceTableForm.patchValue({dutyTypeID : this.advanceTableClosingOne.closingReservationForPickupDataModel.packageTypeID});
     this.advanceTableForm.patchValue({packageID : this.advanceTableClosingOne.closingReservationForPickupDataModel.packageID});
     if (this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage) {
-      this.CustomerSignatureImage = this._generalService.resolveStaticImageUrl(
+      const signatureUrls = this._generalService.signatureImageUrls(
         this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage
       );
+      this.signatureDriverUrl = signatureUrls.driver;
+      this.signatureProdUrl = signatureUrls.prod;
+      this.CustomerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl;
       this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage =
         this.CustomerSignatureImage;
     }
@@ -263,6 +268,15 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   ngAfterViewInit(): void {
     this.suppressInitialDutyStatusEmit = false;
+  }
+
+  useProdSignature(): void {
+    if (this.signatureProdUrl && this.CustomerSignatureImage !== this.signatureProdUrl) {
+      this.CustomerSignatureImage = this.signatureProdUrl;
+      if (this.advanceTableClosingOne?.closingDutySlipModel) {
+        this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage = this.signatureProdUrl;
+      }
+    }
   }
 
   submit()

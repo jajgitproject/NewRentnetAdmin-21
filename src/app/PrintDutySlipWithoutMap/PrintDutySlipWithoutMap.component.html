@@ -324,7 +324,7 @@
                             <div class="signature-box">
                             <app-static-image *ngIf="dataSource?.customerSignatureImage; else noSignatureImage"
                               [src]="dataSource?.customerSignatureImage" cssClass="signature-image" alt="User Signature"
-                              width="100px" height="40px" maxWidth="100px" maxHeight="40px"></app-static-image>
+                              width="100px" height="40px" maxWidth="100px" maxHeight="40px" (failed)="useProdSignature()"></app-static-image>
                             </div>
                               <ng-template #noSignatureImage>No Image</ng-template>
                           </td>

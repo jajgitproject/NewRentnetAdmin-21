@@ -39,6 +39,8 @@ import moment from 'moment';
 })
 export class PrintDutySlipWithoutMapComponent {
   dataSource: any;
+  signatureDriverUrl: string = null;
+  signatureProdUrl: string = null;
   dataSourceForInvoiceDuties: any[] = [];ReservationStatus: any;
   advanceTable: PrintDutySlipWithoutMap | null;
   ReservationID: number;
@@ -108,9 +110,10 @@ export class PrintDutySlipWithoutMapComponent {
         this.dataSource = data;
         this.normalizeDutySlipPrintFlags(this.dataSource);
         if (this.dataSource?.customerSignatureImage) {
-          this.dataSource.customerSignatureImage = this._generalService.resolveStaticImageUrl(
-            this.dataSource.customerSignatureImage
-          );
+          const signatureUrls = this._generalService.signatureImageUrls(this.dataSource.customerSignatureImage);
+          this.signatureDriverUrl = signatureUrls.driver;
+          this.signatureProdUrl = signatureUrls.prod;
+          this.dataSource.customerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl;
         }
         this.dataSource.tollParkingsImages = this.normalizeAttachmentImages(
           this.dataSource?.tollParkingsImages,
@@ -133,6 +136,12 @@ export class PrintDutySlipWithoutMapComponent {
         //this.getTime();
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
+    }
+
+    useProdSignature(): void {
+      if (this.signatureProdUrl && this.dataSource && this.dataSource.customerSignatureImage !== this.signatureProdUrl) {
+        this.dataSource.customerSignatureImage = this.signatureProdUrl;
+      }
     }
 
     getDropAddress(): string {

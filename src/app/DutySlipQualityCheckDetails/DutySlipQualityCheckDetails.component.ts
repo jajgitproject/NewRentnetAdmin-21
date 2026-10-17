@@ -50,6 +50,25 @@ export class DutySlipQualityCheckDetailsComponent {
     this.qcDetails.breatheAnalyzerReading = this.qcDetails.breatheAnalyzerReading
       ?? this.qcDetails.BreatheAnalyzerReading
       ?? null;
+    this.qcDetails.frontPhotoAIVerdict = this.firstText(this.qcDetails.frontPhotoAIVerdict, this.qcDetails.FrontPhotoAIVerdict);
+    this.qcDetails.selfieWithUniformAIVerdict = this.firstText(this.qcDetails.selfieWithUniformAIVerdict, this.qcDetails.SelfieWithUniformAIVerdict);
+    this.qcDetails.interiorsWithAmenitiesAIVerdict = this.firstText(this.qcDetails.interiorsWithAmenitiesAIVerdict, this.qcDetails.InteriorsWithAmenitiesAIVerdict);
+  }
+
+  verdictClass(verdict: string): string {
+    const value = String(verdict || '').trim().toLowerCase();
+    if (value === 'good') {
+      return 'is-good';
+    }
+    if (value === 'bad') {
+      return 'is-bad';
+    }
+    return '';
+  }
+
+  private firstText(...values: any[]): string {
+    const found = values.find((value) => value != null && String(value).trim() !== '');
+    return found == null ? '' : String(found);
   }
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;

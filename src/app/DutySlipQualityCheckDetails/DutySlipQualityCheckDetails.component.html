@@ -43,21 +43,21 @@
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Front Photo</span> <br />
-          <span class="qc-image-wrap">
+          <span class="qc-image-wrap" [ngClass]="verdictClass(qcDetails.frontPhotoAIVerdict)">
               <app-static-image cssClass="qc-image" [src]="qcDetails.frontPhoto" height="80px" maxWidth="100px"
                   (click)="openImageInNewTab(qcDetails.frontPhoto)"></app-static-image>
           </span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Selfie With Uniform</span> <br />
-          <span class="qc-image-wrap">
+          <span class="qc-image-wrap" [ngClass]="verdictClass(qcDetails.selfieWithUniformAIVerdict)">
               <app-static-image cssClass="qc-image" [src]="qcDetails.selfieWithUniform" height="80px" maxWidth="100px"
                   (click)="openImageInNewTab(qcDetails.selfieWithUniform)"></app-static-image>
           </span>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Interiors With Amenities</span> <br />
-          <span class="qc-image-wrap">
+          <span class="qc-image-wrap" [ngClass]="verdictClass(qcDetails.interiorsWithAmenitiesAIVerdict)">
               <app-static-image cssClass="qc-image" [src]="qcDetails.interiorsWithAmenities" height="80px" maxWidth="100px"
                   (click)="openImageInNewTab(qcDetails.interiorsWithAmenities)"></app-static-image>
           </span>

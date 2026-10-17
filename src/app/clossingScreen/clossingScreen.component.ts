@@ -185,6 +185,7 @@ export class ClossingScreenComponent implements OnInit {
   locationInLatByApp: any;
   locationInLongByApp: any;
   CustomerSignatureByDriver: any;
+  signatureProdUrl: string = null;
   dutySlipMap: DutySlipMap;
   mapOfDutySlip: string;
   InventoryID: any;
@@ -311,6 +312,17 @@ export class ClossingScreenComponent implements OnInit {
   patchVerifyGoodForBilling :boolean = true;
   selectedTab: string = 'App';
 
+  applySignatureImage(path: string): string {
+    const signatureUrls = this._generalService.signatureImageUrls(path);
+    this.signatureProdUrl = signatureUrls.prod;
+    return signatureUrls.driver || signatureUrls.prod;
+  }
+
+  useProdSignature(): void {
+    if (this.signatureProdUrl && this.CustomerSignatureByDriver !== this.signatureProdUrl) {
+      this.CustomerSignatureByDriver = this.signatureProdUrl;
+    }
+  }
 
   constructor(
     public httpClient: HttpClient,
@@ -1778,9 +1790,7 @@ public loadDataForApp()
       this.advanceTableForm.patchValue({locationOutKMForBillingApp:locOut});
       this.advanceTableForm.patchValue({pickUpKMForBillingApp:pickup});
       this.advanceTableForm.patchValue({dropOffKMForBillingApp:dropOff});
-      this.CustomerSignatureByDriver = this._generalService.resolveStaticImageUrl(
-        this.advanceTableApp[0].customerSignatureImage
-      );
+      this.CustomerSignatureByDriver = this.applySignatureImage(this.advanceTableApp[0].customerSignatureImage);
 
       if(this.advanceTableApp[0].pickUpDateByApp && this.advanceTableApp[0].dropOffDateByApp)
         {
@@ -1930,9 +1940,7 @@ public loadDataForDriver()
       var pickup=this.advanceTableForm.get("pickUpKMForBilling").value;
       var dropOff=this.advanceTableForm.get("dropOffKMForBilling").value;
    
-      this.CustomerSignatureByDriver = this._generalService.resolveStaticImageUrl(
-        this.advanceTable[0].customerSignatureImage
-      );
+      this.CustomerSignatureByDriver = this.applySignatureImage(this.advanceTable[0].customerSignatureImage);
    
       this.advanceTableForm.patchValue({locationOutKMForBillingManual:locOut});
       this.advanceTableForm.patchValue({pickUpKMForBillingManual:pickup});
@@ -2091,9 +2099,7 @@ public loadDataForGPS()
       var pickup=this.advanceTableForm.get("pickUpKMForBilling").value;
       var dropOff=this.advanceTableForm.get("dropOffKMForBilling").value;
    
-      this.CustomerSignatureByDriver = this._generalService.resolveStaticImageUrl(
-        this.advanceTableGPS[0].customerSignatureImage
-      );
+      this.CustomerSignatureByDriver = this.applySignatureImage(this.advanceTableGPS[0].customerSignatureImage);
    
       this.advanceTableForm.patchValue({locationOutKMForBillingManual:locOut});
       this.advanceTableForm.patchValue({pickUpKMForBillingManual:pickup});

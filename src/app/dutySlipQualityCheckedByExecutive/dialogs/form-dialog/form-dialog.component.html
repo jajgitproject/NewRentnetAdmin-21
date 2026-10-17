@@ -82,11 +82,11 @@
                             Selfie With Uniform
                         </mat-label>
                         <br />
-                        <span>
+                        <span class="qc-image-wrap" [ngClass]="verdictClass(qcVerdict('selfieWithUniformAIVerdict'))">
                             <a href="{{advanceTableForm.value.selfieWithUniform}}" target="_blank"
                                 style="cursor: pointer;color: #007bff;">
                                 <!-- View -->
-                                <app-static-image [src]="advanceTableForm.value.selfieWithUniform"
+                                <app-static-image cssClass="qc-image" [src]="advanceTableForm.value.selfieWithUniform"
                                     maxWidth="100px" height="100px"
                                     *ngIf="advanceTableForm.value.selfieWithUniform"></app-static-image>
                             </a></span>
@@ -97,11 +97,11 @@
                             Front Photo
                         </mat-label>
                         <br>
-                        <span>
+                        <span class="qc-image-wrap" [ngClass]="verdictClass(qcVerdict('frontPhotoAIVerdict'))">
                             <a href="{{advanceTableForm.value.frontPhoto}}" target="_blank"
                                 style="cursor: pointer;color: #007bff;">
                                 <!-- View -->
-                                <app-static-image [src]="advanceTableForm.value.frontPhoto"
+                                <app-static-image cssClass="qc-image" [src]="advanceTableForm.value.frontPhoto"
                                     maxWidth="100px" height="100px"
                                     *ngIf="advanceTableForm.value.frontPhoto"></app-static-image>
                             </a></span>
@@ -115,11 +115,11 @@
                             Interiors with Amenities
                         </mat-label>
                         <br>
-                        <span>
+                        <span class="qc-image-wrap" [ngClass]="verdictClass(qcVerdict('interiorsWithAmenitiesAIVerdict'))">
                             <a href="{{advanceTableForm.value.interiorsWithAmenities}}" target="_blank"
                                 style="cursor: pointer;color: #007bff;">
                                 <!-- View -->
-                                <app-static-image [src]="advanceTableForm.value.interiorsWithAmenities"
+                                <app-static-image cssClass="qc-image" [src]="advanceTableForm.value.interiorsWithAmenities"
                                     maxWidth="100px" height="100px"
                                     *ngIf="advanceTableForm.value.interiorsWithAmenities"></app-static-image>
                             </a></span>
@@ -129,11 +129,11 @@
                             Breath Analyzer
                         </mat-label>
                         <br>
-                        <span>
+                        <span class="qc-image-wrap" [ngClass]="verdictClass(qcVerdict('isolatedCabinAIVerdict'))">
                             <a href="{{advanceTableForm.value.isolatedCabin}}" target="_blank"
                                 style="cursor: pointer;color: #007bff;">
                                 <!-- View -->
-                                <app-static-image [src]="advanceTableForm.value.isolatedCabin"
+                                <app-static-image cssClass="qc-image" [src]="advanceTableForm.value.isolatedCabin"
                                     maxWidth="100px" height="100px"
                                     *ngIf="advanceTableForm.value.isolatedCabin"></app-static-image>
                             </a></span>

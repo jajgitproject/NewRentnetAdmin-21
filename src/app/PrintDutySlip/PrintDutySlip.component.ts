@@ -39,6 +39,8 @@ import moment from 'moment';
 })
 export class PrintDutySlipComponent {
   dataSource: any;
+  signatureDriverUrl: string = null;
+  signatureProdUrl: string = null;
   dataSourceForInvoiceDuties: any[] = [];ReservationStatus: any;
   advanceTable: PrintDutySlip | null;
   ReservationID: number;
@@ -104,9 +106,10 @@ export class PrintDutySlipComponent {
         this.dataSource = data;
         this.normalizeDutySlipPrintFlags(this.dataSource);
         if (this.dataSource?.customerSignatureImage) {
-          this.dataSource.customerSignatureImage = this._generalService.resolveStaticImageUrl(
-            this.dataSource.customerSignatureImage
-          );
+          const signatureUrls = this._generalService.signatureImageUrls(this.dataSource.customerSignatureImage);
+          this.signatureDriverUrl = signatureUrls.driver;
+          this.signatureProdUrl = signatureUrls.prod;
+          this.dataSource.customerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl;
         }
         this.applyDropAddressFromReservation();
         // Total Kms in header uses totalRunningKM; totalKms is for Running Detail total row when distance column is shown.
@@ -118,6 +121,12 @@ export class PrintDutySlipComponent {
         //this.getTime();
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
+    }
+
+    useProdSignature(): void {
+      if (this.signatureProdUrl && this.dataSource && this.dataSource.customerSignatureImage !== this.signatureProdUrl) {
+        this.dataSource.customerSignatureImage = this.signatureProdUrl;
+      }
     }
 
     getDropAddress(): string {
