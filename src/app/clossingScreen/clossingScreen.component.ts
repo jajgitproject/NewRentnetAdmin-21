@@ -185,7 +185,9 @@ export class ClossingScreenComponent implements OnInit {
   locationInLatByApp: any;
   locationInLongByApp: any;
   CustomerSignatureByDriver: any;
+  signatureDriverUrl: string = null;
   signatureProdUrl: string = null;
+  signatureUatUrl: string = null;
   dutySlipMap: DutySlipMap;
   mapOfDutySlip: string;
   InventoryID: any;
@@ -314,13 +316,20 @@ export class ClossingScreenComponent implements OnInit {
 
   applySignatureImage(path: string): string {
     const signatureUrls = this._generalService.signatureImageUrls(path);
+    this.signatureDriverUrl = signatureUrls.driver;
     this.signatureProdUrl = signatureUrls.prod;
-    return signatureUrls.driver || signatureUrls.prod;
+    this.signatureUatUrl = signatureUrls.uat;
+    return signatureUrls.driver || signatureUrls.prod || signatureUrls.uat;
   }
 
   useProdSignature(): void {
-    if (this.signatureProdUrl && this.CustomerSignatureByDriver !== this.signatureProdUrl) {
-      this.CustomerSignatureByDriver = this.signatureProdUrl;
+    const next = this._generalService.nextSignatureUrl(this.CustomerSignatureByDriver, {
+      driver: this.signatureDriverUrl,
+      prod: this.signatureProdUrl,
+      uat: this.signatureUatUrl
+    });
+    if (next) {
+      this.CustomerSignatureByDriver = next;
     }
   }
 

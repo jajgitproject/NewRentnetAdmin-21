@@ -140,6 +140,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
  CustomerSignatureImage :string = null;
  signatureDriverUrl: string = null;
  signatureProdUrl: string = null;
+ signatureUatUrl: string = null;
  buttonText: string = 'Save';
   selectedClosureType: string;
   DutySlipID: number;
@@ -242,7 +243,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       );
       this.signatureDriverUrl = signatureUrls.driver;
       this.signatureProdUrl = signatureUrls.prod;
-      this.CustomerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl;
+      this.signatureUatUrl = signatureUrls.uat;
+      this.CustomerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl || this.signatureUatUrl;
       this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage =
         this.CustomerSignatureImage;
     }
@@ -271,10 +273,15 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   }
 
   useProdSignature(): void {
-    if (this.signatureProdUrl && this.CustomerSignatureImage !== this.signatureProdUrl) {
-      this.CustomerSignatureImage = this.signatureProdUrl;
+    const next = this._generalService.nextSignatureUrl(this.CustomerSignatureImage, {
+      driver: this.signatureDriverUrl,
+      prod: this.signatureProdUrl,
+      uat: this.signatureUatUrl
+    });
+    if (next) {
+      this.CustomerSignatureImage = next;
       if (this.advanceTableClosingOne?.closingDutySlipModel) {
-        this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage = this.signatureProdUrl;
+        this.advanceTableClosingOne.closingDutySlipModel.customerSignatureImage = next;
       }
     }
   }

@@ -483,16 +483,27 @@ export class GeneralService {
     return this.buildStaticImageUrlFromPath(relativePath, this.ImageURL);
   }
 
-  /** Driver-app host first, production admin host when that file is missing. */
-  signatureImageUrls(path: string | null | undefined): { driver: string | null; prod: string | null } {
+  /** Driver-app host, then production, then the UAT driver app. */
+  signatureImageUrls(path: string | null | undefined): { driver: string | null; prod: string | null; uat: string | null } {
     const relativePath = this.normalizeStaticImagePath(path);
     if (!relativePath) {
-      return { driver: null, prod: null };
+      return { driver: null, prod: null, uat: null };
     }
     return {
       driver: this.buildStaticImageUrlFromPath(relativePath, 'https://newdriverapp.ecoserp.in/'),
-      prod: this.buildStaticImageUrlFromPath(relativePath, 'https://prodapi.ecoserp.in/')
+      prod: this.buildStaticImageUrlFromPath(relativePath, 'https://prodapi.ecoserp.in/'),
+      uat: this.buildStaticImageUrlFromPath(relativePath, 'https://uatdriverapp.ecoserp.in/')
     };
+  }
+
+  nextSignatureUrl(current: string | null | undefined, urls: { driver: string | null; prod: string | null; uat: string | null }): string | null {
+    if (current === urls.driver && urls.prod && urls.prod !== current) {
+      return urls.prod;
+    }
+    if (urls.uat && urls.uat !== current) {
+      return urls.uat;
+    }
+    return null;
   }
 
   /** Rejects empty paths and folder-only StaticFiles/Images URLs with no filename. */

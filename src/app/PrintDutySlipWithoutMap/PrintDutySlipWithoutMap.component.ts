@@ -41,6 +41,7 @@ export class PrintDutySlipWithoutMapComponent {
   dataSource: any;
   signatureDriverUrl: string = null;
   signatureProdUrl: string = null;
+  signatureUatUrl: string = null;
   dataSourceForInvoiceDuties: any[] = [];ReservationStatus: any;
   advanceTable: PrintDutySlipWithoutMap | null;
   ReservationID: number;
@@ -113,7 +114,8 @@ export class PrintDutySlipWithoutMapComponent {
           const signatureUrls = this._generalService.signatureImageUrls(this.dataSource.customerSignatureImage);
           this.signatureDriverUrl = signatureUrls.driver;
           this.signatureProdUrl = signatureUrls.prod;
-          this.dataSource.customerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl;
+          this.signatureUatUrl = signatureUrls.uat;
+          this.dataSource.customerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl || this.signatureUatUrl;
         }
         this.dataSource.tollParkingsImages = this.normalizeAttachmentImages(
           this.dataSource?.tollParkingsImages,
@@ -139,8 +141,13 @@ export class PrintDutySlipWithoutMapComponent {
     }
 
     useProdSignature(): void {
-      if (this.signatureProdUrl && this.dataSource && this.dataSource.customerSignatureImage !== this.signatureProdUrl) {
-        this.dataSource.customerSignatureImage = this.signatureProdUrl;
+      const next = this._generalService.nextSignatureUrl(this.dataSource?.customerSignatureImage, {
+        driver: this.signatureDriverUrl,
+        prod: this.signatureProdUrl,
+        uat: this.signatureUatUrl
+      });
+      if (next && this.dataSource) {
+        this.dataSource.customerSignatureImage = next;
       }
     }
 
