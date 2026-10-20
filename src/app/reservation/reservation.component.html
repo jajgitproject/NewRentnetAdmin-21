@@ -444,7 +444,7 @@
                                         panelWidth="custom-autocomplete-panel">
                                         <mat-option *ngFor="let option of toArray(filteredVehicleOptions | async)"
                                             [value]="option.vehicle"
-                                            (click)="getVehicleID(option.vehicleID,option.vehicleCategoryID)">
+                                            (click)="getVehicleID(option.vehicleID, option.vehicleCategoryID, option.vehicle)">
                                             {{option.vehicle}}
                                         </mat-option>
                                     </mat-autocomplete>

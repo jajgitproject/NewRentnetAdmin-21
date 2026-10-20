@@ -1728,6 +1728,16 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
    GetEmployees(): Observable<EmployeeDropDown[]> {
     return this.http.get<EmployeeDropDown[]>(this.BaseURL + "employee/ForDropDowns");
   }
+
+  searchEmployeesByPrefix(prefix: string): Observable<EmployeeDropDown[]> {
+    const trimmed = String(prefix ?? '').trim();
+    if (trimmed.length < 3) {
+      return of([]);
+    }
+    return this.http.get<EmployeeDropDown[]>(
+      this.BaseURL + 'employee/SearchByPrefix/' + encodeURIComponent(trimmed)
+    );
+  }
     GetCustomerChangesKam(): Observable<EmployeeDropDown[]> {
     return this.http.get<EmployeeDropDown[]>(this.BaseURL + "customerKAMChange/ForOLDKAMDropDown");
   }

@@ -61,6 +61,7 @@ import { EmailInfoService } from '../EmailInfo/EmailInfo.service';
 import { EmailInfoModule } from '../EmailInfo/EmailInfo.module';
 import { LocationOutTimeEditComponent } from './dialogs/locationOutTimeEdit/locationOutTimeEdit.component';
 import { KamPickupAddressHistoryDialogComponent } from './dialogs/kam-pickup-address-history-dialog/kam-pickup-address-history-dialog.component';
+import { SoftCappingBypassDialogComponent } from './dialogs/soft-capping-bypass-dialog/soft-capping-bypass-dialog.component';
 import { ReservationGroupDetailsService } from '../reservationGroupDetails/reservationGroupDetails.service';
 @NgModule({
   declarations: [
@@ -68,7 +69,8 @@ import { ReservationGroupDetailsService } from '../reservationGroupDetails/reser
     SavedAddressComponent,
     FormDialogComponent,
     LocationOutTimeEditComponent,
-    KamPickupAddressHistoryDialogComponent
+    KamPickupAddressHistoryDialogComponent,
+    SoftCappingBypassDialogComponent
   ],
   imports: [
     GooglePlaceModule,

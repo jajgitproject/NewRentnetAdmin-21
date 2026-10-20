@@ -159,8 +159,24 @@ export class ReservationService
     return this.httpClient.post<any>(this.GA_API_URL , advanceTable);
   }
 
+  private preserveSoftCappingBypassFields(advanceTable: any): void {
+    if (!advanceTable) {
+      return;
+    }
+    const reason = advanceTable.softCappingByPassReason;
+    const details = advanceTable.softCappingByPassDetails;
+    const approverId = advanceTable.softCappingByPassApproverID;
+    if (reason == null && details == null && approverId == null) {
+      return;
+    }
+    advanceTable.softCappingByPassReason = reason ?? '';
+    advanceTable.softCappingByPassDetails = details ?? '';
+    advanceTable.softCappingByPassApproverID = approverId ?? null;
+  }
+
   update(advanceTable: any)
   {
+    this.preserveSoftCappingBypassFields(advanceTable);
     advanceTable.reservationStatusChangedByID=this.generalService.getUserID();
     advanceTable.userID=this.generalService.getUserID();
     if(advanceTable.etrDate==="")
@@ -270,6 +286,7 @@ export class ReservationService
 
   updateReservationEdit(advanceTable: any)
   {
+    this.preserveSoftCappingBypassFields(advanceTable);
     advanceTable.reservationStatusChangedByID=this.generalService.getUserID();
     advanceTable.userID=this.generalService.getUserID();
     if(advanceTable.pickupSpotTypeID==="")
@@ -454,6 +471,13 @@ export class ReservationService
   getReservationCapping(CustomerGroupID:number,CustomerID:number,PickupDate:string,CityID:number,PackageTypeID:number,VehicleID:number):  Observable<any> 
   {
     return this.httpClient.get(this.API_URL_CustomerGroupReservationCapping + "/CheckReservationCapping/" + CustomerGroupID + '/' + CustomerID + '/' + PickupDate + '/' + CityID + '/' + PackageTypeID + '/' + VehicleID);
+  }
+
+  getSoftReservationCapping(CustomerGroupID:number,CustomerID:number,PickupDate:string,CityID:number,PackageTypeID:number,VehicleID:number): Observable<any> {
+    return this.httpClient.get(
+      this.API_URL_CustomerGroupReservationCapping + '/CheckSoftReservationCapping/'
+      + CustomerGroupID + '/' + CustomerID + '/' + PickupDate + '/' + CityID + '/' + PackageTypeID + '/' + VehicleID
+    );
   }
   GetResrvationGSTForCityID(customerID:number,cityID:number): Observable<any> {
     return this.httpClient.get(this.generalService.BaseURL + "customerConfigurationInvoicing/GetResrvationGSTForCityID/"+customerID +'/'+cityID);

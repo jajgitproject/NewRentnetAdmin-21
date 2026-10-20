@@ -39,6 +39,7 @@ import { ViewKAM } from '../viewKAM/viewKAM.model';
 import { GoogleAddressDropDown } from './googleAddressDropDown.model';
 import { SavedAddressComponent } from './dialogs/saved-address/saved-address.component';
 import { KamPickupAddressHistoryDialogComponent } from './dialogs/kam-pickup-address-history-dialog/kam-pickup-address-history-dialog.component';
+import { SoftCappingBypassDialogComponent } from './dialogs/soft-capping-bypass-dialog/soft-capping-bypass-dialog.component';
 import moment from 'moment';
 import { ReservationCustomerDetails } from '../general/reservationCustomerDetailsDropDown.model';
 import { CustomerReservationFields } from './customerReservationField.model';
@@ -386,6 +387,11 @@ advanceTableIN: InternalNoteDetails | null;
   pickupDate: any;
   bookingCount: any;
   cap: any;
+  softCappingBypassPayload: {
+    softCappingByPassReason: string;
+    softCappingByPassDetails: string;
+    softCappingByPassApproverID: number;
+  } | null = null;
   dataSourceCSF:CustomerSpecificDetails[];
   dynamicForm: FormGroup;
   primaryPassengerID: string;
@@ -986,6 +992,11 @@ private buildReservationSaveBody(
     body.projectCode = Array.isArray(body.projectCode) ? body.projectCode : [];
     body.fieldValue = Array.isArray(body.fieldValue) ? body.fieldValue : [];
     body.customerSpecificFields = body.customerSpecificFields || null;
+    if (this.softCappingBypassPayload) {
+      body.softCappingByPassReason = this.softCappingBypassPayload.softCappingByPassReason;
+      body.softCappingByPassDetails = this.softCappingBypassPayload.softCappingByPassDetails;
+      body.softCappingByPassApproverID = this.softCappingBypassPayload.softCappingByPassApproverID;
+    }
     return body;
   }
 
@@ -996,6 +1007,11 @@ private buildReservationSaveBody(
   body.customerSpecificFields = csfPayload.customerSpecificFields;
   if (!body.reservationID) {
     body.reservationID = csfPayload.reservationID;
+  }
+  if (this.softCappingBypassPayload) {
+    body.softCappingByPassReason = this.softCappingBypassPayload.softCappingByPassReason;
+    body.softCappingByPassDetails = this.softCappingBypassPayload.softCappingByPassDetails;
+    body.softCappingByPassApproverID = this.softCappingBypassPayload.softCappingByPassApproverID;
   }
   return body;
 }
@@ -2684,17 +2700,24 @@ toArray<T>(value: any): T[] {
     );
   
     if (selectedCar) {
-      this.getVehicleID(selectedCar.vehicleID,selectedCar.vehicleCategoryID);
+      this.getVehicleID(selectedCar.vehicleID, selectedCar.vehicleCategoryID, selectedCar.vehicle);
     }
   }
 
-  getVehicleID(vehicleID: any,vehicleCategoryID:any) {
-    this.vehicleID=vehicleID;
-    this.vehicleCategoryID=vehicleCategoryID;
-    this.advanceTableForm.patchValue({vehicleID:this.vehicleID});
-    this.advanceTableForm.patchValue({vehicleCategoryID:this.vehicleCategoryID});
+  getVehicleID(vehicleID: any, vehicleCategoryID: any, vehicleName?: string) {
+    this.vehicleID = vehicleID;
+    this.vehicleCategoryID = vehicleCategoryID;
+    const resolvedVehicleName =
+      vehicleName
+      ?? this.toArray(this.VehicleList).find((v: any) => String(v?.vehicleID) === String(vehicleID))?.vehicle
+      ?? '';
+    this.advanceTableForm.patchValue({
+      vehicleID: this.vehicleID,
+      vehicleCategoryID: this.vehicleCategoryID,
+      vehicle: resolvedVehicleName || this.advanceTableForm.get('vehicle')?.value,
+    });
     this.getETRDropOffTime();
-    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
+    this.GetReservationCapping(this.customerGroupID, this.customerID, this.pickupDate, this.cityID, this.packageTypeID, this.vehicleID);
   }
 
   //------------ Type -----------------
@@ -3711,8 +3734,10 @@ public validateCustomerSpecificFields(): boolean {
       this.reservationNo=response.reservationID
       if (this.testBookingMode) {
         this.testBookingSaved.emit(this.reservationNo);
+        this.resolveSoftCapSaveHooks();
         return;
       }
+      this.resolveSoftCapSaveHooks();
       Swal.fire({
         title: '',
         text: 'Reservation - '+ this.reservationNo+' updated. You can add further details from booking details section.',
@@ -3750,6 +3775,7 @@ public validateCustomerSpecificFields(): boolean {
     },
     error =>
     {
+      this.rejectSoftCapSaveHooks(error);
       // The API now reports partial saves (e.g. stops/passenger rows rolled
       // back) as a structured error - show its message when available.
       this.showNotification(
@@ -3807,6 +3833,7 @@ public validateCustomerSpecificFields(): boolean {
       const customerGroupID = response?.customerGroupID ?? this.advanceTableForm.value.customerGroupID ?? this.customerGroupID;
 
       this.reservationNo = reservationID;
+      this.resolveSoftCapSaveHooks();
       Swal.fire({
         title: '',
         text: 'Reservation - ' + this.reservationNo + ' updated. You can add further details from booking details section.',
@@ -3832,6 +3859,7 @@ public validateCustomerSpecificFields(): boolean {
     },
     error =>
     {
+      this.rejectSoftCapSaveHooks(error);
       this.showNotification(
         'snackbar-danger',
         error?.error?.message || 'Operation Failed.....!!!',
@@ -5577,6 +5605,41 @@ private patchDropOffAddress(res: any) {
     });
   }
 
+  /** Resolves/rejects when save finishes after soft-capping bypass dialog Continue. */
+  private softCapSaveHooks: { resolve: () => void; reject: (err: any) => void } | null = null;
+
+  private resolveSoftCapSaveHooks(): void {
+    const hooks = this.softCapSaveHooks;
+    this.softCapSaveHooks = null;
+    hooks?.resolve();
+  }
+
+  private rejectSoftCapSaveHooks(err: any): void {
+    const hooks = this.softCapSaveHooks;
+    this.softCapSaveHooks = null;
+    hooks?.reject(err);
+  }
+
+  private saveReservationAfterSoftCappingBypass(payload: {
+    softCappingByPassReason: string;
+    softCappingByPassDetails: string;
+    softCappingByPassApproverID: number;
+  }): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.applySoftCappingBypassPayload(payload);
+      this.softCapSaveHooks = { resolve, reject };
+      try {
+        if (this.action === 'edit') {
+          this.PutForReservationEdit();
+        } else {
+          this.CheckValidationForSameReservation();
+        }
+      } catch (err) {
+        this.rejectSoftCapSaveHooks(err);
+      }
+    });
+  }
+
   private waitUntil(check: () => boolean, timeoutMs = 15000, intervalMs = 200): Promise<void> {
     return new Promise((resolve, reject) => {
       const started = Date.now();
@@ -5604,16 +5667,20 @@ private patchDropOffAddress(res: any) {
     this.applyCustomerSpecificFieldsToForm(this.buildCustomerSpecificFieldsPayload());
     if (!this.validateReservationForm()) {
       return;
-    }    
-    if (this.action === 'edit') 
-    {
-      this.PutForReservationEdit();
-    } 
-    else 
-    {
-      this.CheckValidationForSameReservation();
-      //this.Put();
     }
+    this.checkReservationCappingForSave().then((gate) => {
+      if (gate === 'abort' || gate === 'done') {
+        return;
+      }
+      if (this.action === 'edit') 
+      {
+        this.PutForReservationEdit();
+      } 
+      else 
+      {
+        this.CheckValidationForSameReservation();
+      }
+    });
   }
 
   InitCompanyForCustomer()
@@ -6054,6 +6121,294 @@ private canThisRoleCreateBackDateBooking(): boolean {
   }
 
   //---------- Reservation Capping ----------
+  private getCustomerGroupDisplayName(): string {
+    if (this.customerGroup) {
+      return this.customerGroup;
+    }
+    const customerCustomerGroup = this.advanceTableForm?.get('customerCustomerGroup')?.value;
+    if (customerCustomerGroup && typeof customerCustomerGroup === 'string') {
+      const separatorIndex = customerCustomerGroup.indexOf('-');
+      if (separatorIndex >= 0) {
+        return customerCustomerGroup.substring(separatorIndex + 1).trim();
+      }
+      return customerCustomerGroup.trim();
+    }
+    return '';
+  }
+
+  private clearVehicleAfterCappingBlock(): void {
+    this.vehicleID = null;
+    this.vehicleCategoryID = null;
+    this.advanceTableForm.patchValue({
+      vehicle: '',
+      vehicleID: '',
+      vehicleCategoryID: '',
+    }, { emitEvent: false });
+  }
+
+  private getVehicleDisplayName(vehicleId?: any): string {
+    const fromForm = String(this.advanceTableForm?.get('vehicle')?.value ?? '').trim();
+    if (fromForm) {
+      return fromForm;
+    }
+    const id = vehicleId ?? this.vehicleID ?? this.advanceTableForm?.get('vehicleID')?.value;
+    if (id != null && id !== '') {
+      const match = this.toArray(this.VehicleList).find((v: any) => String(v?.vehicleID) === String(id));
+      if (match?.vehicle) {
+        return String(match.vehicle).trim();
+      }
+    }
+    return String(this.advanceTable?.vehicle ?? '').trim();
+  }
+
+  /** Contract dropdown label is often "Vehicle -- Category -- Category"; message needs vehicle name only. */
+  private getVehicleNameOnly(vehicleId?: any): string {
+    const label = this.getVehicleDisplayName(vehicleId);
+    if (!label) {
+      return '';
+    }
+    const parts = label.split(/\s+--\s+/);
+    return parts[0].trim();
+  }
+
+  private buildReservationCappingLimitMessage(bookingCount: number, cap: number, vehicleId?: any): string {
+    const customerGroup = this.getCustomerGroupDisplayName();
+    const car = this.getVehicleNameOnly(vehicleId);
+    const city = this.advanceTableForm?.get('pickupCity')?.value || '';
+    const dutyType = this.advanceTableForm?.get('packageType')?.value || '';
+    const rawDate = this.pickupDate ?? this.advanceTableForm?.get('pickupDate')?.value;
+    let dateDisplay = '';
+    if (rawDate) {
+      const formatted = moment(rawDate, ['DD/MM/YYYY', moment.ISO_8601], true);
+      dateDisplay = formatted.isValid() ? formatted.format('DD/MM/YYYY') : String(rawDate);
+    }
+    return [
+      'Booking limit reached.',
+      '',
+      `Customer Group: ${customerGroup}`,
+      `Car: ${car}`,
+      `City: ${city}`,
+      `Duty Type: ${dutyType}`,
+      `Date: ${dateDisplay}`,
+      `Booked: ${bookingCount} of ${cap}`,
+      '',
+      'This booking cannot be made. Choose another Date, Car or Duty Type, or ask an admin to raise the limit.',
+    ].join('\n');
+  }
+
+  private formatPickupDateForCappingApi(pickupDate: any): string | null {
+    const parsed = this.parseFlexibleDate(pickupDate);
+    return parsed ? parsed.format('YYYY-MM-DD') : null;
+  }
+
+  private getReservationCappingRequestParams(): {
+    customerGroupID: any;
+    customerID: any;
+    cityID: any;
+    packageTypeID: any;
+    vehicleID: any;
+    pickupDate: any;
+  } | null {
+    const raw = this.advanceTableForm.getRawValue();
+    const customerGroupID = this.customerGroupID || raw.customerGroupID;
+    const customerID = this.customerID || raw.customerID;
+    const cityID = this.cityID || raw.pickupCityID;
+    const packageTypeID = this.packageTypeID || raw.packageTypeID;
+    const vehicleID = this.vehicleID || raw.vehicleID;
+    const pickupDate = this.pickupDate ?? raw.pickupDate;
+    if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleID) {
+      return null;
+    }
+    return { customerGroupID, customerID, cityID, packageTypeID, vehicleID, pickupDate };
+  }
+
+  private showReservationCappingLimitSwal(bookingCount: number, cap: number, vehicleID: any): void {
+    const cappingMessage = this.buildReservationCappingLimitMessage(bookingCount, cap, vehicleID);
+    Swal.fire({
+      title: '',
+      html: `<div style="text-align:left;white-space:pre-line;">${cappingMessage.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`,
+      icon: 'warning',
+    });
+  }
+
+  /** @returns true when save / selection may proceed; false when hard capping blocks the booking. */
+  private handleReservationCappingResponse(data: any, vehicleID: any, clearVehicleOnBlock: boolean): boolean {
+    if (!data) {
+      return true;
+    }
+    this.bookingCount = data.bookingCount;
+    this.cap = data.cap;
+    if (this.cap === 0) {
+      Swal.fire({
+        title: '',
+        text: `No cars can be provided for ${this.customer} on the selected date (capping is zero).`,
+        icon: 'warning',
+      });
+      if (clearVehicleOnBlock) {
+        this.clearVehicleAfterCappingBlock();
+      }
+      return false;
+    }
+    if (this.cap != null && this.cap > 0 && this.bookingCount >= this.cap) {
+      this.showReservationCappingLimitSwal(this.bookingCount, this.cap, vehicleID);
+      if (clearVehicleOnBlock) {
+        this.clearVehicleAfterCappingBlock();
+      }
+      return false;
+    }
+    return true;
+  }
+
+  private getProjectedSoftBookingCount(data: any): number {
+    const existing = data?.bookingCount ?? data?.BookingCount ?? 0;
+    return Number(existing) + 1;
+  }
+
+  private isSoftCappingLimitCrossed(data: any): boolean {
+    if (!data) {
+      return false;
+    }
+    const cap = data.cap ?? data.Cap;
+    if (cap == null || cap <= 0) {
+      return false;
+    }
+    return this.getProjectedSoftBookingCount(data) > cap;
+  }
+
+  private buildSoftCappingCrossedMessage(data: any, vehicleId?: any): string {
+    const customerGroup = this.getCustomerGroupDisplayName();
+    const car = this.getVehicleNameOnly(vehicleId);
+    const city = this.advanceTableForm?.get('pickupCity')?.value || '';
+    const packageType = this.advanceTableForm?.get('packageType')?.value || '';
+    const rawDate = this.pickupDate ?? this.advanceTableForm?.get('pickupDate')?.value;
+    let dateDisplay = '';
+    if (rawDate) {
+      const formatted = moment(rawDate, ['DD/MM/YYYY', moment.ISO_8601], true);
+      dateDisplay = formatted.isValid() ? formatted.format('DD/MM/YYYY') : String(rawDate);
+    }
+    const projected = this.getProjectedSoftBookingCount(data);
+    const cap = data?.cap ?? data?.Cap ?? '';
+    return `Booking limit crossed for Customer Group: ${customerGroup}, Car: ${car}, City: ${city}, Package Type: ${packageType} on ${dateDisplay}. This will be booking ${projected} against a daily limit of ${cap}. You can continue with a reason and approver.`;
+  }
+
+  private fetchSoftCappingData(): Promise<any | null> {
+    const params = this.getReservationCappingRequestParams();
+    if (!params) {
+      return Promise.resolve(null);
+    }
+    const pickupDateApi = this.formatPickupDateForCappingApi(params.pickupDate);
+    if (!pickupDateApi) {
+      return Promise.resolve(null);
+    }
+    return this.toPromise(
+      this.reservationService.getSoftReservationCapping(
+        params.customerGroupID,
+        params.customerID,
+        pickupDateApi,
+        params.cityID,
+        params.packageTypeID,
+        params.vehicleID
+      )
+    ).catch(() => null);
+  }
+
+  private runSoftCappingInfoCheck(vehicleID: any): void {
+    this.fetchSoftCappingData().then((data) => {
+      if (!this.isSoftCappingLimitCrossed(data)) {
+        return;
+      }
+      const message = this.buildSoftCappingCrossedMessage(data, vehicleID);
+      Swal.fire({
+        title: '',
+        html: `<div style="text-align:left;white-space:pre-line;">${message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`,
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+    });
+  }
+
+  private applySoftCappingBypassPayload(result: {
+    softCappingByPassReason: string;
+    softCappingByPassDetails: string;
+    softCappingByPassApproverID: number;
+  }): void {
+    this.softCappingBypassPayload = result;
+  }
+
+  private promptSoftCappingBypass(data: any, vehicleID: any): Promise<'proceed' | 'abort' | 'done'> {
+    const projected = this.getProjectedSoftBookingCount(data);
+    const cap = data?.cap ?? data?.Cap ?? 0;
+    const dialogRef = this.dialog.open(SoftCappingBypassDialogComponent, {
+      width: '520px',
+      maxWidth: '92vw',
+      panelClass: 'soft-capping-bypass-dialog-panel',
+      disableClose: true,
+      autoFocus: false,
+      data: {
+        summaryMessage: this.buildSoftCappingCrossedMessage(data, vehicleID),
+        bookingCount: projected,
+        cap,
+        onSaveAfterBypass: (payload) => this.saveReservationAfterSoftCappingBypass(payload),
+      },
+    });
+    return this.toPromise(dialogRef.afterClosed()).then((result) => {
+      if (!result) {
+        this.showNotification(
+          'snackbar-info',
+          'Save cancelled. Update the booking and click Save again when ready.',
+          'bottom',
+          'center'
+        );
+        return 'abort';
+      }
+      if (result.savedFromDialog) {
+        return 'done';
+      }
+      this.applySoftCappingBypassPayload(result);
+      return 'proceed';
+    });
+  }
+
+  private checkSoftCappingForSave(): Promise<'proceed' | 'abort' | 'done'> {
+    const params = this.getReservationCappingRequestParams();
+    return this.fetchSoftCappingData().then((data) => {
+      if (!this.isSoftCappingLimitCrossed(data)) {
+        this.softCappingBypassPayload = null;
+        return 'proceed';
+      }
+      return this.promptSoftCappingBypass(data, params?.vehicleID);
+    });
+  }
+
+  private checkReservationCappingForSave(): Promise<'proceed' | 'abort' | 'done'> {
+    const params = this.getReservationCappingRequestParams();
+    if (!params) {
+      return Promise.resolve('proceed');
+    }
+    const pickupDateApi = this.formatPickupDateForCappingApi(params.pickupDate);
+    if (!pickupDateApi) {
+      return Promise.resolve('proceed');
+    }
+    return this.toPromise(
+      this.reservationService.getReservationCapping(
+        params.customerGroupID,
+        params.customerID,
+        pickupDateApi,
+        params.cityID,
+        params.packageTypeID,
+        params.vehicleID
+      )
+    )
+      .then((data) => {
+        const hardPassed = this.handleReservationCappingResponse(data, params.vehicleID, false);
+        if (!hardPassed) {
+          return 'abort';
+        }
+        return this.checkSoftCappingForSave();
+      })
+      .catch(() => 'proceed');
+  }
+
   public GetReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleID)
   {
     // All 6 params are path segments; any missing value produces URLs like
@@ -6061,47 +6416,13 @@ private canThisRoleCreateBackDateBooking(): boolean {
     if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleID) {
       return;
     }
-    const formattedDate = moment(pickupDate, "DD/MM/YYYY");
-    if (!formattedDate.isValid()) { return; }
-    pickupDate = formattedDate.format("YYYY-MM-DD");
-    this.reservationService.getReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleID).subscribe(
+    const pickupDateApi = this.formatPickupDateForCappingApi(pickupDate);
+    if (!pickupDateApi) { return; }
+    this.reservationService.getReservationCapping(customerGroupID,customerID,pickupDateApi,cityID,packageTypeID,vehicleID).subscribe(
       (data: any) =>   
       {
-        if (data) 
-        {
-          this.bookingCount = data.bookingCount;
-          this.cap = data.cap;
-          if (this.cap === 0)
-          {
-            Swal.fire({
-              title: '',
-              text: `No cars can be provided for ${this.customer} on the selected date (capping is zero).`,
-              icon: 'warning',
-            });
-            return false;
-          }
-          if (this.cap != null && this.cap > 0 && this.bookingCount >= this.cap) 
-          {
-            Swal.fire({
-              title: '',
-              text: `The maximum booking limit ${this.bookingCount} for ${this.customer} is exhausted.`,
-              icon: 'warning',
-            });
-            return false;
-          }
-          return true;
-          // if((this.bookingCount > this.cap) && (this.bookingCount != 0) && (this.cap != null && this.cap != 0))
-          // {
-          //   this.CapMessageShow = true;
-          //   this.CapMessage = "You have exceeded your booking limit.";
-          // }
-          // else
-          // {
-          //   this.CapMessageShow = false;
-          // }
-        }
-        else 
-        {
+        if (this.handleReservationCappingResponse(data, vehicleID, true)) {
+          this.runSoftCappingInfoCheck(vehicleID);
         }
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -6515,6 +6836,10 @@ private isEditingAllowed(): boolean {
               if (result.isConfirmed) 
               {
                 this.Put();
+              }
+              else
+              {
+                this.rejectSoftCapSaveHooks(new Error('Save cancelled at duplicate booking confirmation.'));
               }
             });
 
