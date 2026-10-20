@@ -35,6 +35,7 @@ interface MenuItem {
 })
 export class CustomerGroupComponent implements OnInit {
   displayedColumns = [
+    'id',
     'CustomerGroup',
     'createBookingBeforeMinutes',
   'editBookingBeforeMinutes',

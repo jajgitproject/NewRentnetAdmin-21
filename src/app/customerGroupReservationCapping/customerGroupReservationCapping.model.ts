@@ -68,3 +68,18 @@ export interface BulkUpdateRequest {
 export interface BulkUpdateResponse {
   updatedCount: number;
 }
+
+export interface CappingImportError {
+  rowNumber: number;
+  field: string;
+  message: string;
+}
+
+export interface CappingImportResult {
+  success?: boolean;
+  createdCount: number;
+  updatedCount: number;
+  totalRows?: number;
+  message?: string;
+  errors?: CappingImportError[];
+}

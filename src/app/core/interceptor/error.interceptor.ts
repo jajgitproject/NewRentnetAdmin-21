@@ -287,11 +287,23 @@ export class ErrorInterceptor implements HttpInterceptor {
     if (!errorBody || typeof errorBody !== 'object' || !('errors' in errorBody)) {
       return '';
     }
-    const errors = (errorBody as { errors?: Record<string, unknown> }).errors;
-    if (!errors || typeof errors !== 'object') {
+    const errors = (errorBody as { errors?: unknown }).errors;
+    if (!errors) {
       return '';
     }
-    return Object.entries(errors)
+
+    if (Array.isArray(errors)) {
+      return errors
+        .map((item) => this.formatStructuredImportError(item))
+        .filter((part) => !!part.trim())
+        .join('\n');
+    }
+
+    if (typeof errors !== 'object') {
+      return '';
+    }
+
+    return Object.entries(errors as Record<string, unknown>)
       .map(([key, value]) => {
         const field = String(key || '').replace(/^\$\./, '');
         const text = Array.isArray(value) ? value.join(' ') : String(value ?? '');
@@ -299,6 +311,30 @@ export class ErrorInterceptor implements HttpInterceptor {
       })
       .filter((part) => !!part.trim())
       .join(' | ');
+  }
+
+  private formatStructuredImportError(item: unknown): string {
+    if (typeof item === 'string') {
+      return item.trim();
+    }
+    if (!item || typeof item !== 'object') {
+      return String(item ?? '');
+    }
+    const row = (item as { rowNumber?: unknown; RowNumber?: unknown }).rowNumber
+      ?? (item as { RowNumber?: unknown }).RowNumber;
+    const field = (item as { field?: unknown; Field?: unknown }).field
+      ?? (item as { Field?: unknown }).Field;
+    const message = (item as { message?: unknown; Message?: unknown }).message
+      ?? (item as { Message?: unknown }).Message;
+    const text = message != null ? String(message).trim() : '';
+    if (!text) {
+      return '';
+    }
+    const rowLabel = row != null && String(row).trim() !== '' && String(row) !== '0'
+      ? `Row ${row}`
+      : 'File';
+    const fieldLabel = field != null && String(field).trim() !== '' ? String(field).trim() : '';
+    return fieldLabel ? `${rowLabel} (${fieldLabel}): ${text}` : `${rowLabel}: ${text}`;
   }
 
 }

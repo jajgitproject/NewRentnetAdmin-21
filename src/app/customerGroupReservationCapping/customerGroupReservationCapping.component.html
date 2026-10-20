@@ -103,6 +103,14 @@
             <div class="br-table-toolbar cg-cap-table-toolbar">
                 <div class="cg-cap-toolbar-spacer"></div>
                 <div class="cg-cap-toolbar-actions">
+                    <input #excelFileInput type="file" accept=".xlsx" hidden (change)="onExcelFileSelected($event)">
+                    <button mat-icon-button type="button" title="Download Excel (current customer group data)" (click)="downloadImportTemplate()" [disabled]="!customerGroup_ID">
+                        <mat-icon>download</mat-icon>
+                    </button>
+                    <button mat-mini-fab color="primary" type="button" title="Import from Excel"
+                        [disabled]="!customerGroup_ID || importInProgress" (click)="triggerExcelImport()">
+                        <mat-icon>upload_file</mat-icon>
+                    </button>
                     <button mat-mini-fab color="primary" type="button" title="Add Capping" (click)="addNew()">
                         <mat-icon>add</mat-icon>
                     </button>

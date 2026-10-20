@@ -5,7 +5,7 @@ import { CustomerGroupReservationCappingModel } from './customerGroupReservation
 import { HttpClient } from '@angular/common/http';
 import { GeneralService } from '../general/general.service';
 import { CityDropDown } from '../city/cityDropDown.model';
-import { BulkUpdateRequest, BulkUpdateResponse } from './customerGroupReservationCapping.model';
+import { BulkUpdateRequest, BulkUpdateResponse, CappingImportResult } from './customerGroupReservationCapping.model';
 
 @Injectable()
 export class CustomerGroupReservationCappingService 
@@ -129,6 +129,20 @@ export class CustomerGroupReservationCappingService
   {
       const capType = CappingType ? encodeURIComponent(CappingType) : 'null';
       return this.httpClient.get<CityDropDown[]>(this.API_URL + '/'+ "GetCityForCustomerGroupCapping/" + CustomerGroupID + '/'+ PackageTypeID + '/'+ VehicleID + '/' + capType);
+  }
+
+  importExcel(customerGroupId: number, file: File): Observable<CappingImportResult> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    const userId = this.generalService.getUserID();
+    return this.httpClient.post<CappingImportResult>(
+      `${this.API_URL}/import-excel/${customerGroupId}/${userId}`,
+      formData
+    );
+  }
+
+  downloadImportTemplate(customerGroupId: number): Observable<Blob> {
+    return this.httpClient.get(`${this.API_URL}/import-excel-template/${customerGroupId}`, { responseType: 'blob' });
   }
 
 }

@@ -104,7 +104,7 @@
                                  <div class="scrollable-table-container">
                                 <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
                                 <ng-container matColumnDef="id">
-                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Group ID</mat-header-cell>
                                     <mat-cell *matCellDef="let row">{{row.customerGroupID}}</mat-cell>
                                 </ng-container>
 

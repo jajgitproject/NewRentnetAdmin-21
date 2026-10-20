@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { CustomerGroupReservationCappingModel, CappingListStatusFilter } from './customerGroupReservationCapping.model';
+import { CustomerGroupReservationCappingModel, CappingListStatusFilter, CappingImportError } from './customerGroupReservationCapping.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
@@ -78,6 +78,7 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
   filtersCollapsed = false;
   hasSearched = false;
   selectedRows = new Map<number, CustomerGroupReservationCappingModel>();
+  importInProgress = false;
 
   constructor(
     public dialog: MatDialog,
@@ -91,6 +92,7 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
   @ViewChild('filter', { static: true }) filter: ElementRef;
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
+  @ViewChild('excelFileInput') excelFileInput: ElementRef<HTMLInputElement>;
   contextMenuPosition = { x: '0px', y: '0px' };
 
   ngOnInit() 
@@ -679,6 +681,106 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
         }
       }
     );
+  }
+
+  triggerExcelImport(): void {
+    if (!this.customerGroup_ID || this.importInProgress) {
+      return;
+    }
+    this.excelFileInput?.nativeElement?.click();
+  }
+
+  onExcelFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    input.value = '';
+    if (!file || !this.customerGroup_ID) {
+      return;
+    }
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      this.showNotification('snackbar-danger', 'Please upload a .xlsx file.', 'top', 'right');
+      return;
+    }
+
+    this.importInProgress = true;
+    this.customerGroupReservationCappingService.importExcel(Number(this.customerGroup_ID), file).subscribe({
+      next: (result) => {
+        this.importInProgress = false;
+        const created = result?.createdCount ?? (result as any)?.CreatedCount ?? 0;
+        const updated = result?.updatedCount ?? (result as any)?.UpdatedCount ?? 0;
+        this.showNotification(
+          'snackbar-success',
+          `Import complete. Created ${created}, updated ${updated}.`,
+          'top',
+          'right'
+        );
+        if (this.hasSearched) {
+          this.SearchData();
+        }
+      },
+      error: (error: unknown) => {
+        this.importInProgress = false;
+        this.showImportErrorDialog(error);
+      }
+    });
+  }
+
+  private showImportErrorDialog(error: unknown): void {
+    let message = 'Import failed. Please check the file and try again.';
+    if (typeof error === 'string' && error.trim()) {
+      message = error.trim();
+    } else if (error instanceof HttpErrorResponse) {
+      const body = error.error;
+      const errors: CappingImportError[] = body?.errors ?? body?.Errors ?? [];
+      const fallback = body?.message ?? body?.Message ?? error.message;
+      message = this.formatImportErrorMessage(errors, fallback);
+    }
+    this.dialog.open(CappingMessageDialogComponent, {
+      width: '520px',
+      maxHeight: '80vh',
+      panelClass: 'cg-cap-message-dialog',
+      autoFocus: false,
+      data: {
+        title: 'Excel import failed',
+        message
+      }
+    });
+  }
+
+  downloadImportTemplate(): void {
+    if (!this.customerGroup_ID) {
+      this.showNotification('snackbar-danger', 'Customer group is not selected.', 'top', 'right');
+      return;
+    }
+    const groupId = Number(this.customerGroup_ID);
+    this.customerGroupReservationCappingService.downloadImportTemplate(groupId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `CustomerGroupReservationCapping_${groupId}.xlsx`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.showNotification('snackbar-danger', 'Could not download Excel file.', 'top', 'right');
+      }
+    });
+  }
+
+  private formatImportErrorMessage(errors: CappingImportError[], fallback?: string): string {
+    if (errors?.length) {
+      return errors
+        .map((err) => {
+          const row = err?.rowNumber ?? (err as any)?.RowNumber;
+          const text = err?.message ?? (err as any)?.Message ?? 'Invalid row';
+          const field = err?.field ?? (err as any)?.Field;
+          const prefix = row ? `Row ${row}` : 'File';
+          return field ? `${prefix} (${field}): ${text}` : `${prefix}: ${text}`;
+        })
+        .join('\n');
+    }
+    return fallback || 'Import failed. Please check the file and try again.';
   }
 
   SortingData(coloumName:any) {
