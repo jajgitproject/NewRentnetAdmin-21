@@ -9,6 +9,15 @@ import { MatTableDataSource } from '@angular/material/table';
 import { CustomerGroupReservationCappingModel, CappingListStatusFilter, CappingImportError } from './customerGroupReservationCapping.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
+import {
+  buildSelectAllSelection,
+  filterListByTerm,
+  isFullSelectionSelected,
+  mergeMultiSelectPanelOptions,
+  pruneSelectedIds,
+  selectionSpecificIds,
+  sortByString
+} from './multi-select-panel.helpers';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { GeneralService } from '../general/general.service';
@@ -58,10 +67,13 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
   packageFilterText = '';
   filterCityIDs: number[] = [];
   cityFilterText = '';
-  allCitiesLoaded = false;
-  /** Sentinel for “All vehicles” in the multi-select (not sent to API). */
+  mappedCitiesLoading = false;
+  /** Sentinel for “All” in multi-select (not sent to API). */
   readonly vehicleFilterAllValue = -1;
-  filterVehicleIDs: number[] = [this.vehicleFilterAllValue];
+  readonly cityFilterAllValue = -2;
+  filterVehicleIDs: number[] = [];
+  private vehicleFilterSelectionSnapshot: number[] = [];
+  private cityFilterSelectionSnapshot: number[] = [];
   vehicleFilterText = '';
   filterStatus: CappingListStatusFilter = 'Active';
 
@@ -107,7 +119,6 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
       this.customerGroup_ID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerGroupID));
       this.customerGroup_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerGroupName));
     });
-    this.setVehicleFilterToAll();
     this.loadMasterData();
     this.SubscribeUpdateService();
   }
@@ -122,18 +133,50 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
     });
     this._generalService.GetVehicle().subscribe((data) => {
       this.vehicleList = data || [];
-      this.filterVehicleIDs = this.normalizeVehicleFilterIds(this.filterVehicleIDs);
     });
   }
 
-  ensureCityMasterLoaded(): void {
-    if (this.allCitiesLoaded) {
+  loadMappedCitiesForFilter(): void {
+    const customerGroupId = Number(this.customerGroup_ID);
+    if (!customerGroupId || !this.filterCappingType || this.mappedCitiesLoading) {
       return;
     }
-    this._generalService.GetCitys().subscribe((data) => {
-      this.cityList = (data || []).map((c) => this.normalizeCityDropDown(c)).filter((c) => c.geoPointID > 0);
-      this.allCitiesLoaded = true;
-    });
+    const packageTypeID = this.filterPackageTypeIDs?.length
+      ? Number(this.filterPackageTypeIDs[0])
+      : Number(this.packageList?.[0]?.packageTypeID) || 0;
+    const vehicleIds = this.getAllVehicleFilterIds();
+    const vehicleID = vehicleIds.length ? vehicleIds[0] : 0;
+    if (!packageTypeID || !vehicleID) {
+      return;
+    }
+    this.mappedCitiesLoading = true;
+    this.customerGroupReservationCappingService
+      .GetCityForCustomerGroupCapping(customerGroupId, packageTypeID, vehicleID, this.filterCappingType)
+      .subscribe(
+        (data) => {
+          const map = new Map<number, CityDropDown>();
+          (data || []).forEach((city) => {
+            const normalized = this.normalizeCityDropDown(city);
+            if (normalized.geoPointID > 0) {
+              map.set(normalized.geoPointID, normalized);
+            }
+          });
+          this.cityList = sortByString(Array.from(map.values()), (c) => this.getCityOptionName(c));
+          const availableIds = this.getAllCityFilterIds();
+          const token = this.cityFilterAllValue;
+          const prev = this.filterCityIDs || [];
+          if (isFullSelectionSelected(prev, token, availableIds)) {
+            this.filterCityIDs = buildSelectAllSelection(prev, [token, ...availableIds], token, availableIds);
+          } else {
+            const pruned = pruneSelectedIds(selectionSpecificIds(prev, token), availableIds);
+            this.filterCityIDs = pruned;
+          }
+          this.mappedCitiesLoading = false;
+        },
+        () => {
+          this.mappedCitiesLoading = false;
+        }
+      );
   }
 
   normalizeCityDropDown(city: any): CityDropDown {
@@ -158,13 +201,23 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
     }
   }
 
-  get filteredCityList(): CityDropDown[] {
-    const term = (this.cityFilterText || '').trim().toLowerCase();
-    const list = this.cityList || [];
-    if (!term) {
-      return list;
+  private getCitySelectionIdsForPanel(): number[] {
+    const token = this.cityFilterAllValue;
+    const allIds = this.getAllCityFilterIds();
+    if (isFullSelectionSelected(this.filterCityIDs, token, allIds)) {
+      return allIds;
     }
-    return list.filter((city) => (this.getCityOptionName(city) || '').toLowerCase().includes(term));
+    return selectionSpecificIds(this.filterCityIDs, token);
+  }
+
+  get cityPanelOptions(): CityDropDown[] {
+    const filtered = filterListByTerm(this.cityList || [], this.cityFilterText, (c) => this.getCityOptionName(c));
+    return mergeMultiSelectPanelOptions(
+      filtered,
+      this.cityList || [],
+      this.getCitySelectionIdsForPanel(),
+      (c) => this.getCityOptionId(c)
+    );
   }
 
   getCityOptionId(city: CityDropDown): number {
@@ -177,61 +230,109 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
 
   onCityFilterPanelOpen(opened: boolean): void {
     if (opened) {
-      this.ensureCityMasterLoaded();
+      this.cityFilterSelectionSnapshot = [...(this.filterCityIDs || [])];
+      if (!this.cityList?.length) {
+        this.loadMappedCitiesForFilter();
+      }
     } else {
       this.cityFilterText = '';
+      this.cityFilterSelectionSnapshot = [...(this.filterCityIDs || [])];
     }
   }
 
-  get filteredVehicleList(): VehicleDropDown[] {
-    const term = (this.vehicleFilterText || '').trim().toLowerCase();
-    const list = this.vehicleList || [];
-    if (!term) {
-      return list;
+  private getAllCityFilterIds(): number[] {
+    return (this.cityList || [])
+      .map((c) => this.getCityOptionId(c))
+      .filter((id) => Number.isFinite(id) && id > 0);
+  }
+
+  get cityFilterTriggerText(): string {
+    const allIds = this.getAllCityFilterIds();
+    const token = this.cityFilterAllValue;
+    if (!this.filterCityIDs?.length) {
+      return '';
     }
-    return list.filter((v) => (this.getVehicleOptionName(v) || '').toLowerCase().includes(term));
+    if (isFullSelectionSelected(this.filterCityIDs, token, allIds)) {
+      return 'All';
+    }
+    return selectionSpecificIds(this.filterCityIDs, token)
+      .map((id) => {
+        const match = (this.cityList || []).find((c) => this.getCityOptionId(c) === id);
+        return match ? this.getCityOptionName(match) : '';
+      })
+      .filter((name) => !!name)
+      .join(', ');
+  }
+
+  onCityFilterIdsChange(ids: number[]): void {
+    const allIds = this.getAllCityFilterIds();
+    const allToken = this.cityFilterAllValue;
+    const prev = [...(this.cityFilterSelectionSnapshot || [])];
+    const next = (ids || []).map(Number);
+    this.filterCityIDs = buildSelectAllSelection(prev, next, allToken, allIds);
+    this.cityFilterSelectionSnapshot = [...this.filterCityIDs];
+  }
+
+  cityFilterIdsForApi(): number[] | null {
+    const allIds = this.getAllCityFilterIds();
+    const token = this.cityFilterAllValue;
+    const specifics = selectionSpecificIds(this.filterCityIDs, token);
+    if (!specifics.length || isFullSelectionSelected(this.filterCityIDs, token, allIds)) {
+      return null;
+    }
+    return specifics;
+  }
+
+  private getVehicleSelectionIdsForPanel(): number[] {
+    const token = this.vehicleFilterAllValue;
+    const allIds = this.getAllVehicleFilterIds();
+    if (isFullSelectionSelected(this.filterVehicleIDs, token, allIds)) {
+      return allIds;
+    }
+    return selectionSpecificIds(this.filterVehicleIDs, token);
+  }
+
+  get vehiclePanelOptions(): VehicleDropDown[] {
+    const filtered = filterListByTerm(this.vehicleList || [], this.vehicleFilterText, (v) =>
+      this.getVehicleOptionName(v)
+    );
+    return mergeMultiSelectPanelOptions(
+      filtered,
+      this.vehicleList || [],
+      this.getVehicleSelectionIdsForPanel(),
+      (v) => this.getVehicleOptionId(v)
+    );
   }
 
   onVehicleFilterPanelOpen(opened: boolean): void {
-    if (!opened) {
+    if (opened) {
+      this.vehicleFilterSelectionSnapshot = [...(this.filterVehicleIDs || [])];
+    } else {
       this.vehicleFilterText = '';
+      this.vehicleFilterSelectionSnapshot = [...(this.filterVehicleIDs || [])];
     }
   }
 
-  get isVehicleFilterAll(): boolean {
-    const ids = this.filterVehicleIDs || [];
-    return !ids.length || ids.includes(this.vehicleFilterAllValue);
-  }
+  compareFilterSelectValue = (a: number, b: number): boolean => Number(a) === Number(b);
 
-  get vehicleFilterDisplayText(): string {
-    const ids = (this.filterVehicleIDs || []).filter(
-      (id) => id !== this.vehicleFilterAllValue && id > 0
-    );
-    if (!ids.length) {
+  get vehicleFilterTriggerText(): string {
+    const allIds = this.getAllVehicleFilterIds();
+    const token = this.vehicleFilterAllValue;
+    if (!this.filterVehicleIDs?.length) {
       return '';
     }
-    return ids
+    if (isFullSelectionSelected(this.filterVehicleIDs, token, allIds)) {
+      return 'All';
+    }
+    return selectionSpecificIds(this.filterVehicleIDs, token)
       .map((id) => this.getVehicleNameById(id))
       .filter((name) => !!name)
       .join(', ');
   }
 
-  /** Closed-field label (matches Capping Type / Status style). */
-  get vehicleFilterTriggerText(): string {
-    if (this.isVehicleFilterAll) {
-      return 'All';
-    }
-    return this.vehicleFilterDisplayText;
-  }
-
   getVehicleNameById(id: number): string {
     const match = (this.vehicleList || []).find((v) => this.getVehicleOptionId(v) === id);
     return match ? this.getVehicleOptionName(match) : '';
-  }
-
-  setVehicleFilterToAll(): void {
-    this.filterVehicleIDs = [this.vehicleFilterAllValue];
-    this.vehicleFilterText = '';
   }
 
   private getAllVehicleFilterIds(): number[] {
@@ -240,61 +341,23 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
       .filter((id) => Number.isFinite(id) && id > 0);
   }
 
-  private collapseToAllIfEveryVehicleSelected(specifics: number[]): number[] {
-    const selected = [...new Set(specifics.filter((id) => id > 0))];
-    const allIds = this.getAllVehicleFilterIds();
-    if (
-      allIds.length &&
-      selected.length >= allIds.length &&
-      allIds.every((id) => selected.includes(id))
-    ) {
-      return [this.vehicleFilterAllValue];
-    }
-    return selected;
-  }
-
-  private normalizeVehicleFilterIds(ids: number[] | null | undefined): number[] {
-    const allToken = this.vehicleFilterAllValue;
-    const raw = (ids || []).map((id) => Number(id));
-    if (!raw.length) {
-      return [allToken];
-    }
-    const hasAll = raw.includes(allToken);
-    const specifics = raw.filter((id) => id !== allToken && id > 0);
-    if (hasAll && !specifics.length) {
-      return [allToken];
-    }
-    if (!specifics.length) {
-      return [allToken];
-    }
-    return this.collapseToAllIfEveryVehicleSelected(specifics);
-  }
-
   vehicleFilterIdsForApi(): number[] | null {
-    const specifics = (this.filterVehicleIDs || []).filter(
-      (id) => id !== this.vehicleFilterAllValue && id > 0
-    );
-    return specifics.length ? specifics : null;
+    const allIds = this.getAllVehicleFilterIds();
+    const token = this.vehicleFilterAllValue;
+    const specifics = selectionSpecificIds(this.filterVehicleIDs, token);
+    if (!specifics.length || isFullSelectionSelected(this.filterVehicleIDs, token, allIds)) {
+      return null;
+    }
+    return specifics;
   }
 
   onVehicleFilterIdsChange(ids: number[]): void {
+    const allIds = this.getAllVehicleFilterIds();
     const allToken = this.vehicleFilterAllValue;
-    const next = (ids || []).map((id) => Number(id));
-    if (!next.length) {
-      this.filterVehicleIDs = [allToken];
-      return;
-    }
-    const hasAll = next.includes(allToken);
-    const specifics = next.filter((id) => id !== allToken && id > 0);
-    if (hasAll && specifics.length) {
-      this.filterVehicleIDs = this.collapseToAllIfEveryVehicleSelected(specifics);
-      return;
-    }
-    if (hasAll) {
-      this.filterVehicleIDs = [allToken];
-      return;
-    }
-    this.filterVehicleIDs = this.collapseToAllIfEveryVehicleSelected(specifics);
+    const prev = [...(this.vehicleFilterSelectionSnapshot || [])];
+    const next = (ids || []).map(Number);
+    this.filterVehicleIDs = buildSelectAllSelection(prev, next, allToken, allIds);
+    this.vehicleFilterSelectionSnapshot = [...this.filterVehicleIDs];
   }
 
   get tableVisible(): boolean {
@@ -330,7 +393,9 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
     this.packageFilterText = '';
     this.filterCityIDs = [];
     this.cityFilterText = '';
-    this.setVehicleFilterToAll();
+    this.filterVehicleIDs = [];
+    this.vehicleFilterSelectionSnapshot = [];
+    this.cityFilterSelectionSnapshot = [];
     this.filterStatus = 'Active';
     this.PageNumber = 0;
     this.hasSearched = false;
@@ -683,7 +748,7 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
       Number(this.customerGroup_ID),
       this.filterCappingType,
       this.filterPackageTypeIDs?.length ? this.filterPackageTypeIDs : null,
-      this.filterCityIDs?.length ? this.filterCityIDs : null,
+      this.cityFilterIdsForApi(),
       this.vehicleFilterIdsForApi(),
       this.statusIsActive,
       this.PageNumber,
@@ -951,7 +1016,7 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
       Number(this.customerGroup_ID),
       this.filterCappingType,
       this.filterPackageTypeIDs?.length ? this.filterPackageTypeIDs : null,
-      this.filterCityIDs?.length ? this.filterCityIDs : null,
+      this.cityFilterIdsForApi(),
       this.vehicleFilterIdsForApi(),
       this.statusIsActive,
       this.PageNumber,
