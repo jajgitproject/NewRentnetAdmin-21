@@ -13,6 +13,10 @@ import { PackageTypeDropDown } from 'src/app/packageType/packageTypeDropDown.mod
 import { VehicleDropDown } from 'src/app/vehicle/vehicleDropDown.model';
 import { BulkSelectedCitiesDialogComponent } from '../bulk-selected-cities-dialog/bulk-selected-cities-dialog.component';
 import { BulkSelectedVehiclesDialogComponent } from '../bulk-selected-vehicles-dialog/bulk-selected-vehicles-dialog.component';
+import {
+  CappingDuplicateCombination,
+  CappingMessageDialogComponent
+} from '../message-dialog/message-dialog.component';
 
 @Component({
   standalone: false,
@@ -118,8 +122,12 @@ export class FormDialogComponent
       fridayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.fridayCap)],
       saturdayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.saturdayCap)],
       sundayCap: [this.action === 'bulk' ? null : this.formatCapValue(this.advanceTable?.sundayCap)],
-      activationStatus: [this.advanceTable.activationStatus]
+      activationStatus: [this.normalizeActivationStatus(this.advanceTable.activationStatus)]
     });
+  }
+
+  private normalizeActivationStatus(value: any): boolean {
+    return value === true || value === 'true' || value === 1 || value === '1';
   }
 
   private formatCapValue(value: any): number | null {
@@ -462,6 +470,7 @@ export class FormDialogComponent
     }
     if (this.action === 'edit') {
       raw.customerGroupReservationCappingID = this.resolveRecordId();
+      raw.activationStatus = this.normalizeActivationStatus(raw.activationStatus);
     }
     return raw;
   }
@@ -518,6 +527,71 @@ export class FormDialogComponent
     );
   }
   
+  private mapConflictCombinations(items: any[]): CappingDuplicateCombination[] {
+    return (items || []).map((item) => ({
+      cappingType: (item?.cappingType ?? item?.CappingType ?? '').toString(),
+      packageType: (item?.packageType ?? item?.PackageType ?? '').toString(),
+      city: (item?.city ?? item?.City ?? '').toString(),
+      vehicle: (item?.vehicle ?? item?.Vehicle ?? '').toString()
+    }));
+  }
+
+  private showActiveRecordExistsMessage(combinations: CappingDuplicateCombination[]): void {
+    this.matDialog.open(CappingMessageDialogComponent, {
+      width: '560px',
+      panelClass: 'cg-cap-message-dialog',
+      autoFocus: false,
+      data: {
+        title: 'Activate Record',
+        message:
+          'The same existing record is already available as active. You cannot activate this record until the active one is deactivated.',
+        duplicateCombinations: combinations,
+        combinationListHeading: 'Combination(s):'
+      }
+    });
+  }
+
+  private submitUpdate(payload: any): void {
+    this.advanceTableService.update(payload).subscribe(
+      (response) => {
+        if (
+          response &&
+          response.activationStatus &&
+          typeof response.activationStatus === 'string' &&
+          response.activationStatus.includes('Duplicate')
+        ) {
+          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
+          this.saveDisabled = true;
+        } else {
+          this.dialogRef.close();
+          this._generalService.sendUpdate('CustomerGroupReservationCappingUpdate:CustomerGroupReservationCappingView:Success');
+          this.saveDisabled = true;
+        }
+      },
+      (error) => {
+        const message = error?.error?.toString?.() ?? error?.error ?? '';
+        if (typeof message === 'string' && message.includes('ActiveRecordExists')) {
+          this.advanceTableService.bulkActivateCheck([payload.customerGroupReservationCappingID]).subscribe({
+            next: (retry) => {
+              const conflicts = this.mapConflictCombinations(retry?.conflicts);
+              if (conflicts.length) {
+                this.showActiveRecordExistsMessage(conflicts);
+              } else {
+                this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+              }
+            },
+            error: () => {
+              this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+            }
+          });
+        } else {
+          this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+        }
+        this.saveDisabled = true;
+      }
+    );
+  }
+
   public Put(): void {
     if (this.advanceTableForm.invalid) {
       this.advanceTableForm.markAllAsTouched();
@@ -530,25 +604,25 @@ export class FormDialogComponent
       this.saveDisabled = true;
       return;
     }
-    this.advanceTableService.update(payload).subscribe(
-      response => {
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
-        {
-          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
+    if (payload.activationStatus === true) {
+      this.advanceTableService.bulkActivateCheck([payload.customerGroupReservationCappingID]).subscribe({
+        next: (checkResult) => {
+          const conflicts = this.mapConflictCombinations(checkResult?.conflicts);
+          if (conflicts.length) {
+            this.showActiveRecordExistsMessage(conflicts);
+            this.saveDisabled = true;
+            return;
+          }
+          this.submitUpdate(payload);
+        },
+        error: () => {
+          this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
           this.saveDisabled = true;
         }
-        else
-        {
-          this.dialogRef.close();
-          this._generalService.sendUpdate('CustomerGroupReservationCappingUpdate:CustomerGroupReservationCappingView:Success');
-          this.saveDisabled = true;
-        }
-      },
-      error => {
-        this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
-        this.saveDisabled = true;
-      }
-    );
+      });
+      return;
+    }
+    this.submitUpdate(payload);
   }
 
   public confirmAdd(): void 

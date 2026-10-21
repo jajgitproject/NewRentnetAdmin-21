@@ -1,0 +1,10 @@
+<div class="container">
+  <h2 mat-dialog-title>Delete selected records</h2>
+  <p mat-dialog-content>Are you sure you want to deactivate {{ count }} selected capping record(s)?</p>
+  <div mat-dialog-actions class="mb-1">
+    <button mat-flat-button color="warn" type="button" [disabled]="deleting" (click)="confirmDelete()">
+      Delete
+    </button>
+    <button mat-flat-button type="button" [disabled]="deleting" (click)="onCancel()" tabindex="-1">Cancel</button>
+  </div>
+</div>

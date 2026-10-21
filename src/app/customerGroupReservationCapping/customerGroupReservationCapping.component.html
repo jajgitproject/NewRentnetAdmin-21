@@ -117,6 +117,12 @@
                     <button mat-mini-fab color="primary" type="button" title="Edit selected records" [disabled]="selectedCount === 0" (click)="bulkEdit()">
                         <mat-icon>edit</mat-icon>
                     </button>
+                    <button mat-mini-fab color="primary" type="button" title="Activate selected records" [disabled]="selectedCount === 0" (click)="bulkActivate()">
+                        <mat-icon>check_circle</mat-icon>
+                    </button>
+                    <button mat-mini-fab color="warn" type="button" title="Delete selected records" [disabled]="selectedCount === 0" (click)="bulkDelete()">
+                        <mat-icon>delete</mat-icon>
+                    </button>
                     <button mat-icon-button type="button" title="Refresh list" (click)="SearchData()" [disabled]="!filterCappingType">
                         <mat-icon>refresh</mat-icon>
                     </button>

@@ -2,9 +2,20 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
+export interface CappingDuplicateCombination {
+  cappingType: string;
+  packageType: string;
+  city: string;
+  vehicle: string;
+  selectedCount?: number;
+}
+
 export interface CappingMessageDialogData {
   title?: string;
   message: string;
+  footerMessage?: string;
+  duplicateCombinations?: CappingDuplicateCombination[];
+  combinationListHeading?: string;
 }
 
 @Component({

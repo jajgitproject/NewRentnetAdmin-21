@@ -14,7 +14,11 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { GeneralService } from '../general/general.service';
 import { FormDialogComponent } from '../customerGroupReservationCapping/dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
-import { CappingMessageDialogComponent } from './dialogs/message-dialog/message-dialog.component';
+import { BulkDeleteDialogComponent } from './dialogs/bulk-delete-dialog/bulk-delete-dialog.component';
+import {
+  CappingDuplicateCombination,
+  CappingMessageDialogComponent
+} from './dialogs/message-dialog/message-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
@@ -475,6 +479,139 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
     });
   }
 
+  private getRowCombinationKey(row: CustomerGroupReservationCappingModel): string {
+    const cappingType = (row?.cappingType ?? row?.CappingType ?? '').toString().trim().toLowerCase();
+    const packageTypeId = Number(row?.packageTypeID ?? row?.PackageTypeID ?? 0);
+    const cityId = Number(row?.cityID ?? row?.CityID ?? 0);
+    const vehicleId = Number(row?.vehicleID ?? row?.VehicleID ?? 0);
+    if (packageTypeId > 0 && cityId > 0 && vehicleId > 0) {
+      return `id:${cappingType}|${packageTypeId}|${cityId}|${vehicleId}`;
+    }
+    const packageType = (row?.packageType ?? row?.PackageType ?? '').toString().trim().toLowerCase();
+    const city = (row?.city ?? row?.City ?? '').toString().trim().toLowerCase();
+    const vehicle = (row?.vehicle ?? row?.Vehicle ?? '').toString().trim().toLowerCase();
+    return `name:${cappingType}|${packageType}|${city}|${vehicle}`;
+  }
+
+  private getDuplicateCombinationsInSelection(
+    rows: CustomerGroupReservationCappingModel[]
+  ): CappingDuplicateCombination[] {
+    const groups = new Map<string, CustomerGroupReservationCappingModel[]>();
+    rows.forEach((row) => {
+      const key = this.getRowCombinationKey(row);
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key).push(row);
+    });
+    const combinations: CappingDuplicateCombination[] = [];
+    groups.forEach((groupRows, key) => {
+      if (groupRows.length > 1 && key) {
+        const row = groupRows[0];
+        combinations.push({
+          cappingType: (row?.cappingType ?? row?.CappingType ?? '').toString(),
+          packageType: (row?.packageType ?? row?.PackageType ?? '').toString(),
+          city: (row?.city ?? row?.City ?? '').toString(),
+          vehicle: (row?.vehicle ?? row?.Vehicle ?? '').toString(),
+          selectedCount: groupRows.length
+        });
+      }
+    });
+    return combinations;
+  }
+
+  private mapConflictCombinations(items: any[]): CappingDuplicateCombination[] {
+    return (items || []).map((item) => ({
+      cappingType: (item?.cappingType ?? item?.CappingType ?? '').toString(),
+      packageType: (item?.packageType ?? item?.PackageType ?? '').toString(),
+      city: (item?.city ?? item?.City ?? '').toString(),
+      vehicle: (item?.vehicle ?? item?.Vehicle ?? '').toString()
+    }));
+  }
+
+  private showBulkDuplicateActivateMessage(duplicateCombinations: CappingDuplicateCombination[]): void {
+    this.dialog.open(CappingMessageDialogComponent, {
+      width: '560px',
+      panelClass: 'cg-cap-message-dialog',
+      autoFocus: false,
+      data: {
+        title: 'Bulk Activate',
+        message:
+          'Some of the selected records are duplicate. Bulk activate cannot enable multiple rows with the same combination.',
+        duplicateCombinations,
+        combinationListHeading: 'Duplicate combinations in your selection:',
+        footerMessage: 'Please select only unique records to proceed.'
+      }
+    });
+  }
+
+  private showActiveRecordExistsMessage(combinations: CappingDuplicateCombination[]): void {
+    this.dialog.open(CappingMessageDialogComponent, {
+      width: '560px',
+      panelClass: 'cg-cap-message-dialog',
+      autoFocus: false,
+      data: {
+        title: 'Bulk Activate',
+        message:
+          'The same existing record is already available as active. You cannot activate this record until the active one is deactivated.',
+        duplicateCombinations: combinations,
+        combinationListHeading: 'Combination(s):'
+      }
+    });
+  }
+
+  bulkActivate(): void {
+    if (this.selectedIds.size === 0) {
+      return;
+    }
+    const rows = Array.from(this.selectedRows.values());
+    const duplicateCombinations = this.getDuplicateCombinationsInSelection(rows);
+    if (duplicateCombinations.length) {
+      this.showBulkDuplicateActivateMessage(duplicateCombinations);
+      return;
+    }
+    const ids = Array.from(this.selectedIds);
+    this.customerGroupReservationCappingService.bulkActivateCheck(ids).subscribe({
+      next: (checkResult) => {
+        const activeConflicts = this.mapConflictCombinations(checkResult?.conflicts);
+        if (activeConflicts.length) {
+          this.showActiveRecordExistsMessage(activeConflicts);
+          return;
+        }
+        this.customerGroupReservationCappingService.bulkActivate(ids).subscribe({
+          next: () => {
+            this._generalService.sendUpdate('CustomerGroupReservationCappingBulkActivate:CustomerGroupReservationCappingView:Success');
+          },
+          error: (err) => {
+            const message = err?.error?.toString?.() ?? err?.error ?? '';
+            if (typeof message === 'string' && message.includes('ActiveRecordExists')) {
+              this.customerGroupReservationCappingService.bulkActivateCheck(ids).subscribe({
+                next: (retry) => this.showActiveRecordExistsMessage(this.mapConflictCombinations(retry?.conflicts))
+              });
+              return;
+            }
+            this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+          }
+        });
+      },
+      error: () => {
+        this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+      }
+    });
+  }
+
+  bulkDelete(): void {
+    if (this.selectedIds.size === 0) {
+      return;
+    }
+    this.dialog.open(BulkDeleteDialogComponent, {
+      width: '420px',
+      data: {
+        ids: Array.from(this.selectedIds)
+      }
+    });
+  }
+
   deleteItem(row)
   {
     this.dialog.open(DeleteDialogComponent, 
@@ -640,6 +777,21 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
                this.clearSelection();
                this.loadData();
                this.showNotification('snackbar-success', 'Customer Group Reservation Capping Updated...!!!', 'bottom', 'center');
+              }
+            }
+          }
+          else if(this.MessageArray[0]=="CustomerGroupReservationCappingBulkActivate")
+          {
+            if(this.MessageArray[1]=="CustomerGroupReservationCappingView")
+            {
+              if(this.MessageArray[2]=="Success")
+              {
+               if (this.filterCappingType) {
+                 this.hasSearched = true;
+               }
+               this.clearSelection();
+               this.loadData();
+               this.showNotification('snackbar-success', 'Selected records activated...!!!', 'bottom', 'center');
               }
             }
           }
