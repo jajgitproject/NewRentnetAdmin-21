@@ -506,6 +506,42 @@ export class GeneralService {
     return null;
   }
 
+  /** QC photos: driver, prod, UAT, then admin ImageURL base (deduped). */
+  qcPhotoUrlCandidates(path: string | null | undefined): string[] {
+    const urls = this.signatureImageUrls(path);
+    const admin = this.resolveStaticImageUrl(path);
+    const ordered = [urls.driver, urls.prod, urls.uat, admin, (path ?? '').toString().trim()];
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const candidate of ordered) {
+      const value = (candidate ?? '').trim();
+      if (!value || seen.has(value) || !this.isValidStaticImageUrl(value)) {
+        continue;
+      }
+      seen.add(value);
+      result.push(value);
+    }
+    return result;
+  }
+
+  qcPhotoInitialDisplayUrl(path: string | null | undefined): string | null {
+    const candidates = this.qcPhotoUrlCandidates(path);
+    return candidates.length > 0 ? candidates[0] : null;
+  }
+
+  qcPhotoNextDisplayUrl(current: string | null | undefined, path: string | null | undefined): string | null {
+    const candidates = this.qcPhotoUrlCandidates(path);
+    const currentValue = (current ?? '').trim();
+    const index = candidates.findIndex((url) => url === currentValue);
+    if (index >= 0 && index < candidates.length - 1) {
+      return candidates[index + 1];
+    }
+    if (index < 0 && candidates.length > 0 && candidates[0] !== currentValue) {
+      return candidates[0];
+    }
+    return null;
+  }
+
   /** Rejects empty paths and folder-only StaticFiles/Images URLs with no filename. */
   isValidStaticImageUrl(path: string | null | undefined): boolean {
     const value = (path ?? '').trim();

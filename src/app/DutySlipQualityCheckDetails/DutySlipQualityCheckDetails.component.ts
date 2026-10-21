@@ -9,6 +9,8 @@ import { DutySlipQualityCheckedByExecutiveService } from '../dutySlipQualityChec
 import { DutySlipQualityCheckedByExecutive } from '../dutySlipQualityCheckedByExecutive/dutySlipQualityCheckedByExecutive.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
+import { formatQcVerdict, truncateQcMessage } from '../dutySlipQualityCheck/qc-ai-verdict.util';
+import { bindQcPhotoSlots, QcPhotoSlot } from '../dutySlipQualityCheck/qc-photo-url.util';
 @Component({
   standalone: false,
   selector: 'app-DutySlipQualityCheckDetails',
@@ -22,6 +24,12 @@ export class DutySlipQualityCheckDetailsComponent {
   allotmentID: number;
   dataSource: DutySlipQualityCheckedByExecutive[] | null;
   qcDetails:any;
+  formatQcVerdict = formatQcVerdict;
+  truncateQcMessage = truncateQcMessage;
+  selfieSlot: QcPhotoSlot;
+  frontSlot: QcPhotoSlot;
+  interiorsSlot: QcPhotoSlot;
+  breathSlot: QcPhotoSlot;
 
 
   constructor(
@@ -53,17 +61,35 @@ export class DutySlipQualityCheckDetailsComponent {
     this.qcDetails.frontPhotoAIVerdict = this.firstText(this.qcDetails.frontPhotoAIVerdict, this.qcDetails.FrontPhotoAIVerdict);
     this.qcDetails.selfieWithUniformAIVerdict = this.firstText(this.qcDetails.selfieWithUniformAIVerdict, this.qcDetails.SelfieWithUniformAIVerdict);
     this.qcDetails.interiorsWithAmenitiesAIVerdict = this.firstText(this.qcDetails.interiorsWithAmenitiesAIVerdict, this.qcDetails.InteriorsWithAmenitiesAIVerdict);
+    this.qcDetails.frontPhotoAIMessage = this.firstText(this.qcDetails.frontPhotoAIMessage, this.qcDetails.FrontPhotoAIMessage);
+    this.qcDetails.selfieWithUniformAIMessage = this.firstText(this.qcDetails.selfieWithUniformAIMessage, this.qcDetails.SelfieWithUniformAIMessage);
+    this.qcDetails.interiorsWithAmenitiesAIMessage = this.firstText(this.qcDetails.interiorsWithAmenitiesAIMessage, this.qcDetails.InteriorsWithAmenitiesAIMessage);
+    const slots = bindQcPhotoSlots(this._generalService, {
+      selfie: this.qcDetails.selfieWithUniform,
+      front: this.qcDetails.frontPhoto,
+      interiors: this.qcDetails.interiorsWithAmenities,
+    });
+    this.selfieSlot = slots.selfie;
+    this.frontSlot = slots.front;
+    this.interiorsSlot = slots.interiors;
+    const breathRaw = this.qcDetails.breatheAnalyzerImage || this.qcDetails.isolatedCabin;
+    this.breathSlot = new QcPhotoSlot(breathRaw, this._generalService);
   }
 
-  verdictClass(verdict: string): string {
-    const value = String(verdict || '').trim().toLowerCase();
-    if (value === 'good') {
-      return 'is-good';
-    }
-    if (value === 'bad') {
-      return 'is-bad';
-    }
-    return '';
+  onQcSelfieImageFailed(): void {
+    this.selfieSlot?.advanceOnFailed(this._generalService);
+  }
+
+  onQcFrontImageFailed(): void {
+    this.frontSlot?.advanceOnFailed(this._generalService);
+  }
+
+  onQcInteriorsImageFailed(): void {
+    this.interiorsSlot?.advanceOnFailed(this._generalService);
+  }
+
+  onQcBreathImageFailed(): void {
+    this.breathSlot?.advanceOnFailed(this._generalService);
   }
 
   private firstText(...values: any[]): string {
@@ -77,7 +103,9 @@ export class DutySlipQualityCheckDetailsComponent {
   
  ///----For Image
  openImageInNewTab(imageUrl: string) {
-  window.open(imageUrl, '_blank');
+  if (imageUrl) {
+    window.open(imageUrl, '_blank');
+  }
 }
 
 onContextMenu(event: MouseEvent, item: DutySlipQualityCheckDetails) {
@@ -92,24 +120,5 @@ onContextMenu(event: MouseEvent, item: DutySlipQualityCheckDetails) {
   onNoClick(): void {
     this.dialogRef.close();
   }
-  // ngOnInit() {
-  //   this.loadData();
-   
-  // }
-
-  // public loadData() {
-   
-  //   this.dutySlipQualityCheckedByExecutiveService.getdutyQualityCheckDataDetails(this.allotmentID).subscribe
-  //     (
-  //       data => {
-
-  //         this.dataSource = data;
-  //         //console.log(this.dataSource)
-       
-  //       },
-  //       (error: HttpErrorResponse) => { this.dataSource = null; }
-  //     );
-  // }
 }
-
 

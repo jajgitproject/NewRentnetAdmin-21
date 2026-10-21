@@ -21,6 +21,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
@@ -60,6 +61,7 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     MatAutocompleteModule,
     MatToolbarModule,
     MatMenuModule,
+    MatTooltipModule,
     MatProgressSpinnerModule,
     MyUploadModule,
     StaticImageComponent,

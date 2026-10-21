@@ -15,6 +15,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DutySlipQualityCheckService } from 'src/app/dutySlipQualityCheck/dutySlipQualityCheck.service';
 import { DutyAmenitieModel } from 'src/app/dutySlipQualityCheck/dutySlipQualityCheck.model';
 import { VerifiedDutyAmenitieDialogComponent } from '../verifiedDutyAmenitie-dialog/verifiedDutyAmenitie-dialog.component';
+import { formatQcVerdict, truncateQcMessage } from 'src/app/dutySlipQualityCheck/qc-ai-verdict.util';
+import { bindQcPhotoSlots, QcPhotoSlot } from 'src/app/dutySlipQualityCheck/qc-photo-url.util';
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
@@ -52,6 +54,18 @@ export class FormDialogComponent
   sortType: string;
   verifyDutyStatusAndCacellationStatus: any;
   isSaveAllowed: boolean = false;
+  selfieAiVerdict: string;
+  selfieAiMessage: string;
+  frontPhotoAiVerdict: string;
+  frontPhotoAiMessage: string;
+  interiorsAiVerdict: string;
+  interiorsAiMessage: string;
+  formatQcVerdict = formatQcVerdict;
+  truncateQcMessage = truncateQcMessage;
+  selfieSlot: QcPhotoSlot;
+  frontSlot: QcPhotoSlot;
+  interiorsSlot: QcPhotoSlot;
+  breathSlot: QcPhotoSlot;
 
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -139,8 +153,45 @@ this.isSaveAllowed = status === 'changes allow';
         this.advanceTableForm.patchValue({bodyTemperatureImage:this.driverRegistrationData[0].bodyTemperatureImage});
         this.advanceTableForm.patchValue({selfDeclaration:this.driverRegistrationData[0].selfDeclaration===true?'Yes':'No'});
         this.advanceTableForm.patchValue({driverRemark:this.driverRegistrationData[0].driverRemark});
+        const qc = this.driverRegistrationData[0];
+        this.bindQcPhotoSlotsFromRow(qc);
+        this.selfieAiVerdict = qc.selfieWithUniformAIVerdict;
+        this.selfieAiMessage = qc.selfieWithUniformAIMessage;
+        this.frontPhotoAiVerdict = qc.frontPhotoAIVerdict;
+        this.frontPhotoAiMessage = qc.frontPhotoAIMessage;
+        this.interiorsAiVerdict = qc.interiorsWithAmenitiesAIVerdict;
+        this.interiorsAiMessage = qc.interiorsWithAmenitiesAIMessage;
       }
     );
+  }
+
+  private bindQcPhotoSlotsFromRow(qc: DutyAllotmentDetails): void {
+    const slots = bindQcPhotoSlots(this._generalService, {
+      selfie: qc.selfieWithUniform,
+      front: qc.frontPhoto,
+      interiors: qc.interiorsWithAmenities,
+    });
+    this.selfieSlot = slots.selfie;
+    this.frontSlot = slots.front;
+    this.interiorsSlot = slots.interiors;
+    const breathRaw = qc.isolatedCabin || qc.breatheAnalyzerImage;
+    this.breathSlot = new QcPhotoSlot(breathRaw, this._generalService);
+  }
+
+  onQcSelfieImageFailed(): void {
+    this.selfieSlot?.advanceOnFailed(this._generalService);
+  }
+
+  onQcFrontImageFailed(): void {
+    this.frontSlot?.advanceOnFailed(this._generalService);
+  }
+
+  onQcInteriorsImageFailed(): void {
+    this.interiorsSlot?.advanceOnFailed(this._generalService);
+  }
+
+  onQcBreathImageFailed(): void {
+    this.breathSlot?.advanceOnFailed(this._generalService);
   }
 
   InitDutyQualityCheckDataDetails()
@@ -157,11 +208,6 @@ this.isSaveAllowed = status === 'changes allow';
         this.advanceTableForm.patchValue({qcDate:this.dutyQualityCheckData[0].qcDate});
         this.advanceTableForm.patchValue({qcTime:this.dutyQualityCheckData[0].qcTime});
         this.advanceTableForm.patchValue({bodyTemperatureInDegreeCelcius:this.dutyQualityCheckData[0].bodyTemperatureInDegreeCelcius});
-        this.advanceTableForm.patchValue({selfieWithUniform:this.dutyQualityCheckData[0].selfieWithUniform});
-        this.advanceTableForm.patchValue({frontPhoto:this.dutyQualityCheckData[0].frontPhoto});
-        this.advanceTableForm.patchValue({interiorsWithAmenities:this.dutyQualityCheckData[0].interiorsWithAmenities});
-        this.advanceTableForm.patchValue({isolatedCabin:this.dutyQualityCheckData[0].isolatedCabin});
-        this.advanceTableForm.patchValue({bodyTemperatureImage:this.dutyQualityCheckData[0].bodyTemperatureImage});
         this.advanceTableForm.patchValue({selfDeclaration:this.dutyQualityCheckData[0].selfDeclaration===true?'Yes':'No'});
         this.advanceTableForm.patchValue({driverRemark:this.dutyQualityCheckData[0].driverRemark});
         this.advanceTableForm.patchValue({qCCheckedByExecutivePassed:this.dutyQualityCheckData[0].qcCheckedByExecutivePassed});
@@ -203,27 +249,6 @@ this.isSaveAllowed = status === 'changes allow';
       selfieWithUniform: [this.advanceTable.selfieWithUniform],
       activationStatus: [this.advanceTable.activationStatus],
     });
-  }
-
-  verdictClass(verdict: string): string {
-    const value = String(verdict || '').trim().toLowerCase();
-    if (value === 'good') {
-      return 'is-good';
-    }
-    if (value === 'bad') {
-      return 'is-bad';
-    }
-    return '';
-  }
-
-  qcVerdict(key: string): string {
-    const row = this.dutyQualityCheckData && this.dutyQualityCheckData[0];
-    if (!row) {
-      return '';
-    }
-    const pascal = key.charAt(0).toUpperCase() + key.slice(1);
-    const value = row[key] != null && String(row[key]).trim() !== '' ? row[key] : row[pascal];
-    return value == null ? '' : String(value);
   }
 
   public noWhitespaceValidator(control: FormControl) {

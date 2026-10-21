@@ -23,6 +23,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { DutySlipQualityCheckService } from './dutySlipQualityCheck.service';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
@@ -65,6 +66,7 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     MatSortModule,
     MatToolbarModule,
     MatMenuModule,
+    MatTooltipModule,
     MatProgressSpinnerModule,
     MyUploadModule,
     StaticImageComponent,
