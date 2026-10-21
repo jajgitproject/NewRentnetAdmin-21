@@ -21,6 +21,8 @@ import { DutyAmenitieDialogComponent } from '../dutyAmenitie-dialog/dutyAmenitie
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { DeleteDADialogComponent } from '../deleteDA/deleteDA.component';
+import { formatQcVerdict, truncateQcMessage } from '../../qc-ai-verdict.util';
+import { bindQcPhotoSlots, QcPhotoSlot } from '../../qc-photo-url.util';
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
@@ -80,6 +82,18 @@ export class FormDialogComponent
   registrationNumber: any;
   dutyQualityCheckList:any;
   dutyAmeniteAdvanceTable : DutyAmenitieModel | null;
+  selfieAiVerdict: string;
+  selfieAiMessage: string;
+  frontPhotoAiVerdict: string;
+  frontPhotoAiMessage: string;
+  interiorsAiVerdict: string;
+  interiorsAiMessage: string;
+  formatQcVerdict = formatQcVerdict;
+  truncateQcMessage = truncateQcMessage;
+  selfieSlot: QcPhotoSlot;
+  frontSlot: QcPhotoSlot;
+  interiorsSlot: QcPhotoSlot;
+  breathSlot: QcPhotoSlot;
 
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -179,37 +193,53 @@ this.buttonDisabled = normalized !== 'changes allow';
         this.advanceTableForm.patchValue({qCDate:this.driverQualityCheckData[0].qcDate});
         this.advanceTableForm.patchValue({qCTime:this.driverQualityCheckData[0].qcTime});
         this.advanceTableForm.patchValue({bodyTemperatureInDegreeCelcius:this.driverQualityCheckData[0].bodyTemperatureInDegreeCelcius});
-        this.ImagePath=this.driverQualityCheckData[0].selfieWithUniform;
-        this.ImagePath1=this.driverQualityCheckData[0].frontPhoto;
-        this.ImagePath2=this.driverQualityCheckData[0].interiorsWithAmenities
-        this.ImagePath3=this.driverQualityCheckData[0].breatheAnalyzerImage;
-        this.ImagePath4=this.driverQualityCheckData[0].bodyTemperatureImage;
+        const qc = this.driverQualityCheckData[0];
+        this.bindQcPhotoSlotsFromRow(qc);
+        this.ImagePath = qc.selfieWithUniform;
+        this.ImagePath1 = qc.frontPhoto;
+        this.ImagePath2 = qc.interiorsWithAmenities;
+        this.ImagePath3 = qc.breatheAnalyzerImage || qc.isolatedCabin;
+        this.ImagePath4 = qc.bodyTemperatureImage;
         this.advanceTableForm.patchValue({selfDeclaration: true});
-        this.advanceTableForm.patchValue({driverRemark:this.driverQualityCheckData[0].driverRemark});
-        this.advanceTableForm.patchValue({activationStatus:this.driverQualityCheckData[0].activationStatus});
+        this.advanceTableForm.patchValue({driverRemark: qc.driverRemark});
+        this.advanceTableForm.patchValue({activationStatus: qc.activationStatus});
+        this.selfieAiVerdict = qc.selfieWithUniformAIVerdict;
+        this.selfieAiMessage = qc.selfieWithUniformAIMessage;
+        this.frontPhotoAiVerdict = qc.frontPhotoAIVerdict;
+        this.frontPhotoAiMessage = qc.frontPhotoAIMessage;
+        this.interiorsAiVerdict = qc.interiorsWithAmenitiesAIVerdict;
+        this.interiorsAiMessage = qc.interiorsWithAmenitiesAIMessage;
       }
     );
   }
 
-  verdictClass(verdict: string): string {
-    const value = String(verdict || '').trim().toLowerCase();
-    if (value === 'good') {
-      return 'is-good';
-    }
-    if (value === 'bad') {
-      return 'is-bad';
-    }
-    return '';
+  private bindQcPhotoSlotsFromRow(qc: DutyAllotmentDetails): void {
+    const slots = bindQcPhotoSlots(this._generalService, {
+      selfie: qc.selfieWithUniform,
+      front: qc.frontPhoto,
+      interiors: qc.interiorsWithAmenities,
+    });
+    this.selfieSlot = slots.selfie;
+    this.frontSlot = slots.front;
+    this.interiorsSlot = slots.interiors;
+    const breathRaw = qc.isolatedCabin || qc.breatheAnalyzerImage;
+    this.breathSlot = new QcPhotoSlot(breathRaw, this._generalService);
   }
 
-  qcVerdict(key: string): string {
-    const row = this.driverQualityCheckData && this.driverQualityCheckData[0];
-    if (!row) {
-      return '';
-    }
-    const pascal = key.charAt(0).toUpperCase() + key.slice(1);
-    const value = row[key] != null && String(row[key]).trim() !== '' ? row[key] : row[pascal];
-    return value == null ? '' : String(value);
+  onQcSelfieImageFailed(): void {
+    this.selfieSlot?.advanceOnFailed(this._generalService);
+  }
+
+  onQcFrontImageFailed(): void {
+    this.frontSlot?.advanceOnFailed(this._generalService);
+  }
+
+  onQcInteriorsImageFailed(): void {
+    this.interiorsSlot?.advanceOnFailed(this._generalService);
+  }
+
+  onQcBreathImageFailed(): void {
+    this.breathSlot?.advanceOnFailed(this._generalService);
   }
   
   formControl = new FormControl('', 
@@ -465,7 +495,8 @@ this.buttonDisabled = normalized !== 'changes allow';
   {
     this.response = event;
     this.ImagePath3 = this._generalService.getImageURL() + this.response.dbPath;
-    this.advanceTableForm.patchValue({isolatedCabin:this.ImagePath3})
+    this.advanceTableForm.patchValue({isolatedCabin:this.ImagePath3});
+    this.breathSlot = new QcPhotoSlot(this.ImagePath3, this._generalService);
   }
 
   public uploadFinishedBodyTemp = (event) => 

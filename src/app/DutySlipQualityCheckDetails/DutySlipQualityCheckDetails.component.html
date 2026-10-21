@@ -43,32 +43,63 @@
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Front Photo</span> <br />
-          <span class="qc-image-wrap" [ngClass]="verdictClass(qcDetails.frontPhotoAIVerdict)">
-              <app-static-image cssClass="qc-image" [src]="qcDetails.frontPhoto" height="80px" maxWidth="100px"
-                  (click)="openImageInNewTab(qcDetails.frontPhoto)"></app-static-image>
-          </span>
+          <div class="qc-photo-block">
+            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()">
+                <app-static-image cssClass="qc-image" [src]="frontSlot.displayUrl" height="80px" maxWidth="100px"
+                    (click)="openImageInNewTab(frontSlot.displayUrl)"
+                    (failed)="onQcFrontImageFailed()"></app-static-image>
+            </span>
+            <div class="qc-ai-meta" *ngIf="formatQcVerdict(qcDetails.frontPhotoAIVerdict)">
+              <div class="qc-ai-verdict">{{ formatQcVerdict(qcDetails.frontPhotoAIVerdict) }}</div>
+              <div class="qc-ai-message" *ngIf="qcDetails.frontPhotoAIMessage"
+                   [matTooltip]="qcDetails.frontPhotoAIMessage" matTooltipPosition="above">
+                {{ truncateQcMessage(qcDetails.frontPhotoAIMessage) }}
+              </div>
+            </div>
+          </div>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Selfie With Uniform</span> <br />
-          <span class="qc-image-wrap" [ngClass]="verdictClass(qcDetails.selfieWithUniformAIVerdict)">
-              <app-static-image cssClass="qc-image" [src]="qcDetails.selfieWithUniform" height="80px" maxWidth="100px"
-                  (click)="openImageInNewTab(qcDetails.selfieWithUniform)"></app-static-image>
-          </span>
+          <div class="qc-photo-block">
+            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()">
+                <app-static-image cssClass="qc-image" [src]="selfieSlot.displayUrl" height="80px" maxWidth="100px"
+                    (click)="openImageInNewTab(selfieSlot.displayUrl)"
+                    (failed)="onQcSelfieImageFailed()"></app-static-image>
+            </span>
+            <div class="qc-ai-meta" *ngIf="formatQcVerdict(qcDetails.selfieWithUniformAIVerdict)">
+              <div class="qc-ai-verdict">{{ formatQcVerdict(qcDetails.selfieWithUniformAIVerdict) }}</div>
+              <div class="qc-ai-message" *ngIf="qcDetails.selfieWithUniformAIMessage"
+                   [matTooltip]="qcDetails.selfieWithUniformAIMessage" matTooltipPosition="above">
+                {{ truncateQcMessage(qcDetails.selfieWithUniformAIMessage) }}
+              </div>
+            </div>
+          </div>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Interiors With Amenities</span> <br />
-          <span class="qc-image-wrap" [ngClass]="verdictClass(qcDetails.interiorsWithAmenitiesAIVerdict)">
-              <app-static-image cssClass="qc-image" [src]="qcDetails.interiorsWithAmenities" height="80px" maxWidth="100px"
-                  (click)="openImageInNewTab(qcDetails.interiorsWithAmenities)"></app-static-image>
-          </span>
+          <div class="qc-photo-block">
+            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()">
+                <app-static-image cssClass="qc-image" [src]="interiorsSlot.displayUrl" height="80px" maxWidth="100px"
+                    (click)="openImageInNewTab(interiorsSlot.displayUrl)"
+                    (failed)="onQcInteriorsImageFailed()"></app-static-image>
+            </span>
+            <div class="qc-ai-meta" *ngIf="formatQcVerdict(qcDetails.interiorsWithAmenitiesAIVerdict)">
+              <div class="qc-ai-verdict">{{ formatQcVerdict(qcDetails.interiorsWithAmenitiesAIVerdict) }}</div>
+              <div class="qc-ai-message" *ngIf="qcDetails.interiorsWithAmenitiesAIMessage"
+                   [matTooltip]="qcDetails.interiorsWithAmenitiesAIMessage" matTooltipPosition="above">
+                {{ truncateQcMessage(qcDetails.interiorsWithAmenitiesAIMessage) }}
+              </div>
+            </div>
+          </div>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Breath Analyzer</span>
           <span class="TDValue" *ngIf="qcDetails.breatheAnalyzerReading != null"> (Reading: {{ qcDetails.breatheAnalyzerReading }})</span>
           <br />
-          <span class="qc-image-wrap" *ngIf="qcDetails.breatheAnalyzerImage; else noBreathAnalyzer">
-              <app-static-image cssClass="qc-image" [src]="qcDetails.breatheAnalyzerImage" height="80px" maxWidth="100px"
-                  (click)="openImageInNewTab(qcDetails.breatheAnalyzerImage)"></app-static-image>
+          <span class="qc-image-wrap" *ngIf="breathSlot?.hasImage(); else noBreathAnalyzer">
+              <app-static-image cssClass="qc-image" [src]="breathSlot.displayUrl" height="80px" maxWidth="100px"
+                  (click)="openImageInNewTab(breathSlot.displayUrl)"
+                  (failed)="onQcBreathImageFailed()"></app-static-image>
           </span>
           <ng-template #noBreathAnalyzer>
             <span class="TDValue">N/A</span>

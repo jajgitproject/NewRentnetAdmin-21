@@ -77,7 +77,7 @@
   <div class="cda-mop-banner" *ngIf="allotmentModeOfPayment as mop">
     <span class="cda-mop-label">Mode of Payment</span>
     <span class="cda-mop-value">{{ mop }}</span>
-  </div>
+</div>
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <div class="card" style="width: 100%">
       <div class="body">
@@ -1361,7 +1361,7 @@
               <div class="allotment-results-wrap">
                 <div class="allotment-results-loading" *ngIf="isLoadingdata">
                   <mat-progress-spinner mode="indeterminate" diameter="28" strokeWidth="3"></mat-progress-spinner>
-                </div>
+                    </div>
                 <div class="table-responsive">
                   <table class="allotment-results-table">
                     <thead>
@@ -1372,9 +1372,9 @@
                         <th>Vehicle</th>
                         <th>Driver</th>
                         <th>Ownership</th>
-                      </tr>
+                                      </tr>
                     </thead>
-                    <tbody>
+              <tbody>
                       <tr *ngFor="let data of driverInventoryAssociationDataSource; index as i; trackBy: trackByInventoryId"
                           [class.row-alt]="i % 2 === 1">
                         <td class="col-actions">
@@ -1382,8 +1382,8 @@
                                   [matMenuTriggerFor]="rowActionsMenu"
                                   (click)="rowActionsMenuIndex = i">
                             Actions
-                          </button>
-                        </td>
+                    </button>
+                  </td>
                         <td>{{ data.organizationalEntityName }}</td>
                         <td>{{ data.inventoryName }}</td>
                         <td>{{ data.vehicle }}</td>
@@ -1391,38 +1391,38 @@
                           {{ data.driverName }}
                           <ng-container *ngIf="data.driverName && data.driverPhone">
                             <br /><span class="secondary-cell">{{ data.driverPhone }}</span>
-                          </ng-container>
-                        </td>
+                    </ng-container>
+                  </td>
                         <td>
                           {{ data.inventorySupplierType }}
                           <ng-container *ngIf="data.inventorySupplierName">
                             <br /><span class="secondary-cell">{{ data.inventorySupplierName }}</span>
-                          </ng-container>
-                        </td>
-                      </tr>
+                        </ng-container>
+                      </td>
+                    </tr>
                       <tr *ngIf="!isLoading && (!driverInventoryAssociationDataSource || driverInventoryAssociationDataSource.length === 0)">
                         <td colspan="6" class="empty-state">No records found. Use Search to load results.</td>
                       </tr>
-                    </tbody>
-                  </table>
+                  </tbody>
+                </table>
                   <mat-menu #rowActionsMenu="matMenu">
                     <button mat-menu-item
                             (click)="openAllotCarAndDriver(rowActionsMenuIndex,'Soft',reservationInfo[0].allotmentID)">
                       Allot Car & Driver (Soft)
-                    </button>
+                                    </button>
                     <button mat-menu-item
                             (click)="openAllotCarAndDriver(rowActionsMenuIndex,'Hard',reservationInfo[0].allotmentID)">
                       Allot Car & Driver (Hard)
-                    </button>
+                                    </button>
                     <button mat-menu-item (click)="AttachAnotherDriver(rowActionsMenuIndex)">
                       Attach another Driver
-                    </button>
+                                    </button>
                     <button mat-menu-item (click)="DriverFeedbackInfo(rowActionsMenuIndex)">
                       View Feedback Details
-                    </button>
+                                    </button>
                   </mat-menu>
-                </div>
-              </div>
+                          </div>
+                  </div>
 
               <mat-progress-bar mode="indeterminate" *ngIf="isLoading"></mat-progress-bar>
               <mat-paginator #paginator [length]="unassociatedTotalData || driverInventoryAssociationDataSource?.length || 0" [pageIndex]="PageNumber - 1" [pageSize]="recordsPerPage" (page)="onChangedPage($event)"

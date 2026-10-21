@@ -81,11 +81,21 @@
                         <!-- <mat-label style="margin-left: 18px;">Selfie With Uniform</mat-label> -->
                         <mat-label>Selfie With Uniform</mat-label>
                         <br>
-                        <span class="qc-image-wrap" [ngClass]="verdictClass(qcVerdict('selfieWithUniformAIVerdict'))">
-                            <a href="{{ ImagePath }}" target="_blank" *ngIf="ImagePath">
-                                <app-static-image [src]="ImagePath" cssClass="qc-image" height="80px" width="auto"></app-static-image>
-                            </a>
-                        </span>
+                        <div class="qc-photo-block">
+                            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()">
+                                <a href="{{ selfieSlot.displayUrl }}" target="_blank">
+                                    <app-static-image [src]="selfieSlot.displayUrl" cssClass="qc-image" height="80px" maxWidth="100px"
+                                        (failed)="onQcSelfieImageFailed()"></app-static-image>
+                                </a>
+                            </span>
+                            <div class="qc-ai-meta" *ngIf="formatQcVerdict(selfieAiVerdict)">
+                                <div class="qc-ai-verdict">{{ formatQcVerdict(selfieAiVerdict) }}</div>
+                                <div class="qc-ai-message" *ngIf="selfieAiMessage"
+                                     [matTooltip]="selfieAiMessage" matTooltipPosition="above">
+                                    {{ truncateQcMessage(selfieAiMessage) }}
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2" style="right: 15px;">
                             <app-myupload (onUploadFinished)="uploadFinishedSelfie($event)"></app-myupload>
@@ -96,11 +106,21 @@
                         <!-- <mat-label style="margin-left: 18px;">Front Photo</mat-label> -->
                         <mat-label>Front Photo</mat-label>
                         <br>
-                        <span class="qc-image-wrap" [ngClass]="verdictClass(qcVerdict('frontPhotoAIVerdict'))">
-                            <a href="{{ ImagePath1 }}" target="_blank" *ngIf="ImagePath1">
-                                <app-static-image [src]="ImagePath1" cssClass="qc-image" height="80px" width="auto"></app-static-image>
-                            </a>
-                        </span>
+                        <div class="qc-photo-block">
+                            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()">
+                                <a href="{{ frontSlot.displayUrl }}" target="_blank">
+                                    <app-static-image [src]="frontSlot.displayUrl" cssClass="qc-image" height="80px" maxWidth="100px"
+                                        (failed)="onQcFrontImageFailed()"></app-static-image>
+                                </a>
+                            </span>
+                            <div class="qc-ai-meta" *ngIf="formatQcVerdict(frontPhotoAiVerdict)">
+                                <div class="qc-ai-verdict">{{ formatQcVerdict(frontPhotoAiVerdict) }}</div>
+                                <div class="qc-ai-message" *ngIf="frontPhotoAiMessage"
+                                     [matTooltip]="frontPhotoAiMessage" matTooltipPosition="above">
+                                    {{ truncateQcMessage(frontPhotoAiMessage) }}
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2" style="right: 15px;">
                             <app-myupload (onUploadFinished)="uploadFinishedFront($event)"></app-myupload>
@@ -111,11 +131,21 @@
                         <!-- <mat-label style="margin-left: 18px;">Interiors With Amenities</mat-label> -->
                         <mat-label>Interiors With Amenities</mat-label>
                         <br>
-                        <span class="qc-image-wrap" [ngClass]="verdictClass(qcVerdict('interiorsWithAmenitiesAIVerdict'))">
-                            <a href="{{ ImagePath2 }}" target="_blank" *ngIf="ImagePath2">
-                                <app-static-image [src]="ImagePath2" cssClass="qc-image" height="80px" width="auto"></app-static-image>
-                            </a>
-                        </span>
+                        <div class="qc-photo-block">
+                            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()">
+                                <a href="{{ interiorsSlot.displayUrl }}" target="_blank">
+                                    <app-static-image [src]="interiorsSlot.displayUrl" cssClass="qc-image" height="80px" maxWidth="100px"
+                                        (failed)="onQcInteriorsImageFailed()"></app-static-image>
+                                </a>
+                            </span>
+                            <div class="qc-ai-meta" *ngIf="formatQcVerdict(interiorsAiVerdict)">
+                                <div class="qc-ai-verdict">{{ formatQcVerdict(interiorsAiVerdict) }}</div>
+                                <div class="qc-ai-message" *ngIf="interiorsAiMessage"
+                                     [matTooltip]="interiorsAiMessage" matTooltipPosition="above">
+                                    {{ truncateQcMessage(interiorsAiMessage) }}
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2" style="right: 15px;">
                             <app-myupload (onUploadFinished)="uploadFinishedInteriors($event)"></app-myupload>
@@ -126,9 +156,12 @@
                         <!-- <mat-label style="margin-left: 18px;">Isolated Cabin</mat-label> -->
                         <mat-label>Breath Analyzer</mat-label>
                         <br>
-                        <a href="{{ ImagePath3 }}" target="_blank" *ngIf="ImagePath3">
-                            <app-static-image [src]="ImagePath3" cssClass="table" height="80px" width="auto"></app-static-image>
-                        </a>
+                        <span class="qc-image-wrap" *ngIf="breathSlot?.hasImage()">
+                            <a href="{{ breathSlot.displayUrl }}" target="_blank">
+                                <app-static-image [src]="breathSlot.displayUrl" cssClass="qc-image" height="80px" maxWidth="100px"
+                                    (failed)="onQcBreathImageFailed()"></app-static-image>
+                            </a>
+                        </span>
 
                         <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 mb-2" style="right: 15px;">
                             <app-myupload (onUploadFinished)="uploadFinishedFrontCabin($event)"></app-myupload>

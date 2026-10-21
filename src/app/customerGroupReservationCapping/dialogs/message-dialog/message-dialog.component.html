@@ -10,6 +10,25 @@
   </div>
   <div mat-dialog-content class="cg-msg-dialog__content">
     <p class="cg-msg-dialog__message">{{ data.message }}</p>
+    @if (data.duplicateCombinations?.length) {
+      <p class="cg-msg-dialog__dup-heading">{{ data.combinationListHeading || 'Duplicate combinations in your selection:' }}</p>
+      <ul class="cg-msg-dialog__dup-list">
+        @for (combo of data.duplicateCombinations; track $index) {
+          <li class="cg-msg-dialog__dup-item">
+            @if (combo.selectedCount && combo.selectedCount > 1) {
+              <span class="cg-msg-dialog__dup-badge">{{ combo.selectedCount }} selected</span>
+            }
+            <div class="cg-msg-dialog__dup-row"><span class="cg-msg-dialog__dup-label">Capping Type:</span> {{ combo.cappingType || '—' }}</div>
+            <div class="cg-msg-dialog__dup-row"><span class="cg-msg-dialog__dup-label">Package Type:</span> {{ combo.packageType || '—' }}</div>
+            <div class="cg-msg-dialog__dup-row"><span class="cg-msg-dialog__dup-label">City:</span> {{ combo.city || '—' }}</div>
+            <div class="cg-msg-dialog__dup-row"><span class="cg-msg-dialog__dup-label">Vehicle:</span> {{ combo.vehicle || '—' }}</div>
+          </li>
+        }
+      </ul>
+    }
+    @if (data.footerMessage) {
+      <p class="cg-msg-dialog__footer">{{ data.footerMessage }}</p>
+    }
   </div>
   <div mat-dialog-actions class="cg-msg-dialog__actions">
     <button mat-flat-button color="primary" type="button" (click)="onClose()">OK</button>

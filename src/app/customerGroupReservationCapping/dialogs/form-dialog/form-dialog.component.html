@@ -78,14 +78,19 @@
                     <mat-form-field class="example-full-width cg-vehicle-multi" appearance="outline" floatLabel="always">
                         <mat-label>Vehicle</mat-label>
                         <mat-select multiple formControlName="vehicleID" required #vehicleVal [class.is-invalid]="vehicleVal.invalid && vehicleVal.touched"
-                            (selectionChange)="onVehicleSelectionChange()"
+                            [compareWith]="compareMultiSelectValue"
+                            (selectionChange)="onVehicleIdsChange($event.value)"
                             (openedChange)="onVehiclePanelOpen($event)">
+                            <mat-select-trigger>
+                                <span>{{ vehicleSelectTriggerText }}</span>
+                            </mat-select-trigger>
                             <mat-option class="select-filter-option" disabled>
                                 <input class="select-filter-input" matInput placeholder="Search vehicle"
                                     [(ngModel)]="vehicleFilterText" [ngModelOptions]="{standalone: true}"
                                     (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
                             </mat-option>
-                            <mat-option [value]="getVehicleOptionId(option)" *ngFor="let option of filteredVehicleList">
+                            <mat-option [value]="vehicleSelectAllValue">All</mat-option>
+                            <mat-option [value]="getVehicleOptionId(option)" *ngFor="let option of vehiclePanelOptions">
                                 {{ getVehicleOptionName(option) }}
                             </mat-option>
                         </mat-select>
@@ -112,14 +117,20 @@
                         <mat-label>City</mat-label>
                         <mat-select multiple formControlName="cityID" required #cityVal
                             [class.is-invalid]="cityVal.invalid && cityVal.touched"
+                            [compareWith]="compareMultiSelectValue"
+                            (selectionChange)="onCityIdsChange($event.value)"
                             (openedChange)="onCityPanelOpen($event)">
+                            <mat-select-trigger>
+                                <span>{{ citySelectTriggerText }}</span>
+                            </mat-select-trigger>
                             <mat-option class="select-filter-option" disabled>
                                 <input class="select-filter-input" matInput placeholder="Search city"
                                     [(ngModel)]="cityFilterText" [ngModelOptions]="{standalone: true}"
                                     (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
                             </mat-option>
-                            <mat-option *ngIf="filteredCityList.length === 0" disabled>No city found</mat-option>
-                            <mat-option [value]="getCityOptionId(city)" *ngFor="let city of filteredCityList">
+                            <mat-option [value]="citySelectAllValue">All</mat-option>
+                            <mat-option *ngIf="cityPanelOptions.length === 0" disabled>No city found</mat-option>
+                            <mat-option [value]="getCityOptionId(city)" *ngFor="let city of cityPanelOptions">
                                 {{ getCityOptionName(city) }}
                             </mat-option>
                         </mat-select>

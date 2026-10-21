@@ -5,7 +5,12 @@ import { CustomerGroupReservationCappingModel } from './customerGroupReservation
 import { HttpClient } from '@angular/common/http';
 import { GeneralService } from '../general/general.service';
 import { CityDropDown } from '../city/cityDropDown.model';
-import { BulkUpdateRequest, BulkUpdateResponse, CappingImportResult } from './customerGroupReservationCapping.model';
+import {
+  BulkUpdateRequest,
+  BulkUpdateResponse,
+  CappingCombinationDisplay,
+  CappingImportResult
+} from './customerGroupReservationCapping.model';
 
 @Injectable()
 export class CustomerGroupReservationCappingService 
@@ -98,10 +103,44 @@ export class CustomerGroupReservationCappingService
     return this.httpClient.post<any>(this.API_URL, body);
   }
 
-  update(advanceTable: CustomerGroupReservationCappingModel)
-  {
-    advanceTable.userID=this.generalService.getUserID();
-    return this.httpClient.put<any>(this.API_URL , advanceTable);
+  update(advanceTable: CustomerGroupReservationCappingModel | any) {
+    const body = {
+      customerGroupReservationCappingID:
+        advanceTable.customerGroupReservationCappingID ?? advanceTable.CustomerGroupReservationCappingID,
+      customerGroupID: advanceTable.customerGroupID ?? advanceTable.CustomerGroupID,
+      mondayCap: advanceTable.mondayCap ?? advanceTable.MondayCap,
+      tuesdayCap: advanceTable.tuesdayCap ?? advanceTable.TuesdayCap,
+      wednesdayCap: advanceTable.wednesdayCap ?? advanceTable.WednesdayCap,
+      thursdayCap: advanceTable.thursdayCap ?? advanceTable.ThursdayCap,
+      fridayCap: advanceTable.fridayCap ?? advanceTable.FridayCap,
+      saturdayCap: advanceTable.saturdayCap ?? advanceTable.SaturdayCap,
+      sundayCap: advanceTable.sundayCap ?? advanceTable.SundayCap,
+      activationStatus:
+        advanceTable.activationStatus === true ||
+        advanceTable.activationStatus === 'true' ||
+        advanceTable.activationStatus === 1,
+      userID: this.generalService.getUserID()
+    };
+    return this.httpClient.put<any>(this.API_URL, body);
+  }
+
+  bulkActivateCheck(ids: number[]): Observable<{ conflicts: CappingCombinationDisplay[] }> {
+    const body = {
+      ids,
+      userID: this.generalService.getUserID()
+    };
+    return this.httpClient.post<{ conflicts: CappingCombinationDisplay[] }>(
+      `${this.API_URL}/bulk-activate-check`,
+      body
+    );
+  }
+
+  bulkActivate(ids: number[]): Observable<BulkUpdateResponse> {
+    const body = {
+      ids,
+      userID: this.generalService.getUserID()
+    };
+    return this.httpClient.put<BulkUpdateResponse>(`${this.API_URL}/bulk-activate`, body);
   }
 
   bulkUpdate(request: BulkUpdateRequest): Observable<BulkUpdateResponse> {

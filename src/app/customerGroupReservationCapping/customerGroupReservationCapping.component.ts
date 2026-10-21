@@ -9,12 +9,25 @@ import { MatTableDataSource } from '@angular/material/table';
 import { CustomerGroupReservationCappingModel, CappingListStatusFilter, CappingImportError } from './customerGroupReservationCapping.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
+import {
+  buildSelectAllSelection,
+  filterListByTerm,
+  isFullSelectionSelected,
+  mergeMultiSelectPanelOptions,
+  pruneSelectedIds,
+  selectionSpecificIds,
+  sortByString
+} from './multi-select-panel.helpers';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { GeneralService } from '../general/general.service';
 import { FormDialogComponent } from '../customerGroupReservationCapping/dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
-import { CappingMessageDialogComponent } from './dialogs/message-dialog/message-dialog.component';
+import { BulkDeleteDialogComponent } from './dialogs/bulk-delete-dialog/bulk-delete-dialog.component';
+import {
+  CappingDuplicateCombination,
+  CappingMessageDialogComponent
+} from './dialogs/message-dialog/message-dialog.component';
 import { ActivatedRoute } from '@angular/router';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
@@ -54,10 +67,13 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
   packageFilterText = '';
   filterCityIDs: number[] = [];
   cityFilterText = '';
-  allCitiesLoaded = false;
-  /** Sentinel for “All vehicles” in the multi-select (not sent to API). */
+  mappedCitiesLoading = false;
+  /** Sentinel for “All” in multi-select (not sent to API). */
   readonly vehicleFilterAllValue = -1;
-  filterVehicleIDs: number[] = [this.vehicleFilterAllValue];
+  readonly cityFilterAllValue = -2;
+  filterVehicleIDs: number[] = [];
+  private vehicleFilterSelectionSnapshot: number[] = [];
+  private cityFilterSelectionSnapshot: number[] = [];
   vehicleFilterText = '';
   filterStatus: CappingListStatusFilter = 'Active';
 
@@ -103,7 +119,6 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
       this.customerGroup_ID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerGroupID));
       this.customerGroup_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerGroupName));
     });
-    this.setVehicleFilterToAll();
     this.loadMasterData();
     this.SubscribeUpdateService();
   }
@@ -118,18 +133,50 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
     });
     this._generalService.GetVehicle().subscribe((data) => {
       this.vehicleList = data || [];
-      this.filterVehicleIDs = this.normalizeVehicleFilterIds(this.filterVehicleIDs);
     });
   }
 
-  ensureCityMasterLoaded(): void {
-    if (this.allCitiesLoaded) {
+  loadMappedCitiesForFilter(): void {
+    const customerGroupId = Number(this.customerGroup_ID);
+    if (!customerGroupId || !this.filterCappingType || this.mappedCitiesLoading) {
       return;
     }
-    this._generalService.GetCitys().subscribe((data) => {
-      this.cityList = (data || []).map((c) => this.normalizeCityDropDown(c)).filter((c) => c.geoPointID > 0);
-      this.allCitiesLoaded = true;
-    });
+    const packageTypeID = this.filterPackageTypeIDs?.length
+      ? Number(this.filterPackageTypeIDs[0])
+      : Number(this.packageList?.[0]?.packageTypeID) || 0;
+    const vehicleIds = this.getAllVehicleFilterIds();
+    const vehicleID = vehicleIds.length ? vehicleIds[0] : 0;
+    if (!packageTypeID || !vehicleID) {
+      return;
+    }
+    this.mappedCitiesLoading = true;
+    this.customerGroupReservationCappingService
+      .GetCityForCustomerGroupCapping(customerGroupId, packageTypeID, vehicleID, this.filterCappingType)
+      .subscribe(
+        (data) => {
+          const map = new Map<number, CityDropDown>();
+          (data || []).forEach((city) => {
+            const normalized = this.normalizeCityDropDown(city);
+            if (normalized.geoPointID > 0) {
+              map.set(normalized.geoPointID, normalized);
+            }
+          });
+          this.cityList = sortByString(Array.from(map.values()), (c) => this.getCityOptionName(c));
+          const availableIds = this.getAllCityFilterIds();
+          const token = this.cityFilterAllValue;
+          const prev = this.filterCityIDs || [];
+          if (isFullSelectionSelected(prev, token, availableIds)) {
+            this.filterCityIDs = buildSelectAllSelection(prev, [token, ...availableIds], token, availableIds);
+          } else {
+            const pruned = pruneSelectedIds(selectionSpecificIds(prev, token), availableIds);
+            this.filterCityIDs = pruned;
+          }
+          this.mappedCitiesLoading = false;
+        },
+        () => {
+          this.mappedCitiesLoading = false;
+        }
+      );
   }
 
   normalizeCityDropDown(city: any): CityDropDown {
@@ -154,13 +201,23 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
     }
   }
 
-  get filteredCityList(): CityDropDown[] {
-    const term = (this.cityFilterText || '').trim().toLowerCase();
-    const list = this.cityList || [];
-    if (!term) {
-      return list;
+  private getCitySelectionIdsForPanel(): number[] {
+    const token = this.cityFilterAllValue;
+    const allIds = this.getAllCityFilterIds();
+    if (isFullSelectionSelected(this.filterCityIDs, token, allIds)) {
+      return allIds;
     }
-    return list.filter((city) => (this.getCityOptionName(city) || '').toLowerCase().includes(term));
+    return selectionSpecificIds(this.filterCityIDs, token);
+  }
+
+  get cityPanelOptions(): CityDropDown[] {
+    const filtered = filterListByTerm(this.cityList || [], this.cityFilterText, (c) => this.getCityOptionName(c));
+    return mergeMultiSelectPanelOptions(
+      filtered,
+      this.cityList || [],
+      this.getCitySelectionIdsForPanel(),
+      (c) => this.getCityOptionId(c)
+    );
   }
 
   getCityOptionId(city: CityDropDown): number {
@@ -173,61 +230,109 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
 
   onCityFilterPanelOpen(opened: boolean): void {
     if (opened) {
-      this.ensureCityMasterLoaded();
+      this.cityFilterSelectionSnapshot = [...(this.filterCityIDs || [])];
+      if (!this.cityList?.length) {
+        this.loadMappedCitiesForFilter();
+      }
     } else {
       this.cityFilterText = '';
+      this.cityFilterSelectionSnapshot = [...(this.filterCityIDs || [])];
     }
   }
 
-  get filteredVehicleList(): VehicleDropDown[] {
-    const term = (this.vehicleFilterText || '').trim().toLowerCase();
-    const list = this.vehicleList || [];
-    if (!term) {
-      return list;
+  private getAllCityFilterIds(): number[] {
+    return (this.cityList || [])
+      .map((c) => this.getCityOptionId(c))
+      .filter((id) => Number.isFinite(id) && id > 0);
+  }
+
+  get cityFilterTriggerText(): string {
+    const allIds = this.getAllCityFilterIds();
+    const token = this.cityFilterAllValue;
+    if (!this.filterCityIDs?.length) {
+      return '';
     }
-    return list.filter((v) => (this.getVehicleOptionName(v) || '').toLowerCase().includes(term));
+    if (isFullSelectionSelected(this.filterCityIDs, token, allIds)) {
+      return 'All';
+    }
+    return selectionSpecificIds(this.filterCityIDs, token)
+      .map((id) => {
+        const match = (this.cityList || []).find((c) => this.getCityOptionId(c) === id);
+        return match ? this.getCityOptionName(match) : '';
+      })
+      .filter((name) => !!name)
+      .join(', ');
+  }
+
+  onCityFilterIdsChange(ids: number[]): void {
+    const allIds = this.getAllCityFilterIds();
+    const allToken = this.cityFilterAllValue;
+    const prev = [...(this.cityFilterSelectionSnapshot || [])];
+    const next = (ids || []).map(Number);
+    this.filterCityIDs = buildSelectAllSelection(prev, next, allToken, allIds);
+    this.cityFilterSelectionSnapshot = [...this.filterCityIDs];
+  }
+
+  cityFilterIdsForApi(): number[] | null {
+    const allIds = this.getAllCityFilterIds();
+    const token = this.cityFilterAllValue;
+    const specifics = selectionSpecificIds(this.filterCityIDs, token);
+    if (!specifics.length || isFullSelectionSelected(this.filterCityIDs, token, allIds)) {
+      return null;
+    }
+    return specifics;
+  }
+
+  private getVehicleSelectionIdsForPanel(): number[] {
+    const token = this.vehicleFilterAllValue;
+    const allIds = this.getAllVehicleFilterIds();
+    if (isFullSelectionSelected(this.filterVehicleIDs, token, allIds)) {
+      return allIds;
+    }
+    return selectionSpecificIds(this.filterVehicleIDs, token);
+  }
+
+  get vehiclePanelOptions(): VehicleDropDown[] {
+    const filtered = filterListByTerm(this.vehicleList || [], this.vehicleFilterText, (v) =>
+      this.getVehicleOptionName(v)
+    );
+    return mergeMultiSelectPanelOptions(
+      filtered,
+      this.vehicleList || [],
+      this.getVehicleSelectionIdsForPanel(),
+      (v) => this.getVehicleOptionId(v)
+    );
   }
 
   onVehicleFilterPanelOpen(opened: boolean): void {
-    if (!opened) {
+    if (opened) {
+      this.vehicleFilterSelectionSnapshot = [...(this.filterVehicleIDs || [])];
+    } else {
       this.vehicleFilterText = '';
+      this.vehicleFilterSelectionSnapshot = [...(this.filterVehicleIDs || [])];
     }
   }
 
-  get isVehicleFilterAll(): boolean {
-    const ids = this.filterVehicleIDs || [];
-    return !ids.length || ids.includes(this.vehicleFilterAllValue);
-  }
+  compareFilterSelectValue = (a: number, b: number): boolean => Number(a) === Number(b);
 
-  get vehicleFilterDisplayText(): string {
-    const ids = (this.filterVehicleIDs || []).filter(
-      (id) => id !== this.vehicleFilterAllValue && id > 0
-    );
-    if (!ids.length) {
+  get vehicleFilterTriggerText(): string {
+    const allIds = this.getAllVehicleFilterIds();
+    const token = this.vehicleFilterAllValue;
+    if (!this.filterVehicleIDs?.length) {
       return '';
     }
-    return ids
+    if (isFullSelectionSelected(this.filterVehicleIDs, token, allIds)) {
+      return 'All';
+    }
+    return selectionSpecificIds(this.filterVehicleIDs, token)
       .map((id) => this.getVehicleNameById(id))
       .filter((name) => !!name)
       .join(', ');
   }
 
-  /** Closed-field label (matches Capping Type / Status style). */
-  get vehicleFilterTriggerText(): string {
-    if (this.isVehicleFilterAll) {
-      return 'All';
-    }
-    return this.vehicleFilterDisplayText;
-  }
-
   getVehicleNameById(id: number): string {
     const match = (this.vehicleList || []).find((v) => this.getVehicleOptionId(v) === id);
     return match ? this.getVehicleOptionName(match) : '';
-  }
-
-  setVehicleFilterToAll(): void {
-    this.filterVehicleIDs = [this.vehicleFilterAllValue];
-    this.vehicleFilterText = '';
   }
 
   private getAllVehicleFilterIds(): number[] {
@@ -236,61 +341,23 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
       .filter((id) => Number.isFinite(id) && id > 0);
   }
 
-  private collapseToAllIfEveryVehicleSelected(specifics: number[]): number[] {
-    const selected = [...new Set(specifics.filter((id) => id > 0))];
-    const allIds = this.getAllVehicleFilterIds();
-    if (
-      allIds.length &&
-      selected.length >= allIds.length &&
-      allIds.every((id) => selected.includes(id))
-    ) {
-      return [this.vehicleFilterAllValue];
-    }
-    return selected;
-  }
-
-  private normalizeVehicleFilterIds(ids: number[] | null | undefined): number[] {
-    const allToken = this.vehicleFilterAllValue;
-    const raw = (ids || []).map((id) => Number(id));
-    if (!raw.length) {
-      return [allToken];
-    }
-    const hasAll = raw.includes(allToken);
-    const specifics = raw.filter((id) => id !== allToken && id > 0);
-    if (hasAll && !specifics.length) {
-      return [allToken];
-    }
-    if (!specifics.length) {
-      return [allToken];
-    }
-    return this.collapseToAllIfEveryVehicleSelected(specifics);
-  }
-
   vehicleFilterIdsForApi(): number[] | null {
-    const specifics = (this.filterVehicleIDs || []).filter(
-      (id) => id !== this.vehicleFilterAllValue && id > 0
-    );
-    return specifics.length ? specifics : null;
+    const allIds = this.getAllVehicleFilterIds();
+    const token = this.vehicleFilterAllValue;
+    const specifics = selectionSpecificIds(this.filterVehicleIDs, token);
+    if (!specifics.length || isFullSelectionSelected(this.filterVehicleIDs, token, allIds)) {
+      return null;
+    }
+    return specifics;
   }
 
   onVehicleFilterIdsChange(ids: number[]): void {
+    const allIds = this.getAllVehicleFilterIds();
     const allToken = this.vehicleFilterAllValue;
-    const next = (ids || []).map((id) => Number(id));
-    if (!next.length) {
-      this.filterVehicleIDs = [allToken];
-      return;
-    }
-    const hasAll = next.includes(allToken);
-    const specifics = next.filter((id) => id !== allToken && id > 0);
-    if (hasAll && specifics.length) {
-      this.filterVehicleIDs = this.collapseToAllIfEveryVehicleSelected(specifics);
-      return;
-    }
-    if (hasAll) {
-      this.filterVehicleIDs = [allToken];
-      return;
-    }
-    this.filterVehicleIDs = this.collapseToAllIfEveryVehicleSelected(specifics);
+    const prev = [...(this.vehicleFilterSelectionSnapshot || [])];
+    const next = (ids || []).map(Number);
+    this.filterVehicleIDs = buildSelectAllSelection(prev, next, allToken, allIds);
+    this.vehicleFilterSelectionSnapshot = [...this.filterVehicleIDs];
   }
 
   get tableVisible(): boolean {
@@ -326,7 +393,9 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
     this.packageFilterText = '';
     this.filterCityIDs = [];
     this.cityFilterText = '';
-    this.setVehicleFilterToAll();
+    this.filterVehicleIDs = [];
+    this.vehicleFilterSelectionSnapshot = [];
+    this.cityFilterSelectionSnapshot = [];
     this.filterStatus = 'Active';
     this.PageNumber = 0;
     this.hasSearched = false;
@@ -475,6 +544,139 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
     });
   }
 
+  private getRowCombinationKey(row: CustomerGroupReservationCappingModel): string {
+    const cappingType = (row?.cappingType ?? row?.CappingType ?? '').toString().trim().toLowerCase();
+    const packageTypeId = Number(row?.packageTypeID ?? row?.PackageTypeID ?? 0);
+    const cityId = Number(row?.cityID ?? row?.CityID ?? 0);
+    const vehicleId = Number(row?.vehicleID ?? row?.VehicleID ?? 0);
+    if (packageTypeId > 0 && cityId > 0 && vehicleId > 0) {
+      return `id:${cappingType}|${packageTypeId}|${cityId}|${vehicleId}`;
+    }
+    const packageType = (row?.packageType ?? row?.PackageType ?? '').toString().trim().toLowerCase();
+    const city = (row?.city ?? row?.City ?? '').toString().trim().toLowerCase();
+    const vehicle = (row?.vehicle ?? row?.Vehicle ?? '').toString().trim().toLowerCase();
+    return `name:${cappingType}|${packageType}|${city}|${vehicle}`;
+  }
+
+  private getDuplicateCombinationsInSelection(
+    rows: CustomerGroupReservationCappingModel[]
+  ): CappingDuplicateCombination[] {
+    const groups = new Map<string, CustomerGroupReservationCappingModel[]>();
+    rows.forEach((row) => {
+      const key = this.getRowCombinationKey(row);
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key).push(row);
+    });
+    const combinations: CappingDuplicateCombination[] = [];
+    groups.forEach((groupRows, key) => {
+      if (groupRows.length > 1 && key) {
+        const row = groupRows[0];
+        combinations.push({
+          cappingType: (row?.cappingType ?? row?.CappingType ?? '').toString(),
+          packageType: (row?.packageType ?? row?.PackageType ?? '').toString(),
+          city: (row?.city ?? row?.City ?? '').toString(),
+          vehicle: (row?.vehicle ?? row?.Vehicle ?? '').toString(),
+          selectedCount: groupRows.length
+        });
+      }
+    });
+    return combinations;
+  }
+
+  private mapConflictCombinations(items: any[]): CappingDuplicateCombination[] {
+    return (items || []).map((item) => ({
+      cappingType: (item?.cappingType ?? item?.CappingType ?? '').toString(),
+      packageType: (item?.packageType ?? item?.PackageType ?? '').toString(),
+      city: (item?.city ?? item?.City ?? '').toString(),
+      vehicle: (item?.vehicle ?? item?.Vehicle ?? '').toString()
+    }));
+  }
+
+  private showBulkDuplicateActivateMessage(duplicateCombinations: CappingDuplicateCombination[]): void {
+    this.dialog.open(CappingMessageDialogComponent, {
+      width: '560px',
+      panelClass: 'cg-cap-message-dialog',
+      autoFocus: false,
+      data: {
+        title: 'Bulk Activate',
+        message:
+          'Some of the selected records are duplicate. Bulk activate cannot enable multiple rows with the same combination.',
+        duplicateCombinations,
+        combinationListHeading: 'Duplicate combinations in your selection:',
+        footerMessage: 'Please select only unique records to proceed.'
+      }
+    });
+  }
+
+  private showActiveRecordExistsMessage(combinations: CappingDuplicateCombination[]): void {
+    this.dialog.open(CappingMessageDialogComponent, {
+      width: '560px',
+      panelClass: 'cg-cap-message-dialog',
+      autoFocus: false,
+      data: {
+        title: 'Bulk Activate',
+        message:
+          'The same existing record is already available as active. You cannot activate this record until the active one is deactivated.',
+        duplicateCombinations: combinations,
+        combinationListHeading: 'Combination(s):'
+      }
+    });
+  }
+
+  bulkActivate(): void {
+    if (this.selectedIds.size === 0) {
+      return;
+    }
+    const rows = Array.from(this.selectedRows.values());
+    const duplicateCombinations = this.getDuplicateCombinationsInSelection(rows);
+    if (duplicateCombinations.length) {
+      this.showBulkDuplicateActivateMessage(duplicateCombinations);
+      return;
+    }
+    const ids = Array.from(this.selectedIds);
+    this.customerGroupReservationCappingService.bulkActivateCheck(ids).subscribe({
+      next: (checkResult) => {
+        const activeConflicts = this.mapConflictCombinations(checkResult?.conflicts);
+        if (activeConflicts.length) {
+          this.showActiveRecordExistsMessage(activeConflicts);
+          return;
+        }
+        this.customerGroupReservationCappingService.bulkActivate(ids).subscribe({
+          next: () => {
+            this._generalService.sendUpdate('CustomerGroupReservationCappingBulkActivate:CustomerGroupReservationCappingView:Success');
+          },
+          error: (err) => {
+            const message = err?.error?.toString?.() ?? err?.error ?? '';
+            if (typeof message === 'string' && message.includes('ActiveRecordExists')) {
+              this.customerGroupReservationCappingService.bulkActivateCheck(ids).subscribe({
+                next: (retry) => this.showActiveRecordExistsMessage(this.mapConflictCombinations(retry?.conflicts))
+              });
+              return;
+            }
+            this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+          }
+        });
+      },
+      error: () => {
+        this._generalService.sendUpdate('CustomerGroupReservationCappingAll:CustomerGroupReservationCappingView:Failure');
+      }
+    });
+  }
+
+  bulkDelete(): void {
+    if (this.selectedIds.size === 0) {
+      return;
+    }
+    this.dialog.open(BulkDeleteDialogComponent, {
+      width: '420px',
+      data: {
+        ids: Array.from(this.selectedIds)
+      }
+    });
+  }
+
   deleteItem(row)
   {
     this.dialog.open(DeleteDialogComponent, 
@@ -546,7 +748,7 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
       Number(this.customerGroup_ID),
       this.filterCappingType,
       this.filterPackageTypeIDs?.length ? this.filterPackageTypeIDs : null,
-      this.filterCityIDs?.length ? this.filterCityIDs : null,
+      this.cityFilterIdsForApi(),
       this.vehicleFilterIdsForApi(),
       this.statusIsActive,
       this.PageNumber,
@@ -640,6 +842,21 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
                this.clearSelection();
                this.loadData();
                this.showNotification('snackbar-success', 'Customer Group Reservation Capping Updated...!!!', 'bottom', 'center');
+              }
+            }
+          }
+          else if(this.MessageArray[0]=="CustomerGroupReservationCappingBulkActivate")
+          {
+            if(this.MessageArray[1]=="CustomerGroupReservationCappingView")
+            {
+              if(this.MessageArray[2]=="Success")
+              {
+               if (this.filterCappingType) {
+                 this.hasSearched = true;
+               }
+               this.clearSelection();
+               this.loadData();
+               this.showNotification('snackbar-success', 'Selected records activated...!!!', 'bottom', 'center');
               }
             }
           }
@@ -799,7 +1016,7 @@ export class CustomerGroupReservationCappingComponent implements OnInit {
       Number(this.customerGroup_ID),
       this.filterCappingType,
       this.filterPackageTypeIDs?.length ? this.filterPackageTypeIDs : null,
-      this.filterCityIDs?.length ? this.filterCityIDs : null,
+      this.cityFilterIdsForApi(),
       this.vehicleFilterIdsForApi(),
       this.statusIsActive,
       this.PageNumber,

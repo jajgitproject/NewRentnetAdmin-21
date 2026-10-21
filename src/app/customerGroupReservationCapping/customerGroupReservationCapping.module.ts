@@ -8,6 +8,7 @@ import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { CappingMessageDialogComponent } from './dialogs/message-dialog/message-dialog.component';
 import { BulkSelectedCitiesDialogComponent } from './dialogs/bulk-selected-cities-dialog/bulk-selected-cities-dialog.component';
 import { BulkSelectedVehiclesDialogComponent } from './dialogs/bulk-selected-vehicles-dialog/bulk-selected-vehicles-dialog.component';
+import { BulkDeleteDialogComponent } from './dialogs/bulk-delete-dialog/bulk-delete-dialog.component';
 import { SearchableCityDropdownComponent } from './components/searchable-city-dropdown/searchable-city-dropdown.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -39,6 +40,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     CappingMessageDialogComponent,
     BulkSelectedCitiesDialogComponent,
     BulkSelectedVehiclesDialogComponent,
+    BulkDeleteDialogComponent,
     SearchableCityDropdownComponent
   ],
   imports: [

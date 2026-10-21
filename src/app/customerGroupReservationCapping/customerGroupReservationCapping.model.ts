@@ -69,6 +69,13 @@ export interface BulkUpdateResponse {
   updatedCount: number;
 }
 
+export interface CappingCombinationDisplay {
+  cappingType?: string;
+  packageType?: string;
+  city?: string;
+  vehicle?: string;
+}
+
 export interface CappingImportError {
   rowNumber: number;
   field: string;

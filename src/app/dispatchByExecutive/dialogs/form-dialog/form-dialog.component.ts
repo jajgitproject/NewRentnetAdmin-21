@@ -395,6 +395,12 @@ export class FormDialogDBEComponent {
         }
       }
 
+      const loadedDriverId = this.dataSource[0]?.dutySlipByDriverID;
+      if (loadedDriverId) {
+        this.dutySlipByDriverID = loadedDriverId;
+        this.advanceTableForm.patchValue({ dutySlipByDriverID: loadedDriverId });
+      }
+
       this.syncIfBlockToGoogleAddresses();
     },
     (error: HttpErrorResponse) => {

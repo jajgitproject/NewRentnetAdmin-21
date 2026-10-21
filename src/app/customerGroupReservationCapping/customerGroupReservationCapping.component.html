@@ -45,14 +45,20 @@
 
                 <mat-form-field class="br-field br-field-city cg-filter-city-multi" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>City</mat-label>
-                    <mat-select multiple [(ngModel)]="filterCityIDs" (openedChange)="onCityFilterPanelOpen($event)">
+                    <mat-select multiple [(ngModel)]="filterCityIDs" (ngModelChange)="onCityFilterIdsChange($event)"
+                        [compareWith]="compareFilterSelectValue"
+                        (openedChange)="onCityFilterPanelOpen($event)">
+                        <mat-select-trigger>
+                            <span class="cg-city-filter-trigger-text">{{ cityFilterTriggerText }}</span>
+                        </mat-select-trigger>
                         <mat-option class="select-filter-option" disabled>
                             <input class="select-filter-input" matInput placeholder="Search city"
                                 [(ngModel)]="cityFilterText" [ngModelOptions]="{standalone: true}"
                                 (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
                         </mat-option>
-                        <mat-option *ngIf="filteredCityList.length === 0" disabled>No city found</mat-option>
-                        <mat-option [value]="getCityOptionId(city)" *ngFor="let city of filteredCityList">
+                        <mat-option [value]="cityFilterAllValue">All</mat-option>
+                        <mat-option *ngIf="cityPanelOptions.length === 0" disabled>No city found</mat-option>
+                        <mat-option [value]="getCityOptionId(city)" *ngFor="let city of cityPanelOptions">
                             {{ getCityOptionName(city) }}
                         </mat-option>
                     </mat-select>
@@ -61,6 +67,7 @@
                 <mat-form-field class="br-field cg-filter-vehicle-multi" appearance="outline" subscriptSizing="dynamic">
                     <mat-label>Vehicle</mat-label>
                     <mat-select multiple [(ngModel)]="filterVehicleIDs" (ngModelChange)="onVehicleFilterIdsChange($event)"
+                        [compareWith]="compareFilterSelectValue"
                         (openedChange)="onVehicleFilterPanelOpen($event)">
                         <mat-select-trigger>
                             <span class="cg-vehicle-filter-trigger-text">{{ vehicleFilterTriggerText }}</span>
@@ -71,8 +78,8 @@
                                 (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
                         </mat-option>
                         <mat-option [value]="vehicleFilterAllValue">All</mat-option>
-                        <mat-option *ngIf="filteredVehicleList.length === 0" disabled>No vehicle found</mat-option>
-                        <mat-option *ngFor="let v of filteredVehicleList" [value]="getVehicleOptionId(v)">
+                        <mat-option *ngIf="vehiclePanelOptions.length === 0" disabled>No vehicle found</mat-option>
+                        <mat-option *ngFor="let v of vehiclePanelOptions" [value]="getVehicleOptionId(v)">
                             {{ getVehicleOptionName(v) }}
                         </mat-option>
                     </mat-select>
@@ -116,6 +123,12 @@
                     </button>
                     <button mat-mini-fab color="primary" type="button" title="Edit selected records" [disabled]="selectedCount === 0" (click)="bulkEdit()">
                         <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-mini-fab color="primary" type="button" title="Activate selected records" [disabled]="selectedCount === 0" (click)="bulkActivate()">
+                        <mat-icon>check_circle</mat-icon>
+                    </button>
+                    <button mat-mini-fab color="warn" type="button" title="Delete selected records" [disabled]="selectedCount === 0" (click)="bulkDelete()">
+                        <mat-icon>delete</mat-icon>
                     </button>
                     <button mat-icon-button type="button" title="Refresh list" (click)="SearchData()" [disabled]="!filterCappingType">
                         <mat-icon>refresh</mat-icon>
