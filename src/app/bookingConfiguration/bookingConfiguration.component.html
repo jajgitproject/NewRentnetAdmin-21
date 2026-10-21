@@ -39,7 +39,7 @@
             <div class="bc-summary-item">
               <span class="bc-label">Package (Requested)</span>
               <span class="bc-value">{{ displayOrDash(customerDetails?.package) }}</span>
-            </div>
+                </div>
             <div class="bc-summary-item">
               <span class="bc-label">Total Passengers</span>
               <span class="bc-value">{{ passengerCount || '--' }}</span>
@@ -49,7 +49,7 @@
               <span class="bc-value">{{ receivedOnDisplay }}</span>
             </div>
           </div>
-        </div>
+            </div>
 
         <div class="bc-section" *ngIf="passengerDetailsList?.length">
           <h3 class="bc-section-title">Passenger Details</h3>
@@ -74,7 +74,7 @@
                   <div class="bc-label">Landmark</div>
                   <div class="bc-value">{{ displayOrDash(getPassengerPickupLandmark(passenger)) }}</div>
                 </div>
-              </div>
+        </div>      
               <div class="bc-passenger-trip-col">
                 <div class="bc-passenger-trip-heading">Drop Off</div>
                 <div class="bc-passenger-row">
@@ -84,14 +84,14 @@
                 <div class="bc-passenger-row">
                   <div class="bc-label">Address</div>
                   <div class="bc-value">{{ displayOrDash(getPassengerDropoffAddress(passenger)) }}</div>
-                </div>
+                </div>                
                 <div class="bc-passenger-row">
                   <div class="bc-label">Landmark</div>
                   <div class="bc-value">{{ displayOrDash(getPassengerDropoffLandmark(passenger)) }}</div>
                 </div>
               </div>
             </div>
-          </div>
+            </div>
         </div>
 
         <div class="bc-section" *ngIf="hasAnyAdditionalInfo || enrouteStops.length">
@@ -189,46 +189,46 @@
             </table>
           </div>
         </div>
-        </div>
-      </div>
-
+                </div>
+            </div>
+            
       <!-- Right: Eco Configuration -->
       <div class="bc-right-panel">
         <div class="bc-panel-header">
           <h2 class="bc-panel-title">2. Eco Configuration</h2>
           <span class="bc-badge bc-badge-configure">Configure &amp; Save</span>
-        </div>
+        </div>     
 
         <form class="register-form quick-search-panel" [formGroup]="advanceTableForm" (ngSubmit)="submit">
           <div class="bc-panel-body">
           <div class="row">
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Duty Type <span class="bc-required">*</span></mat-label>
-                <input required type="text" matInput formControlName="packageType"
-                  [matAutocomplete]="auto6" (keyup)="onPackageTypeChanges($event)">
-                <mat-autocomplete #auto6="matAutocomplete" (optionSelected)="onDTSelected($event.option.value)">
-                  <mat-option *ngFor="let option of filteredPackageTypeOptions | async"
-                    [value]="option.packageType"
-                    (click)="getPackageTypeID(option.packageTypeID,option.packageType)">
-                    {{option.packageType}}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
-            </div>
-
+                    <input required type="text" matInput formControlName="packageType"
+                        [matAutocomplete]="auto6" (keyup)="onPackageTypeChanges($event)">
+                    <mat-autocomplete #auto6="matAutocomplete" (optionSelected)="onDTSelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredPackageTypeOptions | async"
+                            [value]="option.packageType"
+                            (click)="getPackageTypeID(option.packageTypeID,option.packageType)">
+                            {{option.packageType}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+              </div>
+  
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Package <span class="bc-required">*</span></mat-label>
-                <input required type="text" matInput formControlName="package"
-                  [matAutocomplete]="auto7" (keyup)="onPackageChanges($event)">
-                <mat-autocomplete #auto7="matAutocomplete" (optionSelected)="onPackageSelected($event.option.value)">
-                  <mat-option *ngFor="let option of filteredPackageOptions | async"
-                    [value]="option.package" (click)="getPackageID(option.packageID)">
-                    {{option.package}}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
+                    <input required type="text" matInput formControlName="package"
+                        [matAutocomplete]="auto7" (keyup)="onPackageChanges($event)">
+                    <mat-autocomplete #auto7="matAutocomplete" (optionSelected)="onPackageSelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredPackageOptions | async"
+                            [value]="option.package" (click)="getPackageID(option.packageID)">
+                            {{option.package}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
             </div>
           </div>
 
@@ -254,39 +254,39 @@
                 <input matInput formControlName="carType" readonly>
               </mat-form-field>
             </div>
-          </div>
-
+              </div>
+  
           <div class="row">
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>City <span class="bc-required">*</span></mat-label>
-                <input required type="text" matInput formControlName="pickupCity"
-                  [matAutocomplete]="auto4" (keyup)="onPickupCityKeyUp($event)">
-                <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="onCitySelected($event.option.value)">
-                  <mat-option *ngFor="let option of filteredCityOptions | async"
-                    [value]="option.geoPointName" (click)="getCityID(option.geoPointID)">
-                    {{option.geoPointName}}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
-            </div>
-
+                    <input required type="text" matInput formControlName="pickupCity"
+                        [matAutocomplete]="auto4" (keyup)="onPickupCityKeyUp($event)">
+                    <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="onCitySelected($event.option.value)">
+                        <mat-option *ngFor="let option of filteredCityOptions | async"
+                            [value]="option.geoPointName" (click)="getCityID(option.geoPointID)">
+                            {{option.geoPointName}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+              </div>
+  
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Service Location <span class="bc-required">*</span></mat-label>
-                <input required type="text" matInput formControlName="serviceLocation"
-                  [matAutocomplete]="auto10">
-                <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onSLSelected($event.option.value)">
-                  <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
-                    [value]="option.organizationalEntityName"
-                    (click)="getServiceLocationID(option.organizationalEntityID)">
-                    {{option.organizationalEntityName}}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
+                      <input required type="text" matInput formControlName="serviceLocation"
+                          [matAutocomplete]="auto10">
+                      <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onSLSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
+                              [value]="option.organizationalEntityName"
+                              (click)="getServiceLocationID(option.organizationalEntityID)">
+                              {{option.organizationalEntityName}}
+                          </mat-option>
+                      </mat-autocomplete>
+                  </mat-form-field>
+              </div>
             </div>
-          </div>
-
+              
           <div class="row">
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
@@ -319,55 +319,55 @@
 
           <div class="row">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width mb-3 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                   <mat-form-field class="example-full-width mb-3 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Date &amp; Time <span class="bc-required">*</span></mat-label>
                 <input matInput [owlDateTimeTrigger]="date2" [owlDateTime]="date2" formControlName="pickupDateTime" />
                 <mat-icon matSuffix [owlDateTimeTrigger]="date2" class="date-icon disabled-icon">today</mat-icon>
-                <owl-date-time #date2></owl-date-time>
-              </mat-form-field>
+                  <owl-date-time #date2></owl-date-time>
+                  </mat-form-field>
             </div>
-          </div>
-
+                </div>
+  
           <div class="row">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock; else elseBlock">
               <mat-form-field class="example-full-width cp-quick-search-field bc-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Pickup Address <span class="bc-required">*</span></mat-label>
-                <input required type="text" matInput formControlName="pickupAddress"
-                  [matAutocomplete]="auto20">
+                      <input required type="text" matInput formControlName="pickupAddress"
+                          [matAutocomplete]="auto20">
                 <mat-icon matSuffix>location_on</mat-icon>
                 <mat-autocomplete #auto20="matAutocomplete" class="google-autocomplete-panel"
                   panelWidth="fit-content"
                   (optionSelected)="onPGLSelected($event.option.value)">
-                  <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
-                    [value]="option.geoSearchString"
+                          <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                              [value]="option.geoSearchString"
                     (click)="OnPickupGeoLocationClick(option)">
-                    {{option.geoSearchString}}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
-              <div class="bc-google-checkbox">
-                <mat-checkbox color="warn" formControlName="googleAddresses"
-                  (change)="valueSwitch()" [(indeterminate)]="indeterminate"
-                  [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
-              </div>
-            </div>
-
-            <ng-template #elseBlock>
+                              {{option.geoSearchString}}
+                          </mat-option>
+                      </mat-autocomplete>
+                  </mat-form-field>
+                  <div class="bc-google-checkbox">
+                      <mat-checkbox color="warn" formControlName="googleAddresses"
+                          (change)="valueSwitch()" [(indeterminate)]="indeterminate"
+                          [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                  </div>
+                </div>
+  
+              <ng-template #elseBlock>
               <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width cp-quick-search-field bc-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Pickup Address <span class="bc-required">*</span></mat-label>
-                  <input matInput ngx-google-places-autocomplete [options]='options'
-                    #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
-                    formControlName="pickupAddress" required>
+                          <input matInput ngx-google-places-autocomplete [options]='options'
+                              #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
+                              formControlName="pickupAddress" required>
                   <mat-icon matSuffix>location_on</mat-icon>
-                </mat-form-field>
-                <div class="bc-google-checkbox">
-                  <mat-checkbox color="primary" formControlName="googleAddresses"
-                    [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
-                    (change)="valueSwitch()">Google Addresses</mat-checkbox>
-                </div>
-              </div>
-            </ng-template>
+                      </mat-form-field>
+                      <div class="bc-google-checkbox">
+                          <mat-checkbox color="primary" formControlName="googleAddresses"
+                              [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                              (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                      </div>
+                  </div>
+              </ng-template>
           </div>
 
           <div class="row">
@@ -375,62 +375,62 @@
               <mat-form-field class="example-full-width cp-quick-search-field bc-textarea-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>Pickup Address Details</mat-label>
                 <textarea matInput rows="2" formControlName="pickupAddressDetails"></textarea>
-              </mat-form-field>
+                  </mat-form-field>
+              </div>
             </div>
-          </div>
-
+  
           <div class="row">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width mb-3 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-form-field class="example-full-width mb-3 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Drop Date &amp; Time <span class="bc-required">*</span></mat-label>
                 <input matInput [owlDateTimeTrigger]="date3" [owlDateTime]="date3" formControlName="dropOffDateTime" />
                 <mat-icon matSuffix [owlDateTimeTrigger]="date3" class="date-icon disabled-icon">today</mat-icon>
-                <owl-date-time #date3></owl-date-time>
-              </mat-form-field>
+                    <owl-date-time #date3></owl-date-time>
+                    </mat-form-field>
             </div>
-          </div>
+                </div>
 
           <div class="row">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="dropOffifBlock; else elseBlock2">
               <mat-form-field class="example-full-width cp-quick-search-field bc-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                 <mat-label>Drop Address</mat-label>
-                <input type="text" matInput formControlName="dropOffAddress"
-                  [matAutocomplete]="auto21">
+                        <input type="text" matInput formControlName="dropOffAddress"
+                            [matAutocomplete]="auto21">
                 <mat-icon matSuffix>location_on</mat-icon>
                 <mat-autocomplete #auto21="matAutocomplete" class="google-autocomplete-panel"
                   panelWidth="fit-content"
                   (optionSelected)="onDropGLSelected($event.option.value)">
-                  <mat-option *ngFor="let option of filteredDropOffGoogleAddressOptions | async"
-                    [value]="option.geoSearchString"
-                    (click)="OnDropOffGeoLocationClick(option)">
-                    {{option.geoSearchString}}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
-              <div class="bc-google-checkbox">
-                <mat-checkbox color="primary" formControlName="googleAdressesDropOff"
-                  (change)="dropOffControlSwitch()" [(indeterminate)]="indeterminate"
-                  [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
-              </div>
-            </div>
+                            <mat-option *ngFor="let option of filteredDropOffGoogleAddressOptions | async"
+                                [value]="option.geoSearchString"
+                                (click)="OnDropOffGeoLocationClick(option)">
+                                {{option.geoSearchString}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                    <div class="bc-google-checkbox">
+                        <mat-checkbox color="primary" formControlName="googleAdressesDropOff"
+                            (change)="dropOffControlSwitch()" [(indeterminate)]="indeterminate"
+                            [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                    </div>
+                </div>
 
-            <ng-template #elseBlock2>
+                <ng-template #elseBlock2>
               <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width cp-quick-search-field bc-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                   <mat-label>Drop Address</mat-label>
-                  <input matInput ngx-google-places-autocomplete [options]='options'
-                    #placesRef="ngx-places"
-                    (onAddressChange)="handleAddressChangeDropOff($event)"
-                    formControlName="dropOffAddress">
+                            <input matInput ngx-google-places-autocomplete [options]='options'
+                                #placesRef="ngx-places"
+                                (onAddressChange)="handleAddressChangeDropOff($event)"
+                                formControlName="dropOffAddress">
                   <mat-icon matSuffix>location_on</mat-icon>
-                </mat-form-field>
-                <div class="bc-google-checkbox">
+                        </mat-form-field>
+                        <div class="bc-google-checkbox">
                   <mat-checkbox color="primary" formControlName="googleAdressesDropOff"
-                    [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
-                    (change)="dropOffControlSwitch()">Google Addresses</mat-checkbox>
-                </div>
-              </div>
-            </ng-template>
+                                [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                (change)="dropOffControlSwitch()">Google Addresses</mat-checkbox>
+                        </div>
+                    </div>
+                </ng-template>
           </div>
 
           <div class="row">
@@ -438,22 +438,22 @@
               <mat-form-field class="example-full-width cp-quick-search-field bc-textarea-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>Drop Address Details</mat-label>
                 <textarea matInput rows="2" formControlName="dropOffAddressDetails"></textarea>
-              </mat-form-field>
+                    </mat-form-field>
+                </div>
             </div>
-          </div>
 
           <div class="row">
-            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field bc-textarea-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
                 <mat-label>Special Instructions</mat-label>
                 <textarea matInput rows="3" formControlName="specialInstructions"></textarea>
               </mat-form-field>
-            </div>
-          </div>
+                </div>
+              </div>
 
           <mat-progress-bar *ngIf="saving" mode="indeterminate"></mat-progress-bar>
-          </div>
-
+                </div>
+    
           <div class="bc-footer booking-configuration-actions">
             <button mat-stroked-button type="button" [disabled]="saving" (click)="onBack()">Back</button>
             <button mat-flat-button color="warn" type="button" [disabled]="saving || PackageType" (click)="confirmRejected()">
@@ -466,8 +466,8 @@
             <mat-spinner *ngIf="saving" diameter="30"></mat-spinner>
           </div>
         </form>
-      </div>
-
+                </div>
+    
     </div>
   </div>
 </section>
