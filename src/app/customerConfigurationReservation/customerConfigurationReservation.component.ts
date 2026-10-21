@@ -33,6 +33,7 @@ export class CustomerConfigurationReservationComponent implements OnInit {
     //'acceptBooking',
     'bookingFromBookerOnly',
     'allowBackDateBooking',
+    'callMasking',
     'status',
     'actions'
   ];

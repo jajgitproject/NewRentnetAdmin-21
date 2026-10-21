@@ -145,6 +145,12 @@
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.allowBackDateBooking===true ? 'Yes' : 'No'}}</mat-cell>
                                     </ng-container>
+
+                                    <ng-container matColumnDef="callMasking">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Call Masking" matTooltipPosition="above">Call Masking</span></mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.callMasking===true ? 'Yes' : 'No'}}</mat-cell>
+                                    </ng-container>
                                     
                                     <ng-container matColumnDef="status">
                                         <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
