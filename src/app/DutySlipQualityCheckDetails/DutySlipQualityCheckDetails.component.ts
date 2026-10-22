@@ -9,7 +9,7 @@ import { DutySlipQualityCheckedByExecutiveService } from '../dutySlipQualityChec
 import { DutySlipQualityCheckedByExecutive } from '../dutySlipQualityCheckedByExecutive/dutySlipQualityCheckedByExecutive.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
-import { formatQcVerdict, qcVerdictBorderClass, truncateQcMessage } from '../dutySlipQualityCheck/qc-ai-verdict.util';
+import { formatQcVerdict, qcVerdictBorderClass } from '../dutySlipQualityCheck/qc-ai-verdict.util';
 import { bindQcPhotoSlots, QcPhotoSlot } from '../dutySlipQualityCheck/qc-photo-url.util';
 @Component({
   standalone: false,
@@ -26,7 +26,6 @@ export class DutySlipQualityCheckDetailsComponent {
   qcDetails:any;
   formatQcVerdict = formatQcVerdict;
   qcVerdictBorderClass = qcVerdictBorderClass;
-  truncateQcMessage = truncateQcMessage;
   selfieSlot: QcPhotoSlot;
   frontSlot: QcPhotoSlot;
   interiorsSlot: QcPhotoSlot;

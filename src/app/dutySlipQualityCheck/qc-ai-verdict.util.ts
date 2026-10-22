@@ -24,14 +24,3 @@ export function qcVerdictBorderClass(verdict: string | null | undefined): string
   }
   return '';
 }
-
-export function truncateQcMessage(message: string | null | undefined, maxLen = 50): string {
-  if (message == null || String(message).trim() === '') {
-    return '';
-  }
-  const text = String(message);
-  if (text.length <= maxLen) {
-    return text;
-  }
-  return text.slice(0, maxLen) + '…';
-}

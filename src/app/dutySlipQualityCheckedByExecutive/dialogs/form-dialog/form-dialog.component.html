@@ -93,10 +93,7 @@
                             </span>
                             <div class="qc-ai-meta" *ngIf="formatQcVerdict(selfieAiVerdict)">
                                 <div class="qc-ai-verdict">{{ formatQcVerdict(selfieAiVerdict) }}</div>
-                                <div class="qc-ai-message" *ngIf="selfieAiMessage"
-                                     [matTooltip]="selfieAiMessage" matTooltipPosition="above">
-                                    {{ truncateQcMessage(selfieAiMessage) }}
-                                </div>
+                                <div class="qc-ai-message" *ngIf="selfieAiMessage">{{ selfieAiMessage }}</div>
                             </div>
                         </div>
 
@@ -117,10 +114,7 @@
                             </span>
                             <div class="qc-ai-meta" *ngIf="formatQcVerdict(frontPhotoAiVerdict)">
                                 <div class="qc-ai-verdict">{{ formatQcVerdict(frontPhotoAiVerdict) }}</div>
-                                <div class="qc-ai-message" *ngIf="frontPhotoAiMessage"
-                                     [matTooltip]="frontPhotoAiMessage" matTooltipPosition="above">
-                                    {{ truncateQcMessage(frontPhotoAiMessage) }}
-                                </div>
+                                <div class="qc-ai-message" *ngIf="frontPhotoAiMessage">{{ frontPhotoAiMessage }}</div>
                             </div>
                         </div>
                     </div>
@@ -144,10 +138,7 @@
                             </span>
                             <div class="qc-ai-meta" *ngIf="formatQcVerdict(interiorsAiVerdict)">
                                 <div class="qc-ai-verdict">{{ formatQcVerdict(interiorsAiVerdict) }}</div>
-                                <div class="qc-ai-message" *ngIf="interiorsAiMessage"
-                                     [matTooltip]="interiorsAiMessage" matTooltipPosition="above">
-                                    {{ truncateQcMessage(interiorsAiMessage) }}
-                                </div>
+                                <div class="qc-ai-message" *ngIf="interiorsAiMessage">{{ interiorsAiMessage }}</div>
                             </div>
                         </div>
                     </div>

@@ -51,10 +51,7 @@
             </span>
             <div class="qc-ai-meta" *ngIf="formatQcVerdict(qcDetails.frontPhotoAIVerdict)">
               <div class="qc-ai-verdict">{{ formatQcVerdict(qcDetails.frontPhotoAIVerdict) }}</div>
-              <div class="qc-ai-message" *ngIf="qcDetails.frontPhotoAIMessage"
-                   [matTooltip]="qcDetails.frontPhotoAIMessage" matTooltipPosition="above">
-                {{ truncateQcMessage(qcDetails.frontPhotoAIMessage) }}
-              </div>
+              <div class="qc-ai-message" *ngIf="qcDetails.frontPhotoAIMessage">{{ qcDetails.frontPhotoAIMessage }}</div>
             </div>
           </div>
         </div>
@@ -68,10 +65,7 @@
             </span>
             <div class="qc-ai-meta" *ngIf="formatQcVerdict(qcDetails.selfieWithUniformAIVerdict)">
               <div class="qc-ai-verdict">{{ formatQcVerdict(qcDetails.selfieWithUniformAIVerdict) }}</div>
-              <div class="qc-ai-message" *ngIf="qcDetails.selfieWithUniformAIMessage"
-                   [matTooltip]="qcDetails.selfieWithUniformAIMessage" matTooltipPosition="above">
-                {{ truncateQcMessage(qcDetails.selfieWithUniformAIMessage) }}
-              </div>
+              <div class="qc-ai-message" *ngIf="qcDetails.selfieWithUniformAIMessage">{{ qcDetails.selfieWithUniformAIMessage }}</div>
             </div>
           </div>
         </div>
@@ -85,10 +79,7 @@
             </span>
             <div class="qc-ai-meta" *ngIf="formatQcVerdict(qcDetails.interiorsWithAmenitiesAIVerdict)">
               <div class="qc-ai-verdict">{{ formatQcVerdict(qcDetails.interiorsWithAmenitiesAIVerdict) }}</div>
-              <div class="qc-ai-message" *ngIf="qcDetails.interiorsWithAmenitiesAIMessage"
-                   [matTooltip]="qcDetails.interiorsWithAmenitiesAIMessage" matTooltipPosition="above">
-                {{ truncateQcMessage(qcDetails.interiorsWithAmenitiesAIMessage) }}
-              </div>
+              <div class="qc-ai-message" *ngIf="qcDetails.interiorsWithAmenitiesAIMessage">{{ qcDetails.interiorsWithAmenitiesAIMessage }}</div>
             </div>
           </div>
         </div>
