@@ -2046,6 +2046,22 @@ OnDropOffGeoLocationClick(option:any)
     return this.getStopLandmark(this.getPassengerDropoffStop(passenger));
   }
 
+  getBookingPickupAddressDetails(): string {
+    const v = this.advanceTableForm?.get('pickupAddressDetails')?.value;
+    if (v != null && String(v).trim() !== '') {
+      return String(v).trim();
+    }
+    return this.dataSource?.pickupAddressDetails ?? '';
+  }
+
+  getBookingDropoffAddressDetails(): string {
+    const v = this.advanceTableForm?.get('dropOffAddressDetails')?.value;
+    if (v != null && String(v).trim() !== '') {
+      return String(v).trim();
+    }
+    return this.dataSource?.dropOffAddressDetails ?? '';
+  }
+
   get pickupCityName(): string {
     const pickupStop = this.stopDetailsList?.find(
       stop => this.isPickupIntegrationStopType(stop.integrationRequestStopType)
