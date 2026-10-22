@@ -142,53 +142,45 @@
   justify-content: center !important;
   align-items: center !important;
 }
-.cdk-overlay-pane.max-garage-dialog-panel {
+.cdk-overlay-pane.max-garage-dialog-panel,
+.cdk-overlay-pane.max-garage-dialog-panel.mat-mdc-dialog-panel {
   position: fixed !important;
   left: 50% !important;
   top: 50% !important;
   margin: 0 !important;
   width: min(880px, calc(100vw - 32px)) !important;
   min-width: min(880px, calc(100vw - 32px)) !important;
-  max-width: calc(100vw - 32px) !important;
-  height: min(640px, 90vh) !important;
-  min-height: min(640px, 90vh) !important;
-  max-height: min(640px, 90vh) !important;
+  max-width: min(880px, calc(100vw - 32px)) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: 90vh !important;
   transform: translate(-50%, -50%) !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  flex: 0 0 auto !important;
 }
 .cdk-overlay-pane.max-garage-dialog-panel .mat-mdc-dialog-container,
 .cdk-overlay-pane.max-garage-dialog-panel .mdc-dialog__surface {
   width: 100% !important;
   max-width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  max-height: 100% !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
+  max-height: 90vh !important;
 }
 .cdk-overlay-pane.max-garage-dialog-panel .mat-mdc-dialog-content,
 .cdk-overlay-pane.max-garage-dialog-panel .mdc-dialog__content {
-  flex: 1 1 auto !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
+  max-height: calc(90vh - 120px) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
 }
-.cdk-overlay-pane.max-garage-dialog-panel .mat-mdc-form-field-subscript-wrapper,
-.cdk-overlay-pane.max-garage-dialog-panel .mat-mdc-form-field-bottom-align::before {
-  min-height: 22px !important;
-  height: 22px !important;
-}
-.cdk-overlay-pane.max-garage-dialog-panel .mat-mdc-form-field-hint-wrapper,
-.cdk-overlay-pane.max-garage-dialog-panel .mat-mdc-form-field-error-wrapper {
-  padding: 0 !important;
-}
-.cdk-overlay-container .cdk-overlay-pane:has(.max-garage-select-panel) {
+.cdk-overlay-container .cdk-overlay-pane:has(.max-garage-select-panel):not(.max-garage-dialog-panel) {
   z-index: 21000 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: min(840px, calc(100vw - 48px)) !important;
 }
-.max-garage-select-panel {
+.max-garage-select-panel.mat-mdc-select-panel {
   max-height: 256px !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
 
 /* Customer page create/edit popups (Corporate, Individual, Corp. Indi.) — true 4-column layout.

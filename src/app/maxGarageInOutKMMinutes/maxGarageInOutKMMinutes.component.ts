@@ -24,7 +24,7 @@ export class MaxGarageInOutKMMinutesComponent implements OnInit {
     'maximumDropoffToGarageKMs',
     'maximumDropoffToGarageMinutes',
     'status',
-    'createdByID',
+    'createdBy',
     'creationDateTime',
     'endDateTime',
     'actions'
@@ -93,6 +93,9 @@ export class MaxGarageInOutKMMinutesComponent implements OnInit {
 
     const dialogRef = this.dialog.open(FormDialogComponent, {
       panelClass: 'max-garage-dialog-panel',
+      width: '880px',
+      maxWidth: 'calc(100vw - 32px)',
+      maxHeight: '90vh',
       autoFocus: false,
       restoreFocus: true,
       disableClose: false,
@@ -259,6 +262,17 @@ export class MaxGarageInOutKMMinutesComponent implements OnInit {
     return row?.activationStatus === true ? 'Active' : 'Deactive';
   }
 
+  createdByLabel(row: MaxGarageInOutKMMinutes): string {
+    const name = (row?.createdByName || '').trim();
+    if (name) {
+      return name;
+    }
+    if (row?.createdByID) {
+      return String(row.createdByID);
+    }
+    return '';
+  }
+
   private mapSortColumn(column: string): string {
     const map = {
       packageType: 'pt.PackageType',
@@ -267,7 +281,7 @@ export class MaxGarageInOutKMMinutesComponent implements OnInit {
       maximumDropoffToGarageKMs: 'm.MaximumDropoffToGarageKMs',
       maximumDropoffToGarageMinutes: 'm.MaximumDropoffToGarageMinutes',
       status: 'm.ActivationStatus',
-      createdByID: 'm.CreatedByID',
+      createdBy: 'm.CreatedByID',
       creationDateTime: 'm.CreationDate',
       endDateTime: 'm.EndDate'
     };

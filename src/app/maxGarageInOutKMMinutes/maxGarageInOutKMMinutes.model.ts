@@ -9,6 +9,7 @@ export class MaxGarageInOutKMMinutes {
   maximumDropoffToGarageMinutes: number;
   activationStatus: boolean;
   createdByID: number;
+  createdByName: string;
   creationDate: string | Date;
   creationTime: string;
   endDate: string | Date;
@@ -27,6 +28,7 @@ export class MaxGarageInOutKMMinutes {
     this.maximumDropoffToGarageMinutes = item?.maximumDropoffToGarageMinutes ?? null;
     this.activationStatus = item?.activationStatus ?? true;
     this.createdByID = item?.createdByID ?? 0;
+    this.createdByName = item?.createdByName ?? '';
     this.creationDate = item?.creationDate ?? null;
     this.creationTime = item?.creationTime ?? null;
     this.endDate = item?.endDate ?? null;

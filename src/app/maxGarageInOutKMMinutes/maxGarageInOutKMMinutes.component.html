@@ -99,9 +99,9 @@
                         <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
                         <mat-cell *matCellDef="let row">{{ statusLabel(row) }}</mat-cell>
                       </ng-container>
-                      <ng-container matColumnDef="createdByID">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>Created By ID</mat-header-cell>
-                        <mat-cell *matCellDef="let row">{{ row.createdByID }}</mat-cell>
+                      <ng-container matColumnDef="createdBy">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Created By</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ createdByLabel(row) }}</mat-cell>
                       </ng-container>
                       <ng-container matColumnDef="creationDateTime">
                         <mat-header-cell *matHeaderCellDef mat-sort-header>Creation Date/Time</mat-header-cell>

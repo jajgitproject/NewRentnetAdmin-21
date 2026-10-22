@@ -1,9 +1,8 @@
 // @ts-nocheck
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import moment from 'moment';
 import Swal from 'sweetalert2';
 import { GeneralService } from '../../../general/general.service';
 import { PackageTypeDropDown } from '../../../packageType/packageTypeDropDown.model';
@@ -17,6 +16,8 @@ import { MaxGarageInOutKMMinutesService } from '../../maxGarageInOutKMMinutes.se
   styleUrls: ['./form-dialog.component.sass']
 })
 export class FormDialogComponent implements OnInit {
+  private static readonly DIALOG_WIDTH_PX = 880;
+
   dialogTitle = 'Max Garage In/Out KM/Minutes';
   recordForm: FormGroup;
   packageTypeList: PackageTypeDropDown[] = [];
@@ -32,10 +33,10 @@ export class FormDialogComponent implements OnInit {
     private fb: FormBuilder,
     private maxGarageService: MaxGarageInOutKMMinutesService,
     private snackBar: MatSnackBar,
-    public _generalService: GeneralService
+    public _generalService: GeneralService,
+    private cdr: ChangeDetectorRef
   ) {
     this.customerContractID = Number(data?.customerContractID) || 0;
-    const employeeId = this._generalService.getUserID();
     this.recordForm = this.fb.group({
       packageTypeID: [null, Validators.required],
       maximumGarageToPickupKMs: [
@@ -54,15 +55,37 @@ export class FormDialogComponent implements OnInit {
         null,
         [Validators.required, Validators.min(0), Validators.pattern(this.nonNegativeIntPattern)]
       ],
-      activationStatus: [{ value: true, disabled: true }],
-      createdByID: [{ value: employeeId, disabled: true }],
-      creationDate: [{ value: moment().format('DD-MM-YYYY'), disabled: true }],
-      creationTime: [{ value: moment().format('hh:mm A'), disabled: true }]
+      activationStatus: [{ value: true, disabled: true }]
     });
   }
 
   ngOnInit(): void {
     this.loadPackageTypes();
+    this.dialogRef.afterOpened().subscribe(() => this.lockDialogWidth());
+  }
+
+  onPackageTypePanelToggle(_opened: boolean): void {
+    this.lockDialogWidth();
+  }
+
+  private lockDialogWidth(): void {
+    const widthPx = Math.min(FormDialogComponent.DIALOG_WIDTH_PX, window.innerWidth - 32);
+    const width = `${widthPx}px`;
+    this.dialogRef.updateSize(width, undefined);
+
+    const overlayPane = this.getDialogOverlayPane();
+    if (!overlayPane) {
+      return;
+    }
+
+    overlayPane.style.setProperty('width', width, 'important');
+    overlayPane.style.setProperty('min-width', width, 'important');
+    overlayPane.style.setProperty('max-width', width, 'important');
+  }
+
+  private getDialogOverlayPane(): HTMLElement | null {
+    const ref = this.dialogRef as { _overlayRef?: { overlayElement?: HTMLElement } };
+    return ref?._overlayRef?.overlayElement ?? null;
   }
 
   loadPackageTypes(): void {
@@ -86,22 +109,16 @@ export class FormDialogComponent implements OnInit {
   }
 
   resetForm(): void {
-    const employeeId = this._generalService.getUserID();
+    this.resetSavingState();
     this.recordForm.reset({
       packageTypeID: null,
       maximumGarageToPickupKMs: null,
       maximumGarageToPickupMinutes: null,
       maximumDropoffToGarageKMs: null,
       maximumDropoffToGarageMinutes: null,
-      activationStatus: true,
-      createdByID: employeeId,
-      creationDate: moment().format('DD-MM-YYYY'),
-      creationTime: moment().format('hh:mm A')
+      activationStatus: true
     });
     this.recordForm.get('activationStatus')?.disable();
-    this.recordForm.get('createdByID')?.disable();
-    this.recordForm.get('creationDate')?.disable();
-    this.recordForm.get('creationTime')?.disable();
   }
 
   save(): void {
@@ -138,11 +155,11 @@ export class FormDialogComponent implements OnInit {
     }
 
     const payload = this.buildPayload(false);
-    this.isSaving = true;
+    this.setSavingState();
     this.maxGarageService.getActiveByPackageTypeID(this.customerContractID, payload.packageTypeID).subscribe(
       (existing) => {
         if (existing && existing.customerContractMaxG2GKMMinutesID > 0) {
-          this.isSaving = false;
+          this.resetSavingState();
           this.promptReplace();
           return;
         }
@@ -155,6 +172,7 @@ export class FormDialogComponent implements OnInit {
   }
 
   onNoClick(): void {
+    this.resetSavingState();
     this.dialogRef.close(false);
   }
 
@@ -172,31 +190,33 @@ export class FormDialogComponent implements OnInit {
   }
 
   private attemptSave(payload: MaxGarageInOutKMMinutes): void {
-    this.isSaving = true;
+    this.setSavingState();
     this.maxGarageService.add(payload).subscribe(
       (response) => {
         if (response?.code === 'ConfirmReplaceRequired') {
-          this.isSaving = false;
+          this.resetSavingState();
           this.promptReplace();
           return;
         }
-        this.isSaving = false;
+        this.resetSavingState();
         this.showNotification('snackbar-success', 'Record saved successfully.', 'bottom', 'center');
         this.dialogRef.close(true);
       },
       (error) => {
-        this.isSaving = false;
         const message = this.toErrorMessage(error, 'Failed to save record. Please try again.');
         if (this.isReplaceRequiredMessage(message)) {
+          this.resetSavingState();
           this.promptReplace();
           return;
         }
+        this.resetSavingState();
         this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
   }
 
   private promptReplace(): void {
+    this.resetSavingState();
     Swal.fire({
       title: 'Existing Package Record',
       text:
@@ -205,13 +225,26 @@ export class FormDialogComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Yes, Replace',
       cancelButtonText: 'Cancel',
-      allowOutsideClick: false
+      allowOutsideClick: false,
+      focusConfirm: false
     }).then((result) => {
       if (!result.isConfirmed) {
+        this.resetSavingState();
         return;
       }
       this.attemptSave(this.buildPayload(true));
     });
+  }
+
+  private resetSavingState(): void {
+    this.isSaving = false;
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
+  }
+
+  private setSavingState(): void {
+    this.isSaving = true;
+    this.cdr.markForCheck();
   }
 
   private isReplaceRequiredMessage(message: string): boolean {
