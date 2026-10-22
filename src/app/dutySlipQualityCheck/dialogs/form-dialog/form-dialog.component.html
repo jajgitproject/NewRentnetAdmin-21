@@ -82,7 +82,7 @@
                         <mat-label>Selfie With Uniform</mat-label>
                         <br>
                         <div class="qc-photo-block">
-                            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()">
+                            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(selfieAiVerdict)">
                                 <a href="{{ selfieSlot.displayUrl }}" target="_blank">
                                     <app-static-image [src]="selfieSlot.displayUrl" cssClass="qc-image" height="80px" maxWidth="100px"
                                         (failed)="onQcSelfieImageFailed()"></app-static-image>
@@ -107,7 +107,7 @@
                         <mat-label>Front Photo</mat-label>
                         <br>
                         <div class="qc-photo-block">
-                            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()">
+                            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(frontPhotoAiVerdict)">
                                 <a href="{{ frontSlot.displayUrl }}" target="_blank">
                                     <app-static-image [src]="frontSlot.displayUrl" cssClass="qc-image" height="80px" maxWidth="100px"
                                         (failed)="onQcFrontImageFailed()"></app-static-image>
@@ -132,7 +132,7 @@
                         <mat-label>Interiors With Amenities</mat-label>
                         <br>
                         <div class="qc-photo-block">
-                            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()">
+                            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(interiorsAiVerdict)">
                                 <a href="{{ interiorsSlot.displayUrl }}" target="_blank">
                                     <app-static-image [src]="interiorsSlot.displayUrl" cssClass="qc-image" height="80px" maxWidth="100px"
                                         (failed)="onQcInteriorsImageFailed()"></app-static-image>

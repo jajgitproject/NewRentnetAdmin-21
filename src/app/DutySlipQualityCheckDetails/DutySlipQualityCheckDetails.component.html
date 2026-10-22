@@ -44,7 +44,7 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Front Photo</span> <br />
           <div class="qc-photo-block">
-            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()">
+            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(qcDetails.frontPhotoAIVerdict)">
                 <app-static-image cssClass="qc-image" [src]="frontSlot.displayUrl" height="80px" maxWidth="100px"
                     (click)="openImageInNewTab(frontSlot.displayUrl)"
                     (failed)="onQcFrontImageFailed()"></app-static-image>
@@ -61,7 +61,7 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Selfie With Uniform</span> <br />
           <div class="qc-photo-block">
-            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()">
+            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(qcDetails.selfieWithUniformAIVerdict)">
                 <app-static-image cssClass="qc-image" [src]="selfieSlot.displayUrl" height="80px" maxWidth="100px"
                     (click)="openImageInNewTab(selfieSlot.displayUrl)"
                     (failed)="onQcSelfieImageFailed()"></app-static-image>
@@ -78,7 +78,7 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Interiors With Amenities</span> <br />
           <div class="qc-photo-block">
-            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()">
+            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(qcDetails.interiorsWithAmenitiesAIVerdict)">
                 <app-static-image cssClass="qc-image" [src]="interiorsSlot.displayUrl" height="80px" maxWidth="100px"
                     (click)="openImageInNewTab(interiorsSlot.displayUrl)"
                     (failed)="onQcInteriorsImageFailed()"></app-static-image>

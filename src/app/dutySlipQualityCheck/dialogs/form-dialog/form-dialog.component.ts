@@ -21,7 +21,7 @@ import { DutyAmenitieDialogComponent } from '../dutyAmenitie-dialog/dutyAmenitie
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { DeleteDADialogComponent } from '../deleteDA/deleteDA.component';
-import { formatQcVerdict, truncateQcMessage } from '../../qc-ai-verdict.util';
+import { formatQcVerdict, qcVerdictBorderClass, truncateQcMessage } from '../../qc-ai-verdict.util';
 import { bindQcPhotoSlots, QcPhotoSlot } from '../../qc-photo-url.util';
 @Component({
   standalone: false,
@@ -89,6 +89,7 @@ export class FormDialogComponent
   interiorsAiVerdict: string;
   interiorsAiMessage: string;
   formatQcVerdict = formatQcVerdict;
+  qcVerdictBorderClass = qcVerdictBorderClass;
   truncateQcMessage = truncateQcMessage;
   selfieSlot: QcPhotoSlot;
   frontSlot: QcPhotoSlot;

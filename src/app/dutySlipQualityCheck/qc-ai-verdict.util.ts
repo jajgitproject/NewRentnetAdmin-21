@@ -14,7 +14,18 @@ export function formatQcVerdict(verdict: string | null | undefined): string {
   return `Verdict - ${titleCased}`;
 }
 
-export function truncateQcMessage(message: string | null | undefined, maxLen = 5): string {
+export function qcVerdictBorderClass(verdict: string | null | undefined): string {
+  const value = String(verdict ?? '').trim().toLowerCase();
+  if (value === 'good') {
+    return 'is-good';
+  }
+  if (value === 'bad') {
+    return 'is-bad';
+  }
+  return '';
+}
+
+export function truncateQcMessage(message: string | null | undefined, maxLen = 50): string {
   if (message == null || String(message).trim() === '') {
     return '';
   }

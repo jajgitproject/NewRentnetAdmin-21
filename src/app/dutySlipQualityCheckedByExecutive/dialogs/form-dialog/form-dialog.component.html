@@ -83,7 +83,7 @@
                         </mat-label>
                         <br />
                         <div class="qc-photo-block">
-                            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()">
+                            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(selfieAiVerdict)">
                                 <a href="{{ selfieSlot.displayUrl }}" target="_blank"
                                     style="cursor: pointer;color: #007bff;">
                                     <app-static-image [src]="selfieSlot.displayUrl"
@@ -107,7 +107,7 @@
                         </mat-label>
                         <br>
                         <div class="qc-photo-block">
-                            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()">
+                            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(frontPhotoAiVerdict)">
                                 <a href="{{ frontSlot.displayUrl }}" target="_blank"
                                     style="cursor: pointer;color: #007bff;">
                                     <app-static-image [src]="frontSlot.displayUrl"
@@ -134,7 +134,7 @@
                         </mat-label>
                         <br>
                         <div class="qc-photo-block">
-                            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()">
+                            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(interiorsAiVerdict)">
                                 <a href="{{ interiorsSlot.displayUrl }}" target="_blank"
                                     style="cursor: pointer;color: #007bff;">
                                     <app-static-image [src]="interiorsSlot.displayUrl"
