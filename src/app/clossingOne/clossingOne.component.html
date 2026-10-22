@@ -276,6 +276,16 @@
           </h5>
         </div>
 
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="sendDutySlipOnEmail()"
+              [class.closing-entry-disabled]="!DutySlipID || sendingDutySlipEmail"
+              [style.cursor]="(!DutySlipID || sendingDutySlipEmail) ? 'not-allowed' : 'pointer'"
+              [style.color]="(!DutySlipID || sendingDutySlipEmail) ? '#6c757d' : '#007bff'">DS on Email</a>
+          </h5>
+          <img *ngIf="sendingDutySlipEmail" src="assets/images/loader4.gif" width="30" alt="">
+        </div>
+
       </div>
     </div>
 
