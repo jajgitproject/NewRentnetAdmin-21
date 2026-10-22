@@ -2451,6 +2451,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'maxGarageInOutKMMinutes',
+        loadChildren: () =>
+          import('./maxGarageInOutKMMinutes/maxGarageInOutKMMinutes.module').then(
+            (m) => m.MaxGarageInOutKMMinutesModule
+          )
+      },
+
+      {
         path: 'customerPerson',
         loadChildren: () =>
           import('./customerPerson/customerPerson.module').then(
