@@ -62,6 +62,11 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   @Input() activeDutyNightNumberOnNights: number | null = null;
   @Input() isMyfAggregator = false;
   @Input() isMoveInSync = false;
+  @Input() customerContractHasMaxG2GConfig = false;
+  @Input() invoiceDutyMaxTotalRunningKM: number | null = null;
+  @Input() invoiceDutyMaxTotalRunningHours: number | null = null;
+  @Input() invoiceDutyMaxTotalRunningMinutes: number | null = null;
+  @Input() invoiceDutyMaxTotalRunningSeconds: number | null = null;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string, invoiceCalculated?: boolean}>();
   //@Output() dutyMessage = new EventEmitter<string>();
@@ -1474,6 +1479,21 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     return dsClosing !== null && dsClosing !== undefined && dsClosing !== '';
   }
 
+  get showInvoiceDutyMaxG2GTotals(): boolean {
+    return this.customerContractHasMaxG2GConfig
+      && this.invoiceDutyMaxTotalRunningKM != null
+      && this.invoiceDutyMaxTotalRunningHours != null
+      && this.invoiceDutyMaxTotalRunningMinutes != null
+      && this.invoiceDutyMaxTotalRunningSeconds != null;
+  }
+
+  get invoiceDutyMaxTotalRunningTimeLabel(): string {
+    if (!this.showInvoiceDutyMaxG2GTotals) {
+      return '';
+    }
+    return `${this.invoiceDutyMaxTotalRunningHours}:${this.invoiceDutyMaxTotalRunningMinutes}:${this.invoiceDutyMaxTotalRunningSeconds}`;
+  }
+
   private normalizeRemark(value: unknown): string {
     return value == null ? '' : String(value).trim();
   }
@@ -2818,7 +2838,8 @@ public resetVerificationForEcoStateChange(): void {
         this.dutyStatusChanged.emit({
         verifyDuty: this.advanceTableForm.value.verifyDuty,
         goodForBilling: this.advanceTableForm.value.goodForBilling,
-        message: this.Message
+        message: this.Message,
+        invoiceCalculated: true
       });
         if (showSummaryPopup) {
           this.showCalculateBillOverlay = false;

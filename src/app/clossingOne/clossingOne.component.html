@@ -96,6 +96,15 @@
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
           <b>Driver Mobile:</b> <br/>{{closingDataAdvanceTable?.driverMobile || 'N/A'}}
         </div>
+        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2"
+          *ngIf="closingDataAdvanceTable?.maximumGarageToPickupKMs != null">
+          <b>Max Garage KM / Minutes (Contract):</b><br/>
+          G2P: {{closingDataAdvanceTable.maximumGarageToPickupKMs}} km,
+          {{closingDataAdvanceTable.maximumGarageToPickupMinutes}} min
+          &nbsp;|&nbsp;
+          D2G: {{closingDataAdvanceTable.maximumDropoffToGarageKMs}} km,
+          {{closingDataAdvanceTable.maximumDropoffToGarageMinutes}} min
+        </div>
      </div>
     </div>
 
@@ -113,6 +122,11 @@
         [activeDutyNightNumberOnNights]="activeDutyNightNumberOnNights"
         [isMyfAggregator]="isMyfAggregator"
         [isMoveInSync]="isMoveInSync"
+        [customerContractHasMaxG2GConfig]="closingDataAdvanceTable?.maximumGarageToPickupKMs != null"
+        [invoiceDutyMaxTotalRunningKM]="closingDataAdvanceTable?.invoiceDutyTotalRunningKM"
+        [invoiceDutyMaxTotalRunningHours]="closingDataAdvanceTable?.invoiceDutyTotalRunningHours"
+        [invoiceDutyMaxTotalRunningMinutes]="closingDataAdvanceTable?.invoiceDutyTotalRunningMinutes"
+        [invoiceDutyMaxTotalRunningSeconds]="closingDataAdvanceTable?.invoiceDutyTotalRunningSeconds"
         (dataSaved)="onDataSaved()"
         (dutyStatusChanged)="onDutyStatusChanged($event)"></app-dutySlipForBilling>
     </div>

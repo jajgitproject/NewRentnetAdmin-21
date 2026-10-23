@@ -466,6 +466,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onDataSaved() {
     this.GetClosingData();
+    this.BookingDataOnClosing();
     this.DisputeLoadData();
   }
 
@@ -1758,6 +1759,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
             this.summaryOfDutyData = response.summary;
             this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
               || hasInvoiceCalculationResult(response);
+            this.BookingDataOnClosing();
             this.loadDataForCard();
             this.showNotification(
               'snackbar-success',
@@ -2173,6 +2175,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.applyEditBlockStatus();
     if (event.invoiceCalculated) {
       this.hasActiveInvoiceCalculation = true;
+      this.BookingDataOnClosing();
     }
   }
 
