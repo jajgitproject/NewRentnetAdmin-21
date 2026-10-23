@@ -7,7 +7,7 @@ import { ReservationGroup } from '../../reservationGroupDetails.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { CustomerTypeDropDown } from 'src/app/customerType/customerTypeDropDown.model';
 import { CustomerCustomerGroupDropDown } from 'src/app/customer/customerCustomerGroupDropDown.model';
 import { map, startWith } from 'rxjs/operators';
@@ -27,6 +27,7 @@ import { ReservationGroupService } from 'src/app/reservationGroup/reservationGro
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CustomerGroupDropDown } from 'src/app/customerGroup/customerGroupDropDown.model';
 import Swal from 'sweetalert2';
+import { CustomerBlockingService } from 'src/app/customerBlocking/customerBlocking.service';
 
 @Component({
   standalone: false,
@@ -89,6 +90,7 @@ export class FormDialogComponent implements OnInit {
   FromToDate: string;
   ReasonMessageShow: boolean = false;
   Reason: any;
+  reservationBlocked: boolean = false;
   saveDisabled: boolean = true;
   isBookerAllowedToBeCreatedFromReservation = false;
 
@@ -111,6 +113,7 @@ export class FormDialogComponent implements OnInit {
     public router: Router,
       private snackBar: MatSnackBar,
     public reservationGroupService: ReservationGroupService,
+    public customerBlockingService: CustomerBlockingService,
     public _generalService: GeneralService) {
     // Set the defaults
     this.action = data.action;
@@ -774,25 +777,45 @@ private _filterRD(value: string): any[] {
     this.syncCustomerGroupValidation(this.customerGroupID, this.customerGroup);
   }
 
+  private getReservationCheckDate(): string {
+    let fromToDate = this.FromToDate || '';
+    if (fromToDate.trim() !== '') {
+      return moment(fromToDate).format('YYYY-MM-DD');
+    }
+    return moment().format('YYYY-MM-DD');
+  }
+
   getStopReservationReason(CustomerID) {
-    let FromToDate = this.FromToDate || ''; // Ensure FromToDate is not undefined
-    if (FromToDate.trim() !== '') {
-      FromToDate = moment(FromToDate).format('YYYY-MM-DD');
-    }
-    else {
-      FromToDate = moment().format('YYYY-MM-DD');// If empty, set it to today's date
-    }
-    this.reservationGroupService.getReason(CustomerID, FromToDate).subscribe(
-      (data: string[]) => {
-        if (data && data.length > 0) {
-          this.ReasonMessageShow = true;
-          this.Reason = data.join(', ');
-        }
-        else {
-          this.ReasonMessageShow = false;
-        }
+    const reservationDate = this.getReservationCheckDate();
+    forkJoin({
+      stopReservation: this.reservationGroupService.getReason(CustomerID, reservationDate),
+      customerBlocking: this.customerBlockingService.checkCustomerBlockingForReservation(
+        CustomerID,
+        reservationDate
+      ),
+    }).subscribe(({ stopReservation, customerBlocking }) => {
+      const reasons: string[] = [];
+      if (stopReservation?.length) {
+        reasons.push(...stopReservation);
       }
-    );
+      if (customerBlocking?.length) {
+        reasons.push(...customerBlocking);
+        Swal.fire({
+          title: 'Customer blocked',
+          html: customerBlocking.join('<br/><br/>'),
+          icon: 'warning',
+          confirmButtonText: 'OK',
+        });
+      }
+      this.reservationBlocked = !!(customerBlocking?.length);
+      if (reasons.length > 0) {
+        this.ReasonMessageShow = true;
+        this.Reason = reasons.join(', ');
+      } else {
+        this.ReasonMessageShow = false;
+        this.Reason = '';
+      }
+    });
   }
 
   getTransferLocationBasedOnCustomer(CustomerID: any) {
@@ -1193,6 +1216,15 @@ private _filterRD(value: string): any[] {
       )
   }
   public confirmAdd(): void {
+    if (this.reservationBlocked) {
+      Swal.fire({
+        title: 'Reservation not allowed',
+        text: this.Reason || 'This customer is blocked and cannot be used for a new reservation.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
     if (this.action == "edit") {
       this.Put();
     }
