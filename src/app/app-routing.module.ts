@@ -1109,6 +1109,13 @@ const routes: Routes = [
     )
 },
 {
+  path: 'customerPaymentMapping',
+    loadChildren: () =>
+      import('./customerPaymentMapping/customerPaymentMapping.module').then(
+        (m) => m.CustomerPaymentMappingModule
+      ),
+  },
+  {
   path: 'contractPaymentMapping',
   loadChildren: () =>
     import('./contractPaymentMapping/contractPaymentMapping.module').then(

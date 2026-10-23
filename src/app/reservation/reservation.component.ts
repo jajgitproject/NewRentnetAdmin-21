@@ -698,7 +698,18 @@ onTNCChange(checked: any)
 
   InitPaymentMode() 
   {
-    this._generalService.GetModeOfPaymentByContract(this.contractID).subscribe(
+    const customerID =
+      this.advanceTableForm.getRawValue()?.customerID ||
+      this.advanceTableForm.value?.customerID ||
+      this.customerID ||
+      (this.advanceTable && this.advanceTable.customerID);
+
+    const mopRequest =
+      customerID && this.contractID
+        ? this._generalService.GetModeOfPaymentByCustomerAndContract(customerID, this.contractID)
+        : this._generalService.GetModeOfPaymentByContract(this.contractID);
+
+    mopRequest.subscribe(
       data => {
         this.PaymentModeList = data;
         const control = this.advanceTableForm.controls['modeOfPayment'];

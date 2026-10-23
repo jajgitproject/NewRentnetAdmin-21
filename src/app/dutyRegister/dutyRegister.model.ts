@@ -14,6 +14,9 @@ export class DutyRegisterModel {
   dutySlipImage: string;
   closingDate: Date | null;
   runningDetails: string;
+  /** Remark on DS Closing (same as runningDetails from API). */
+  billRemark: string;
+  vendorRemark: string;
 
   dispatchLocation: string;
 

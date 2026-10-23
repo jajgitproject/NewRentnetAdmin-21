@@ -140,6 +140,7 @@ export class CustomerComponent implements OnInit {
     { label: 'Customer OTP Configuration', pageName: 'Customer OTP Configuration' },
     { label: 'Change KAM for Customers', pageName: 'Change KAM for Customers' },
     { label: 'Payment Terms Code', pageName: 'customerPaymentTermsCode' },
+    { label: 'Customer Payment Mapping', pageName: 'customerPaymentMapping' },
     { label: 'Customer Growth Person', pageName: 'customerGrowthPerson' },
   ];
 
@@ -1193,6 +1194,15 @@ else if (menuItem.label.toLowerCase() === 'change kam for customers') {
 }
 else if (menuItem.label.toLowerCase() === 'payment terms code') {
   const url = this.router.serializeUrl(this.router.createUrlTree(['/customerPaymentTermsCode'], {
+    queryParams: {
+      CustomerID: encryptedCustomerID,
+      CustomerName: encryptedCustomerName
+    }
+  }));
+  window.open(baseUrl + url, '_blank');
+}
+else if (menuItem.label.toLowerCase() === 'customer payment mapping') {
+  const url = this.router.serializeUrl(this.router.createUrlTree(['/customerPaymentMapping'], {
     queryParams: {
       CustomerID: encryptedCustomerID,
       CustomerName: encryptedCustomerName
