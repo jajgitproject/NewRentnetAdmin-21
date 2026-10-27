@@ -64,6 +64,7 @@ export class Customer {
       aggregatorCustomerName:string;
       showBillingInApp:boolean;
       geocage:boolean;
+      isAppBasedCustomer:string;
   constructor(customer) {
     {
        this.customerID = customer.customerID || -1;
@@ -124,6 +125,7 @@ export class Customer {
        this.aggregatorCustomerName = customer.aggregatorCustomerName || '';
        this.showBillingInApp = customer.showBillingInApp ?? false;
        this.geocage = customer.geocage ?? false;
+       this.isAppBasedCustomer = customer.isAppBasedCustomer ?? customer.IsAppBasedCustomer ?? 'No';
     }
   }
   

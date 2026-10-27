@@ -355,18 +355,170 @@ allotmentType: any;
 
   }
   public Post(): void {
-    this.submitAllotment(this.data.allotmentType, 'Car And Driver Alloted...!!!');
+    this.confirmAppBasedDriverIfNeeded(() =>
+      this.submitAllotment(this.data.allotmentType, 'Car And Driver Alloted...!!!')
+    );
   }
 
   public SoftPost(): void {
-    this.submitAllotment('Soft', 'Car And Driver Alloted...!!!');
+    this.confirmAppBasedDriverIfNeeded(() =>
+      this.submitAllotment('Soft', 'Car And Driver Alloted...!!!')
+    );
   }
 
   public HardPost(): void {
-    this.submitAllotment('Hard', 'Car And Driver Alloted...!!! Notifications are being sent.');
+    this.confirmAppBasedDriverIfNeeded(() =>
+      this.submitAllotment('Hard', 'Car And Driver Alloted...!!! Notifications are being sent.')
+    );
+  }
+
+  private isPreferAppBasedYes(value: any): boolean {
+    if (value === true || value === 1 || value === '1') {
+      return true;
+    }
+    const text = String(value ?? '').trim().toLowerCase();
+    return text === 'yes' || text === 'true';
+  }
+
+  private getSelectedDriverAppBasedYes(): boolean {
+    const driverStatus =
+      this.advanceTableDIA?.appBasedDriver ??
+      this.advanceTableDIA?.AppBasedDriver ??
+      this.data?.driverAppBasedDriver ??
+      this.data?.driverAppBasedStatus;
+    return this.isPreferAppBasedYes(driverStatus);
+  }
+
+  private areBothCustomerAppBasedPreferencesNo(): boolean {
+    const prefs = this.data?.reservationPreferences;
+    if (prefs) {
+      return !prefs.customerPreferYes && !prefs.customerPersonPreferYes;
+    }
+    return (
+      !this.isPreferAppBasedYes(this.data?.customerPreferAppBasedDriver) &&
+      !this.isPreferAppBasedYes(this.data?.customerPersonPreferAppBasedDriver)
+    );
+  }
+
+  private shouldSkipAppBasedDriverAllotmentConfirm(): boolean {
+    if (this.data?.Text !== 'AllotCarDriver') {
+      return true;
+    }
+    if (this.getSelectedDriverAppBasedYes()) {
+      return true;
+    }
+    if (this.areBothCustomerAppBasedPreferencesNo()) {
+      return true;
+    }
+    return false;
+  }
+
+  private getAppBasedPreferenceDisplayLabels(): { customer: string; customerPerson: string } {
+    const prefs = this.data?.reservationPreferences;
+    if (prefs) {
+      return {
+        customer: prefs.customerPreferLabel ?? (prefs.customerPreferYes ? 'Yes' : 'No'),
+        customerPerson:
+          prefs.customerPersonPreferLabel ?? (prefs.customerPersonPreferYes ? 'Yes' : 'No'),
+      };
+    }
+    return {
+      customer: this.isPreferAppBasedYes(this.data?.customerPreferAppBasedDriver) ? 'Yes' : 'No',
+      customerPerson: this.isPreferAppBasedYes(this.data?.customerPersonPreferAppBasedDriver)
+        ? 'Yes'
+        : 'No',
+    };
+  }
+
+  private buildAppBasedDriverConfirmHtml(): string {
+    const labels = this.getAppBasedPreferenceDisplayLabels();
+    const escapeHtml = (value: string) =>
+      String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    const customer = escapeHtml(labels.customer);
+    const customerPerson = escapeHtml(labels.customerPerson);
+    const labelStyle =
+      'font-size:14px;line-height:1.45;color:#424242;text-align:left;white-space:nowrap;';
+    const valueStyle =
+      'font-size:14px;line-height:1.45;font-weight:600;color:#212121;margin-left:6px;white-space:nowrap;';
+    const prefRow = 'margin:0 0 10px;text-align:left;line-height:1.45;';
+    return `
+      <div class="allot-app-based-confirm" style="width:100%;box-sizing:border-box;text-align:left;">
+        <p style="${prefRow}">
+          <span style="${labelStyle}">Customer Prefers App Based Driver:</span><span style="${valueStyle}">${customer}</span>
+        </p>
+        <p style="${prefRow}margin-bottom:16px;">
+          <span style="${labelStyle}">Customer Person Prefers App Based Driver:</span><span style="${valueStyle}">${customerPerson}</span>
+        </p>
+        <div style="border-top:1px solid #e8e8e8;padding-top:14px;margin:0;">
+          <p style="margin:0 0 10px;font-size:14px;line-height:1.5;color:#424242;text-align:left;">
+            The Driver you have chosen is not App based.
+          </p>
+          <p style="margin:0;font-size:14px;line-height:1.5;font-weight:500;color:#212121;text-align:left;">
+            Do you really want to continue?
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  private alignAppBasedDriverConfirmPopup(popup: HTMLElement): void {
+    const htmlContainer = popup.querySelector('.swal2-html-container') as HTMLElement;
+    const content = popup.querySelector('.swal2-content') as HTMLElement;
+    const icon = popup.querySelector('.swal2-icon') as HTMLElement;
+    if (content) {
+      content.style.alignItems = 'flex-start';
+      content.style.justifyContent = 'flex-start';
+      content.style.width = '100%';
+      content.style.textAlign = 'left';
+    }
+    if (icon) {
+      icon.style.marginTop = '0.25em';
+      icon.style.marginBottom = '0.75em';
+    }
+    if (htmlContainer) {
+      htmlContainer.style.display = 'block';
+      htmlContainer.style.width = '100%';
+      htmlContainer.style.maxWidth = '100%';
+      htmlContainer.style.margin = '0';
+      htmlContainer.style.padding = '0 0.5em 0 0.25em';
+      htmlContainer.style.textAlign = 'left';
+      htmlContainer.style.overflow = 'visible';
+    }
+  }
+
+  private confirmAppBasedDriverIfNeeded(continueFn: () => void): void {
+    if (this.buttonDisabled || this.isSubmitting) {
+      return;
+    }
+    if (this.shouldSkipAppBasedDriverAllotmentConfirm()) {
+      continueFn();
+      return;
+    }
+    Swal.fire({
+      html: this.buildAppBasedDriverConfirmHtml(),
+      width: 500,
+      padding: '1.35em 1.5em 1.15em',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+      focusCancel: true,
+      didOpen: (popup) => this.alignAppBasedDriverConfirmPopup(popup),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        continueFn();
+      }
+    });
   }
 
   private submitAllotment(allotmentType: string, successMessage: string): void {
+    if (this.isSubmitting) {
+      return;
+    }
     if (this.buttonDisabled) {
       this.showNotification('snackbar-danger','Changes are not allowed. Status: ' + this.status,'bottom','center');
       return;

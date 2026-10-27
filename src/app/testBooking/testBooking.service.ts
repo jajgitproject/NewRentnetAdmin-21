@@ -244,7 +244,7 @@ export class TestBookingService {
       rows = this.asList(await this.toPromise(
         this.driverInventoryAssociationService.getTableData(
           0, driverID, 'null', 'null', 'null', 'null', 'null', wantedRaw, wantedRaw,
-          'null', 'null', 'null', 'null', 'null', 'null', true, 1
+          'null', 'null', 'null', 'null', 'null', 'All', 'null', true, 1
         )
       ));
     } catch {
@@ -270,7 +270,7 @@ export class TestBookingService {
         rows = this.asList(await this.toPromise(
           this.driverInventoryAssociationService.getTableData(
             0, driverID, 'null', 'null', 'null', 'null', 'null', 'null', 'null',
-            'null', 'null', 'null', 'null', 'null', 'null', true, 1
+            'null', 'null', 'null', 'null', 'null', 'All', 'null', true, 1
           )
         ));
       } catch {
