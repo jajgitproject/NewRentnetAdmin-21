@@ -461,7 +461,9 @@ export const ROUTES: RouteInfo[] = [
       {
         path: 'carUtilizationMIS',
         title: 'Car Utilization MIS',
+        pageKey: 'Car Utilization MIS',
         moduleName: 'carUtilizationMIS',
+        alternateAccessPageKeys: ['carUtilizationMIS', 'Car Utilization MIS'],
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,

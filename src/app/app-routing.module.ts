@@ -2927,6 +2927,13 @@ const routes: Routes = [
           )
       },
       {
+        path: 'customerCityHigherExtraKMorHR',
+        loadChildren: () =>
+          import('./customerCityHigherExtraKMorHR/customerCityHigherExtraKMorHR.module').then(
+            (m) => m.CustomerCityHigherExtraKMorHRModule
+          )
+      },
+      {
         path: 'driverMIS',
         loadChildren: () =>
           import('./driverMIS/driverMIS.module').then(

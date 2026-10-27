@@ -142,6 +142,7 @@ export class CustomerComponent implements OnInit {
     { label: 'Payment Terms Code', pageName: 'customerPaymentTermsCode' },
     { label: 'Customer Payment Mapping', pageName: 'customerPaymentMapping' },
     { label: 'Customer Growth Person', pageName: 'customerGrowthPerson' },
+    { label: 'Charge Higher Extra KM/HR Based on City', pageName: 'customerCityHigherExtraKMorHR' },
   ];
 
   
@@ -1212,6 +1213,15 @@ else if (menuItem.label.toLowerCase() === 'customer payment mapping') {
 }
 else if (menuItem.label.toLowerCase() === 'customer growth person') {
   const url = this.router.serializeUrl(this.router.createUrlTree(['/customerGrowthPerson'], {
+    queryParams: {
+      CustomerID: encryptedCustomerID,
+      CustomerName: encryptedCustomerName
+    }
+  }));
+  window.open(baseUrl + url, '_blank');
+}
+else if (menuItem.pageName === 'customerCityHigherExtraKMorHR') {
+  const url = this.router.serializeUrl(this.router.createUrlTree(['/customerCityHigherExtraKMorHR'], {
     queryParams: {
       CustomerID: encryptedCustomerID,
       CustomerName: encryptedCustomerName
