@@ -368,7 +368,7 @@ export class SendVendorClosingDataComponent implements OnInit, OnDestroy {
     const batches = Math.ceil(selected.length / size);
     const confirmed = window.confirm(
       'Send vendor closing data for ' + selected.length + ' duty slip(s) in ' + batches + ' batch(es) of up to ' + size + '?\n\n' +
-      'MYF duties send the closed event. MoveInSync duties send end duty and invoice data. Processing continues if you leave this page.'
+      'MYF duties send the start trip event, the end trip event, and the closed event. MoveInSync duties send end duty and invoice data. Processing continues if you leave this page.'
     );
     if (!confirmed) {
       return;
