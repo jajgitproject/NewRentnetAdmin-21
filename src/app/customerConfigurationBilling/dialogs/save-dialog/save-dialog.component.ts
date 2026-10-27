@@ -41,18 +41,43 @@ export class SaveDialogComponent
        }
   }
 
+  private coerceBoolean(value: any, defaultValue = false): boolean {
+    if (value === true || value === false) {
+      return value;
+    }
+    if (value === 'true' || value === 'True') {
+      return true;
+    }
+    if (value === 'false' || value === 'False') {
+      return false;
+    }
+    return defaultValue;
+  }
+
+  /** Hidden fields were removed from the UI; API/stored proc still requires valid bit/string values. */
+  private prepareFormForSave(customerID: number): void {
+    const form = this.data.advanceTableForm;
+    const raw = form.getRawValue();
+    const fixBillingBranchID = Number(raw.fixBillingBranchID || this.data.fixBillingBranchID) || 0;
+
+    form.patchValue({
+      customerID: Number(customerID) || 0,
+      ecoCompanyID: 0,
+      fixBillingBranchID,
+      misRequired: this.coerceBoolean(raw.misRequired, false),
+      useOnlyAppDataForBilling: this.coerceBoolean(raw.useOnlyAppDataForBilling, false),
+      mapMandatoryWithDutySlip: this.coerceBoolean(raw.mapMandatoryWithDutySlip, false),
+      runningDetailsMandatoryWithDutySlip: this.coerceBoolean(raw.runningDetailsMandatoryWithDutySlip, false),
+      useDataFromAppToPrintOnDutySlip: this.coerceBoolean(raw.useDataFromAppToPrintOnDutySlip, false),
+      runningDetailsSource: raw.runningDetailsSource || 'App',
+      activationStatus: this.coerceBoolean(raw.activationStatus, true),
+    });
+  }
+
   public Put(): void
   {
     this.dialogRef.close();
-    this.data.advanceTableForm.patchValue({customerID:this.data.advanceTable.customerID});
-    this.data.advanceTableForm.patchValue({ecoCompanyID:0});
-    if(this.data.fixBillingBranchID)
-    {
-      this.data.advanceTableForm.patchValue({fixBillingBranchID:this.data.fixBillingBranchID});
-    }
-    else{
-      this.data.advanceTableForm.patchValue({fixBillingBranchID:0});
-    }
+    this.prepareFormForSave(this.data.advanceTable.customerID);
     
     this.advanceTableService.update(this.data.advanceTableForm.getRawValue())  
     .subscribe(
@@ -73,15 +98,7 @@ export class SaveDialogComponent
   public Post(): void
   {
     this.dialogRef.close();
-    this.data.advanceTableForm.patchValue({customerID:this.data.customerID});
-    this.data.advanceTableForm.patchValue({ecoCompanyID:0});
-    if(this.data.fixBillingBranchID)
-    {
-      this.data.advanceTableForm.patchValue({fixBillingBranchID:this.data.fixBillingBranchID});
-    }
-    else{
-      this.data.advanceTableForm.patchValue({fixBillingBranchID:0});
-    }
+    this.prepareFormForSave(this.data.customerID);
     this.advanceTableService.add(this.data.advanceTableForm.getRawValue())  
     .subscribe(
     response => 

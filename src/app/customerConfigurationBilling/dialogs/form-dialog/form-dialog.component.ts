@@ -68,8 +68,15 @@ export class FormDialogComponent
         } else 
         {
           this.dialogTitle = 'Billing Configuration For';
-          this.advanceTable = new CustomerConfigurationBilling({});
-          this.advanceTable.activationStatus=true;
+          this.advanceTable = new CustomerConfigurationBilling({
+            misRequired: false,
+            useOnlyAppDataForBilling: false,
+            mapMandatoryWithDutySlip: false,
+            runningDetailsMandatoryWithDutySlip: false,
+            useDataFromAppToPrintOnDutySlip: false,
+            runningDetailsSource: 'App',
+            activationStatus: true,
+          });
         }
         this.advanceTableForm = this.createContactForm();
         this.CustomerID=this.data.CustomerID;
@@ -77,7 +84,6 @@ export class FormDialogComponent
   }
   public ngOnInit(): void
   {
-    this.InitCompany();
     this.InitBranch();
     this.advanceTableForm.controls["activationStatus"].disable();
   }
