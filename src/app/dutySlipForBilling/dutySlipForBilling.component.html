@@ -508,6 +508,25 @@
                     </div>
                   </div>
 
+                  <div class="row align-items-end" *ngIf="showInvoiceDutyMaxG2GTotals">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2" style="font-size: 15px; padding-top: 4px;">
+                      <mat-label
+                        style="border-bottom: 1px solid rgba(0, 0, 0, 0.42); padding: 2px 0; width: 215px; display: inline-block;"><strong>Total as per Max KM, Max Hours</strong></mat-label>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
+                        <input matInput [value]="invoiceDutyMaxTotalRunningTimeLabel" readonly aria-label="Total as per Max KM, Max Hours - time">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-2 col-lg-2 col-md-6 col-sm-12 mb-2">
+                      <mat-form-field appearance="fill" floatLabel="auto" subscriptSizing="dynamic" class="example-full-width cp-quick-search-field">
+                        <input matInput [value]="invoiceDutyMaxTotalRunningKM" readonly aria-label="Total as per Max KM, Max Hours - KM">
+                      </mat-form-field>
+                    </div>
+                  </div>
+
                   </div>
 
                   <div class="row">

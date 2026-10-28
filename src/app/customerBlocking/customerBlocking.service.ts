@@ -72,4 +72,10 @@ export class CustomerBlockingService
   {
     return this.httpClient.delete(this.API_URL + '/'+ customerBlockingID);
   }
+
+  checkCustomerBlockingForReservation(customerID: number, reservationDate: string): Observable<any> {
+    return this.httpClient.get(
+      this.API_URL + '/CheckCustomerBlockingForReservation/' + customerID + '/' + reservationDate
+    );
+  }
 }

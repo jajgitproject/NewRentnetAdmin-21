@@ -509,14 +509,12 @@ canCreateReservation: boolean;
       if (this.shouldUseEditPrefill()) {
         this.action = 'edit';
       }
+        this.refreshReservationCustomerAlerts();
             });
           }   
           this.advanceTableForm.controls["customerType"].disable(); 
         this.advanceTableForm.controls["customerCustomerGroup"].disable();
         this.getReservationGSTData();
-        this.getStopReservationReason(this.customerID);
-        this.getReservationAlertForCustomer(this.customerID);
-        this.getAlerMessagetForCustomer(this.customerID);  
         this.InitReservationInvoiceGSTDetails( this.customerID);
         this.InitResrvationGSTForCityID(this.customerID,this.cityID);
         this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
@@ -698,7 +696,18 @@ onTNCChange(checked: any)
 
   InitPaymentMode() 
   {
-    this._generalService.GetModeOfPaymentByContract(this.contractID).subscribe(
+    const customerID =
+      this.advanceTableForm.getRawValue()?.customerID ||
+      this.advanceTableForm.value?.customerID ||
+      this.customerID ||
+      (this.advanceTable && this.advanceTable.customerID);
+
+    const mopRequest =
+      customerID && this.contractID
+        ? this._generalService.GetModeOfPaymentByCustomerAndContract(customerID, this.contractID)
+        : this._generalService.GetModeOfPaymentByContract(this.contractID);
+
+    mopRequest.subscribe(
       data => {
         this.PaymentModeList = data;
         const control = this.advanceTableForm.controls['modeOfPayment'];
@@ -1197,6 +1206,7 @@ toArray<T>(value: any): T[] {
        
         this.customerID=this.advanceTable.customerID;
         this.customerGroupID=this.advanceTable.customerGroupID;
+        this.refreshReservationCustomerAlerts();
         this.InitProjectCode();
         this.InitBooker();
         this.InitPassenger();
@@ -1876,20 +1886,63 @@ toArray<T>(value: any): T[] {
     this.InitProjectCode();
     this.InitCompanyForCustomer();
     this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
+    this.refreshReservationCustomerAlerts();
+  }
+
+  private resolveCustomerIdForAlerts(): any {
+    const id =
+      this.advanceTableForm?.getRawValue()?.customerID ||
+      this.advanceTableForm?.value?.customerID ||
+      this.customerID ||
+      (this.advanceTable && this.advanceTable.customerID);
+    if (id === null || id === undefined || id === '') {
+      return null;
+    }
+    return id;
+  }
+
+  private getReservationCheckDate(): string {
+    const pickupFromForm = this.advanceTableForm?.value?.pickupDate;
+    if (pickupFromForm) {
+      const pickupMoment = moment(pickupFromForm);
+      if (pickupMoment.isValid()) {
+        return pickupMoment.format('YYYY-MM-DD');
+      }
+    }
+    if (this.pickupDate) {
+      const labelMoment = moment(this.pickupDate, ['DD/MM/YYYY', 'DD/MM/yyyy'], true);
+      if (labelMoment.isValid()) {
+        return labelMoment.format('YYYY-MM-DD');
+      }
+    }
+    const fromToDate = this.FromToDate || '';
+    if (fromToDate.trim() !== '') {
+      return moment(fromToDate).format('YYYY-MM-DD');
+    }
+    return moment().format('YYYY-MM-DD');
+  }
+
+  refreshReservationCustomerAlerts(): void {
+    const customerID = this.resolveCustomerIdForAlerts();
+    if (!customerID) {
+      this.ReasonMessageShow = false;
+      this.ReservationAlertShow = false;
+      this.CustomerAlertMessageShow = false;
+      return;
+    }
+    this.getStopReservationReason(customerID);
+    this.getReservationAlertForCustomer(customerID);
+    this.getAlerMessagetForCustomer(customerID);
   }
 
   getStopReservationReason(customerID)
   {
-    let FromToDate = this.FromToDate || ''; // Ensure FromToDate is not undefined
-    if (FromToDate.trim() !== '') 
-    {
-      FromToDate = moment(FromToDate).format('YYYY-MM-DD');
-    } 
-    else 
-    {
-      FromToDate = moment().format('YYYY-MM-DD');// If empty, set it to today's date
+    if (!customerID) {
+      this.ReasonMessageShow = false;
+      return;
     }
-    this.rervationGroupService.getReason(customerID,FromToDate).subscribe(
+    const FromToDate = this.getReservationCheckDate();
+    this.rervationGroupService.getReason(customerID, FromToDate).subscribe(
       (data: string[]) =>
       {
         if (data && data.length > 0) 
@@ -1901,22 +1954,23 @@ toArray<T>(value: any): T[] {
         {
           this.ReasonMessageShow = false;
         }      
+      },
+      (error: HttpErrorResponse) => {
+        if (error?.status === 204) {
+          this.ReasonMessageShow = false;
+        }
       }
     );
   }
 
   getReservationAlertForCustomer(customerID)
   {
-    let FromToDate = this.FromToDate || ''; // Ensure FromToDate is not undefined
-    if (FromToDate.trim() !== '') 
-    {
-      FromToDate = moment(FromToDate).format('YYYY-MM-DD');
-    } 
-    else 
-    {
-      FromToDate = moment().format('YYYY-MM-DD');// If empty, set it to today's date
+    if (!customerID) {
+      this.ReservationAlertShow = false;
+      return;
     }
-    this.rervationGroupService.getReservationAlertForCustomer(customerID,FromToDate).subscribe(
+    const FromToDate = this.getReservationCheckDate();
+    this.rervationGroupService.getReservationAlertForCustomer(customerID, FromToDate).subscribe(
       (data: string[]) =>
       {
         if (data && data.length > 0) 
@@ -1928,22 +1982,23 @@ toArray<T>(value: any): T[] {
         {
           this.ReservationAlertShow = false;
         }      
+      },
+      (error: HttpErrorResponse) => {
+        if (error?.status === 204) {
+          this.ReservationAlertShow = false;
+        }
       }
     );
   }
 
   getAlerMessagetForCustomer(customerID)
   {
-    let FromToDate = this.FromToDate || ''; // Ensure FromToDate is not undefined
-    if (FromToDate.trim() !== '') 
-    {
-      FromToDate = moment(FromToDate).format('YYYY-MM-DD');
-    } 
-    else 
-    {
-      FromToDate = moment().format('YYYY-MM-DD');// If empty, set it to today's date
+    if (!customerID) {
+      this.CustomerAlertMessageShow = false;
+      return;
     }
-    this.rervationGroupService.getAlerMessagetForCustomer(customerID,FromToDate).subscribe(
+    const FromToDate = this.getReservationCheckDate();
+    this.rervationGroupService.getAlerMessagetForCustomer(customerID, FromToDate).subscribe(
       (data: string[]) =>
       {
         if (data && data.length > 0) 
@@ -1955,6 +2010,11 @@ toArray<T>(value: any): T[] {
         {
           this.CustomerAlertMessageShow = false;
         }      
+      },
+      (error: HttpErrorResponse) => {
+        if (error?.status === 204) {
+          this.CustomerAlertMessageShow = false;
+        }
       }
     );
   }
@@ -4862,6 +4922,8 @@ private patchDropOffAddress(res: any) {
   onPickupDateChange(event: any) {
     var date = event.split('/');
     var endDate = date[2] + '-' + date[1] + '-' + date[0];
+    this.pickupDate = event;
+    this.refreshReservationCustomerAlerts();
     // if (this.action === 'edit') {
     //   this._generalService.GetContractIDBasedOnDate(this.advanceTable.customerID, endDate).subscribe(
     //     data => {
@@ -6044,6 +6106,7 @@ private canThisRoleCreateBackDateBooking(): boolean {
           this.customerGroupID=this.dataForReservationList.customerGroupID;
           this.customerGroup=this.dataForReservationList.customerGroup;
           this.customerID=this.dataForReservationList.customerID;
+          this.refreshReservationCustomerAlerts();
           this.customer=this.dataForReservationList.customerName;
           this.customerTypeID=this.dataForReservationList.customerTypeID;
           this.customerType=this.dataForReservationList.customerType;

@@ -65,6 +65,32 @@ import {
         </ng-container>
 
         <ng-container *ngIf="!loading && showPayload">
+          <div *ngIf="hasStartTrip" class="vendor-payload__block">
+            <h3 class="vendor-payload__label">Start trip</h3>
+            <div class="vendor-payload__pair">
+              <section class="payload-json">
+                <h3>Request</h3>
+                <pre>{{ startRequest }}</pre>
+              </section>
+              <section class="payload-json">
+                <h3>Response</h3>
+                <pre>{{ startResponse }}</pre>
+              </section>
+            </div>
+          </div>
+          <div *ngIf="hasEndTrip" class="vendor-payload__block">
+            <h3 class="vendor-payload__label">End trip</h3>
+            <div class="vendor-payload__pair">
+              <section class="payload-json">
+                <h3>Request</h3>
+                <pre>{{ endRequest }}</pre>
+              </section>
+              <section class="payload-json">
+                <h3>Response</h3>
+                <pre>{{ endResponse }}</pre>
+              </section>
+            </div>
+          </div>
           <div class="vendor-payload__block">
             <h3 class="vendor-payload__label">Closed</h3>
             <div class="vendor-payload__pair">
@@ -134,6 +160,12 @@ export class VendorClosingPayloadDialogComponent implements OnInit {
   uploadRequest = '';
   uploadResponse = '';
   hasUpload = false;
+  startRequest = '';
+  startResponse = '';
+  hasStartTrip = false;
+  endRequest = '';
+  endResponse = '';
+  hasEndTrip = false;
   status = '';
   compare: CloseDutyCompare | null = null;
   fields = CLOSE_DUTY_COMPARE_FIELDS;
@@ -157,8 +189,16 @@ export class VendorClosingPayloadDialogComponent implements OnInit {
     loader.pipe(finalize(() => this.finish())).subscribe({
       next: (payload) => {
         this.status = payload?.status || payload?.Status || '';
-        const requestParts = this.splitUpload(payload?.request || payload?.Request || '');
-        const responseParts = this.splitUpload(payload?.response || payload?.Response || '');
+        const requestPartsRaw = this.splitTripPayload(payload?.request || payload?.Request || '');
+        const responsePartsRaw = this.splitTripPayload(payload?.response || payload?.Response || '');
+        this.startRequest = this.pretty(requestPartsRaw.startTrip);
+        this.startResponse = this.pretty(responsePartsRaw.startTrip);
+        this.hasStartTrip = !!(String(requestPartsRaw.startTrip || '').trim() || String(responsePartsRaw.startTrip || '').trim());
+        this.endRequest = this.pretty(requestPartsRaw.endTrip);
+        this.endResponse = this.pretty(responsePartsRaw.endTrip);
+        this.hasEndTrip = !!(String(requestPartsRaw.endTrip || '').trim() || String(responsePartsRaw.endTrip || '').trim());
+        const requestParts = this.splitUpload(requestPartsRaw.closed);
+        const responseParts = this.splitUpload(responsePartsRaw.closed);
         this.requestBody = this.pretty(requestParts.closed);
         this.responseBody = this.pretty(responseParts.closed);
         this.uploadRequest = this.pretty(requestParts.upload);
@@ -197,6 +237,39 @@ export class VendorClosingPayloadDialogComponent implements OnInit {
   private finish(): void {
     this.loading = false;
     this.changeDetector.markForCheck();
+  }
+
+  private splitTripPayload(value: string): { closed: string; startTrip: string; endTrip: string } {
+    const start = this.splitMarked(value, '\n\nStart trip\n');
+    if (start.after) {
+      const end = this.splitMarked(start.after, '\n\nEnd trip\n');
+      return { closed: start.before, startTrip: end.before, endTrip: end.after };
+    }
+
+    const endOnly = this.splitEndTrip(start.before);
+    return { closed: endOnly.closed, startTrip: '', endTrip: endOnly.endTrip };
+  }
+
+  private splitMarked(value: string, marker: string): { before: string; after: string } {
+    const text = String(value || '');
+    const index = text.indexOf(marker);
+    if (index < 0) {
+      return { before: text, after: '' };
+    }
+    return { before: text.slice(0, index), after: text.slice(index + marker.length) };
+  }
+
+  private splitEndTrip(value: string): { closed: string; endTrip: string } {
+    const text = String(value || '');
+    const marker = '\n\nEnd trip\n';
+    const index = text.lastIndexOf(marker);
+    if (index < 0) {
+      return { closed: text, endTrip: '' };
+    }
+    return {
+      closed: text.slice(0, index),
+      endTrip: text.slice(index + marker.length)
+    };
   }
 
   private splitUpload(value: string): { closed: string; upload: string } {

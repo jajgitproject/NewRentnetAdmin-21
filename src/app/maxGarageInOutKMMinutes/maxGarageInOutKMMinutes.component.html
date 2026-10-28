@@ -1,0 +1,149 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main">
+                <i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">Max Garage In/Out KM/Minutes</a>
+            </li>
+          </ul>
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Max Garage In/Out KM/Minutes</h2>
+            </li>
+          </ul>
+          <p *ngIf="customerContractName" class="max-garage-contract-banner">
+            Customer Contract: <strong>{{ customerContractName }}</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <div *ngIf="!customerContractID" class="alert alert-warning" style="text-align: center;">
+              Open this page from Customer Contract &gt; Actions &gt; Max Garage In/Out KM/Minutes.
+            </div>
+
+            <div class="responsive_table" *ngIf="customerContractID">
+              <div class="materialTableHeader">
+                <div class="row">
+                  <div style="width: 70%; float: left; padding-top: 15px; padding-left: 22px;"></div>
+                  <div style="width: 30%; text-align: right;">
+                    <button mat-mini-fab color="primary" (click)="addNew()" matTooltip="Add">
+                      <mat-icon class="col-white">add</mat-icon>
+                    </button>
+                    &nbsp;
+                    <button mat-mini-fab color="primary" (click)="refresh()" matTooltip="Refresh">
+                      <mat-icon class="col-white">refresh</mat-icon>
+                    </button>
+                    &nbsp;
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="isTableLoading" class="tbl-spinner" style="text-align: center; padding: 24px 16px;">
+                <mat-progress-spinner color="primary" [diameter]="40" mode="indeterminate"></mat-progress-spinner>
+              </div>
+
+              <ng-container *ngIf="!isTableLoading">
+                <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">This is not rendered</p>
+
+                <ng-template #thenBlock2>
+                  <div class="alert alert-primary" style="background-color: #E8E8E8; text-align: center;">
+                    No Records Found
+                  </div>
+                  <div class="body">
+                    <div class="example-button-row">
+                      <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                      <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #elseBlock2>
+                  <div class="scrollable-table-container">
+                    <mat-table
+                      #table
+                      [dataSource]="dataSource"
+                      matSort
+                      class="mat-cell floating-header-table"
+                      (matSortChange)="SortingData($event)">
+                      <ng-container matColumnDef="packageType">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Package Type</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.packageType }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="maximumGarageToPickupKMs">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Max Garage To Pickup KMs</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.maximumGarageToPickupKMs }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="maximumGarageToPickupMinutes">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Max Garage To Pickup Minutes</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.maximumGarageToPickupMinutes }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="maximumDropoffToGarageKMs">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Max Drop Off To Garage KMs</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.maximumDropoffToGarageKMs }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="maximumDropoffToGarageMinutes">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Max Drop Off To Garage Minutes</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ row.maximumDropoffToGarageMinutes }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="status">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ statusLabel(row) }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="createdBy">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Created By</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ createdByLabel(row) }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="creationDateTime">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Creation Date/Time</mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                          {{ formatDateTime(row.creationDate, row.creationTime) }}
+                        </mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="endDateTime">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>End Date/Time</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{ formatDateTime(row.endDate, row.endTime) }}</mat-cell>
+                      </ng-container>
+                      <ng-container matColumnDef="actions">
+                        <mat-header-cell *matHeaderCellDef class="pr-0" [ngClass]="'tbl-col-width-per-9'">
+                          Actions
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="pr-0" [ngClass]="'tbl-col-width-per-9'">
+                          <button
+                            *ngIf="canDelete(row)"
+                            mat-raised-button
+                            color="primary"
+                            (click)="deleteItem(row)">
+                            Delete
+                          </button>
+                        </mat-cell>
+                      </ng-container>
+                      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                    </mat-table>
+                  </div>
+
+                  <div class="body">
+                    <div class="example-button-row">
+                      <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
+                      <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
+                    </div>
+                  </div>
+                </ng-template>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

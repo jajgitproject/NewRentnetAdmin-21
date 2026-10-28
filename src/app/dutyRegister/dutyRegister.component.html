@@ -622,7 +622,7 @@
                                             <ng-container matColumnDef="RunningDetails">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Remark on DS Closing</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{row.runningDetails}}
+                                                    {{ dsClosingRemark(row) }}
                                                 </mat-cell>
                                             </ng-container>
                                             <ng-container matColumnDef="ClosureMethod">

@@ -62,6 +62,11 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   @Input() activeDutyNightNumberOnNights: number | null = null;
   @Input() isMyfAggregator = false;
   @Input() isMoveInSync = false;
+  @Input() customerContractHasMaxG2GConfig = false;
+  @Input() invoiceDutyMaxTotalRunningKM: number | null = null;
+  @Input() invoiceDutyMaxTotalRunningHours: number | null = null;
+  @Input() invoiceDutyMaxTotalRunningMinutes: number | null = null;
+  @Input() invoiceDutyMaxTotalRunningSeconds: number | null = null;
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string, invoiceCalculated?: boolean}>();
   //@Output() dutyMessage = new EventEmitter<string>();
@@ -635,6 +640,27 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       if (this.advanceTableClosingOne?.closingDutySlipForBillingModel) {
         this.advanceTableClosingOne.closingDutySlipForBillingModel.physicalDutySlipReceived =
           !!physicalDutySlipReceived;
+      }
+    }
+    const runningDetails = response?.runningDetails ?? response?.RunningDetails;
+    const vendorRemark = response?.vendorRemark ?? response?.VendorRemark;
+    if (runningDetails !== undefined || vendorRemark !== undefined) {
+      const remarkPatch: Record<string, string> = {};
+      if (runningDetails !== undefined) {
+        remarkPatch.runningDetails = this.displayDsClosingRemark(runningDetails);
+      }
+      if (vendorRemark !== undefined) {
+        remarkPatch.vendorRemark = this.normalizeRemark(vendorRemark);
+      }
+      this.advanceTableForm.patchValue(remarkPatch, { emitEvent: false });
+      const billing = this.advanceTableClosingOne?.closingDutySlipForBillingModel;
+      if (billing) {
+        if (remarkPatch.runningDetails !== undefined) {
+          billing.runningDetails = remarkPatch.runningDetails;
+        }
+        if (remarkPatch.vendorRemark !== undefined) {
+          billing.vendorRemark = remarkPatch.vendorRemark;
+        }
       }
     }
     this.applyClosingFieldDefaults();
@@ -1474,14 +1500,30 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     return dsClosing !== null && dsClosing !== undefined && dsClosing !== '';
   }
 
+  get showInvoiceDutyMaxG2GTotals(): boolean {
+    return this.customerContractHasMaxG2GConfig
+      && this.invoiceDutyMaxTotalRunningKM != null
+      && this.invoiceDutyMaxTotalRunningHours != null
+      && this.invoiceDutyMaxTotalRunningMinutes != null
+      && this.invoiceDutyMaxTotalRunningSeconds != null;
+  }
+
+  get invoiceDutyMaxTotalRunningTimeLabel(): string {
+    if (!this.showInvoiceDutyMaxG2GTotals) {
+      return '';
+    }
+    return `${this.invoiceDutyMaxTotalRunningHours}:${this.invoiceDutyMaxTotalRunningMinutes}:${this.invoiceDutyMaxTotalRunningSeconds}`;
+  }
+
   private normalizeRemark(value: unknown): string {
     return value == null ? '' : String(value).trim();
   }
 
-  private remarkBoxValue(runningDetails: unknown, vendorRemark: unknown): string {
+  /** Human DS closing remark only; GTrack/App JSON in RunningDetails is not shown in the remark box. */
+  private displayDsClosingRemark(runningDetails: unknown): string {
     const running = this.normalizeRemark(runningDetails);
-    if (running.startsWith('[') || running.startsWith('{')) {
-      return this.normalizeRemark(vendorRemark);
+    if (!running || running.startsWith('[') || running.startsWith('{')) {
+      return '';
     }
     return running;
   }
@@ -1724,7 +1766,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.advanceTableForm.patchValue({dsClosing : this.advanceTableClosingOne.closingDutySlipForBillingModel.dsClosing});
     const billingModel = this.advanceTableClosingOne.closingDutySlipForBillingModel;
     this.advanceTableForm.patchValue({
-      runningDetails: this.remarkBoxValue(billingModel.runningDetails, billingModel.vendorRemark),
+      runningDetails: this.displayDsClosingRemark(billingModel.runningDetails),
       vendorRemark: billingModel.vendorRemark
     });
     this.syncLoadedRemarksFromForm();
@@ -2553,9 +2595,8 @@ public resetVerificationForEcoStateChange(): void {
     }).subscribe(
       response => {
         const vendorRemark = response?.vendorRemark ?? form.vendorRemark ?? '';
-        const runningDetails = this.remarkBoxValue(
-          response?.runningDetails ?? form.runningDetails,
-          vendorRemark
+        const runningDetails = this.displayDsClosingRemark(
+          response?.runningDetails ?? form.runningDetails
         );
         const kmPatch: Record<string, unknown> = {};
         for (const name of this.alwaysEditableKmControls) {
@@ -2818,7 +2859,8 @@ public resetVerificationForEcoStateChange(): void {
         this.dutyStatusChanged.emit({
         verifyDuty: this.advanceTableForm.value.verifyDuty,
         goodForBilling: this.advanceTableForm.value.goodForBilling,
-        message: this.Message
+        message: this.Message,
+        invoiceCalculated: true
       });
         if (showSummaryPopup) {
           this.showCalculateBillOverlay = false;

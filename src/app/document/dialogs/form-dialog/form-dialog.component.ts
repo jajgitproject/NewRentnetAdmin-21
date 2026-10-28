@@ -31,7 +31,7 @@ export class FormDialogComponentDocument
   contents: any[];
   mydata = [];
   name = '';
-  saveDisabled:boolean = true;
+  saveInProgress = false;
 
   public DocumentList?: DocumentDropDown[] = [];
 
@@ -52,15 +52,22 @@ export class FormDialogComponentDocument
         {
           this.dialogTitle ='Document';       
           this.advanceTable = data.advanceTable;
-          let startDate=moment(this.advanceTable.startDate).format('DD/MM/yyyy');
-          let endDate=moment(this.advanceTable.endDate).format('DD/MM/yyyy');
+          if (this.advanceTable.startDate) {
+            const startDate = moment(this.advanceTable.startDate).format('DD/MM/yyyy');
             this.onBlurUpdateDateEdit(startDate);
+          }
+          if (this.advanceTable.endDate) {
+            const endDate = moment(this.advanceTable.endDate).format('DD/MM/yyyy');
             this.onBlurUpdateEndDateEdit(endDate);
+          }
         } else 
         {
           this.dialogTitle = 'Document';
           this.advanceTable = new Document({});
           this.advanceTable.activationStatus=true;
+          this.advanceTable.documentType = 'Other';
+          this.advanceTable.startDate = null;
+          this.advanceTable.endDate = null;
         }
         this.advanceTableForm = this.createContactForm();
   }
@@ -132,7 +139,7 @@ export class FormDialogComponentDocument
         this.dialogRef.close();
         if(this.action==='fromVD')
           {
-            this.saveDisabled = true;
+            this.saveInProgress = false;
             this.showNotification(
               'snackbar-success',
               'Document Created...!!!',
@@ -141,25 +148,18 @@ export class FormDialogComponentDocument
             );
           }
        this._generalService.sendUpdate('DocumentCreate:DocumentView:Success');//To Send Updates  
-       this.saveDisabled = true;
+       this.saveInProgress = false;
 
     
     },
     error =>
     {
-      if(this.action==='fromVD')
-        {
-          this.saveDisabled = true;
-          this.showNotification(
-            'snackbar-danger',
-            'Operation Failed.....!!!',
-            'bottom',
-            'center'
-          );
-        }
-       this._generalService.sendUpdate('DocumentAll:DocumentView:Failure');//To Send Updates 
-       this.saveDisabled = true;
- 
+      this.saveInProgress = false;
+      const apiMessage = error?.error?.message ?? error?.error;
+      const text = typeof apiMessage === 'string' && apiMessage.trim()
+        ? apiMessage.trim()
+        : 'Operation Failed.....!!!';
+      this.showNotification('snackbar-danger', text, 'bottom', 'center');
     }
   )
   }
@@ -171,30 +171,44 @@ export class FormDialogComponentDocument
     {
         this.dialogRef.close();
        this._generalService.sendUpdate('DocumentUpdate:DocumentView:Success');//To Send Updates 
-       this.saveDisabled = true;
+       this.saveInProgress = false;
  
        
     },
     error =>
     {
-     this._generalService.sendUpdate('DocumentAll:DocumentView:Failure');//To Send Updates  
-     this.saveDisabled = true;
+     this.saveInProgress = false;
+     const apiMessage = error?.error?.message ?? error?.error;
+     const text = typeof apiMessage === 'string' && apiMessage.trim()
+       ? apiMessage.trim()
+       : 'Operation Failed.....!!!';
+     this.showNotification('snackbar-danger', text, 'bottom', 'center');
 
     }
   )
   }
   public confirmAdd(): void 
   {
-    this.saveDisabled = false;
+    if (this.saveInProgress || !this.advanceTableForm.valid) {
+      return;
+    }
 
-       if(this.action=="edit")
-       {
-          this.Put();
-       }
-       else
-       {
-          this.Post();
-       }
+    if (this.action !== 'edit') {
+      this.advanceTableForm.patchValue({
+        documentType: 'Other',
+        startDate: null,
+        endDate: null,
+      });
+    }
+
+    setTimeout(() => {
+      this.saveInProgress = true;
+      if (this.action === 'edit') {
+        this.Put();
+      } else {
+        this.Post();
+      }
+    });
   }
   
   /////////////////for Image Upload////////////////////////////

@@ -481,7 +481,7 @@
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
           <div class="example-button-row">
             <button mat-raised-button *ngIf="saveDisabled" color="primary" [type]="submit"
-              [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">
+              [disabled]="!advanceTableForm.valid || reservationBlocked" (click)="confirmAdd()">
               Save
             </button>
             <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>

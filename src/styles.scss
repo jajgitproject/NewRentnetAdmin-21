@@ -137,6 +137,52 @@
   overflow-y: auto !important;
 }
 
+/* Max Garage In/Out KM/Minutes — add form, viewport-centered */
+.cdk-global-overlay-wrapper:has(> .cdk-overlay-pane.max-garage-dialog-panel) {
+  justify-content: center !important;
+  align-items: center !important;
+}
+.cdk-overlay-pane.max-garage-dialog-panel,
+.cdk-overlay-pane.max-garage-dialog-panel.mat-mdc-dialog-panel {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  margin: 0 !important;
+  width: min(880px, calc(100vw - 32px)) !important;
+  min-width: min(880px, calc(100vw - 32px)) !important;
+  max-width: min(880px, calc(100vw - 32px)) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: 90vh !important;
+  transform: translate(-50%, -50%) !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  flex: 0 0 auto !important;
+}
+.cdk-overlay-pane.max-garage-dialog-panel .mat-mdc-dialog-container,
+.cdk-overlay-pane.max-garage-dialog-panel .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 90vh !important;
+}
+.cdk-overlay-pane.max-garage-dialog-panel .mat-mdc-dialog-content,
+.cdk-overlay-pane.max-garage-dialog-panel .mdc-dialog__content {
+  max-height: calc(90vh - 120px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+.cdk-overlay-container .cdk-overlay-pane:has(.max-garage-select-panel):not(.max-garage-dialog-panel) {
+  z-index: 21000 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: min(840px, calc(100vw - 48px)) !important;
+}
+.max-garage-select-panel.mat-mdc-select-panel {
+  max-height: 256px !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
 /* Customer page create/edit popups (Corporate, Individual, Corp. Indi.) — true 4-column layout.
    Templates still use pairs of fields per `.row`; `display: contents` on `.row` flattens all
    field cells into one 4-column grid on the form (`.customer-form-four-col`). */
@@ -515,6 +561,31 @@ form.customer-form-four-col mat-form-field {
 }
 .cdk-overlay-container .cdk-overlay-pane.role-form-wide-dialog .mat-mdc-form-field-type-mat-select .mat-mdc-text-field-wrapper {
   overflow: visible;
+}
+
+/* Document master add/edit: three fields per section in one row */
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog.mat-mdc-dialog-panel {
+  width: min(960px, 96vw) !important;
+  min-width: min(960px, 96vw) !important;
+  max-width: 96vw !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  box-sizing: border-box;
+  --mat-dialog-container-max-width: min(960px, 96vw);
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog > .mat-mdc-dialog-container {
+  flex-shrink: 0 !important;
+  min-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .mdc-dialog__surface,
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box;
 }
 
 /* KAM Pickup Address Correction dialog */

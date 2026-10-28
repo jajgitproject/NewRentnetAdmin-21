@@ -249,6 +249,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   bookingCount: FormControl = new FormControl();
   vendorType: FormControl = new FormControl();
   ownedSupplier: FormControl = new FormControl();
+  appBasedCustomer: FormControl = new FormControl();
   category: FormControl = new FormControl();
   vehicle: FormControl = new FormControl();
   public VehicleList?: VehicleDropDown[] = [];
@@ -309,6 +310,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   modalBookingCount: FormControl = new FormControl();
   modalVendorType: FormControl = new FormControl();
   modalOwnedSupplier: FormControl = new FormControl();
+  modalAppBasedCustomer: FormControl = new FormControl();
   modalCategory: FormControl = new FormControl();
   modalVehicle: FormControl = new FormControl();
   modalInventory: FormControl = new FormControl();
@@ -1289,6 +1291,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.monthlyTarget.setValue(this.modalMonthlyTarget.value || '');
       this.otherCriteria.setValue(this.modalOtherCriteria.value || '');
       this.ownedSupplier.setValue(this.modalOwnedSupplier.value || '');
+      this.appBasedCustomer.setValue(this.modalAppBasedCustomer.value || '');
       this.supplier.setValue(this.modalSupplier.value || '');
       this.driver.setValue(this.modalDriver.value || '');
       this.driverOfficialIdentityNumber.setValue(this.modalDriverOfficialIdentityNumber.value || '');
@@ -1395,7 +1398,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.driverID, this.driver.value, this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
       this.vehicle.value, this.inventory.value, this.searchInventoryName,
       this.vendorType.value, this.ownedSupplier.value, this.bookingCount.value, this.monthlyTarget.value,
-      this.otherCriteria.value, this.pickupDate, this.searchActivationStatus, this.PageNumber
+      this.otherCriteria.value, this.appBasedCustomer.value, this.pickupDate, this.searchActivationStatus, this.PageNumber
     ).subscribe(
       (data: CarAndDriverAllotmentData) => {
         if (data != null) {
@@ -1457,7 +1460,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
       this.vehicle.value, this.inventory.value, this.searchInventoryName,
       this.vendorType.value, this.ownedSupplier.value, this.bookingCount.value, this.monthlyTarget.value,
-      this.otherCriteria.value, pickupDateParam, this.searchActivationStatus, this.PageNumber
+      this.otherCriteria.value, this.appBasedCustomer.value, pickupDateParam, this.searchActivationStatus, this.PageNumber
     ).subscribe(
       (data: CarAndDriverAllotmentData) => {
         const rowCount = data?.driverInventoryAssociationModel?.length ?? 0;
@@ -1718,6 +1721,44 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   // }
 
+  private isPreferAppBasedYes(value: any): boolean {
+    if (value === true || value === 1 || value === '1') {
+      return true;
+    }
+    const text = String(value ?? '').trim().toLowerCase();
+    return text === 'yes' || text === 'true';
+  }
+
+  getAllotmentAppBasedPreferenceContext(): {
+    customerPreferYes: boolean;
+    customerPersonPreferYes: boolean;
+    customerPreferLabel: string;
+    customerPersonPreferLabel: string;
+  } {
+    const item = this.reservationInfo?.[0];
+    if (!item) {
+      return {
+        customerPreferYes: false,
+        customerPersonPreferYes: false,
+        customerPreferLabel: 'No',
+        customerPersonPreferLabel: 'No',
+      };
+    }
+    const customerPreferYes = this.isPreferAppBasedYes(
+      item.customerPreferAppBasedDriver ?? item.CustomerPreferAppBasedDriver
+    );
+    const personRaw =
+      item.customerPerson?.preferAppBasedDriver ??
+      item.customerPerson?.PreferAppBasedDriver;
+    const customerPersonPreferYes = this.isPreferAppBasedYes(personRaw);
+    return {
+      customerPreferYes,
+      customerPersonPreferYes,
+      customerPreferLabel: customerPreferYes ? 'Yes' : 'No',
+      customerPersonPreferLabel: customerPersonPreferYes ? 'Yes' : 'No',
+    };
+  }
+
   openAllotCarAndDriver(i: any, allotmentType: string, allotmentID: any) {
     if (this.hasHardAllotment()) {
       Swal.fire({
@@ -1737,7 +1778,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           Text: 'AllotCarDriver',
           reservationID: this.reservationID,
           allotmentType: allotmentType,
-          status: this.status
+          status: this.status,
+          reservationPreferences: this.getAllotmentAppBasedPreferenceContext()
         }
       });
 
@@ -1764,7 +1806,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         reservationID: this.reservationID,
         allotmentType: allotmentType,
         allotmentID: activeAllotmentId,
-        status: this.status
+        status: this.status,
+        reservationPreferences: this.getAllotmentAppBasedPreferenceContext()
       }
     });
 
@@ -2912,6 +2955,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         this.bookingCount?.value,
         this.monthlyTarget?.value || '',
         this.otherCriteria?.value || '',
+        this.appBasedCustomer?.value || '',
         this.PickupDate || '',
         this.searchActivationStatus,
         this.PageNumber
@@ -2965,6 +3009,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.bookingCount?.value || '',
       this.monthlyTarget?.value || '',
       this.otherCriteria?.value || '',
+      this.appBasedCustomer?.value || '',
       this.PickupDate || '',  // this.pickupDate
       this.searchActivationStatus,
       this.PageNumber

@@ -85,6 +85,7 @@ export class CustomerContractComponent implements OnInit {
     { label: 'Contract Payment Mapping', },
     { label: 'Customer Contract Integrations Package Type',  },
     { label: 'Contract Package Type Mapping',  },
+    { label: 'Max Garage In/Out KM/Minutes',  },
     { label: 'Local Lumpsum Rate',  },
     { label: 'Local On Demand Rate',  },
     { label: 'Local Rate',  },
@@ -370,7 +371,7 @@ export class CustomerContractComponent implements OnInit {
 
   private getAlwaysVisibleItems() {
     return this.menuItems.filter(item => 
-      ['City Tiers Mapping', 'Contract Package Type Mapping', 'Customer Contract Integrations Package Type', 'Car Category Mapping','Contract Payment Mapping', 'SD Limited Rate', 'SD Unlimited Rate'].includes(item.label)
+      ['City Tiers Mapping', 'Contract Package Type Mapping', 'Customer Contract Integrations Package Type', 'Car Category Mapping','Contract Payment Mapping', 'Max Garage In/Out KM/Minutes', 'SD Limited Rate', 'SD Unlimited Rate'].includes(item.label)
     );
   }
 
@@ -817,6 +818,15 @@ else if(menuItem.label.toLowerCase() === 'sd limited rate') {
   } }));
   window.open(baseUrl + url, '_blank'); 
 
+}
+else if(menuItem.label.toLowerCase() === 'max garage in/out km/minutes') {
+  const url = this.router.serializeUrl(this.router.createUrlTree(['/maxGarageInOutKMMinutes'], { queryParams: {
+    CustomerContractID: encryptedCustomerContractID,
+    CustomerContractName: encryptedCustomerContractName,
+    StartDate: encryptedStartDate,
+    EndDate: encryptedEndDate
+  } }));
+  window.open(baseUrl + url, '_blank');
 }
 else if(menuItem.label.toLowerCase() === 'sd unlimited rate') {
   const url = this.router.serializeUrl(this.router.createUrlTree(['/sdUnLimitedRate'], { queryParams: {

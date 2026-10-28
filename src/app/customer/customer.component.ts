@@ -140,7 +140,9 @@ export class CustomerComponent implements OnInit {
     { label: 'Customer OTP Configuration', pageName: 'Customer OTP Configuration' },
     { label: 'Change KAM for Customers', pageName: 'Change KAM for Customers' },
     { label: 'Payment Terms Code', pageName: 'customerPaymentTermsCode' },
+    { label: 'Customer Payment Mapping', pageName: 'customerPaymentMapping' },
     { label: 'Customer Growth Person', pageName: 'customerGrowthPerson' },
+    { label: 'Charge Higher Extra KM/HR Based on City', pageName: 'customerCityHigherExtraKMorHR' },
   ];
 
   
@@ -1200,8 +1202,26 @@ else if (menuItem.label.toLowerCase() === 'payment terms code') {
   }));
   window.open(baseUrl + url, '_blank');
 }
+else if (menuItem.label.toLowerCase() === 'customer payment mapping') {
+  const url = this.router.serializeUrl(this.router.createUrlTree(['/customerPaymentMapping'], {
+    queryParams: {
+      CustomerID: encryptedCustomerID,
+      CustomerName: encryptedCustomerName
+    }
+  }));
+  window.open(baseUrl + url, '_blank');
+}
 else if (menuItem.label.toLowerCase() === 'customer growth person') {
   const url = this.router.serializeUrl(this.router.createUrlTree(['/customerGrowthPerson'], {
+    queryParams: {
+      CustomerID: encryptedCustomerID,
+      CustomerName: encryptedCustomerName
+    }
+  }));
+  window.open(baseUrl + url, '_blank');
+}
+else if (menuItem.pageName === 'customerCityHigherExtraKMorHR') {
+  const url = this.router.serializeUrl(this.router.createUrlTree(['/customerCityHigherExtraKMorHR'], {
     queryParams: {
       CustomerID: encryptedCustomerID,
       CustomerName: encryptedCustomerName

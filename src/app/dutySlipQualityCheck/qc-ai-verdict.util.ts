@@ -14,13 +14,13 @@ export function formatQcVerdict(verdict: string | null | undefined): string {
   return `Verdict - ${titleCased}`;
 }
 
-export function truncateQcMessage(message: string | null | undefined, maxLen = 5): string {
-  if (message == null || String(message).trim() === '') {
-    return '';
+export function qcVerdictBorderClass(verdict: string | null | undefined): string {
+  const value = String(verdict ?? '').trim().toLowerCase();
+  if (value === 'good') {
+    return 'is-good';
   }
-  const text = String(message);
-  if (text.length <= maxLen) {
-    return text;
+  if (value === 'bad') {
+    return 'is-bad';
   }
-  return text.slice(0, maxLen) + '…';
+  return '';
 }

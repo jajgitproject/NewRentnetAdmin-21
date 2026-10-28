@@ -230,6 +230,14 @@ export class CustomerService
       segment: raw.segment || '',
       businessType: raw.businessType || '',
       businessServices: raw.businessServices || '',
+      isAppBasedCustomer: (() => {
+        const v = raw.isAppBasedCustomer ?? raw.IsAppBasedCustomer;
+        if (v === null || v === undefined || v === '') {
+          return 'No';
+        }
+        const normalized = String(v).trim().toLowerCase();
+        return normalized === 'yes' || normalized === 'true' || normalized === '1' ? 'Yes' : 'No';
+      })(),
     };
   }
   delete(customerID: number):  Observable<any> 
@@ -246,5 +254,11 @@ export class CustomerService
   getAggregatorCustomers(): Observable<CustomerDropDown[]>
   {
     return this.httpClient.get<CustomerDropDown[]>(this.API_URL + "/ForAggregatorDropDown");
+  }
+
+  getIsAppBasedCustomer(customerID: number): Observable<{ isAppBasedCustomer: string }> {
+    return this.httpClient.get<{ isAppBasedCustomer: string }>(
+      this.API_URL + '/GetIsAppBasedCustomer/' + customerID
+    );
   }
 }

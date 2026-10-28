@@ -15,7 +15,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DutySlipQualityCheckService } from 'src/app/dutySlipQualityCheck/dutySlipQualityCheck.service';
 import { DutyAmenitieModel } from 'src/app/dutySlipQualityCheck/dutySlipQualityCheck.model';
 import { VerifiedDutyAmenitieDialogComponent } from '../verifiedDutyAmenitie-dialog/verifiedDutyAmenitie-dialog.component';
-import { formatQcVerdict, truncateQcMessage } from 'src/app/dutySlipQualityCheck/qc-ai-verdict.util';
+import { formatQcVerdict, qcVerdictBorderClass } from 'src/app/dutySlipQualityCheck/qc-ai-verdict.util';
 import { bindQcPhotoSlots, QcPhotoSlot } from 'src/app/dutySlipQualityCheck/qc-photo-url.util';
 @Component({
   standalone: false,
@@ -61,7 +61,7 @@ export class FormDialogComponent
   interiorsAiVerdict: string;
   interiorsAiMessage: string;
   formatQcVerdict = formatQcVerdict;
-  truncateQcMessage = truncateQcMessage;
+  qcVerdictBorderClass = qcVerdictBorderClass;
   selfieSlot: QcPhotoSlot;
   frontSlot: QcPhotoSlot;
   interiorsSlot: QcPhotoSlot;

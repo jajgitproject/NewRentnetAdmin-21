@@ -71,6 +71,10 @@
                   <div class="bc-value">{{ displayOrDash(getPassengerPickupAddress(passenger)) }}</div>
                 </div>
                 <div class="bc-passenger-row">
+                  <div class="bc-label">Address Details</div>
+                  <div class="bc-value">{{ displayOrDash(getBookingPickupAddressDetails()) }}</div>
+                </div>
+                <div class="bc-passenger-row">
                   <div class="bc-label">Landmark</div>
                   <div class="bc-value">{{ displayOrDash(getPassengerPickupLandmark(passenger)) }}</div>
                 </div>
@@ -84,7 +88,11 @@
                 <div class="bc-passenger-row">
                   <div class="bc-label">Address</div>
                   <div class="bc-value">{{ displayOrDash(getPassengerDropoffAddress(passenger)) }}</div>
-                </div>                
+                </div>
+                <div class="bc-passenger-row">
+                  <div class="bc-label">Address Details</div>
+                  <div class="bc-value">{{ displayOrDash(getBookingDropoffAddressDetails()) }}</div>
+                </div>
                 <div class="bc-passenger-row">
                   <div class="bc-label">Landmark</div>
                   <div class="bc-value">{{ displayOrDash(getPassengerDropoffLandmark(passenger)) }}</div>

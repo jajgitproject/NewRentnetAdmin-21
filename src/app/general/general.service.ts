@@ -1019,6 +1019,10 @@ GetCitiessAl(): Observable<CityDropDown[]> {
   getPaymentModeByContractID(ContractID:number): Observable<PaymentModel[]> {
     return this.http.get<PaymentModel[]>(this.BaseURL + "ContractPaymentMapping/GetAllModeOfPayment/"+ContractID);
   }
+
+  getPaymentModeByCustomerID(CustomerID: number): Observable<PaymentModel[]> {
+    return this.http.get<PaymentModel[]>(this.BaseURL + 'customerPaymentMapping/GetAllModeOfPayment/' + CustomerID);
+  }
  
     getPaymentModeByVendorContractID(VendorContractID:number): Observable<PaymentModel[]> {
     return this.http.get<PaymentModel[]>(this.BaseURL + "VendorContractPaymentMapping/GetAllModeOfPayment/"+VendorContractID);
@@ -1517,6 +1521,12 @@ GetDriverBySupplierID(SupplierID: number): Observable<DriverDropDown[]> {
  GetModeOfPaymentByContract(contractID: number): Observable<ModeOfPaymentDropDown[]> {
     return this.http.get<ModeOfPaymentDropDown[]>(
       this.BaseURL + 'supplierContract/ForModeOfPaymentbyContractDropDown/' + contractID
+    );
+  }
+
+  GetModeOfPaymentByCustomerAndContract(customerID: number, contractID: number): Observable<ModeOfPaymentDropDown[]> {
+    return this.http.get<ModeOfPaymentDropDown[]>(
+      this.BaseURL + 'supplierContract/ForModeOfPaymentByCustomerAndContractDropDown/' + customerID + '/' + contractID
     );
   }
   GetPaymentCycle(): Observable<PaymentCycleDropDown[]> {

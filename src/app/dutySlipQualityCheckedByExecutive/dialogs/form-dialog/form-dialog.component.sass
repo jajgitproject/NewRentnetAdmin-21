@@ -15,6 +15,14 @@
   cursor: pointer
   display: block
 
+:host ::ng-deep .qc-image-wrap.is-good .qc-image,
+:host ::ng-deep .qc-image-wrap.is-good app-static-image img.qc-image
+  border: 3px solid #16a34a
+
+:host ::ng-deep .qc-image-wrap.is-bad .qc-image,
+:host ::ng-deep .qc-image-wrap.is-bad app-static-image img.qc-image
+  border: 3px solid #dc2626
+
 .qc-photo-block
   display: flex
   align-items: flex-start
@@ -37,6 +45,9 @@
   font-weight: 600
 
 .qc-ai-message
-  cursor: help
   color: #555
   margin-top: 2px
+  max-width: 35ch
+  white-space: normal
+  overflow-wrap: break-word
+  word-break: break-word

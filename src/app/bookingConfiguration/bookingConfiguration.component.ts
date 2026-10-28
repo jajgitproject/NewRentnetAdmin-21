@@ -322,6 +322,10 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({modeOfPaymentID:this.dataSource.modeOfPaymentID});
           this.advanceTableForm.patchValue({modeOfPayment:this.dataSource.modeOfPayment});
           this.advanceTableForm.patchValue({reservationStatus:this.dataSource.requestStatus || 'Approved'});
+          if (this.dataSource.packageID) {
+            this.packageID = this.dataSource.packageID;
+          }
+          this.initCascadingDropdownsIfReady();
         },
         (error: HttpErrorResponse) => {
           if (error.status === 204 || error.status === 400) {
@@ -400,9 +404,9 @@ toggleStopFold() {
           }
           this.advanceTableForm.patchValue({customerGroupID:this.customerDetails.customerGroupID});
           this.advanceTableForm.patchValue({customerTypeID:this.customerDetails.customerTypeID});
-          this.advanceTableForm.patchValue({pickupDateString:this._generalService.getDateFrom(this.advanceTableForm.value.pickupDate)});
+          this.advanceTableForm.patchValue({pickupDateString:this.formatBookingDateString(this.advanceTableForm.value.pickupDate)});
           this.advanceTableForm.patchValue({pickupTimeString:pickupTime24 || this.formatTime24FromDateTime(pickupDateTime)});
-          this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
+          this.advanceTableForm.patchValue({dropOffDateString:this.formatBookingDateString(this.advanceTableForm.value.dropOffDate)});
           this.advanceTableForm.patchValue({dropOffTimeString:resolvedDropOffTime24 || this.formatTime24FromDateTime(dropOffDateTime)});
           this.onPickupDateChange();
           this.getSalesManager(this.customerDetails.customerID);
@@ -849,6 +853,16 @@ private extractTime(dateTime: Date): Date {
       this.advanceTableForm.markAllAsTouched();
       return;
     }
+    const pickupCityId = this.resolvePickupCityId();
+    const pickupCity = this.advanceTableForm.value.pickupCity;
+    if (!this.isEmptyText(pickupCity) && this.isEmptyId(pickupCityId)) {
+      Swal.fire({
+        title: '',
+        text: 'Please select City from the list.',
+        icon: 'warning',
+      });
+      return;
+    }
     this.saving = true;
     if(this.action=="edit")
     {
@@ -867,6 +881,10 @@ private extractTime(dateTime: Date): Date {
     }
     const parsed = Number(value);
     return Number.isFinite(parsed) ? Math.trunc(parsed) : 0;
+  }
+
+  private isEmptyText(value: unknown): boolean {
+    return value === null || value === undefined || String(value).trim() === '';
   }
 
   public Post(): void
@@ -899,9 +917,29 @@ private extractTime(dateTime: Date): Date {
     this.advanceTableForm.patchValue({
       dropOffCityID: this.normalizeOptionalInt(this.advanceTableForm.value.dropOffCityID),
     });
+    const pickupCityId = this.resolvePickupCityId();
+    if (pickupCityId <= 0) {
+      this.saving = false;
+      Swal.fire({
+        title: '',
+        text: 'Please select City from the list.',
+        icon: 'warning',
+      });
+      return;
+    }
+    this.pickupCityID = pickupCityId;
+    this.advanceTableForm.patchValue({ pickupCityID: pickupCityId });
     const payload: any = this.advanceTableForm.getRawValue();
+    payload.pickupCityID = pickupCityId;
     payload.kamID = this.normalizeOptionalInt(payload.kamID);
     payload.reservationStops = this.reservationStops;
+    // Wall-clock strings are authoritative; omit Date fields to avoid UTC JSON shifting date/time on save.
+    delete payload.pickupDateTime;
+    delete payload.pickupDate;
+    delete payload.pickupTime;
+    delete payload.dropOffDateTime;
+    delete payload.dropOffDate;
+    delete payload.dropOffTime;
     this.bookingConfigurationService.add(payload)  
     .subscribe(
     response => 
@@ -1040,8 +1078,44 @@ private extractTime(dateTime: Date): Date {
         
         this.contractID = data;
         this.InitPackageType();
+        this.initCascadingDropdownsIfReady();
       } 
     }); 
+  }
+
+  private initCascadingDropdownsIfReady(): void {
+    if (!this.contractID || !this.PackageType) {
+      return;
+    }
+    const packageId = this.packageID || this.advanceTableForm.value.packageID;
+    if (!packageId) {
+      return;
+    }
+    this.InitCity(this.PackageType);
+    this.InitVehicle(this.PackageType);
+    this.InitDropOffCity(this.PackageType);
+  }
+
+  private isEmptyId(value: unknown): boolean {
+    return value === null || value === undefined || value === '' || value === 0 || value === '0';
+  }
+
+  private resolvePickupCityId(): number {
+    let pickupCityId = this.normalizeOptionalInt(
+      this.pickupCityID ?? this.advanceTableForm.value.pickupCityID
+    );
+    if (pickupCityId > 0) {
+      return pickupCityId;
+    }
+    const cityName = String(this.advanceTableForm.value.pickupCity ?? '').trim();
+    if (!cityName || !this.CityList?.length) {
+      return 0;
+    }
+    const normalized = cityName.toLowerCase();
+    const match = this.CityList.find(
+      (city) => String(city.geoPointName ?? '').trim().toLowerCase() === normalized
+    );
+    return match?.geoPointID > 0 ? this.normalizeOptionalInt(match.geoPointID) : 0;
   }
 
   InitPackageType(){
@@ -1269,8 +1343,9 @@ private extractTime(dateTime: Date): Date {
    }
    
    onCitySelected(selectedCityName: string) {
-     const selectedCity = this.CityList.find(
-       data => data.geoPointName === selectedCityName
+     const normalized = String(selectedCityName ?? '').trim().toLowerCase();
+     const selectedCity = this.CityList?.find(
+       data => String(data.geoPointName ?? '').trim().toLowerCase() === normalized
      );
    
      if (selectedCity) {
@@ -2044,6 +2119,22 @@ OnDropOffGeoLocationClick(option:any)
 
   getPassengerDropoffLandmark(passenger: BookingConfigurationPassengerDetails): string {
     return this.getStopLandmark(this.getPassengerDropoffStop(passenger));
+  }
+
+  getBookingPickupAddressDetails(): string {
+    const v = this.advanceTableForm?.get('pickupAddressDetails')?.value;
+    if (v != null && String(v).trim() !== '') {
+      return String(v).trim();
+    }
+    return this.dataSource?.pickupAddressDetails ?? '';
+  }
+
+  getBookingDropoffAddressDetails(): string {
+    const v = this.advanceTableForm?.get('dropOffAddressDetails')?.value;
+    if (v != null && String(v).trim() !== '') {
+      return String(v).trim();
+    }
+    return this.dataSource?.dropOffAddressDetails ?? '';
   }
 
   get pickupCityName(): string {

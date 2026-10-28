@@ -178,6 +178,42 @@ export class FormDialogComponent
     this.InitCountryISDCode();
     this.onLatLonRequiredChange();
     this.initAggregatorCustomers();
+    if (this.action === 'edit' && this.advanceTable?.customerID) {
+      this.loadIsAppBasedCustomerFromDriver(this.advanceTable.customerID);
+    }
+  }
+
+  private resolveIsAppBasedCustomerYesNo(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return 'No';
+    }
+    if (value === true || value === 1) {
+      return 'Yes';
+    }
+    if (value === false || value === 0) {
+      return 'No';
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'yes' || normalized === 'true' || normalized === '1') {
+        return 'Yes';
+      }
+    }
+    return 'No';
+  }
+
+  private loadIsAppBasedCustomerFromDriver(customerID: number): void {
+    this.advanceTableService.getIsAppBasedCustomer(customerID).subscribe(
+      (response) => {
+        const value = this.resolveIsAppBasedCustomerYesNo(
+          response?.isAppBasedCustomer ?? response?.IsAppBasedCustomer
+        );
+        this.advanceTableForm.patchValue({ isAppBasedCustomer: value }, { emitEvent: false });
+      },
+      () => {
+        this.advanceTableForm.patchValue({ isAppBasedCustomer: 'No' }, { emitEvent: false });
+      }
+    );
   }
 
 
@@ -911,6 +947,9 @@ getBusinessTypeID(businessTypeID: any)
       isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
       showBillingInApp: [this.advanceTable.showBillingInApp ?? false],
       geocage: [this.advanceTable.geocage ?? false],
+      isAppBasedCustomer: [
+        this.resolveIsAppBasedCustomerYesNo(this.advanceTable.isAppBasedCustomer)
+      ],
       isAggregator: [this.advanceTable.isAggregator ?? false, Validators.required],
       aggregatorCustomerID: [this.advanceTable.aggregatorCustomerID],
       aggregatorCustomerName: [this.advanceTable.aggregatorCustomerName || 'None', Validators.required],

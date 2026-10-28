@@ -35,6 +35,7 @@ import { DuplicateWithRangeDialogComponent } from './dialogs/duplicate-with-rang
 import { EmailInfoModule } from '../EmailInfo/EmailInfo.module';
 import { IndividualCustomerModule } from '../individualCustomer/individualCustomer.module';
 import { IndividualCustomerService } from '../individualCustomer/individualCustomer.service';
+import { CustomerBlockingService } from '../customerBlocking/customerBlocking.service';
 @NgModule({
   declarations: [
     ReservationGroupDetailsComponent,
@@ -71,7 +72,7 @@ import { IndividualCustomerService } from '../individualCustomer/individualCusto
     EmailInfoModule,
     IndividualCustomerModule,
   ],
-  providers: [ReservationGroupDetailsService,CustomerAlertMessageDetailsService,ReservationGroupService, IndividualCustomerService]
+  providers: [ReservationGroupDetailsService,CustomerAlertMessageDetailsService,ReservationGroupService, IndividualCustomerService, CustomerBlockingService]
 })
 export class ReservationGroupDetailsModule {}
 

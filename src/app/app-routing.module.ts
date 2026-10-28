@@ -1109,6 +1109,13 @@ const routes: Routes = [
     )
 },
 {
+  path: 'customerPaymentMapping',
+    loadChildren: () =>
+      import('./customerPaymentMapping/customerPaymentMapping.module').then(
+        (m) => m.CustomerPaymentMappingModule
+      ),
+  },
+  {
   path: 'contractPaymentMapping',
   loadChildren: () =>
     import('./contractPaymentMapping/contractPaymentMapping.module').then(
@@ -2451,6 +2458,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'maxGarageInOutKMMinutes',
+        loadChildren: () =>
+          import('./maxGarageInOutKMMinutes/maxGarageInOutKMMinutes.module').then(
+            (m) => m.MaxGarageInOutKMMinutesModule
+          )
+      },
+
+      {
         path: 'customerPerson',
         loadChildren: () =>
           import('./customerPerson/customerPerson.module').then(
@@ -2909,6 +2924,13 @@ const routes: Routes = [
         loadChildren: () =>
           import('./customerGrowthPerson/customerGrowthPerson.module').then(
             (m) => m.CustomerGrowthPersonModule
+          )
+      },
+      {
+        path: 'customerCityHigherExtraKMorHR',
+        loadChildren: () =>
+          import('./customerCityHigherExtraKMorHR/customerCityHigherExtraKMorHR.module').then(
+            (m) => m.CustomerCityHigherExtraKMorHRModule
           )
       },
       {

@@ -96,6 +96,15 @@
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
           <b>Driver Mobile:</b> <br/>{{closingDataAdvanceTable?.driverMobile || 'N/A'}}
         </div>
+        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2"
+          *ngIf="closingDataAdvanceTable?.maximumGarageToPickupKMs != null">
+          <b>Max Garage KM / Minutes (Contract):</b><br/>
+          G2P: {{closingDataAdvanceTable.maximumGarageToPickupKMs}} km,
+          {{closingDataAdvanceTable.maximumGarageToPickupMinutes}} min
+          &nbsp;|&nbsp;
+          D2G: {{closingDataAdvanceTable.maximumDropoffToGarageKMs}} km,
+          {{closingDataAdvanceTable.maximumDropoffToGarageMinutes}} min
+        </div>
      </div>
     </div>
 
@@ -113,6 +122,11 @@
         [activeDutyNightNumberOnNights]="activeDutyNightNumberOnNights"
         [isMyfAggregator]="isMyfAggregator"
         [isMoveInSync]="isMoveInSync"
+        [customerContractHasMaxG2GConfig]="closingDataAdvanceTable?.maximumGarageToPickupKMs != null"
+        [invoiceDutyMaxTotalRunningKM]="closingDataAdvanceTable?.invoiceDutyTotalRunningKM"
+        [invoiceDutyMaxTotalRunningHours]="closingDataAdvanceTable?.invoiceDutyTotalRunningHours"
+        [invoiceDutyMaxTotalRunningMinutes]="closingDataAdvanceTable?.invoiceDutyTotalRunningMinutes"
+        [invoiceDutyMaxTotalRunningSeconds]="closingDataAdvanceTable?.invoiceDutyTotalRunningSeconds"
         (dataSaved)="onDataSaved()"
         (dutyStatusChanged)="onDutyStatusChanged($event)"></app-dutySlipForBilling>
     </div>
@@ -274,6 +288,16 @@
               [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
               [style.color]="isDutySlipEditBlocked ? '#6c757d' : '#007bff'">Change Supplier</a>
           </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="sendDutySlipOnEmail()"
+              [class.closing-entry-disabled]="!DutySlipID || sendingDutySlipEmail"
+              [style.cursor]="(!DutySlipID || sendingDutySlipEmail) ? 'not-allowed' : 'pointer'"
+              [style.color]="(!DutySlipID || sendingDutySlipEmail) ? '#6c757d' : '#007bff'">DS on Email</a>
+          </h5>
+          <img *ngIf="sendingDutySlipEmail" src="assets/images/loader4.gif" width="30" alt="">
         </div>
 
       </div>

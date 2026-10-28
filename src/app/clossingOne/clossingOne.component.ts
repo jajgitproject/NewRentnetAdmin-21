@@ -172,6 +172,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   isMyfAggregator = false;
   isMoveInSync = false;
   sendingMyfLatLon = false;
+  sendingDutySlipEmail = false;
   PickupTime: Date;
   DropOffTime: Date;
   LocationOutDate: Date;
@@ -465,6 +466,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onDataSaved() {
     this.GetClosingData();
+    this.BookingDataOnClosing();
     this.DisputeLoadData();
   }
 
@@ -535,6 +537,37 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
         this.sendingMyfLatLon = false;
         const body = error && error.error;
         const message = (body && (body.message || body.Message)) || 'MYF lat lon could not be sent.';
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
+  }
+
+  sendDutySlipOnEmail() {
+    if (!this.DutySlipID || this.sendingDutySlipEmail) {
+      return;
+    }
+    this.sendingDutySlipEmail = true;
+    this.clossingOneService.sendDutySlipOnEmail(this.DutySlipID).subscribe(
+      data => {
+        this.sendingDutySlipEmail = false;
+        const message = (data && (data.message || data.Message)) || 'Duty slip email sent successfully.';
+        this.showNotification('snackbar-success', message, 'bottom', 'center');
+      },
+      (error: HttpErrorResponse | string) => {
+        this.sendingDutySlipEmail = false;
+        let message = 'Duty slip email could not be sent.';
+        if (typeof error === 'string' && error.trim()) {
+          message = error.trim();
+        } else if (error && typeof error === 'object') {
+          const body = (error as HttpErrorResponse).error;
+          if (typeof body === 'string' && body.trim()) {
+            message = body.trim();
+          } else if (body && (body.message || body.Message)) {
+            message = body.message || body.Message;
+          } else if ((error as HttpErrorResponse).status === 404) {
+            message = 'Duty slip email API was not found. Rebuild and restart the API.';
+          }
+        }
         this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
@@ -1726,6 +1759,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
             this.summaryOfDutyData = response.summary;
             this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
               || hasInvoiceCalculationResult(response);
+            this.BookingDataOnClosing();
             this.loadDataForCard();
             this.showNotification(
               'snackbar-success',
@@ -2141,6 +2175,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.applyEditBlockStatus();
     if (event.invoiceCalculated) {
       this.hasActiveInvoiceCalculation = true;
+      this.BookingDataOnClosing();
     }
   }
 

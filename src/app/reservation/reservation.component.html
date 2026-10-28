@@ -93,26 +93,39 @@
         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
             <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
         </div>
-        <div *ngIf="ReasonMessageShow">
-            <span style="color: red;font-size: 15px;">
-                Reservation for {{customerName}} are not allowed due to the following reason : {{Reason}}
-            </span>
-        </div>
-        <div *ngIf="ReservationAlertShow">
-            <span style="color: red;font-size: 15px;">
-                Reservation Alert Message : {{ReservationAlert}}
-            </span>
-        </div>
-        <div *ngIf="CustomerAlertMessageShow">
-            <span style="color: red;font-size: 15px;">
-                Customer Alert Message : {{CustomerAlertMessage}}
-            </span>
-        </div>
-
-        <div *ngIf="ReservationStatus === 'Cancelled'">
-            <span style="color: red;font-size: 15px;">
-                Reservation Status : {{ReservationStatus}}
-            </span>
+        <div class="reservation-notices-stack mx-4"
+            *ngIf="ReasonMessageShow || ReservationAlertShow || CustomerAlertMessageShow || ReservationStatus === 'Cancelled'">
+            <div *ngIf="ReasonMessageShow" class="reservation-notice reservation-notice--danger" role="alert">
+                <mat-icon class="reservation-notice__icon" aria-hidden="true">block</mat-icon>
+                <div class="reservation-notice__content">
+                    <div class="reservation-notice__title">Reservation not allowed</div>
+                    <p class="reservation-notice__message">
+                        Reservations for <strong>{{ customerName }}</strong> cannot be processed for the following reason:
+                        {{ Reason }}
+                    </p>
+                </div>
+            </div>
+            <div *ngIf="ReservationAlertShow" class="reservation-notice reservation-notice--warning" role="alert">
+                <mat-icon class="reservation-notice__icon" aria-hidden="true">warning_amber</mat-icon>
+                <div class="reservation-notice__content">
+                    <div class="reservation-notice__title">Reservation alert</div>
+                    <p class="reservation-notice__message">{{ ReservationAlert }}</p>
+                </div>
+            </div>
+            <div *ngIf="CustomerAlertMessageShow" class="reservation-notice reservation-notice--warning" role="alert">
+                <mat-icon class="reservation-notice__icon" aria-hidden="true">campaign</mat-icon>
+                <div class="reservation-notice__content">
+                    <div class="reservation-notice__title">Customer alert message</div>
+                    <p class="reservation-notice__message">{{ CustomerAlertMessage }}</p>
+                </div>
+            </div>
+            <div *ngIf="ReservationStatus === 'Cancelled'" class="reservation-notice reservation-notice--danger" role="alert">
+                <mat-icon class="reservation-notice__icon" aria-hidden="true">cancel</mat-icon>
+                <div class="reservation-notice__content">
+                    <div class="reservation-notice__title">Reservation cancelled</div>
+                    <p class="reservation-notice__message">This reservation status is <strong>{{ ReservationStatus }}</strong>.</p>
+                </div>
+            </div>
         </div>
 
         <div class="addContainer">

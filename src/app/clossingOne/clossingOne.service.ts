@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, timeout } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
@@ -79,6 +79,14 @@ export class ClossingOneService
 
   sendMyfLatLon(dutySlipID: number | string): Observable<any> {
     return this.httpClient.post(this.API_URL + '/sendMyfLatLon/' + dutySlipID, {});
+  }
+
+  sendDutySlipOnEmail(dutySlipID: number | string): Observable<any> {
+    const userID = this.generalService.getUserID();
+    return this.httpClient.post(
+      this.API_URL + '/sendDutySlipEmail/' + dutySlipID + '/' + userID,
+      {}
+    ).pipe(timeout(180000));
   }
 
   sendMyfClosed(dutySlipID: number | string): Observable<any> {

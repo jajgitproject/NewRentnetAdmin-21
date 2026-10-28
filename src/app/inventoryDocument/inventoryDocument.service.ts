@@ -80,19 +80,49 @@ export class InventoryDocumentService
     return this.httpClient.get(this.API_URL + '/'+inventoryID + '/'+ searchAddressCity +'/'+ searchDocumentNumber +'/'+ searchDocumentIssuingAuthority +'/'+ searchAddress +'/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
 
+  getById(inventoryDocumentID: number): Observable<InventoryDocumentModel> {
+    return this.httpClient.get<InventoryDocumentModel>(this.API_URL + '/' + inventoryDocumentID);
+  }
+
   add(advanceTable: InventoryDocumentModel) 
   {
     advanceTable.inventoryDocumentID=-1;
     advanceTable.userID=this.generalService.getUserID();
-    advanceTable.documentExpiryString=this.generalService.getTimeApplicable(advanceTable.documentExpiry);
+    this.applyInventoryDocumentDates(advanceTable);
+    this.normalizeOptionalTextFields(advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
 
   update(advanceTable: InventoryDocumentModel)
   {
     advanceTable.userID=this.generalService.getUserID();
-    advanceTable.documentExpiryString=this.generalService.getTimeApplicable(advanceTable.documentExpiry);
+    this.applyInventoryDocumentDates(advanceTable);
+    this.normalizeOptionalTextFields(advanceTable);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
+  }
+
+  private applyInventoryDocumentDates(advanceTable: InventoryDocumentModel): void {
+    advanceTable.documentExpiryString = this.generalService.getTimeApplicable(advanceTable.documentExpiry);
+    if (advanceTable.documentStartDate) {
+      advanceTable.documentStartDateString = this.generalService.getTimeApplicable(advanceTable.documentStartDate);
+    } else {
+      advanceTable.documentStartDate = null;
+      advanceTable.documentStartDateString = null;
+    }
+  }
+
+  private normalizeOptionalTextFields(advanceTable: InventoryDocumentModel): void {
+    if (!advanceTable.documentNumber?.trim()) {
+      advanceTable.documentNumber = null;
+    }
+    if (!advanceTable.documentIssuingAuthority?.trim()) {
+      advanceTable.documentIssuingAuthority = null;
+    }
+    if (advanceTable.documentImage?.trim()) {
+      advanceTable.documentImageNonAvailabilityReason = null;
+    } else if (!advanceTable.documentImageNonAvailabilityReason?.trim()) {
+      advanceTable.documentImageNonAvailabilityReason = null;
+    }
   }
 
   delete(inventoryDocumentID: number):  Observable<any> 

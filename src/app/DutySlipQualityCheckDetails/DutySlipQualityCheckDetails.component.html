@@ -44,51 +44,42 @@
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Front Photo</span> <br />
           <div class="qc-photo-block">
-            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()">
+            <span class="qc-image-wrap" *ngIf="frontSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(qcDetails.frontPhotoAIVerdict)">
                 <app-static-image cssClass="qc-image" [src]="frontSlot.displayUrl" height="80px" maxWidth="100px"
                     (click)="openImageInNewTab(frontSlot.displayUrl)"
                     (failed)="onQcFrontImageFailed()"></app-static-image>
             </span>
             <div class="qc-ai-meta" *ngIf="formatQcVerdict(qcDetails.frontPhotoAIVerdict)">
               <div class="qc-ai-verdict">{{ formatQcVerdict(qcDetails.frontPhotoAIVerdict) }}</div>
-              <div class="qc-ai-message" *ngIf="qcDetails.frontPhotoAIMessage"
-                   [matTooltip]="qcDetails.frontPhotoAIMessage" matTooltipPosition="above">
-                {{ truncateQcMessage(qcDetails.frontPhotoAIMessage) }}
-              </div>
+              <div class="qc-ai-message" *ngIf="qcDetails.frontPhotoAIMessage">{{ qcDetails.frontPhotoAIMessage }}</div>
             </div>
           </div>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Selfie With Uniform</span> <br />
           <div class="qc-photo-block">
-            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()">
+            <span class="qc-image-wrap" *ngIf="selfieSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(qcDetails.selfieWithUniformAIVerdict)">
                 <app-static-image cssClass="qc-image" [src]="selfieSlot.displayUrl" height="80px" maxWidth="100px"
                     (click)="openImageInNewTab(selfieSlot.displayUrl)"
                     (failed)="onQcSelfieImageFailed()"></app-static-image>
             </span>
             <div class="qc-ai-meta" *ngIf="formatQcVerdict(qcDetails.selfieWithUniformAIVerdict)">
               <div class="qc-ai-verdict">{{ formatQcVerdict(qcDetails.selfieWithUniformAIVerdict) }}</div>
-              <div class="qc-ai-message" *ngIf="qcDetails.selfieWithUniformAIMessage"
-                   [matTooltip]="qcDetails.selfieWithUniformAIMessage" matTooltipPosition="above">
-                {{ truncateQcMessage(qcDetails.selfieWithUniformAIMessage) }}
-              </div>
+              <div class="qc-ai-message" *ngIf="qcDetails.selfieWithUniformAIMessage">{{ qcDetails.selfieWithUniformAIMessage }}</div>
             </div>
           </div>
         </div>
         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
           <span class="TDValueBold">Interiors With Amenities</span> <br />
           <div class="qc-photo-block">
-            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()">
+            <span class="qc-image-wrap" *ngIf="interiorsSlot?.hasImage()" [ngClass]="qcVerdictBorderClass(qcDetails.interiorsWithAmenitiesAIVerdict)">
                 <app-static-image cssClass="qc-image" [src]="interiorsSlot.displayUrl" height="80px" maxWidth="100px"
                     (click)="openImageInNewTab(interiorsSlot.displayUrl)"
                     (failed)="onQcInteriorsImageFailed()"></app-static-image>
             </span>
             <div class="qc-ai-meta" *ngIf="formatQcVerdict(qcDetails.interiorsWithAmenitiesAIVerdict)">
               <div class="qc-ai-verdict">{{ formatQcVerdict(qcDetails.interiorsWithAmenitiesAIVerdict) }}</div>
-              <div class="qc-ai-message" *ngIf="qcDetails.interiorsWithAmenitiesAIMessage"
-                   [matTooltip]="qcDetails.interiorsWithAmenitiesAIMessage" matTooltipPosition="above">
-                {{ truncateQcMessage(qcDetails.interiorsWithAmenitiesAIMessage) }}
-              </div>
+              <div class="qc-ai-message" *ngIf="qcDetails.interiorsWithAmenitiesAIMessage">{{ qcDetails.interiorsWithAmenitiesAIMessage }}</div>
             </div>
           </div>
         </div>

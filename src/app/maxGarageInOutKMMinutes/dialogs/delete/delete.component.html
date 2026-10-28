@@ -1,0 +1,10 @@
+<div class="container">
+  <h2 mat-dialog-title>Delete Max Garage In/Out KM/Minutes</h2>
+  <h3 mat-dialog-title>Are you sure you want to delete this record?</h3>
+  <p *ngIf="data?.packageType">Package Type: <strong>{{ data.packageType }}</strong></p>
+
+  <div mat-dialog-actions class="mb-1">
+    <button mat-flat-button color="warn" (click)="confirmDelete()">Delete</button>
+    <button mat-flat-button (click)="onNoClick()" tabindex="-1">Cancel</button>
+  </div>
+</div>

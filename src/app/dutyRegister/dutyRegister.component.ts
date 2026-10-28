@@ -1689,6 +1689,19 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       fieldValue: item?.FieldValue ?? item?.fieldValue ?? ''
     };
   }
+
+  /** Remark on DS Closing (billing remark); API already excludes vendor remark. */
+  dsClosingRemark(row: DutyRegisterModel | null | undefined): string {
+    const text = (row?.runningDetails ?? row?.billRemark ?? '').toString().trim();
+    if (!text || text.startsWith('[') || text.startsWith('{')) {
+      return '';
+    }
+    const vendor = (row?.vendorRemark ?? '').toString().trim();
+    if (vendor && text === vendor) {
+      return '';
+    }
+    return text;
+  }
 }
 
 

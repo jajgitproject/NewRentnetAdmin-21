@@ -15,6 +15,14 @@
   cursor: pointer
   display: block
 
+:host ::ng-deep .qc-image-wrap.is-good .qc-image,
+:host ::ng-deep .qc-image-wrap.is-good app-static-image img.qc-image
+  border: 3px solid #16a34a
+
+:host ::ng-deep .qc-image-wrap.is-bad .qc-image,
+:host ::ng-deep .qc-image-wrap.is-bad app-static-image img.qc-image
+  border: 3px solid #dc2626
+
 .qc-photo-block
   display: flex
   align-items: flex-start
@@ -27,6 +35,15 @@
     flex-shrink: 0
     min-width: 80px
 
+.qc-photo-thumb-col
+  display: flex
+  flex-direction: column
+  align-items: flex-start
+  flex-shrink: 0
+
+.qc-upload
+  margin-top: 8px
+
 .qc-ai-meta
   font-size: 12px
   line-height: 1.3
@@ -37,6 +54,9 @@
   font-weight: 600
 
 .qc-ai-message
-  cursor: help
   color: #555
   margin-top: 2px
+  max-width: 35ch
+  white-space: normal
+  overflow-wrap: break-word
+  word-break: break-word

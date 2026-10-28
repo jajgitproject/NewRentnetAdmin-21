@@ -1,229 +1,457 @@
-<section class="content">
+<section class="content br-page">
+
   <div class="container-fluid">
-      <div class="block-header">
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                  <ul>
-                      <li class="breadcrumb-item bcrumb-1">
-                          <a routerLink="/dashboard/main">
-                              <i class="fas fa-home"></i> Home</a>|
-                          <a href="#" onClick="return false;">Admin</a>|
-                          <a href="#" onClick="return false;">
-                            Car Utilization MIS</a>
-                      </li>
-                  </ul>
-                  <ul class="breadcrumb breadcrumb-style ">
-                      <li class="breadcrumb-item">
-                          <h2> Car Utilization MIS</h2>
-                      </li>
-                  </ul>
-              </div>
-          </div>
+
+    <div class="br-header">
+
+      <div class="br-header-left">
+
+        <ul class="br-breadcrumb">
+
+          <li>
+
+            <a routerLink="/dashboard/main">Home</a>
+
+            <span class="br-breadcrumb-sep">&gt;</span>
+
+            <span>Admin</span>
+
+            <span class="br-breadcrumb-sep">&gt;</span>
+
+            <span>Car Utilization MIS</span>
+
+          </li>
+
+        </ul>
+
+        <h2 class="br-title">Car Utilization MIS</h2>
+
       </div>
-      <div class="row">
-          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-              <div class="card">
-                  <div class="body">
-                      <div class="responsive_table">
-                          <div class="table-responsive">
-                              <div class="materialTableHeader">
-                                  <div class="row">
-                                      <div style="width: 70%; float:left;padding-top: 6px;padding-left: 12px;">
-                                          <!-- <div style="float:left" *ngIf="SearchCustomerGroup"><b>Customer Group</b> : {{SearchCustomerGroup}}</div> -->
-                                      </div>
-                                      <div style="width: 30%; text-align:right;">
-                                          <button mat-raised-button color="primary" data-dismiss="modal" data-toggle="modal" data-backdrop="false" data-target="#exampleModalCenter">
-                                              Search
-                                          </button>
-                                          &nbsp;
-                                          &nbsp;
-                                          <button mat-mini-fab color="primary" (click)="refresh()">
-                                              <mat-icon class="col-white">refresh</mat-icon>
-                                          </button>
-                                          &nbsp;
-                                      </div>
-                                  </div>
-                              </div>
 
-                              <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
-                                  This is not rendered
-                              </p>
+    </div>
 
-                              <ng-template #thenBlock2>
-                                  <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
-                                  <div class="body">
-                                      <div class="example-button-row">    
-                                          <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
-                                          <button mat-raised-button color="primary" (click)="NextCall()">Next</button>    
-                                      </div>
-                                  </div>    
-                              </ng-template>
-                              <ng-template #elseBlock2>
-                                <div class="scrollable-table-container">
-                                <div style="width: 200%; overflow-y: hidden;">
-                                  <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
-                                    <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
-                                      <mat-header-cell *matHeaderCellDef mat-sort-header>
-                                        {{ columnTitleMap[column] || (column | titlecase) }}
-                                      </mat-header-cell>
-                                      <mat-cell *matCellDef="let row">
-                                        <ng-container *ngIf="column === 'openDate'">
-                                          {{ row[column] ? (row[column] | date: 'dd-MM-yyyy') : '' }}
-                                        </ng-container>
-                                        <ng-container *ngIf="column !== 'openDate'">
-                                          {{ row[column] === undefined || row[column] === null || row[column] === 0 ? '' : row[column] }}
-                                        </ng-container>
-                                      </mat-cell>
-                                    </ng-container>
-                                  
-                                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-                                    <mat-row *matRowDef="let row; columns: displayedColumns;" [style.cursor]="'pointer'" matRipple>
-                                    </mat-row>
-                                  </mat-table>
-                                </div>
-                                </div>
 
-                                <div class="body">
-                                  <div class="example-button-row">
-                                    <button mat-raised-button color="primary" (click)="PreviousCall()">Previous</button>
-                                    <button mat-raised-button color="primary" (click)="NextCall()">Next</button>
-                                  </div>
-                                </div>
-                              </ng-template>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
+
+    <div class="br-filter-card">
+
+      <div class="br-filter-bar">
+
+        <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
+
+          <mat-label>Pickup Date From</mat-label>
+
+          <input matInput [matDatepicker]="pickupFromPicker" [(ngModel)]="pickupDateFrom" />
+
+          <mat-datepicker-toggle matIconSuffix [for]="pickupFromPicker"></mat-datepicker-toggle>
+
+          <mat-datepicker #pickupFromPicker></mat-datepicker>
+
+        </mat-form-field>
+
+
+
+        <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
+
+          <mat-label>Pickup Date To</mat-label>
+
+          <input matInput [matDatepicker]="pickupToPicker" [(ngModel)]="pickupDateTo" />
+
+          <mat-datepicker-toggle matIconSuffix [for]="pickupToPicker"></mat-datepicker-toggle>
+
+          <mat-datepicker #pickupToPicker></mat-datepicker>
+
+        </mat-form-field>
+
+
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+
+          <mat-label>Car Number</mat-label>
+
+          <input matInput [(ngModel)]="carNumbers" placeholder="Comma-separated" />
+
+        </mat-form-field>
+
+
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+
+          <mat-label>Customer Name</mat-label>
+
+          <input
+
+            type="text"
+
+            matInput
+
+            [formControl]="customerNameControl"
+
+            [matAutocomplete]="autoCustomer"
+
+            placeholder="Type at least 3 characters" />
+
+          <mat-hint>Type at least 3 characters</mat-hint>
+
+          <mat-autocomplete #autoCustomer="matAutocomplete" [displayWith]="displayCustomer.bind(this)">
+
+            <mat-option *ngFor="let option of customerOptions" [value]="option">
+
+              {{ option.customerName }}
+
+            </mat-option>
+
+          </mat-autocomplete>
+
+        </mat-form-field>
+
+
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+
+          <mat-label>Duty Slip IDs</mat-label>
+
+          <input matInput [(ngModel)]="dutySlipIds" placeholder="Comma-separated" />
+
+        </mat-form-field>
+
+
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+
+          <mat-label>Reservation IDs</mat-label>
+
+          <input matInput [(ngModel)]="reservationIds" placeholder="Comma-separated" />
+
+        </mat-form-field>
+
       </div>
-  </div>
-</section>
 
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Car Utilization MIS</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+
+
+      <div class="br-filter-actions">
+
+        <button mat-flat-button color="primary" class="br-btn-search" (click)="search()" [disabled]="loading || isExportJobInProgress()">
+
+          <mat-icon>search</mat-icon>
+
+          Search
+
+        </button>
+
+        <button mat-stroked-button type="button" class="br-btn-reset" (click)="reset()" [disabled]="loading || isExportJobInProgress()">
+
+          <mat-icon>refresh</mat-icon>
+
+          Reset
+
+        </button>
+
+        <button mat-flat-button color="accent" type="button" (click)="startExportJob()" [disabled]="isExportJobInProgress()">
+
+          <mat-icon>download</mat-icon>
+
+          {{ getExportButtonLabel() }}
+
+        </button>
+
+      </div>
+
+      <div class="util-export-panel" *ngIf="exportJobId || exportJobError">
+        <div class="util-export-title">Car Utilization export (Excel)</div>
+        <div class="util-export-meta" *ngIf="exportJobId">
+          <span>Job: {{ exportJobId }}</span>
+          <span>Status: {{ getExportJobStatusLabel() || '—' }}</span>
+          <span *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+          <span *ngIf="exportElapsedLabel">Elapsed: {{ exportElapsedLabel }}</span>
+        </div>
+        <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+        <p class="util-export-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+        <div class="util-export-actions">
+          <button mat-flat-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+            {{ exportJobDownloading ? 'Downloading...' : 'Download Excel' }}
+          </button>
+          <button mat-stroked-button type="button" (click)="cancelExportJob()" [disabled]="!isExportJobInProgress()">
+            Cancel
           </button>
         </div>
-        <div class="modal-body">
-          <!-- Row 1 -->
-          <div class="form-row">
-            <div class="form-group col-6">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                <mat-label>Car Location</mat-label>
-                <input type="text" matInput [formControl]="locationHub" [matAutocomplete]="auto5">
-                <mat-autocomplete #auto5="matAutocomplete">
-                  <mat-option *ngFor="let options of filteredOrganizationalEntityOptions | async" [value]="options.organizationalEntityName">
-                    {{options.organizationalEntityName}}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
-            </div>
-  
-            <div class="form-group col-6">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                <mat-label>Car Type</mat-label>
-                <input type="text" matInput [formControl]="vehicle" [matAutocomplete]="auto1">
-                <mat-autocomplete #auto1="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredVehicleOptions | async" [value]="option.vehicle">
-                    {{option.vehicle}}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
-            </div>
-          </div>
-  
-          <!-- Row 2 -->
-          <div class="form-row">
-            <div class="form-group col-6">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                <mat-label>Car Number</mat-label>
-                <input type="text" matInput [formControl]="registrationNumber" [matAutocomplete]="auto2">
-                <mat-autocomplete #auto2="matAutocomplete">
-                  <mat-option *ngFor="let option of filteredRegistrationNumberOptions | async" [value]="option.registrationNumber">
-                    {{option.registrationNumber}}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
-            </div>
-  
-            <div class="form-group col-6">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                <mat-label>Open Date</mat-label>
-                <input matInput [matDatepicker]="dutyDate" [(ngModel)]="openDate">
-                <mat-datepicker-toggle matSuffix [for]="dutyDate"></mat-datepicker-toggle>
-                <mat-datepicker #dutyDate></mat-datepicker>
-              </mat-form-field>
-            </div>
-          </div>
-  
-          <!-- Additional Fields -->
-          <div class="form-row">
-            <div class="form-group col-6">
-              <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
-                <mat-label>Owned Supplier</mat-label>
-                <mat-select [(value)]="searchownedSupplier">
-                  <mat-option value="Owned">Owned</mat-option>
-                  <mat-option value="Supplier">Supplier</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-  
-            <!-- <div class="form-row">
-              <div class="form-group col-6">
-                <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
-                  <mat-label>Owned Supplier</mat-label>
-                  <mat-select [(value)]="searchownedSupplier">
-                    <mat-option value="Owned">Owned</mat-option>
-                    <mat-option value="Supplier">Supplier</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div> -->
-    
-            <!-- <div class="form-group col-6">
-                 <mat-label>Owned Supplier</mat-label>
-                <mat-select [(value)]="searchownedSupplier">
-                  <mat-option value="Owned">Owned</mat-option>
-                  <mat-option value="Supplier">Supplier</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div> -->
-  
-          <!-- Activation Status -->
-          <div class="form-row">
-            <div class="form-group col-12">
-              <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
-                <mat-label>Status</mat-label>
-                <mat-select [(value)]="status" (selectionChange)="onStatusChange($event.value)">
-                  <mat-option value="Free">Free</mat-option>
-                  <mat-option value="OnDuty">On Duty</mat-option>
-                  <mat-option value="All">All</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-12">
-              <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
-                <mat-label>Activation Status</mat-label>
-                <mat-select [(value)]="SearchActivationStatus">
-                  <mat-option [value]=true>Active</mat-option>
-                  <mat-option [value]=false>Deleted</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div>
-        </div>
-  
-        <div class="modal-footer">
-          <button mat-raised-button color="primary" (click)="SearchData()" data-dismiss="modal">Search</button>
-        </div>
       </div>
+
     </div>
+
+
+
+    <div class="br-table-card">
+
+      <div class="br-table-loading" *ngIf="loading">
+
+        <mat-spinner diameter="40"></mat-spinner>
+
+        <span>Loading report...</span>
+
+      </div>
+
+
+
+      <div class="alert alert-primary" *ngIf="!loading && !hasSearched" style="text-align: center;">
+
+        Select pickup date range and click Search to view car utilization.
+
+      </div>
+
+
+
+      <div class="alert alert-primary" *ngIf="!loading && hasSearched && carRecords.length === 0" style="text-align: center;">
+
+        No records found for the selected filters.
+
+      </div>
+
+
+
+      <div class="util-grid-wrap" *ngIf="!loading && carRecords.length > 0 && isMultiDayView">
+
+        <table class="util-grid">
+
+          <thead>
+
+            <tr class="util-date-row">
+
+              <th class="util-fixed-head" colspan="6"></th>
+
+              <th class="util-date-head" *ngFor="let date of reportDates" [colSpan]="metricsPerDay">
+
+                {{ date | date: 'dd-MMM-yy' }}
+
+              </th>
+
+            </tr>
+
+            <tr class="util-metric-head-row">
+
+              <th class="util-fixed-head">Sl.No</th>
+
+              <th class="util-fixed-head">Location</th>
+
+              <th class="util-fixed-head">Car No</th>
+
+              <th class="util-fixed-head">Car Name</th>
+
+              <th class="util-fixed-head">Car Status</th>
+
+              <th class="util-fixed-head">Mode of Car</th>
+
+              <ng-container *ngFor="let date of reportDates">
+
+                <th class="util-metric-head">Hrs</th>
+
+                <th class="util-metric-head">Kms</th>
+
+                <th class="util-metric-head">Duties</th>
+
+                <th class="util-metric-head">GPS</th>
+
+                <th class="util-metric-head">Usage %</th>
+
+                <th class="util-metric-head">Day Name</th>
+
+                <th class="util-metric-head">Remarks</th>
+
+              </ng-container>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let car of carRecords; let i = index">
+
+              <td class="util-fixed-cell">{{ slNo(i) }}</td>
+
+              <td class="util-fixed-cell">{{ car.location }}</td>
+
+              <td class="util-fixed-cell">{{ car.carNo }}</td>
+
+              <td class="util-fixed-cell">{{ car.carName }}</td>
+
+              <td class="util-fixed-cell">{{ car.carStatus }}</td>
+
+              <td class="util-fixed-cell">{{ car.modeOfCar }}</td>
+
+              <ng-container *ngFor="let day of car.dayMetrics">
+
+                <td class="util-metric-cell">{{ day.hrs | number: '1.2-2' }}</td>
+
+                <td class="util-metric-cell">{{ day.totalKM | number: '1.2-2' }}</td>
+
+                <td class="util-metric-cell">{{ day.numberOfDuties }}</td>
+
+                <td class="util-metric-cell">{{ day.gpsKm | number: '1.2-2' }}</td>
+
+                <td class="util-metric-cell">{{ usagePercent(day.hrs) }}</td>
+
+                <td class="util-metric-cell">{{ dayName(day.pickupDate) }}</td>
+
+                <td class="util-metric-cell"></td>
+
+              </ng-container>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+
+
+        <mat-paginator
+
+          [length]="totalRecords"
+
+          [pageSize]="pageSize"
+
+          [pageIndex]="pageNumber"
+
+          [pageSizeOptions]="[50]"
+
+          (page)="onPageChange($event)">
+
+        </mat-paginator>
+
+      </div>
+
+
+
+      <div class="util-grid-wrap" *ngIf="!loading && carRecords.length > 0 && !isMultiDayView">
+
+        <table class="util-grid">
+
+          <thead>
+
+            <tr class="util-date-row">
+
+              <th class="util-fixed-head" colspan="6"></th>
+
+              <th class="util-date-head" [colSpan]="metricsPerDay" *ngIf="reportDates.length === 1">
+
+                {{ reportDates[0] | date: 'dd-MMM-yy' }}
+
+              </th>
+
+            </tr>
+
+            <tr class="util-metric-head-row">
+
+              <th class="util-fixed-head">Sl.No</th>
+
+              <th class="util-fixed-head">Location</th>
+
+              <th class="util-fixed-head">Car No</th>
+
+              <th class="util-fixed-head">Car Name</th>
+
+              <th class="util-fixed-head">Car Status</th>
+
+              <th class="util-fixed-head">Mode of Car</th>
+
+              <th class="util-metric-head">Hrs</th>
+
+              <th class="util-metric-head">Kms</th>
+
+              <th class="util-metric-head">Duties</th>
+
+              <th class="util-metric-head">GPS</th>
+
+              <th class="util-metric-head">Usage %</th>
+
+              <th class="util-metric-head">Day Name</th>
+
+              <th class="util-metric-head">Remarks</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let car of carRecords; let i = index">
+
+              <td class="util-fixed-cell">{{ slNo(i) }}</td>
+
+              <td class="util-fixed-cell">{{ car.location }}</td>
+
+              <td class="util-fixed-cell">{{ car.carNo }}</td>
+
+              <td class="util-fixed-cell">{{ car.carName }}</td>
+
+              <td class="util-fixed-cell">{{ car.carStatus }}</td>
+
+              <td class="util-fixed-cell">{{ car.modeOfCar }}</td>
+
+              <ng-container *ngIf="car.dayMetrics?.length; else emptyDay">
+
+                <td class="util-metric-cell">{{ car.dayMetrics[0].hrs | number: '1.2-2' }}</td>
+
+                <td class="util-metric-cell">{{ car.dayMetrics[0].totalKM | number: '1.2-2' }}</td>
+
+                <td class="util-metric-cell">{{ car.dayMetrics[0].numberOfDuties }}</td>
+
+                <td class="util-metric-cell">{{ car.dayMetrics[0].gpsKm | number: '1.2-2' }}</td>
+
+                <td class="util-metric-cell">{{ usagePercent(car.dayMetrics[0].hrs) }}</td>
+
+                <td class="util-metric-cell">{{ dayName(car.dayMetrics[0].pickupDate) }}</td>
+
+                <td class="util-metric-cell"></td>
+
+              </ng-container>
+
+              <ng-template #emptyDay>
+
+                <td class="util-metric-cell">0</td>
+
+                <td class="util-metric-cell">0</td>
+
+                <td class="util-metric-cell">0</td>
+
+                <td class="util-metric-cell">0</td>
+
+                <td class="util-metric-cell">{{ usagePercent(0) }}</td>
+
+                <td class="util-metric-cell">{{ reportDates[0] ? dayName(reportDates[0]) : '' }}</td>
+
+                <td class="util-metric-cell"></td>
+
+              </ng-template>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+
+
+        <mat-paginator
+
+          [length]="totalRecords"
+
+          [pageSize]="pageSize"
+
+          [pageIndex]="pageNumber"
+
+          [pageSizeOptions]="[50]"
+
+          (page)="onPageChange($event)">
+
+        </mat-paginator>
+
+      </div>
+
+    </div>
+
   </div>
-  
+
+</section>
+
+
