@@ -563,6 +563,31 @@ form.customer-form-four-col mat-form-field {
   overflow: visible;
 }
 
+/* Document master add/edit: three fields per section in one row */
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog.mat-mdc-dialog-panel {
+  width: min(960px, 96vw) !important;
+  min-width: min(960px, 96vw) !important;
+  max-width: 96vw !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  box-sizing: border-box;
+  --mat-dialog-container-max-width: min(960px, 96vw);
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog > .mat-mdc-dialog-container {
+  flex-shrink: 0 !important;
+  min-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .mdc-dialog__surface,
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .mat-mdc-dialog-container,
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box;
+}
+
 /* KAM Pickup Address Correction dialog */
 .cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel.mat-mdc-dialog-panel {
   width: min(1200px, 96vw) !important;
