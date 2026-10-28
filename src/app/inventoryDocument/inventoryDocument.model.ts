@@ -12,6 +12,8 @@ export class InventoryDocumentModel {
   documentImageNonAvailabilityReason:string;
   documentExpiry:Date;
   documentExpiryString:string;
+  documentStartDate:Date;
+  documentStartDateString:string;
   addressCityID:number;
   address:string;
   pin:string;
@@ -35,13 +37,15 @@ export class InventoryDocumentModel {
        this.addressCityID = inventoryDocumentModel.addressCityID || 0;
        this.address = inventoryDocumentModel.address || '';
        this.documentExpiryString = inventoryDocumentModel.documentExpiryString || '';
+       this.documentStartDateString = inventoryDocumentModel.documentStartDateString || '';
        this.pin = inventoryDocumentModel.pin || '';
        this.activationStatus = inventoryDocumentModel.activationStatus || '';
        this.verified = inventoryDocumentModel.verified || '';
        this.verifiedBy = inventoryDocumentModel.verifiedBy || '';
        this.verificationRemark = inventoryDocumentModel.verificationRemark || '';
        this.verificationDate = inventoryDocumentModel.verificationDate || '';
-       this.documentExpiry=new Date();
+       this.documentExpiry = inventoryDocumentModel.documentExpiry ?? null;
+       this.documentStartDate = inventoryDocumentModel.documentStartDate ?? null;
     }
   }
   

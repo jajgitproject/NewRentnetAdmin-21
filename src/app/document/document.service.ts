@@ -45,16 +45,30 @@ export class DocumentService
   {
     advanceTable.documentID=-1;
     advanceTable.userID=this.generalService.getUserID();
-    advanceTable.startDateString=this.generalService.getTimeApplicable(advanceTable.startDate);
-    advanceTable.endDateString=this.generalService.getTimeApplicableTO(advanceTable.endDate);
+    advanceTable.documentType = advanceTable.documentType || 'Other';
+    this.applyDocumentDateStrings(advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: Document)
   {
     advanceTable.userID=this.generalService.getUserID();
-    advanceTable.startDateString=this.generalService.getTimeApplicable(advanceTable.startDate);
-    advanceTable.endDateString=this.generalService.getTimeApplicableTO(advanceTable.endDate);
+    this.applyDocumentDateStrings(advanceTable);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
+  }
+
+  private applyDocumentDateStrings(advanceTable: Document): void {
+    if (advanceTable.startDate) {
+      advanceTable.startDateString = this.generalService.getTimeApplicable(advanceTable.startDate);
+    } else {
+      advanceTable.startDate = null;
+      advanceTable.startDateString = null;
+    }
+    if (advanceTable.endDate) {
+      advanceTable.endDateString = this.generalService.getTimeApplicableTO(advanceTable.endDate);
+    } else {
+      advanceTable.endDate = null;
+      advanceTable.endDateString = null;
+    }
   }
   delete(documentID: number):  Observable<any> 
   {
