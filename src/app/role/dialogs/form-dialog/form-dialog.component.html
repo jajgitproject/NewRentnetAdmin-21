@@ -197,6 +197,7 @@
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+<<<<<<< HEAD
                         <mat-label>Can Bypass OTP</mat-label>
                         <mat-select formControlName="canBypassOTP">
                             <mat-option [value]="false">No</mat-option>
@@ -206,6 +207,14 @@
                         <mat-error *ngIf="advanceTableForm.get('canBypassOTP')?.hasError('required')">
                             Can Bypass OTP is required
                         </mat-error>
+=======
+                        <mat-label>Can Edit Auto Billing</mat-label>
+                        <mat-select formControlName="canEditAutoBilling">
+                            <mat-option [value]="true">Yes</mat-option>
+                            <mat-option [value]="false">No</mat-option>
+                        </mat-select>
+                        <mat-hint>Allows editing Verify Duty / Good for Billing for app-triggered auto billing</mat-hint>
+>>>>>>> newrentnet_b2cbilling
                     </mat-form-field>
                 </div>
             </div>

@@ -3234,20 +3234,30 @@ const routes: Routes = [
       },
 
       {
+<<<<<<< HEAD
         path: 'testBooking',
         loadChildren: () =>
           import('./testBooking/testBooking.module').then(
             (m) => m.TestBookingModule
+=======
+        path: 'appBillingReceipt',
+        loadChildren: () =>
+          import('./appBillingReceipt/appBillingReceipt.module').then(
+            (m) => m.AppBillingReceiptModule
+>>>>>>> newrentnet_b2cbilling
           )
       },
 
       {
+<<<<<<< HEAD
         path: 'invoiceExport',
         redirectTo: 'Forensic',
         pathMatch: 'full'
       },
 
       {
+=======
+>>>>>>> newrentnet_b2cbilling
         path: 'supplierCityMapping',
         loadChildren: () =>
           import('./supplierCityMapping/supplierCityMapping.module').then(

@@ -1535,11 +1535,20 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+<<<<<<< HEAD
         path: 'testBooking',
         title: 'Test Booking',
         pageKey: 'testBooking',
         moduleName: 'testBooking',
         icon: 'fas fa-clipboard-check',
+=======
+        path: 'appBillingReceipt',
+        title: 'App Billing Receipt',
+        pageKey: 'App Billing Receipt',
+        moduleName: 'appBillingReceipt',
+        alternateAccessPageKeys: ['appBillingReceipt', 'invoiceExport', 'Invoice Export'],
+        icon: 'fas fa-receipt',
+>>>>>>> newrentnet_b2cbilling
         class: '',
         groupTitle: false,
         submenu: [],
