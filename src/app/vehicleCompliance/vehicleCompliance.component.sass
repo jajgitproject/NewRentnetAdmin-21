@@ -1,0 +1,120 @@
+.vehicle-compliance-page
+  .summary-card
+    text-align: center
+    min-height: 110px
+
+  .summary-value
+    font-size: 28px
+    font-weight: 600
+    padding-top: 8px
+
+  .toolbar-row
+    display: flex
+    align-items: center
+    gap: 12px
+
+  .scrollable-table-container
+    overflow-x: auto
+    width: 100%
+
+  .compliance-grid
+    width: max-content
+    max-width: 100%
+    table-layout: auto
+
+    th
+      white-space: nowrap
+      vertical-align: middle
+
+    td
+      vertical-align: top
+      white-space: nowrap
+
+  .mandatory-mark
+    color: #f44336
+    font-weight: 700
+    margin-left: 2px
+
+  .cell-qc
+    text-align: center
+    vertical-align: middle
+    padding-left: 4px
+    padding-right: 4px
+
+  ::ng-deep .cell-qc .qc-icon
+    font-size: 22px
+    width: 22px
+    height: 22px
+    line-height: 22px
+    vertical-align: middle
+
+  ::ng-deep .cell-qc .qc-icon--approved
+    color: #4caf50
+
+  ::ng-deep .cell-qc .qc-icon--rejected
+    color: #f44336
+
+  ::ng-deep .cell-qc .qc-icon--pending
+    color: #ff9800
+
+  ::ng-deep .cell-qc .qc-icon--na
+    color: #bdbdbd
+
+  .field-fit
+    font-size: 12px
+    width: max-content
+    max-width: 100%
+
+  ::ng-deep .compliance-grid
+    .field-fit.mat-mdc-form-field,
+    .field-fit.mat-form-field
+      width: max-content
+      display: inline-block
+      vertical-align: top
+
+    .field-fit .mat-mdc-form-field-infix,
+    .field-fit .mat-form-field-infix
+      width: auto
+      min-width: 0
+
+    .field-fit .mat-mdc-select-value,
+    .field-fit .mat-select-value
+      max-width: none
+
+    .field-action
+      min-width: 4.5rem
+
+    .field-date
+      width: max-content
+      min-width: 0
+
+      .mat-mdc-form-field-infix,
+      .mat-form-field-infix
+        width: auto
+        min-width: 0
+        padding-right: 0
+
+      input.mat-mdc-input-element,
+      input.mat-input-element
+        field-sizing: content
+        width: 10ch
+        min-width: 10ch
+        max-width: 10ch
+        box-sizing: content-box
+
+    .field-text
+      min-width: 6rem
+      width: max-content
+
+      input.mat-mdc-input-element,
+      input.mat-input-element
+        width: 100%
+        min-width: 6rem
+        field-sizing: content
+
+  .cell-text
+    max-width: 16rem
+
+  .image-cell
+    min-width: max-content
+    white-space: normal

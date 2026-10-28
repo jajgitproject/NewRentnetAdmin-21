@@ -1,0 +1,134 @@
+<section class="content vehicle-compliance-page">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Vehicle Compliance</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style">
+                        <li class="breadcrumb-item">
+                            <h2>Vehicle Compliance for <strong>{{ inventoryName }}</strong></h2>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row summary-cards" *ngIf="summaryCards?.length">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3" *ngFor="let card of summaryCards">
+                <mat-card class="summary-card">
+                    <mat-card-title>{{ card.label }}</mat-card-title>
+                    <mat-card-content class="summary-value">{{ card.value }}</mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="toolbar-row mb-3">
+                            <button mat-raised-button color="primary" (click)="loadPage()">Refresh</button>
+                            <button mat-raised-button color="accent" (click)="saveAll()" [disabled]="saveInProgress">
+                                Save all
+                            </button>
+                            <mat-spinner *ngIf="saveInProgress" diameter="28"></mat-spinner>
+                        </div>
+
+                        <p *ngIf="!page?.rows?.length" class="alert alert-primary text-center">
+                            No inventory documents are configured in the Document master.
+                        </p>
+
+                        <form [formGroup]="complianceForm" *ngIf="rows?.length">
+                            <div class="scrollable-table-container">
+                                <table class="table table-bordered compliance-grid">
+                                    <thead>
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>Document</th>
+                                            <th>QC</th>
+                                            <th>Document Number</th>
+                                            <th>Start Date</th>
+                                            <th>Expiry Date</th>
+                                            <th>Image</th>
+                                            <th>Reason</th>
+                                            <th>Issuing Authority</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody formArrayName="rows">
+                                        <tr *ngFor="let row of rows.controls; let i = index" [formGroupName]="i">
+                                            <td class="cell-action">
+                                                <mat-form-field appearance="outline" class="field-fit field-action">
+                                                    <mat-select formControlName="action" (selectionChange)="onActionChange(i)">
+                                                        <mat-option *ngFor="let opt of actionOptions" [value]="opt.value"
+                                                            [disabled]="opt.value === 'EditCurrent' && !row.get('hasApplicableRecord')?.value">
+                                                            {{ opt.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                            <td>
+                                                {{ row.get('documentName')?.value }}<span *ngIf="row.get('isMandatory')?.value" class="mandatory-mark">*</span>
+                                            </td>
+                                            <td class="cell-qc">
+                                                <mat-icon [matTooltip]="qcStatusLabel(row)" matTooltipPosition="above"
+                                                    [ngClass]="qcStatusClass(row)">{{ qcStatusIcon(row) }}</mat-icon>
+                                            </td>
+                                            <td class="cell-text">
+                                                <mat-form-field appearance="outline" class="field-fit field-text">
+                                                    <input matInput formControlName="documentNumber" maxlength="50">
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="cell-date">
+                                                <mat-form-field appearance="outline" class="field-fit field-date">
+                                                    <input matInput size="10" maxlength="10" placeholder="DD/MM/YYYY"
+                                                        [matDatepicker]="startPicker" formControlName="documentStartDate">
+                                                    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                                                    <mat-datepicker #startPicker></mat-datepicker>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="cell-date">
+                                                <mat-form-field appearance="outline" class="field-fit field-date">
+                                                    <input matInput size="10" maxlength="10" placeholder="DD/MM/YYYY"
+                                                        [matDatepicker]="expiryPicker" formControlName="documentExpiry">
+                                                    <mat-datepicker-toggle matSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                                                    <mat-datepicker #expiryPicker></mat-datepicker>
+                                                    <mat-error *ngIf="row.get('documentExpiry')?.hasError('required')">
+                                                        Required
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="image-cell">
+                                                <a *ngIf="imagePaths[i]" [href]="imagePaths[i]" target="_blank">View</a>
+                                                <app-myupload (onUploadFinished)="uploadFinished(i, $event)"></app-myupload>
+                                            </td>
+                                            <td class="cell-text">
+                                                <mat-form-field appearance="outline" class="field-fit field-text">
+                                                    <input matInput formControlName="documentImageNonAvailabilityReason"
+                                                        (input)="onReasonChange(i)">
+                                                    <mat-error *ngIf="row.get('documentImageNonAvailabilityReason')?.hasError('required')">
+                                                        Required without image
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="cell-text">
+                                                <mat-form-field appearance="outline" class="field-fit field-text">
+                                                    <input matInput formControlName="documentIssuingAuthority" maxlength="50">
+                                                </mat-form-field>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

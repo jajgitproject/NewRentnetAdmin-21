@@ -699,6 +699,23 @@ const routes: Routes = [
             (m) => m.InventoryDocumentModule
           )
       },
+      {
+        path: 'vehicleCompliance',
+        loadChildren: () =>
+          import('./vehicleCompliance/vehicleCompliance.module').then(
+            (m) => m.VehicleComplianceModule
+          ),
+        data: {
+          requiredPageKey: 'inventoryDocument',
+          alternatePageKeys: [
+            'vehicleCompliance',
+            'Vehicle Compliance',
+            'inventoryDocument',
+            'Inventory Document',
+            'inventory',
+          ],
+        },
+      },
       
       {
         path: 'customerMIS',

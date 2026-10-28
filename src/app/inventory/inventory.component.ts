@@ -109,7 +109,8 @@ export class InventoryComponent implements OnInit, OnDestroy {
     { label: 'Fitness', route: '/inventoryFitness', tooltip: 'Inventory Fitness' },
     { label: 'Monthly Business Report', route: '/monthlyBusinessReport', tooltip: 'Monthly Business Report' },
     { label: 'Driver Association', route:'/driverInventoryAssociation', tooltip: 'Driver Association' },
-    { label: 'Document', route:'/inventoryDocument', tooltip: 'Inventory Document' }
+    { label: 'Document', route:'/inventoryDocument', tooltip: 'Inventory Document' },
+    { label: 'Vehicle Compliance', route:'/vehicleCompliance', tooltip: 'Vehicle Compliance (bulk documents)' },
   ];
   
   searchTerm: any = '';
@@ -172,7 +173,6 @@ export class InventoryComponent implements OnInit, OnDestroy {
     this.initVehicle();
     this.InitRegistrationNumber();
     this.InitLocationHub();
-    this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
     this.resumeExportJobIfNeeded();
   }
 
