@@ -23,6 +23,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CitiesDropDown } from '../organizationalEntity/citiesDropDown.model';
 import { AllCitiesDropDown } from './allCitiesDropDown.model';
 import { FormDialogInventoryVerificationsComponent } from './dialogs/verification/verification.component';
+import { DocumentDropDown } from '../general/documentDropDown.model';
+import moment from 'moment';
 //import { FormDialogVerificationsComponent } from '../inventoryDocumentVerification/dialogs/form-dialog-verifications/form-dialog-verifications.component';
 @Component({
   standalone: false,
@@ -33,9 +35,10 @@ import { FormDialogInventoryVerificationsComponent } from './dialogs/verificatio
 })
 export class InventoryDocumentComponent implements OnInit {
   displayedColumns = [
-    'RegistrationNumber',
     'Document',
-    'SupplierName',
+    'DocumentStartDate',
+    'DocumentExpiry',
+    'DocumentIssuingAuthority',
     'DocumentVerified',
     'status',
     'actions'
@@ -56,6 +59,13 @@ export class InventoryDocumentComponent implements OnInit {
   searchDocumentNumber: string = '';
   searchDocumentIssuingAuthority: string = '';
   searchAddress: string = '';
+  searchDocumentID: number | null = null;
+  searchDocumentStartDateFrom: Date | string = '';
+  searchDocumentStartDateTo: Date | string = '';
+  searchDocumentExpiryFrom: Date | string = '';
+  searchDocumentExpiryTo: Date | string = '';
+  searchQcStatus: string = '';
+  public DocumentList?: DocumentDropDown[] = [];
   addressCity : FormControl = new FormControl();
   documentNumber : FormControl = new FormControl();
   documentIssuingAuthority : FormControl = new FormControl();
@@ -94,13 +104,25 @@ export class InventoryDocumentComponent implements OnInit {
       const encryptedInventoryID = paramsData.InventoryID;
       const encryptedInventoryName = paramsData.RegNo;
 
-      this.InventoryID = this._generalService.decrypt(decodeURIComponent(encryptedInventoryID));
-      this.InventoryName = this._generalService.decrypt(decodeURIComponent(encryptedInventoryName));
+      if (encryptedInventoryID && encryptedInventoryName) {
+        this.InventoryID = this._generalService.decrypt(decodeURIComponent(encryptedInventoryID));
+        this.InventoryName = this._generalService.decrypt(decodeURIComponent(encryptedInventoryName));
+      } else {
+        this.InventoryID = 0;
+        this.InventoryName = '';
+      }
     });
     this.loadData();
     this.SubscribeUpdateService();
     this.InitCities();
+    this.initDocuments();
     //this.InitIssuingCity();
+  }
+
+  initDocuments() {
+    this.inventoryDocumentService.GetDocumentForInventory().subscribe((data) => {
+      this.DocumentList = data;
+    });
   }
 
   InitCities()
@@ -154,6 +176,12 @@ export class InventoryDocumentComponent implements OnInit {
     this.searchDocumentNumber = '';
     this.searchDocumentIssuingAuthority = '';
     this.searchAddress = '';
+    this.searchDocumentID = null;
+    this.searchDocumentStartDateFrom = '';
+    this.searchDocumentStartDateTo = '';
+    this.searchDocumentExpiryFrom = '';
+    this.searchDocumentExpiryTo = '';
+    this.searchQcStatus = '';
     this.SearchActivationStatus = true;
     this.PageNumber=0;
     this.searchTerm = '';
@@ -179,6 +207,7 @@ export class InventoryDocumentComponent implements OnInit {
 
   public SearchData()
   {
+    this.PageNumber = 0;
     this.loadData();    
   }
 
@@ -236,8 +265,19 @@ export class InventoryDocumentComponent implements OnInit {
     }
   }
 
+  private formatFilterDate(value: Date | string): string {
+    if (value === '' || value == null) {
+      return '';
+    }
+    return moment(value).format('YYYY-MM-DD');
+  }
+
    public loadData() 
    {
+    const documentStartDateFromFilter = this.formatFilterDate(this.searchDocumentStartDateFrom);
+    const documentStartDateToFilter = this.formatFilterDate(this.searchDocumentStartDateTo);
+    const documentExpiryFromFilter = this.formatFilterDate(this.searchDocumentExpiryFrom);
+    const documentExpiryToFilter = this.formatFilterDate(this.searchDocumentExpiryTo);
     switch (this.selectedFilter)
     {
       case 'documentNumber':
@@ -247,7 +287,21 @@ export class InventoryDocumentComponent implements OnInit {
         this.searchTerm = '';
         break;
     }
-      this.inventoryDocumentService.getTableData(this.InventoryID,this.searchAddressCity,this.searchDocumentNumber,this.searchDocumentIssuingAuthority,this.searchAddress,this.SearchActivationStatus, this.PageNumber).subscribe
+      this.inventoryDocumentService.getTableData(
+        this.InventoryID,
+        this.searchAddressCity,
+        this.searchDocumentNumber,
+        this.searchDocumentIssuingAuthority,
+        this.searchAddress,
+        this.SearchActivationStatus,
+        this.searchDocumentID != null ? String(this.searchDocumentID) : '',
+        documentStartDateFromFilter,
+        documentStartDateToFilter,
+        documentExpiryFromFilter,
+        documentExpiryToFilter,
+        this.searchQcStatus,
+        this.PageNumber
+      ).subscribe
     (
       data =>   
       {
@@ -419,7 +473,27 @@ export class InventoryDocumentComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.inventoryDocumentService.getTableDataSort(this.InventoryID,this.searchAddressCity,this.searchDocumentNumber,this.searchDocumentIssuingAuthority,this.searchAddress,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
+    const documentStartDateFromFilter = this.formatFilterDate(this.searchDocumentStartDateFrom);
+    const documentStartDateToFilter = this.formatFilterDate(this.searchDocumentStartDateTo);
+    const documentExpiryFromFilter = this.formatFilterDate(this.searchDocumentExpiryFrom);
+    const documentExpiryToFilter = this.formatFilterDate(this.searchDocumentExpiryTo);
+    this.inventoryDocumentService.getTableDataSort(
+      this.InventoryID,
+      this.searchAddressCity,
+      this.searchDocumentNumber,
+      this.searchDocumentIssuingAuthority,
+      this.searchAddress,
+      this.SearchActivationStatus,
+      this.searchDocumentID != null ? String(this.searchDocumentID) : '',
+      documentStartDateFromFilter,
+      documentStartDateToFilter,
+      documentExpiryFromFilter,
+      documentExpiryToFilter,
+      this.searchQcStatus,
+      this.PageNumber,
+      coloumName.active,
+      this.sortType
+    ).subscribe
     (
       data =>   
       {

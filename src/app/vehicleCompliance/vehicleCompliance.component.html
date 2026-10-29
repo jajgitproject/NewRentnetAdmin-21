@@ -19,13 +19,16 @@
             </div>
         </div>
 
-        <div class="row summary-cards" *ngIf="summaryCards?.length">
-            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3" *ngFor="let card of summaryCards">
-                <mat-card class="summary-card">
-                    <mat-card-title>{{ card.label }}</mat-card-title>
-                    <mat-card-content class="summary-value">{{ card.value }}</mat-card-content>
-                </mat-card>
-            </div>
+        <div class="vc-summary-strip" *ngIf="summaryCards?.length" role="list" aria-label="Compliance summary">
+            <article class="vc-summary-card" *ngFor="let card of summaryCards"
+                [ngClass]="'vc-summary-card--' + card.key" role="listitem"
+                [matTooltip]="card.label + ': ' + card.value">
+                <mat-icon class="vc-summary-card__icon" aria-hidden="true">{{ card.icon }}</mat-icon>
+                <div class="vc-summary-card__body">
+                    <span class="vc-summary-card__value">{{ card.value }}</span>
+                    <span class="vc-summary-card__label">{{ card.label }}</span>
+                </div>
+            </article>
         </div>
 
         <div class="row">
@@ -49,15 +52,24 @@
                                 <table class="table table-bordered compliance-grid">
                                     <thead>
                                         <tr>
-                                            <th>Action</th>
-                                            <th>Document</th>
-                                            <th>QC</th>
-                                            <th>Document Number</th>
-                                            <th>Start Date</th>
-                                            <th>Expiry Date</th>
-                                            <th>Image</th>
-                                            <th>Reason</th>
-                                            <th>Issuing Authority</th>
+                                            <th class="col-action">Action</th>
+                                            <th class="col-document">Document</th>
+                                            <th class="col-qc">QC</th>
+                                            <th class="th-wrap col-number">
+                                                <span class="th-wrap-line">Document</span>
+                                                <span class="th-wrap-line">Number</span>
+                                            </th>
+                                            <th class="col-date">Start Date</th>
+                                            <th class="col-date">Expiry Date</th>
+                                            <th class="col-image">Image</th>
+                                            <th class="th-wrap col-reason">
+                                                <span class="th-wrap-line">Reason of non availability</span>
+                                                <span class="th-wrap-line">of image</span>
+                                            </th>
+                                            <th class="th-wrap col-issuing">
+                                                <span class="th-wrap-line">Issuing</span>
+                                                <span class="th-wrap-line">Authority</span>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody formArrayName="rows">
@@ -66,27 +78,27 @@
                                                 <mat-form-field appearance="outline" class="field-fit field-action">
                                                     <mat-select formControlName="action" (selectionChange)="onActionChange(i)">
                                                         <mat-option *ngFor="let opt of actionOptions" [value]="opt.value"
-                                                            [disabled]="opt.value === 'EditCurrent' && !row.get('hasApplicableRecord')?.value">
+                                                            [disabled]="isActionOptionDisabled(opt.value, row)">
                                                             {{ opt.label }}
                                                         </mat-option>
                                                     </mat-select>
                                                 </mat-form-field>
                                             </td>
-                                            <td>
+                                            <td class="cell-document">
                                                 {{ row.get('documentName')?.value }}<span *ngIf="row.get('isMandatory')?.value" class="mandatory-mark">*</span>
                                             </td>
                                             <td class="cell-qc">
                                                 <mat-icon [matTooltip]="qcStatusLabel(row)" matTooltipPosition="above"
                                                     [ngClass]="qcStatusClass(row)">{{ qcStatusIcon(row) }}</mat-icon>
                                             </td>
-                                            <td class="cell-text">
+                                            <td class="cell-text cell-number">
                                                 <mat-form-field appearance="outline" class="field-fit field-text">
                                                     <input matInput formControlName="documentNumber" maxlength="50">
                                                 </mat-form-field>
                                             </td>
                                             <td class="cell-date">
                                                 <mat-form-field appearance="outline" class="field-fit field-date">
-                                                    <input matInput size="10" maxlength="10" placeholder="DD/MM/YYYY"
+                                                    <input matInput placeholder="DD/MM/YYYY"
                                                         [matDatepicker]="startPicker" formControlName="documentStartDate">
                                                     <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
                                                     <mat-datepicker #startPicker></mat-datepicker>
@@ -94,7 +106,7 @@
                                             </td>
                                             <td class="cell-date">
                                                 <mat-form-field appearance="outline" class="field-fit field-date">
-                                                    <input matInput size="10" maxlength="10" placeholder="DD/MM/YYYY"
+                                                    <input matInput placeholder="DD/MM/YYYY"
                                                         [matDatepicker]="expiryPicker" formControlName="documentExpiry">
                                                     <mat-datepicker-toggle matSuffix [for]="expiryPicker"></mat-datepicker-toggle>
                                                     <mat-datepicker #expiryPicker></mat-datepicker>
@@ -104,19 +116,33 @@
                                                 </mat-form-field>
                                             </td>
                                             <td class="image-cell">
-                                                <a *ngIf="imagePaths[i]" [href]="imagePaths[i]" target="_blank">View</a>
+                                                <button type="button" class="doc-image-thumb"
+                                                    *ngIf="hasDocumentImage(i)"
+                                                    [matTooltip]="isDocumentImageBroken(i) ? 'Image unavailable' : 'View full image'"
+                                                    (click)="openImagePreview(i, row)">
+                                                    <img *ngIf="!isDocumentImageBroken(i)"
+                                                        [src]="imagePaths[i]"
+                                                        alt="Document image"
+                                                        class="doc-image-thumb__img"
+                                                        (load)="onDocumentImageLoad(i)"
+                                                        (error)="onDocumentImageError(i)" />
+                                                    <span *ngIf="isDocumentImageBroken(i)" class="doc-image-thumb__fallback"
+                                                        aria-label="Image unavailable">
+                                                        <mat-icon>image_not_supported</mat-icon>
+                                                    </span>
+                                                </button>
                                                 <app-myupload (onUploadFinished)="uploadFinished(i, $event)"></app-myupload>
                                             </td>
-                                            <td class="cell-text">
+                                            <td class="cell-text cell-reason">
                                                 <mat-form-field appearance="outline" class="field-fit field-text">
                                                     <input matInput formControlName="documentImageNonAvailabilityReason"
                                                         (input)="onReasonChange(i)">
                                                     <mat-error *ngIf="row.get('documentImageNonAvailabilityReason')?.hasError('required')">
-                                                        Required without image
+                                                        Required when image is not available
                                                     </mat-error>
                                                 </mat-form-field>
                                             </td>
-                                            <td class="cell-text">
+                                            <td class="cell-text cell-issuing">
                                                 <mat-form-field appearance="outline" class="field-fit field-text">
                                                     <input matInput formControlName="documentIssuingAuthority" maxlength="50">
                                                 </mat-form-field>

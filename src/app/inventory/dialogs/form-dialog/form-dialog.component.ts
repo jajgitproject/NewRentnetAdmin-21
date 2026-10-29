@@ -30,6 +30,7 @@ import { map, startWith } from 'rxjs/operators';
 import { Color } from 'src/app/color/color.model';
 import { TransmissionTypeDropDown } from 'src/app/transmissionType/transmissionTypeDropDown.model';
 import moment from 'moment';
+import { Router } from '@angular/router';
 
 export const INVENTORY_DATE_FORMATS = {
   parse: {
@@ -125,7 +126,8 @@ export class FormDialogComponent
     private fb: FormBuilder,
     private el: ElementRef,
   public _generalService:GeneralService,
-  private snackBar: MatSnackBar)
+  private snackBar: MatSnackBar,
+  private router: Router)
   {
         // Set the defaults
         this.action = data.action;
@@ -995,10 +997,14 @@ export class FormDialogComponent
     .subscribe(
     response => 
     {
-      
+        const inventoryID =
+          response?.inventoryID ?? response?.InventoryID ?? -1;
+        const registrationNumber =
+          this.advanceTableForm.getRawValue()?.registrationNumber ?? '';
         this.dialogRef.close();
        this._generalService.sendUpdate('InventoryCreate:InventoryView:Success');//To Send Updates  
        this.saveDisabled = true;
+       this.navigateToVehicleCompliance(inventoryID, registrationNumber);
     },
     error =>
     {
@@ -1046,9 +1052,18 @@ export class FormDialogComponent
     .subscribe(
     response => 
     {
+        const inventoryID =
+          response?.inventoryID ??
+          response?.InventoryID ??
+          this.advanceTableForm.getRawValue()?.inventoryID ??
+          this.advanceTable?.inventoryID ??
+          -1;
+        const registrationNumber =
+          this.advanceTableForm.getRawValue()?.registrationNumber ?? '';
         this.dialogRef.close();
        this._generalService.sendUpdate('InventoryUpdate:InventoryView:Success');//To Send Updates  
        this.saveDisabled = true;
+       this.navigateToVehicleCompliance(inventoryID, registrationNumber);
     },
     error =>
     {
@@ -1077,6 +1092,23 @@ export class FormDialogComponent
     }
     this.saveDisabled = false;
     this.checkRegistrationNumberDuplicate(true);
+  }
+
+  private navigateToVehicleCompliance(
+    inventoryID: number,
+    registrationNumber: string
+  ): void {
+    if (!inventoryID || inventoryID <= 0) {
+      return;
+    }
+    const enc = (value: unknown) =>
+      this._generalService.encrypt(String(value ?? ''));
+    this.router.navigate(['/vehicleCompliance'], {
+      queryParams: {
+        InventoryID: enc(inventoryID),
+        RegNo: enc(registrationNumber),
+      },
+    });
   }
   
   onGPSAvailableChange() {

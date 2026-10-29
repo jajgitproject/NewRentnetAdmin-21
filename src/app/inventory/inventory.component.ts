@@ -31,7 +31,6 @@ import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSear
 interface MenuItem {
   label: string;
   action: (item: any) => void;
-  tooltip?: string;
   row?: any;
 }
 @Component({
@@ -99,18 +98,18 @@ export class InventoryComponent implements OnInit, OnDestroy {
   public SupplierList?: SupplierDropDown[] = [];
   filteredSupplierOptions: Observable<SupplierDropDown[]>;
   menuItems: any[] = [
-    { label: 'Block', route: '/inventoryBlock', tooltip: 'Inventory Block' },
-    { label: 'Status History', route: '/inventoryStatusHistory', tooltip: 'Inventory Status History' },
-    { label: 'Target', route: '/inventoryTarget', tooltip: 'Inventory Target' },
-    { label: 'Insurance', route: '/inventoryInsurance', tooltip: 'Inventory Insurance' },
-    { label: 'Permit', route: '/inventoryPermit', tooltip: 'Inventory Permit' },
-    { label: 'Tax', route: '/interstateTaxEntry', tooltip: 'Interstate Tax' },
-    { label: 'PUC', route: '/inventoryPUC', tooltip: 'Inventory PUC' },
-    { label: 'Fitness', route: '/inventoryFitness', tooltip: 'Inventory Fitness' },
-    { label: 'Monthly Business Report', route: '/monthlyBusinessReport', tooltip: 'Monthly Business Report' },
-    { label: 'Driver Association', route:'/driverInventoryAssociation', tooltip: 'Driver Association' },
-    { label: 'Document', route:'/inventoryDocument', tooltip: 'Inventory Document' },
-    { label: 'Vehicle Compliance', route:'/vehicleCompliance', tooltip: 'Vehicle Compliance (bulk documents)' },
+    { label: 'Block', route: '/inventoryBlock' },
+    { label: 'Status History', route: '/inventoryStatusHistory' },
+    { label: 'Target', route: '/inventoryTarget' },
+    { label: 'Insurance', route: '/inventoryInsurance' },
+    { label: 'Permit', route: '/inventoryPermit' },
+    { label: 'Tax', route: '/interstateTaxEntry' },
+    { label: 'PUC', route: '/inventoryPUC' },
+    { label: 'Fitness', route: '/inventoryFitness' },
+    { label: 'Monthly Business Report', route: '/monthlyBusinessReport' },
+    { label: 'Driver Association', route:'/driverInventoryAssociation' },
+    { label: 'Document', route:'/inventoryDocument' },
+    { label: 'Vehicle Compliance', route:'/vehicleCompliance' },
   ];
   
   searchTerm: any = '';

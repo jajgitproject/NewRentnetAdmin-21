@@ -1,4 +1,6 @@
 // @ts-nocheck
+import moment from 'moment';
+
 export class VehicleComplianceSummary {
   mandatory: number;
   complete: number;
@@ -89,21 +91,38 @@ export class VehicleCompliancePage {
 }
 
 function parseDate(value: any): Date | null {
-  if (!value) {
+  if (value === undefined || value === null || value === '') {
     return null;
   }
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
+  }
+  const text = String(value).trim();
+  if (!text || /^0001-01-01/.test(text)) {
+    return null;
+  }
+  const parsed = moment(
+    text,
+    [moment.ISO_8601, 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD', 'DD/MM/YYYY', 'DD-MM-YYYY', 'MM/DD/YYYY'],
+    true
+  );
+  if (parsed.isValid()) {
+    return parsed.toDate();
+  }
+  const fallback = moment(text);
+  return fallback.isValid() ? fallback.toDate() : null;
 }
 
 export const VehicleComplianceActions = {
   addNewInfo: 'AddNewInfo',
   doNotAddInfo: 'DoNotAddInfo',
   editCurrent: 'EditCurrent',
+  qc: 'Qc',
 };
 
 export const VehicleComplianceActionLabels = [
   { value: VehicleComplianceActions.addNewInfo, label: 'Add' },
   { value: VehicleComplianceActions.doNotAddInfo, label: 'NA' },
   { value: VehicleComplianceActions.editCurrent, label: 'Edit' },
+  { value: VehicleComplianceActions.qc, label: 'QC' },
 ];

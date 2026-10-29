@@ -16,11 +16,15 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialogModule } from '@angular/material/dialog';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
+import { VehicleComplianceImagePreviewDialogComponent } from './dialogs/image-preview-dialog/image-preview-dialog.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { InventoryDocumentSharedModule } from '../inventoryDocument/inventory-document-shared.module';
 
 @NgModule({
-  declarations: [VehicleComplianceComponent],
+  declarations: [VehicleComplianceComponent, VehicleComplianceImagePreviewDialogComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -37,7 +41,10 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
     MatDatepickerModule,
     MatIconModule,
     MatTooltipModule,
+    MatDialogModule,
+    StaticImageComponent,
     MyUploadModule,
+    InventoryDocumentSharedModule,
   ],
   providers: [VehicleComplianceService, { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }],
 })

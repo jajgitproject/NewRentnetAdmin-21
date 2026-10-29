@@ -4,6 +4,7 @@ export class InventoryDocumentModel {
   inventoryDocumentID:number;
   inventoryID:number;
   inventoryName: string;
+  document: string;
   documentID:number;
   addressCity:string;
   documentNumber:string;
@@ -29,6 +30,7 @@ export class InventoryDocumentModel {
        this.inventoryDocumentID = inventoryDocumentModel.inventoryDocumentID || -1;
        this.inventoryID = inventoryDocumentModel.inventoryID || '';
        this.inventoryName = inventoryDocumentModel.inventoryName || '';
+       this.document = inventoryDocumentModel.document || '';
        this.documentID = inventoryDocumentModel.documentID || '';
        this.documentNumber = inventoryDocumentModel.documentNumber || '';
        this.documentIssuingAuthority = inventoryDocumentModel.documentIssuingAuthority || '';

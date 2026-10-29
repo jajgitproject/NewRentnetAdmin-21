@@ -22,62 +22,126 @@ export class InventoryDocumentService
     this.API_URL_ForDoc=generalService.BaseURL+ "document";
   }
   /** CRUD METHODS */
-  getTableData(inventoryID:number,searchAddressCity:string,searchDocumentNumber:string,searchDocumentIssuingAuthority:string,searchAddress:string,SearchActivationStatus:boolean, PageNumber: number):  Observable<any> 
-  {
-    if(inventoryID===0)
-    {
-      inventoryID=0;
-    }
-    if(searchAddressCity==="")
-    {
-      searchAddressCity="null";
-    }
-    if(searchDocumentNumber==="")
-    {
-      searchDocumentNumber="null";
-    }
-    if(searchDocumentIssuingAuthority==="")
-    {
-      searchDocumentIssuingAuthority="null";
-    }
-    if(searchAddress==="")
-    {
-      searchAddress="null";
-    }
-    if(SearchActivationStatus===null)
-    {
-      SearchActivationStatus=null;
-    }
-    return this.httpClient.get(this.API_URL + '/'+inventoryID + '/'+ searchAddressCity +'/'+ searchDocumentNumber +'/'+ searchDocumentIssuingAuthority +'/'+ searchAddress +'/' + SearchActivationStatus +'/' + PageNumber + '/InventoryDocumentID/Ascending');
+  getTableData(
+    inventoryID: number,
+    searchAddressCity: string,
+    searchDocumentNumber: string,
+    searchDocumentIssuingAuthority: string,
+    searchAddress: string,
+    SearchActivationStatus: boolean,
+    searchDocumentID: string,
+    searchDocumentStartDateFrom: string,
+    searchDocumentStartDateTo: string,
+    searchDocumentExpiryFrom: string,
+    searchDocumentExpiryTo: string,
+    searchQcStatus: string,
+    PageNumber: number
+  ): Observable<any> {
+    return this.httpClient.get(
+      this.buildTableDataUrl(
+        inventoryID,
+        searchAddressCity,
+        searchDocumentNumber,
+        searchDocumentIssuingAuthority,
+        searchAddress,
+        SearchActivationStatus,
+        searchDocumentID,
+        searchDocumentStartDateFrom,
+        searchDocumentStartDateTo,
+        searchDocumentExpiryFrom,
+        searchDocumentExpiryTo,
+        searchQcStatus,
+        PageNumber,
+        'InventoryDocumentID',
+        'Ascending'
+      )
+    );
   }
-  
-  getTableDataSort(inventoryID:number,searchAddressCity:string,searchDocumentNumber:string,searchDocumentIssuingAuthority:string,searchAddress:string,SearchActivationStatus:boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
-  {
-    if(inventoryID===0)
-    {
-      inventoryID=0;
+
+  getTableDataSort(
+    inventoryID: number,
+    searchAddressCity: string,
+    searchDocumentNumber: string,
+    searchDocumentIssuingAuthority: string,
+    searchAddress: string,
+    SearchActivationStatus: boolean,
+    searchDocumentID: string,
+    searchDocumentStartDateFrom: string,
+    searchDocumentStartDateTo: string,
+    searchDocumentExpiryFrom: string,
+    searchDocumentExpiryTo: string,
+    searchQcStatus: string,
+    PageNumber: number,
+    coloumName: string,
+    sortType: string
+  ): Observable<any> {
+    return this.httpClient.get(
+      this.buildTableDataUrl(
+        inventoryID,
+        searchAddressCity,
+        searchDocumentNumber,
+        searchDocumentIssuingAuthority,
+        searchAddress,
+        SearchActivationStatus,
+        searchDocumentID,
+        searchDocumentStartDateFrom,
+        searchDocumentStartDateTo,
+        searchDocumentExpiryFrom,
+        searchDocumentExpiryTo,
+        searchQcStatus,
+        PageNumber,
+        coloumName,
+        sortType
+      )
+    );
+  }
+
+  private buildTableDataUrl(
+    inventoryID: number,
+    searchAddressCity: string,
+    searchDocumentNumber: string,
+    searchDocumentIssuingAuthority: string,
+    searchAddress: string,
+    SearchActivationStatus: boolean,
+    searchDocumentID: string,
+    searchDocumentStartDateFrom: string,
+    searchDocumentStartDateTo: string,
+    searchDocumentExpiryFrom: string,
+    searchDocumentExpiryTo: string,
+    searchQcStatus: string,
+    PageNumber: number,
+    orderByColumn: string,
+    order: string
+  ): string {
+    const segments = [
+      inventoryID ?? 0,
+      this.nullIfEmpty(searchAddressCity),
+      this.nullIfEmpty(searchDocumentNumber),
+      this.nullIfEmpty(searchDocumentIssuingAuthority),
+      this.nullIfEmpty(searchAddress),
+      SearchActivationStatus === null ? 'null' : SearchActivationStatus,
+      this.nullIfEmpty(searchDocumentID),
+      this.nullIfEmpty(searchDocumentStartDateFrom),
+      this.nullIfEmpty(searchDocumentStartDateTo),
+      this.nullIfEmpty(searchDocumentExpiryFrom),
+      this.nullIfEmpty(searchDocumentExpiryTo),
+      this.nullIfEmpty(searchQcStatus),
+      PageNumber,
+      orderByColumn,
+      order,
+    ];
+    return (
+      this.API_URL +
+      '/' +
+      segments.map((segment) => encodeURIComponent(String(segment))).join('/')
+    );
+  }
+
+  private nullIfEmpty(value: string | number | null | undefined): string {
+    if (value === null || value === undefined || value === '') {
+      return 'null';
     }
-    if(searchAddressCity==="")
-    {
-      searchAddressCity="null";
-    }
-    if(searchDocumentNumber==="")
-    {
-      searchDocumentNumber="null";
-    }
-    if(searchDocumentIssuingAuthority==="")
-    {
-      searchDocumentIssuingAuthority="null";
-    }
-    if(searchAddress==="")
-    {
-      searchAddress="null";
-    }
-    if(SearchActivationStatus===null)
-    {
-      SearchActivationStatus=null;
-    }
-    return this.httpClient.get(this.API_URL + '/'+inventoryID + '/'+ searchAddressCity +'/'+ searchDocumentNumber +'/'+ searchDocumentIssuingAuthority +'/'+ searchAddress +'/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
+    return String(value);
   }
 
   getById(inventoryDocumentID: number): Observable<InventoryDocumentModel> {

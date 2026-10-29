@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { GeneralService } from '../general/general.service';
 import { VehicleComplianceService } from './vehicleCompliance.service';
 import {
@@ -11,6 +12,20 @@ import {
   VehicleCompliancePage,
   VehicleComplianceSummary,
 } from './vehicleCompliance.model';
+import { VehicleComplianceImagePreviewDialogComponent } from './dialogs/image-preview-dialog/image-preview-dialog.component';
+import { FormDialogInventoryVerificationsComponent } from '../inventoryDocument/dialogs/verification/verification.component';
+import { InventoryDocumentService } from '../inventoryDocument/inventoryDocument.service';
+
+/** Server-loaded document field values restored on Edit / NA (when a record exists). */
+interface VehicleComplianceRowDocumentSnapshot {
+  inventoryDocumentID: number;
+  documentNumber: string;
+  documentIssuingAuthority: string;
+  documentImage: string;
+  documentImageNonAvailabilityReason: string;
+  documentStartDate: Date | null;
+  documentExpiry: Date | null;
+}
 
 @Component({
   standalone: false,
@@ -27,15 +42,20 @@ export class VehicleComplianceComponent implements OnInit {
   actionOptions = VehicleComplianceActionLabels;
   saveInProgress = false;
   imagePaths: string[] = [];
+  imageBroken: boolean[] = [];
+  private rowSnapshots: VehicleComplianceRowDocumentSnapshot[] = [];
+  private rowLastActions: string[] = [];
 
-  summaryCards: { key: string; label: string; value: number }[] = [];
+  summaryCards: { key: string; label: string; value: number; icon: string }[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private vehicleComplianceService: VehicleComplianceService,
+    private inventoryDocumentService: InventoryDocumentService,
     private generalService: GeneralService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {
     this.complianceForm = this.fb.group({ rows: this.fb.array([]) });
   }
@@ -66,6 +86,7 @@ export class VehicleComplianceComponent implements OnInit {
         this.page = null;
         this.summary = null;
         this.rows.clear();
+        this.rowSnapshots = [];
         this.showNotification('snackbar-danger', 'Failed to load vehicle compliance.', 'bottom', 'center');
       }
     );
@@ -77,32 +98,51 @@ export class VehicleComplianceComponent implements OnInit {
     this.updateSummaryCards();
     this.rows.clear();
     this.imagePaths = [];
+    this.imageBroken = [];
+    this.rowSnapshots = [];
+    this.rowLastActions = [];
     page.rows.forEach((row, index) => {
+      this.rowSnapshots.push(this.snapshotFromRow(row));
+      this.rowLastActions.push(VehicleComplianceActions.doNotAddInfo);
       this.rows.push(this.createRowGroup(row));
       this.imagePaths[index] = row.documentImage || '';
+      this.imageBroken[index] = false;
       this.syncRowState(this.rows.at(index) as FormGroup);
     });
+  }
+
+  hasDocumentImage(index: number): boolean {
+    return !!(this.imagePaths[index] || '').toString().trim();
+  }
+
+  isDocumentImageBroken(index: number): boolean {
+    return !!this.imageBroken[index];
+  }
+
+  onDocumentImageError(index: number): void {
+    this.imageBroken[index] = true;
+  }
+
+  onDocumentImageLoad(index: number): void {
+    this.imageBroken[index] = false;
   }
 
   updateSummaryCards(): void {
     const s = this.summary;
     this.summaryCards = [
-      { key: 'mandatory', label: 'Mandatory', value: s?.mandatory ?? 0 },
-      { key: 'complete', label: 'Complete', value: s?.complete ?? 0 },
-      { key: 'missing', label: 'Missing', value: s?.missing ?? 0 },
-      { key: 'approvedQC', label: 'Approved QC', value: s?.approvedQC ?? 0 },
-      { key: 'rejectedQC', label: 'Rejected QC', value: s?.rejectedQC ?? 0 },
-      { key: 'pendingQC', label: 'Pending QC', value: s?.pendingQC ?? 0 },
-      { key: 'expiringSoon', label: 'Expiring soon', value: s?.expiringSoon ?? 0 },
+      { key: 'mandatory', label: 'Mandatory', value: s?.mandatory ?? 0, icon: 'assignment_late' },
+      { key: 'complete', label: 'Complete', value: s?.complete ?? 0, icon: 'task_alt' },
+      { key: 'missing', label: 'Missing', value: s?.missing ?? 0, icon: 'report_problem' },
+      { key: 'approvedQC', label: 'Approved QC', value: s?.approvedQC ?? 0, icon: 'verified' },
+      { key: 'rejectedQC', label: 'Rejected QC', value: s?.rejectedQC ?? 0, icon: 'block' },
+      { key: 'pendingQC', label: 'Pending QC', value: s?.pendingQC ?? 0, icon: 'pending_actions' },
+      { key: 'expiringSoon', label: 'Expiring in 10 Days', value: s?.expiringSoon ?? 0, icon: 'event_busy' },
     ];
   }
 
   createRowGroup(row: any): FormGroup {
-    const defaultAction =
-      row.defaultAction ||
-      (row.hasApplicableRecord ? VehicleComplianceActions.editCurrent : VehicleComplianceActions.addNewInfo);
     return this.fb.group({
-      action: [defaultAction],
+      action: [VehicleComplianceActions.doNotAddInfo],
       documentID: [row.documentID],
       documentName: [row.documentName],
       documentType: [row.documentType],
@@ -126,8 +166,115 @@ export class VehicleComplianceComponent implements OnInit {
 
   onActionChange(index: number): void {
     const group = this.rows.at(index) as FormGroup;
+    const action = group.get('action')?.value;
+    const hasApplicableRecord = !!group.get('hasApplicableRecord')?.value;
+
+    if (action === VehicleComplianceActions.qc) {
+      const restore =
+        this.rowLastActions[index] ?? VehicleComplianceActions.doNotAddInfo;
+      group.patchValue({ action: restore }, { emitEvent: false });
+      if (hasApplicableRecord) {
+        this.openInventoryDocumentQc(index);
+      }
+      return;
+    }
+
+    this.rowLastActions[index] = action;
+
+    if (action === VehicleComplianceActions.addNewInfo) {
+      this.applyRowDocumentValues(index, this.getEmptyAddPatch());
+    } else if (action === VehicleComplianceActions.doNotAddInfo) {
+      if (hasApplicableRecord) {
+        this.applyRowDocumentValues(index, this.rowSnapshots[index]);
+      } else {
+        this.applyRowDocumentValues(index, this.getEmptyAddPatch());
+      }
+    } else if (action === VehicleComplianceActions.editCurrent) {
+      if (!hasApplicableRecord) {
+        group.patchValue({ action: VehicleComplianceActions.addNewInfo }, { emitEvent: false });
+        this.applyRowDocumentValues(index, this.getEmptyAddPatch());
+      } else {
+        this.applyRowDocumentValues(index, this.rowSnapshots[index]);
+      }
+    }
+
     this.syncRowState(group);
     this.syncReasonValidators(group);
+  }
+
+  private snapshotFromRow(row: any): VehicleComplianceRowDocumentSnapshot {
+    return {
+      inventoryDocumentID: row.inventoryDocumentID ?? -1,
+      documentNumber: row.documentNumber ?? '',
+      documentIssuingAuthority: row.documentIssuingAuthority ?? '',
+      documentImage: row.documentImage ?? '',
+      documentImageNonAvailabilityReason: row.documentImageNonAvailabilityReason ?? '',
+      documentStartDate: row.documentStartDate ?? null,
+      documentExpiry: row.documentExpiry ?? null,
+    };
+  }
+
+  private getEmptyAddPatch(): VehicleComplianceRowDocumentSnapshot {
+    return {
+      inventoryDocumentID: -1,
+      documentNumber: '',
+      documentIssuingAuthority: '',
+      documentImage: '',
+      documentImageNonAvailabilityReason: '',
+      documentStartDate: null,
+      documentExpiry: null,
+    };
+  }
+
+  openInventoryDocumentQc(index: number): void {
+    const group = this.rows.at(index) as FormGroup;
+    const inventoryDocumentID = Number(group.get('inventoryDocumentID')?.value);
+    if (!inventoryDocumentID || inventoryDocumentID <= 0) {
+      return;
+    }
+
+    this.inventoryDocumentService.getById(inventoryDocumentID).subscribe(
+      (row) => {
+        const dialogRef = this.dialog.open(FormDialogInventoryVerificationsComponent, {
+          width: '900px',
+          maxWidth: '95vw',
+          data: {
+            advanceTable: row,
+            inventoryID: this.inventoryID,
+            inventoryName: this.inventoryName,
+          },
+        });
+        dialogRef.afterClosed().subscribe(() => this.loadPage());
+      },
+      () => {
+        this.showNotification(
+          'snackbar-danger',
+          'Could not load inventory document for QC.',
+          'bottom',
+          'center'
+        );
+      }
+    );
+  }
+
+  isActionOptionDisabled(optValue: string, row: FormGroup): boolean {
+    if (
+      optValue !== VehicleComplianceActions.editCurrent &&
+      optValue !== VehicleComplianceActions.qc
+    ) {
+      return false;
+    }
+    return !row.get('hasApplicableRecord')?.value;
+  }
+
+  private applyRowDocumentValues(
+    index: number,
+    patch: VehicleComplianceRowDocumentSnapshot
+  ): void {
+    const group = this.rows.at(index) as FormGroup;
+    group.patchValue(patch, { emitEvent: false });
+    this.imagePaths[index] = patch.documentImage || '';
+    this.imageBroken[index] = false;
   }
 
   syncRowState(group: FormGroup): void {
@@ -183,9 +330,25 @@ export class VehicleComplianceComponent implements OnInit {
   uploadFinished(index: number, event: any): void {
     const path = this.generalService.getImageURL() + event.dbPath;
     this.imagePaths[index] = path;
+    this.imageBroken[index] = false;
     const group = this.rows.at(index) as FormGroup;
     group.patchValue({ documentImage: path });
     this.syncReasonValidators(group);
+  }
+
+  openImagePreview(index: number, row: FormGroup): void {
+    const url = this.imagePaths[index] || row.get('documentImage')?.value;
+    if (!url) {
+      return;
+    }
+    const title = row.get('documentName')?.value || 'Document image';
+    this.dialog.open(VehicleComplianceImagePreviewDialogComponent, {
+      width: '860px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'vehicle-compliance-image-preview-panel',
+      data: { title, imageUrl: url },
+    });
   }
 
   onReasonChange(index: number): void {
