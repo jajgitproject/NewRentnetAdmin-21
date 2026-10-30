@@ -947,6 +947,7 @@ getBusinessTypeID(businessTypeID: any)
       isBillToShipToCustomer: [this.advanceTable.isBillToShipToCustomer ?? false],
       showBillingInApp: [this.advanceTable.showBillingInApp ?? false],
       geocage: [this.advanceTable.geocage ?? false],
+      showOdometerFromZero: [this.advanceTable.showOdometerFromZero ?? false],
       isAppBasedCustomer: [
         this.resolveIsAppBasedCustomerYesNo(this.advanceTable.isAppBasedCustomer)
       ],

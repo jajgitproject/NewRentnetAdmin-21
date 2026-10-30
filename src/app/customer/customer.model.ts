@@ -64,6 +64,7 @@ export class Customer {
       aggregatorCustomerName:string;
       showBillingInApp:boolean;
       geocage:boolean;
+      showOdometerFromZero:boolean;
       isAppBasedCustomer:string;
   constructor(customer) {
     {
@@ -125,6 +126,7 @@ export class Customer {
        this.aggregatorCustomerName = customer.aggregatorCustomerName || '';
        this.showBillingInApp = customer.showBillingInApp ?? false;
        this.geocage = customer.geocage ?? false;
+       this.showOdometerFromZero = customer.showOdometerFromZero ?? customer.ShowOdometerFromZero ?? false;
        this.isAppBasedCustomer = customer.isAppBasedCustomer ?? customer.IsAppBasedCustomer ?? 'No';
     }
   }

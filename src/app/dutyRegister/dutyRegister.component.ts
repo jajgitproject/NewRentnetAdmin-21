@@ -79,6 +79,10 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   'LocationInDate',
   'LocationInTime',
   'LocationInKM',
+  'OutKmsFromZero',
+  'ReportingKmsFromZero',
+  'ReleasingKmsFromZero',
+  'InKmsFromZero',
   'G2P',
   'D2G',
   'AppP2D',
@@ -426,7 +430,9 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.dutyRegisterService.getTableData(searchCriteria,this.PageNumber,).subscribe(
       data =>   
       {
-        this.dataSource = this.applyCustomerSpecificFieldColumns(Array.isArray(data) ? data : []);
+        this.dataSource = this.applyCustomerSpecificFieldColumns(
+          this.applySegmentOdometerColumns(Array.isArray(data) ? data : [])
+        );
         console.log(this.dataSource);
       },
     (error: HttpErrorResponse) => { 
@@ -955,7 +961,9 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     (
       data =>   
       {
-        this.dataSource = this.applyCustomerSpecificFieldColumns(Array.isArray(data) ? data : []);
+        this.dataSource = this.applyCustomerSpecificFieldColumns(
+          this.applySegmentOdometerColumns(Array.isArray(data) ? data : [])
+        );
       
       },
       (error: HttpErrorResponse) => { 
@@ -1604,6 +1612,37 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       return '';
     }
     return text;
+  }
+
+  private applySegmentOdometerColumns(data: DutyRegisterModel[]): DutyRegisterModel[] {
+    return (Array.isArray(data) ? data : []).map(row => {
+      const actualOut = Number(row.locationOutKM) || 0;
+      const pickUp = Number(row.pickUpKM) || 0;
+      const dropOff = Number(row.dropOffKM) || 0;
+      const locationIn = Number(row.locationInKM) || 0;
+      const rowAny = row as DutyRegisterModel & Record<string, unknown>;
+      const outFromApi = row.outKmsFromZero ?? rowAny['OutKmsFromZero'];
+      const reportingFromApi = row.reportingKmsFromZero ?? rowAny['ReportingKmsFromZero'];
+      const releasingFromApi = row.releasingKmsFromZero ?? rowAny['ReleasingKmsFromZero'];
+      const inFromApi = row.inKmsFromZero ?? rowAny['InKmsFromZero'];
+      const hasApiValues =
+        outFromApi != null ||
+        reportingFromApi != null ||
+        releasingFromApi != null ||
+        inFromApi != null;
+      if (hasApiValues) {
+        row.outKmsFromZero = Number(outFromApi ?? 0);
+        row.reportingKmsFromZero = Number(reportingFromApi ?? 0);
+        row.releasingKmsFromZero = Number(releasingFromApi ?? 0);
+        row.inKmsFromZero = Number(inFromApi ?? 0);
+        return row;
+      }
+      row.outKmsFromZero = 0;
+      row.reportingKmsFromZero = Math.max(0, pickUp - actualOut);
+      row.releasingKmsFromZero = Math.max(0, dropOff - pickUp);
+      row.inKmsFromZero = Math.max(0, locationIn - dropOff);
+      return row;
+    });
   }
 
   private applyCustomerSpecificFieldColumns(data: DutyRegisterModel[]): DutyRegisterModel[] {

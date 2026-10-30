@@ -54,6 +54,10 @@ export class PrintBlankDutySlipComponent {
       totalAmountAfterGSTInWords: ''
     };
   totalDays: number;
+  blankOutTime = '';
+  blankOutDate = '';
+  blankReportingTime = '';
+  blankReportingDate = '';
   
     constructor(
       @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
@@ -114,14 +118,52 @@ export class PrintBlankDutySlipComponent {
       data =>   
       {
         this.dataSource = data;
+        this.normalizePrintData(this.dataSource);
+        this.refreshBlankOdometerDisplay();
         this.applyDropAddressFromReservation();
         if (!this.reservationID && this.dataSource?.reservationID) {
           this.reservationID = this.dataSource.reservationID;
           this.loadDataForReservation();
         }
-        this.getTime()
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
+    }
+
+    /** API may return camelCase or PascalCase (dates/times for blank slip print). */
+    private normalizePrintData(data: any): void {
+      if (!data) {
+        return;
+      }
+      data.reservationID = data.reservationID ?? data.ReservationID;
+      data.locationOutDate = data.locationOutDate ?? data.LocationOutDate;
+      data.locationOutTime = data.locationOutTime ?? data.LocationOutTime;
+      data.pickUpDate = data.pickUpDate ?? data.PickUpDate;
+      data.pickUpTime = data.pickUpTime ?? data.PickUpTime;
+      data.dropOffDate = data.dropOffDate ?? data.DropOffDate;
+      data.dropOffTime = data.dropOffTime ?? data.DropOffTime;
+      data.locationInDate = data.locationInDate ?? data.LocationInDate;
+      data.locationInTime = data.locationInTime ?? data.LocationInTime;
+    }
+
+    /** Blank slip grid: only Out + Reporting schedule (per blank form layout); no kms or trip legs. */
+    private refreshBlankOdometerDisplay(): void {
+      this.blankOutTime = '';
+      this.blankOutDate = '';
+      this.blankReportingTime = '';
+      this.blankReportingDate = '';
+      if (!this.dataSource) {
+        return;
+      }
+      this.blankOutTime = this.formatBlankDutySlipTime(
+        this.dataSource.locationOutDate,
+        this.dataSource.locationOutTime
+      );
+      this.blankOutDate = this.formatBlankDutySlipDate(this.dataSource.locationOutDate);
+      this.blankReportingTime = this.formatBlankDutySlipTime(
+        this.dataSource.pickUpDate,
+        this.dataSource.pickUpTime
+      );
+      this.blankReportingDate = this.formatBlankDutySlipDate(this.dataSource.pickUpDate);
     }
 
     getDropAddress(): string {
@@ -156,50 +198,32 @@ export class PrintBlankDutySlipComponent {
       return '';
     }
   
-   getTime() 
-       {
-         // ------------LocationOutDateTime--------------
-         var locOutTimeConversion = moment(this.dataSource.locationOutTime).format('HH:mm');
-         var locOutDateConversion = moment(this.dataSource.locationOutDate).format('yyyy-MM-DD');
-         var locationOutDateTime = locOutDateConversion + ' ' + locOutTimeConversion;
-       
-         // ------------PickupDateTime--------------
-         var pickUpTimeConversion = moment(this.dataSource.pickUpTime).format('HH:mm');
-         var pickUpDateConversion = moment(this.dataSource.pickUpDate).format('yyyy-MM-DD');
-         var pickUpDateTime = pickUpDateConversion + ' ' + pickUpTimeConversion;
-       
-         // ------------DropoffDateTime--------------
-         var dropOffTimeConversion = moment(this.dataSource.dropOffTime).format('HH:mm');
-         var dropOffDateConversion = moment(this.dataSource.dropOffDate).format('yyyy-MM-DD');
-         var dropOffDateTime = dropOffDateConversion + ' ' + dropOffTimeConversion;
-       
-         // ------------LocationInDateTime--------------
-         var locInTimeConversion = moment(this.dataSource.locationInTime).format('HH:mm');
-         var locInDateConversion = moment(this.dataSource.locationInDate).format('yyyy-MM-DD');
-         var locInDateTime = locInDateConversion + ' ' + locInTimeConversion;
-       
-         // Calculate differences
-         var diff3 = new Date(pickUpDateTime).getTime() - new Date(locationOutDateTime).getTime();
-         var diff2 = new Date(dropOffDateTime).getTime() - new Date(pickUpDateTime).getTime();
-         var diff1 = new Date(locInDateTime).getTime() - new Date(dropOffDateTime).getTime();
-         
-         var totalMilliseconds = diff1 + diff2 + diff3;
-       
-         // Convert to total minutes
-         var totalMinutes = totalMilliseconds / (1000 * 60);
-         this.totalDays = Math.ceil(totalMilliseconds/(1000 * 60 * 60 * 24));
-       
-         // Extract hours and minutes
-         var hours = Math.floor(totalMinutes / 60);
-         var minutes = Math.floor(totalMinutes % 60);
-       
-         // Combine hours and minutes in desired format
-         this.datetime = hours + "." + minutes;
-     }
-   
-  
- 
-  
+    formatBlankDutySlipTime(datePart: unknown, timePart: unknown): string {
+      let combined = moment(timePart);
+      if (!combined.isValid() || combined.year() < 2000) {
+        const dateMoment = moment(datePart);
+        const timeMoment = moment(timePart);
+        if (!dateMoment.isValid() && !timeMoment.isValid()) {
+          return '';
+        }
+        combined = dateMoment.isValid() ? dateMoment.clone() : moment().startOf('day');
+        if (timeMoment.isValid()) {
+          combined.hour(timeMoment.hour()).minute(timeMoment.minute()).second(0);
+        }
+      }
+      return combined.isValid()
+        ? combined.format('HH') + 'hrs' + combined.format('mm')
+        : '';
+    }
+
+    formatBlankDutySlipDate(value: unknown): string {
+      if (value == null || value === '') {
+        return '';
+      }
+      const parsed = moment(value);
+      return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
+    }
+
   print() 
   {
     window.print();

@@ -378,6 +378,34 @@
                                                 </mat-cell>
                                             </ng-container>
 
+                                            <ng-container matColumnDef="OutKmsFromZero">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Out Kms</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.outKmsFromZero}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ReportingKmsFromZero">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Reporting Kms</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.reportingKmsFromZero}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="ReleasingKmsFromZero">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>Releasing Kms</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.releasingKmsFromZero}}
+                                                </mat-cell>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="InKmsFromZero">
+                                                <mat-header-cell *matHeaderCellDef mat-sort-header>In Kms</mat-header-cell>
+                                                <mat-cell *matCellDef="let row">
+                                                    {{row.inKmsFromZero}}
+                                                </mat-cell>
+                                            </ng-container>
+
                                             <!-- G2P -->
                                             <ng-container matColumnDef="G2P">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>G2P</mat-header-cell>

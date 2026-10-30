@@ -200,6 +200,7 @@ export class CustomerService
       roundOffTime: toBool(raw.roundOffTime, true),
       showDistanceOnDutySlipPdf: toBool(raw.showDistanceOnDutySlipPdf, false),
       geocage: toBool(raw.geocage, false),
+      showOdometerFromZero: toBool(raw.showOdometerFromZero ?? raw.ShowOdometerFromZero, false),
       isBookerAllowedToBeCreatedFromReservation: toBool(raw.isBookerAllowedToBeCreatedFromReservation, false),
       isPostPickUpCallAllowed: toBool(raw.isPostPickUpCallAllowed, false),
       isFeedbackEmailAllowed: raw.isFeedbackEmailAllowed === null || raw.isFeedbackEmailAllowed === undefined || raw.isFeedbackEmailAllowed === ''

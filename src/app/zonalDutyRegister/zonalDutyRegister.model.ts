@@ -44,6 +44,12 @@ export class ZonalDutyRegisterModel {
   locationInDate: string;
   locationInTime: string;
   locationInKM: number;
+
+  outKmsFromZero: number;
+  reportingKmsFromZero: number;
+  releasingKmsFromZero: number;
+  inKmsFromZero: number;
+
   g2P: number;
   d2G: number;
   appP2D: number;

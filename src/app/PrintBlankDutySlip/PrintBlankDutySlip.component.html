@@ -125,63 +125,34 @@
                         </tr>
 
                         <tr>
-                          <td colspan="2">
-                            <strong>Out Kms : {{dataSource?.locationOutKM}}</strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>Out Time : {{dataSource?.locationOutTime | date : 'hh:mm a'}}</strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>Out Date : {{dataSource?.locationOutDate | date : 'dd/MM/yyyy'}}</strong>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2">
-                            <strong>Reporting Kms : {{dataSource?.reportingToGuestKM}}</strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>Reporting Time : {{dataSource?.reportingToGuestTime | date : 'hh:mm a'}}</strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>Reporting Date : {{dataSource?.reportingToGuestDate | date : 'dd/MM/yyyy'}}</strong>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2">
-                            <strong>Releasing Kms : {{dataSource?.dropOffKM}}</strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>Releasing time : {{dataSource?.dropOffTime | date : 'hh:mm a'}}</strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>Releasing Date : {{dataSource?.dropOffDate | date : 'dd/MM/yyyy'}}</strong>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2">
-                            <strong>In Kms : {{dataSource?.locationInKM}}</strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>In Time : {{dataSource?.locationInTime | date : 'hh:mm a'}}</strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>In Date : {{dataSource?.locationInDate | date : 'dd/MM/yyyy'}}</strong>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <td colspan="2">
-                            <strong *ngIf="dataSource?.totalRunningKM > 0">Total Kms : {{dataSource?.totalRunningKM}} </strong>
-                            <!-- <strong>Total Kms : {{dataSource?.locationInKM - dataSource?.locationOutKM}} </strong> -->
-                          </td>
-                          <td colspan="2">
-                            <strong>Total Time : </strong>
-                          </td>
-                          <td colspan="2">
-                            <strong>Total Days : </strong>
+                          <td colspan="6" style="padding: 0;">
+                            <table width="100%" border="0" cellpadding="0" cellspacing="0" class="text1 blank-duty-odometer">
+                              <tr>
+                                <td width="33%"><strong>Out Kms : </strong></td>
+                                <td width="33%"><strong>Out Time :{{ blankOutTime }}</strong></td>
+                                <td width="34%"><strong>Out Date : {{ blankOutDate }}</strong></td>
+                              </tr>
+                              <tr>
+                                <td><strong>Reporting Kms:</strong></td>
+                                <td><strong>Reporting Time:{{ blankReportingTime }}</strong></td>
+                                <td><strong>Reporting Date:{{ blankReportingDate }}</strong></td>
+                              </tr>
+                              <tr>
+                                <td><strong>Releasing Kms:</strong></td>
+                                <td><strong>Releasing time:</strong></td>
+                                <td><strong>Releasing Date:</strong></td>
+                              </tr>
+                              <tr>
+                                <td><strong>In Kms : </strong></td>
+                                <td><strong>In Time : </strong></td>
+                                <td><strong>In Date : </strong></td>
+                              </tr>
+                              <tr>
+                                <td><strong>Total Kms : </strong></td>
+                                <td><strong>Total Time : </strong></td>
+                                <td><strong>Total Days : </strong></td>
+                              </tr>
+                            </table>
                           </td>
                         </tr>
                       </table>
