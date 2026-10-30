@@ -2236,7 +2236,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.withOdometerImageData((data) => {
       this.openOdometerImageDialog(
         'Trip Start ODO Meter Image',
-        data?.tripStartODOMeterImage,
+        this.getOdometerImagePath(data, 'start'),
         'Trip Start ODO Meter image not available.'
       );
     });
@@ -2246,10 +2246,33 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
     this.withOdometerImageData((data) => {
       this.openOdometerImageDialog(
         'Trip End ODO Meter Image',
-        data?.tripEndODOMeterImage,
+        this.getOdometerImagePath(data, 'end'),
         'Trip End ODO Meter image not available.'
       );
     });
+  }
+
+  private getOdometerImagePath(
+    data: OdoMeterAndManualDutySlipImage | Record<string, unknown> | null | undefined,
+    field: 'start' | 'end'
+  ): string | null {
+    if (!data) {
+      return null;
+    }
+    const record = data as Record<string, unknown>;
+    const camelKey = field === 'start' ? 'tripStartODOMeterImage' : 'tripEndODOMeterImage';
+    const pascalKey = field === 'start' ? 'TripStartODOMeterImage' : 'TripEndODOMeterImage';
+    const value = record[camelKey] ?? record[pascalKey] ?? (data as OdoMeterAndManualDutySlipImage)[camelKey as keyof OdoMeterAndManualDutySlipImage];
+    if (value === null || value === undefined) {
+      return null;
+    }
+    const text = String(value).trim();
+    return text !== '' ? text : null;
+  }
+
+  private isValidOdometerImagePath(path: string | null | undefined): boolean {
+    const value = (path ?? '').toString().trim();
+    return value !== '' && !/^(null|undefined)$/i.test(value);
   }
 
   private withOdometerImageData(onLoaded: (data: OdoMeterAndManualDutySlipImage) => void): void {
@@ -2275,11 +2298,10 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private openOdometerImageDialog(
     title: string,
-    imageUrl: string | null | undefined,
+    imagePath: string | null | undefined,
     missingMessage: string
   ): void {
-    const resolvedUrl = this._generalService.resolveStaticImageUrl(imageUrl) || imageUrl;
-    if (!resolvedUrl) {
+    if (!this.isValidOdometerImagePath(imagePath)) {
       this.showNotification(
         'snackbar-warning',
         missingMessage,
@@ -2293,7 +2315,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
       maxWidth: '90vw',
       data: {
         title,
-        imageUrl: resolvedUrl,
+        imagePath: imagePath.trim(),
       },
     });
   }
