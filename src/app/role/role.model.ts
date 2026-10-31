@@ -23,11 +23,8 @@ export class Role {
    canCancelBackDateReservation: boolean;
    canReactivateBackDateReservation: boolean;
    canEditDSAfterGoodForBilling: boolean;
-<<<<<<< HEAD
    canBypassOTP: boolean;
-=======
    canEditAutoBilling: boolean;
->>>>>>> newrentnet_b2cbilling
 
   constructor(role) {
     {
@@ -56,18 +53,15 @@ export class Role {
        this.canEditDSAfterGoodForBilling = Role.toBoolOrEmpty(
          role.canEditDSAfterGoodForBilling ?? role.CanEditDSAfterGoodForBilling
        );
-<<<<<<< HEAD
        this.canBypassOTP = Role.toBoolOrEmpty(
          role.canBypassOTP ?? role.CanBypassOTP ?? false
        );
        if (this.canBypassOTP === '') {
          this.canBypassOTP = false;
        }
-=======
        this.canEditAutoBilling = Role.toBoolOrEmpty(
          role.canEditAutoBilling ?? role.CanEditAutoBilling
        );
->>>>>>> newrentnet_b2cbilling
 
     }
   }

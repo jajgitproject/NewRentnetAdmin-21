@@ -78,7 +78,6 @@ export class FormDialogComponent
       canResetOdometer: [this.advanceTable.canResetOdometer, Validators.required],
       canDeleteFuelEntry: [this.advanceTable.canDeleteFuelEntry, Validators.required],
       canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required],
-<<<<<<< HEAD
       canCloseIncident: [this.advanceTable.canCloseIncident, Validators.required],
       canCancelBackDateAllotment: [this.advanceTable.canCancelBackDateAllotment, Validators.required],
       canCancelBackDateReservation: [this.advanceTable.canCancelBackDateReservation, Validators.required],
@@ -86,11 +85,8 @@ export class FormDialogComponent
       canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required],
       canBypassOTP: [this.advanceTable.canBypassOTP === true || this.advanceTable.canBypassOTP === false
         ? this.advanceTable.canBypassOTP
-        : false, Validators.required]
-=======
-      canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required],
+        : false, Validators.required],
       canEditAutoBilling: [this.advanceTable.canEditAutoBilling === true || this.advanceTable.canEditAutoBilling === false ? this.advanceTable.canEditAutoBilling : false, Validators.required]
->>>>>>> newrentnet_b2cbilling
     });
   }
   submit() 
@@ -124,11 +120,8 @@ export class FormDialogComponent
       canCancelBackDateReservation: toBool(raw.canCancelBackDateReservation),
       canReactivateBackDateReservation: toBool(raw.canReactivateBackDateReservation),
       canEditDSAfterGoodForBilling: toBool(raw.canEditDSAfterGoodForBilling),
-<<<<<<< HEAD
       canBypassOTP: toBool(raw.canBypassOTP),
-=======
       canEditAutoBilling: toBool(raw.canEditAutoBilling),
->>>>>>> newrentnet_b2cbilling
     };
   }
 

@@ -721,7 +721,7 @@ private _filterCCG(value: string): any[] {
    InitCustomerRD() {
     this._generalService.getCustomersForRD().subscribe(
       data => {
-        this.CustomerCustomerGroupList = data;
+        this.CustomerCustomerGroupList = data || [];
         this.advanceTableForm.controls['customerCustomerGroup'].setValidators([Validators.required,
         this.customerValidator(this.CustomerCustomerGroupList)
         ]);
@@ -1412,8 +1412,7 @@ private _filterRD(value: string): any[] {
     {
       this.advanceTableService.getCustomersForRGByKAM().subscribe(
         data => {
-          if(data)
-          {          
+          if (data && data.length) {
             this.CustomerCustomerGroupList = data;
             this.advanceTableForm.controls['customerCustomerGroup'].setValidators([Validators.required,this.customerForRGByKAMValidator(this.CustomerCustomerGroupList)]);
             this.advanceTableForm.controls['customerCustomerGroup'].updateValueAndValidity();
@@ -1422,17 +1421,11 @@ private _filterRD(value: string): any[] {
               map(value => this._filterRGByKAM(value || ''))
             );
             this.syncBookerCreateAllowedFromCurrentCustomerId();
+          } else {
+            this.InitCustomerRD();
           }
-          else
-          {
-            Swal.fire({
-              title: '',
-              text: 'You are not KAM for this customer.',
-              icon: 'info',
-              confirmButtonText: 'OK'
-            });
-          }
-      });          
+      },
+      () => this.InitCustomerRD());          
     }
   
     private _filterRGByKAM(value: string): any[] {
@@ -1506,14 +1499,10 @@ private _filterRD(value: string): any[] {
       }
       else
       {
-        Swal.fire({
-          title: '',
-          text: 'You are not KAM for this customer.',
-          icon: 'info',
-          confirmButtonText: 'OK'
-        });
+        this.InitCustomerCG(customerGroupID);
       }
-    });
+    },
+    () => this.InitCustomerCG(customerGroupID));
   }
 
   customerCGForRGByKAMValidator(CustomerCustomerGroupList: any[]): ValidatorFn {

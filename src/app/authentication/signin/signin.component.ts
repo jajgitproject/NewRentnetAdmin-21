@@ -287,7 +287,6 @@ export class SigninComponent implements OnInit {
                   : 'false'
               );
               localStorage.setItem(
-<<<<<<< HEAD
                 'canCancelBackDateAllotment',
                 String(
                   employee.CanCancelBackDateAllotment ??
@@ -310,7 +309,8 @@ export class SigninComponent implements OnInit {
                     employee.canReactivateBackDateReservation ??
                     false
                 )
-=======
+              );
+              localStorage.setItem(
                 'canEditAutoBilling',
                 (employee.CanEditAutoBilling === true ||
                   employee.canEditAutoBilling === true ||
@@ -320,7 +320,6 @@ export class SigninComponent implements OnInit {
                   employee.canEditAutoBilling === 1)
                   ? 'true'
                   : 'false'
->>>>>>> newrentnet_b2cbilling
               );
               this.calculateDaysLeft();
             }

@@ -58,7 +58,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   @Input() canThisRoleDoGoodForBillingOnClosingScreen = false;
   @Input() canThisRoleViewDummyInvoice = false;
   @Input() canEditDSAfterGoodForBilling = false;
-<<<<<<< HEAD
   @Input() dutyBillingSummary: any = null;
   @Input() activeDutyNightNumberOnNights: number | null = null;
   @Input() isMyfAggregator = false;
@@ -68,10 +67,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   @Input() invoiceDutyMaxTotalRunningHours: number | null = null;
   @Input() invoiceDutyMaxTotalRunningMinutes: number | null = null;
   @Input() invoiceDutyMaxTotalRunningSeconds: number | null = null;
-=======
   @Input() canEditAutoBilling = false;
   @Input() hasAppBillingReceipt = false;
->>>>>>> newrentnet_b2cbilling
   @Output() dataSaved: EventEmitter<void> = new EventEmitter();
   @Output() dutyStatusChanged = new EventEmitter<{verifyDuty: boolean, goodForBilling: boolean,message: string, invoiceCalculated?: boolean}>();
   //@Output() dutyMessage = new EventEmitter<string>();
@@ -201,34 +198,13 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
   
 
   ngOnChanges(changes: SimpleChanges): void {
-<<<<<<< HEAD
-    if (changes['hasActiveEInvoice'] || changes['hasActiveInvoice'] || changes['canEditDSAfterGoodForBilling'] || changes['advanceTableClosingOne']) {
+    if (changes['hasActiveEInvoice'] || changes['hasActiveInvoice'] || changes['canEditDSAfterGoodForBilling'] || changes['canEditAutoBilling'] || changes['hasAppBillingReceipt'] || changes['canThisRoleDoGoodForBillingOnClosingScreen'] || changes['advanceTableClosingOne']) {
       this.applyDutySlipEditLockState();
       if (this.hasActiveInvoiceLock) {
         this.readyForBulkBilling = false;
         this.readyForBulkGfb = false;
       }
-=======
-    if (changes['disputeAdvanceTable']) {
-      const hasUnapprovedDispute = this.disputeAdvanceTable?.some(d => d.approvalStatus === false);
-      if (hasUnapprovedDispute) {
-        this.advanceTableForm.patchValue({
-          verifyDuty: false,
-          goodForBilling: false
-        });
-      }
-    }
-    if (
-      changes['hasActiveEInvoice'] ||
-      changes['canEditDSAfterGoodForBilling'] ||
-      changes['canEditAutoBilling'] ||
-      changes['hasAppBillingReceipt'] ||
-      changes['canThisRoleDoGoodForBillingOnClosingScreen'] ||
-      changes['advanceTableClosingOne']
-    ) {
-      this.applyDutySlipEditLockState();
       this.syncVerifyDutyAndGoodForBillingState();
->>>>>>> newrentnet_b2cbilling
     }
     if (changes['disputeAdvanceTable']) {
       const hasUnapprovedDispute = this.disputeAdvanceTable?.some(d => d.approvalStatus === false);
@@ -2128,9 +2104,7 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   async onGFBChange(event: any)
     {
-<<<<<<< HEAD
       try {
-=======
       if (this.isAutoBillingFlagsLocked) {
         Swal.fire('', 'Verify Duty / Good for Billing are locked for app-triggered auto billing.', 'warning');
         this.advanceTableForm.patchValue({
@@ -2139,7 +2113,6 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
         this.syncVerifyDutyAndGoodForBillingState();
         return false;
       }
->>>>>>> newrentnet_b2cbilling
       if(this.advanceTableForm.value.verifyDuty===false || this.advanceTableForm.value.verifyDuty==='' || this.advanceTableForm.value.verifyDuty===null)
       {
         Swal.fire('', 'Please Verify Duty Before Good For Billing.', 'warning');

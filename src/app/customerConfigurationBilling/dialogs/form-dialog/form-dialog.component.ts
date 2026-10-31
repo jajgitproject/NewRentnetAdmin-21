@@ -68,7 +68,6 @@ export class FormDialogComponent
         } else 
         {
           this.dialogTitle = 'Billing Configuration For';
-<<<<<<< HEAD
           this.advanceTable = new CustomerConfigurationBilling({
             misRequired: false,
             useOnlyAppDataForBilling: false,
@@ -77,12 +76,8 @@ export class FormDialogComponent
             useDataFromAppToPrintOnDutySlip: false,
             runningDetailsSource: 'App',
             activationStatus: true,
+            triggerBillingFromApp: false,
           });
-=======
-          this.advanceTable = new CustomerConfigurationBilling({});
-          this.advanceTable.activationStatus=true;
-          this.advanceTable.triggerBillingFromApp=false;
->>>>>>> newrentnet_b2cbilling
         }
         this.advanceTableForm = this.createContactForm();
         this.CustomerID=this.data.CustomerID;
