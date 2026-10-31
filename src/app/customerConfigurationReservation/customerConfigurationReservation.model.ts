@@ -13,7 +13,6 @@ export class CustomerConfigurationReservation {
   creditCardRequiredAtReservation:boolean;
   receiveReservationFrom:string;
   allowDuplicateBooking:boolean;
-  callMasking:boolean;
   activationStatus:boolean;
   userID: number;
   
@@ -31,7 +30,6 @@ export class CustomerConfigurationReservation {
        this.creditCardRequiredAtReservation = customerConfigurationReservation.creditCardRequiredAtReservation || '';
        this.receiveReservationFrom = customerConfigurationReservation.receiveReservationFrom || '';
        this.allowDuplicateBooking = customerConfigurationReservation.allowDuplicateBooking || '';
-       this.callMasking = customerConfigurationReservation.callMasking === true;
        this.activationStatus = customerConfigurationReservation.activationStatus || '';
     }
   }

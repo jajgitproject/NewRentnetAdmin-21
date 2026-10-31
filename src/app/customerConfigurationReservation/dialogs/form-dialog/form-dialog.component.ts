@@ -121,7 +121,6 @@ export class FormDialogComponent
       // creditCardRequiredAtReservation: [this.advanceTable.creditCardRequiredAtReservation],
       receiveReservationFrom: [this.advanceTable.receiveReservationFrom],
       allowDuplicateBooking: [this.advanceTable.allowDuplicateBooking],
-      callMasking: [this.advanceTable.callMasking],
       activationStatus: [this.advanceTable.activationStatus]
     });
   }
