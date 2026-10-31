@@ -2341,3 +2341,51 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   padding-bottom: 4px !important;
 }
 
+.ticket-on-time {
+  background: #e5f6ec;
+  color: #146c36;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ticket-late {
+  background: #fde8e8;
+  color: #b42318;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ticket-shell {
+  padding: 16px;
+}
+
+.ticket-shell table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ticket-shell th,
+.ticket-shell td {
+  border-bottom: 1px solid #e6e6e6;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.ticket-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.ticket-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+}
+

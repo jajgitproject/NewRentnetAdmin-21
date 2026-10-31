@@ -110,6 +110,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   openMenuPage(path: string | null, event: MouseEvent, level: 1 | 2 | 3, moduleName: string): void {
     event.preventDefault();
+    event.stopPropagation();
     if (level === 1) {
       this.callLevel1Toggle(event, moduleName);
     } else if (level === 2) {
@@ -120,7 +121,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (!path) {
       return;
     }
-    void this.router.navigateByUrl('/' + path);
+    void this.router.navigate(['/' + path]);
   }
   ngOnInit() {
     this.userSub = this.authService.currentUser.subscribe((user) => {

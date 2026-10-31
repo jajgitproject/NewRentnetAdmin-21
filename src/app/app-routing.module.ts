@@ -2579,6 +2579,16 @@ const routes: Routes = [
       },
 
       {
+        path: 'ticket',
+        loadChildren: () =>
+          import('./ticket/ticket.module').then((m) => m.TicketModule)
+      },
+      { path: 'raiseTicket', redirectTo: '/ticket/raise', pathMatch: 'full' },
+      { path: 'ticketDashboard', redirectTo: '/ticket/dashboard', pathMatch: 'full' },
+      { path: 'ticketPerformance', redirectTo: '/ticket/performance', pathMatch: 'full' },
+      { path: 'ticketMasters', redirectTo: '/ticket/masters', pathMatch: 'full' },
+
+      {
         path: 'rolePageMapping/:RoleID/:Role',
         loadChildren: () =>
           import('./rolePageMapping/rolePageMapping.module').then(

@@ -3,6 +3,67 @@ import { RouteInfo } from './sidebar.metadata';
 export const ROUTES: RouteInfo[] = [
   {
     path: '',
+    title: 'Ticketing',
+    moduleName: 'ticketing',
+    icon: 'fas fa-ticket-alt',
+    class: 'menu-toggle',
+    groupTitle: false,
+    submenu: [
+      {
+        path: 'ticket',
+        title: 'Tickets',
+        moduleName: 'ticket',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'raiseTicket',
+        title: 'Raise Ticket',
+        moduleName: 'raiseTicket',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'ticketDashboard',
+        title: 'Ticket Dashboard',
+        moduleName: 'ticketDashboard',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'ticketPerformance',
+        title: 'Developer Performance',
+        moduleName: 'ticketPerformance',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'ticketMasters',
+        title: 'Ticket Masters',
+        moduleName: 'ticketMasters',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      }
+    ],
+    isAccess: false
+  },
+  {
+    path: '',
     title: 'Menu',
     moduleName: 'Masters',
     icon: 'fas fa-tachometer-alt',

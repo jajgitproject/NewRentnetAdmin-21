@@ -114,8 +114,16 @@ export class RolePageGuard implements CanActivate, CanActivateChild {
     if (!segment) {
       return true;
     }
-
-    const meta = findSidebarRouteByPath(ROUTES, segment);
+    const path = String(state.url || '').split('?')[0].replace(/^\//, '');
+    const ticketAlias = {
+      'ticket/raise': 'raiseTicket',
+      'ticket/dashboard': 'ticketDashboard',
+      'ticket/performance': 'ticketPerformance',
+      'ticket/masters': 'ticketMasters'
+    };
+    const meta =
+      findSidebarRouteByPath(ROUTES, ticketAlias[path] || path) ||
+      findSidebarRouteByPath(ROUTES, segment);
     const routeData = this.mergedRouteData(activated);
     const overrideKey = routeData.requiredPageKey;
     if (overrideKey) {
@@ -137,6 +145,12 @@ export class RolePageGuard implements CanActivate, CanActivateChild {
     const allowed = routePageAllowed(meta, accessPages);
     if (allowed) {
       return true;
+    }
+    if (meta.path === 'ticket') {
+      const raise = findSidebarRouteByPath(ROUTES, 'raiseTicket');
+      if (raise && routePageAllowed(raise, accessPages)) {
+        return true;
+      }
     }
     if (
       segment === 'driverInventoryAssociation' &&
