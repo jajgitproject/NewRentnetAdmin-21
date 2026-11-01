@@ -31,6 +31,7 @@ import { MatRippleModule } from '@angular/material/core';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { FeedBackAttachmentModule } from '../feedBackAttachment/feedBackAttachment.module';
 import { MyUploadModule } from '../myupload/myupload.module';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [FormDialogComponent],
@@ -62,6 +63,7 @@ import { MyUploadModule } from '../myupload/myupload.module';
     MatProgressSpinnerModule,
     MatRippleModule,
     MyUploadModule,
+    StaticImageComponent,
   ],
   exports: [FormDialogComponent],
 })

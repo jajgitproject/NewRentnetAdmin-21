@@ -19,6 +19,7 @@ import { map, startWith } from 'rxjs/operators';
 import moment from 'moment';
 import { SupplierTypeDropDownModel } from 'src/app/supplierType/supplierType.model';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntity/organizationalEntityDropDown.model';
+import { formatSupplierCode } from '../../supplier-display.util';
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
@@ -57,6 +58,8 @@ export class FormDialogComponent
   public CompanyList?: OrganizationalEntityDropDown[] = [];
   filteredCompanyOptions: Observable<OrganizationalEntityDropDown[]>;
 
+  public LocationList?: OrganizationalEntityDropDown[] = [];
+
   image: any;
   fileUploadEl: any;
   stateOnCityID: any;
@@ -92,7 +95,6 @@ export class FormDialogComponent
           this.OnStateChangeGetCity();
           this.getStatesBasedOnCity();
           // this.searchCountryTerm.setValue(this.advanceTable.country)
-          this.advanceTable.supplierCode='N/A';
           // this.searchStateTerm.setValue(this.advanceTable.stateName)
           // this.searchCityTerm.setValue(this.advanceTable.city)
           this.registrationDate = moment(this.advanceTable.supplierRegistrationDate).format('DD/MM/yyyy');
@@ -105,7 +107,6 @@ export class FormDialogComponent
           this.advanceTable.supplierStatus='N/A';
           this.advanceTable.verificationStatus='N/A';
           // this.advanceTable.supplierRegistrationDate='N/A';
-          this.advanceTable.supplierCode='N/A';
         }
         this.advanceTableForm = this.createContactForm();
   }
@@ -113,6 +114,7 @@ export class FormDialogComponent
   {
     this.InitCountries();
     this.InitSupplierType();
+    this.InitAgreementLocation();
     //this.InitCompany();
   }
 
@@ -202,7 +204,7 @@ export class FormDialogComponent
     return this.fb.group(
     {
       supplierID: [this.advanceTable.supplierID],
-      supplierName: [this.advanceTable.supplierName],
+      supplierName: [this.toUpperValue(this.advanceTable?.supplierName)],
       addressCityID: [this.advanceTable.addressCityID],
       address: [this.advanceTable.address],
       //pin: [this.advanceTable.pin],
@@ -229,8 +231,37 @@ export class FormDialogComponent
       oldRentnetCode: [
         (this.advanceTable.oldRentnetCode && this.advanceTable.oldRentnetCode !== 0) ? this.advanceTable.oldRentnetCode : null,
         [Validators.required, Validators.pattern(/^[0-9]+$/)]
+      ],
+      paymentBasis: [this.advanceTable.paymentBasis || ''],
+      supplierPercentage: [
+        (this.advanceTable.supplierPercentage !== null && this.advanceTable.supplierPercentage !== undefined)
+          ? this.advanceTable.supplierPercentage
+          : null
+      ],
+      dateOfAgreement: [
+        this.advanceTable.dateOfAgreement
+          ? new Date(this.advanceTable.dateOfAgreement)
+          : null
+      ],
+      supplierAgreementLocationID: [
+        (this.advanceTable.supplierAgreementLocationID && this.advanceTable.supplierAgreementLocationID !== 0)
+          ? this.advanceTable.supplierAgreementLocationID
+          : null
       ]
     });
+  }
+
+  OnPaymentBasisChange(): void {
+    if (this.advanceTableForm.value.paymentBasis !== 'Percentage Basis') {
+      this.advanceTableForm.controls['supplierPercentage'].setValue(null);
+    }
+  }
+
+  InitAgreementLocation(): void {
+    this._generalService.GetLocation().subscribe(
+      data => {
+        this.LocationList = data || [];
+      });
   }
 
   public noWhitespaceValidator(control: FormControl) {
@@ -256,6 +287,7 @@ showDetails(){
   }
   public Post(): void {
     this.isLoading = true;
+    this.forceUppercase('supplierName');
     this.advanceTableForm.patchValue({
       supplierTypeID: this.supplierTypeID,
       countryID: this.geoPointID,
@@ -264,7 +296,8 @@ showDetails(){
       oldRentnetCode: this.getOldRentnetCode()
     });
 
-    this.advanceTableService.add(this.advanceTableForm.getRawValue()).subscribe(
+    const payload = this.buildSupplierPayload(this.advanceTableForm.getRawValue());
+    this.advanceTableService.add(payload).subscribe(
       response => {
         this.isLoading = false;
         if (response && response.success === false) {
@@ -287,6 +320,7 @@ showDetails(){
 
   public Put(): void {
     this.isLoading = true;
+    this.forceUppercase('supplierName');
     this.advanceTableForm.patchValue({
       supplierTypeID: this.supplierTypeID || this.advanceTable.supplierTypeID,
       countryID: this.geoPointID || this.advanceTable.countryID,
@@ -299,7 +333,7 @@ showDetails(){
       new Date(this.advanceTableForm.controls['supplierRegistrationDate'].value)
     );
 
-    const payload = this.advanceTableForm.getRawValue();
+    const payload = this.buildSupplierPayload(this.advanceTableForm.getRawValue());
     delete payload.supplierOfficialIdentityNumber;
 
     this.advanceTableService.update(payload).subscribe(
@@ -336,6 +370,73 @@ showDetails(){
     return Number(value);
   }
 
+  getSupplierCodeDisplay(): string {
+    if (!this.advanceTableForm) {
+      return '';
+    }
+    const name = (this.advanceTableForm.get('supplierName')?.value || '').trim();
+    if (!name) {
+      return '';
+    }
+    return formatSupplierCode({
+      supplierName: name,
+      oldRentnetCode: this.advanceTableForm.get('oldRentnetCode')?.value,
+    });
+  }
+
+  getPaymentBasis(): string | null {
+    const value = this.advanceTableForm.get('paymentBasis')?.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    return value;
+  }
+
+  getSupplierPercentage(): number | null {
+    if (this.advanceTableForm.get('paymentBasis')?.value !== 'Percentage Basis') {
+      return null;
+    }
+    const value = this.advanceTableForm.get('supplierPercentage')?.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  /** Normalize optional fields so empty strings are never sent for decimal/nullables (API 400). */
+  buildSupplierPayload(raw: any): any {
+    const payload = { ...raw };
+    if (payload.supplierName) {
+      payload.supplierName = String(payload.supplierName).toUpperCase();
+    }
+    payload.paymentBasis = this.getPaymentBasis();
+    payload.supplierPercentage = this.getSupplierPercentage();
+    if (payload.paymentBasis === '' || payload.paymentBasis === undefined) {
+      payload.paymentBasis = null;
+    }
+    if (payload.supplierPercentage === '' || payload.supplierPercentage === undefined || Number.isNaN(payload.supplierPercentage)) {
+      payload.supplierPercentage = null;
+    }
+
+    const dateValue = this.advanceTableForm.get('dateOfAgreement')?.value;
+    if (!dateValue || dateValue === '') {
+      payload.dateOfAgreement = null;
+    } else {
+      const parsed = dateValue instanceof Date ? dateValue : new Date(dateValue);
+      payload.dateOfAgreement = isNaN(parsed.getTime()) ? null : parsed;
+    }
+
+    const locationId = this.advanceTableForm.get('supplierAgreementLocationID')?.value;
+    if (locationId === null || locationId === undefined || locationId === '' || Number(locationId) <= 0) {
+      payload.supplierAgreementLocationID = null;
+    } else {
+      payload.supplierAgreementLocationID = Number(locationId);
+    }
+
+    return payload;
+  }
+
   keyPressAlphaNumeric(event: KeyboardEvent): boolean {
     const charCode = event.which ? event.which : event.keyCode;
     if ((charCode >= 48 && charCode <= 57) || (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)) {
@@ -359,6 +460,34 @@ showDetails(){
     if (panControl?.value) {
       panControl.setValue(String(panControl.value).trim().toUpperCase());
     }
+  }
+
+  toUpperValue(value: string | null | undefined): string {
+    return value ? String(value).toUpperCase() : '';
+  }
+
+  forceUppercase(controlName: string) {
+    const control = this.advanceTableForm?.get(controlName);
+    if (!control) {
+      return;
+    }
+    const current = control.value;
+    if (current == null || current === '') {
+      return;
+    }
+    const upper = String(current).toUpperCase();
+    if (current !== upper) {
+      control.setValue(upper, { emitEvent: false });
+    }
+  }
+
+  keyPressNumbersDecimal(event): boolean {
+    const charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
   }
   public confirmAdd(): void 
   {

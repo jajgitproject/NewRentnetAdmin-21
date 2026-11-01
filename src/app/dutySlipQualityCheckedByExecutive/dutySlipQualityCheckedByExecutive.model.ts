@@ -82,7 +82,13 @@ export class DutyAllotmentDetails{
   activationStatus:boolean;
   dutySlipImage: string;
   breatheAnalyzerImage: string;
-  breatheAnalyzerReading: number
+  breatheAnalyzerReading: number;
+  selfieWithUniformAIVerdict: string;
+  frontPhotoAIVerdict: string;
+  interiorsWithAmenitiesAIVerdict: string;
+  selfieWithUniformAIMessage: string;
+  frontPhotoAIMessage: string;
+  interiorsWithAmenitiesAIMessage: string;
 
   constructor(allotmentDetails){
     {
@@ -105,6 +111,12 @@ export class DutyAllotmentDetails{
       this.selfDeclaration = allotmentDetails.selfDeclaration || '';
       this.breatheAnalyzerImage = allotmentDetails.breatheAnalyzerImage || '';
       this.breatheAnalyzerReading = allotmentDetails.breatheAnalyzerReading || null;
+      this.selfieWithUniformAIVerdict = allotmentDetails.selfieWithUniformAIVerdict || '';
+      this.frontPhotoAIVerdict = allotmentDetails.frontPhotoAIVerdict || '';
+      this.interiorsWithAmenitiesAIVerdict = allotmentDetails.interiorsWithAmenitiesAIVerdict || '';
+      this.selfieWithUniformAIMessage = allotmentDetails.selfieWithUniformAIMessage || '';
+      this.frontPhotoAIMessage = allotmentDetails.frontPhotoAIMessage || '';
+      this.interiorsWithAmenitiesAIMessage = allotmentDetails.interiorsWithAmenitiesAIMessage || '';
 
       this.qcDate=new Date();
        this.qcTime=new Date();

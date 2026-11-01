@@ -2,7 +2,7 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject, Input, OnInit } from '@angular/core';
 import { SettledRateDetailsService } from '../../settledRateDetails.service';
-import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors} from '@angular/forms';
 import { BookingDataModel, CDCDataModel, SettledRateDetails } from '../../settledRateDetails.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
@@ -119,6 +119,9 @@ this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status 
       this.advanceTableForm.patchValue({interstateCharges: this.advanceTable.interstateCharges});
       this.advanceTableForm.patchValue({airportFee: this.advanceTable.airportFee});
       this.advanceTableForm.patchValue({nextDayCharging: this.advanceTable.nextDayCharging});
+      this.advanceTableForm.patchValue({fgrAmount: this.advanceTable.fgrAmount});
+      this.advanceTableForm.patchValue({fgrKm: this.advanceTable.fgrKm});
+      this.advanceTableForm.patchValue({fuelSurcharge: this.advanceTable.fuelSurcharge});
     }
     else
     {
@@ -378,9 +381,23 @@ this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status 
       interstateCharges: [this.advanceTable.interstateCharges],
       airportFee: [this.advanceTable.airportFee],
       activationStatus: [this.advanceTable.activationStatus] ,
-      nextDayCharging: [this.advanceTable.nextDayCharging || null]     
-    });
+      nextDayCharging: [this.advanceTable.nextDayCharging || null],
+      fgrAmount: [this.advanceTable.fgrAmount ?? null],
+      fgrKm: [this.advanceTable.fgrKm ?? null],
+      fuelSurcharge: [this.advanceTable.fuelSurcharge ?? false]
+    }, { validators: [this.validateFgrFields] });
   }
+
+  validateFgrFields = (group: AbstractControl): ValidationErrors | null => {
+    const amount = group.get('fgrAmount')?.value;
+    const km = group.get('fgrKm')?.value;
+    const amountProvided = amount !== null && amount !== undefined && amount !== '';
+    const kmProvided = km !== null && km !== undefined && km !== '';
+    if (!amountProvided && !kmProvided) {
+      return { fgrRequired: true };
+    }
+    return null;
+  };
 
   public noWhitespaceValidator(control: FormControl) {
     const isWhitespace = (control.value || '').trim().length === 0;
@@ -415,7 +432,7 @@ this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status 
       {
         this.showNotification(
           'snackbar-danger',
-          'Operation Failed...!!!',
+          this.getApiErrorMessage(error),
           'bottom',
           'center'
         );
@@ -443,7 +460,7 @@ this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status 
       {
         this.showNotification(
           'snackbar-danger',
-          'Operation Failed...!!!',
+          this.getApiErrorMessage(error),
           'bottom',
           'center'
         );
@@ -451,8 +468,27 @@ this.buttonDisabled = this.status !== 'Changes allow'; // true अगर status 
       }
     )
   }
+
+  private getApiErrorMessage(error: any): string {
+    const message = error?.error;
+    if (typeof message === 'string' && message.trim().length > 0) {
+      return message.replace(/^Failure\s*:\s*/i, '').trim();
+    }
+    return 'Operation Failed...!!!';
+  }
+
   public confirmAdd(): void 
   {
+    this.advanceTableForm.updateValueAndValidity();
+    if (this.advanceTableForm.errors?.fgrRequired) {
+      this.showNotification(
+        'snackbar-danger',
+        'Either FGR Amount or FGR Km is required',
+        'bottom',
+        'center'
+      );
+      return;
+    }
     this.saveDisabled=false;
        if(this.action=="edit")
        {

@@ -173,7 +173,7 @@ export class FormDialogComponent {
         iconAltTag: [this.advanceTable.iconAltTag],
         countryID: [this.advanceTable.countryID],
         activationStatus: [this.advanceTable.activationStatus],
-        googlePlacesID:[this.advanceTable.googlePlacesID]
+        googlePlacesID:[this.advanceTable.googlePlacesID],
       });
   }
 

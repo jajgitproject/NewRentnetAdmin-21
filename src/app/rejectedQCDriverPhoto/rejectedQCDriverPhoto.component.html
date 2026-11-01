@@ -1,0 +1,87 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">Rejected QC Driver Photo</a>
+            </li>
+          </ul>
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Rejected QC Driver Photo</h2>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <mat-accordion class="duty-register-search-accordion">
+              <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Search</mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="duty-register-inline-search-body">
+                  <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>QC Date From</mat-label>
+                        <input matInput [matDatepicker]="qcFromPicker" [formControl]="qcDateFromCtrl" required />
+                        <mat-datepicker-toggle matSuffix [for]="qcFromPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #qcFromPicker></mat-datepicker>
+                        <mat-error *ngIf="qcDateFromCtrl.hasError('required')">QC Date From is required</mat-error>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>QC Date To</mat-label>
+                        <input matInput [matDatepicker]="qcToPicker" [formControl]="qcDateToCtrl" required />
+                        <mat-datepicker-toggle matSuffix [for]="qcToPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #qcToPicker></mat-datepicker>
+                        <mat-error *ngIf="qcDateToCtrl.hasError('required')">QC Date To is required</mat-error>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                      <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Image Count</mat-label>
+                        <input matInput type="number" min="1" [formControl]="imageCountCtrl" required />
+                        <mat-error *ngIf="imageCountCtrl.hasError('required')">Image Count is required</mat-error>
+                        <mat-error *ngIf="imageCountCtrl.hasError('min')">Image Count must be greater than zero</mat-error>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="duty-register-inline-search-actions quick-search-actions">
+                  <button mat-raised-button color="primary" type="button" (click)="download()" [disabled]="!canDownload()">
+                    {{ downloading ? 'Downloading...' : 'Download ZIP' }}
+                  </button>
+                  &nbsp;&nbsp;
+                  <button mat-raised-button color="warn" type="button" (click)="refresh()" [disabled]="downloading">Reset</button>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+
+            <mat-progress-bar *ngIf="downloading" mode="indeterminate"></mat-progress-bar>
+            <div class="load-error" *ngIf="loadError">{{ loadError }}</div>
+
+            <p class="upload-hint" style="margin-top: 16px;">
+              Downloads rejected QC driver photos for records where executive QC status is not approved,
+              within the selected QC date range. Up to the requested image count is included in a single ZIP file.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

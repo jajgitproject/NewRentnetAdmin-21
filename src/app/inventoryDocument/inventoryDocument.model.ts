@@ -4,6 +4,7 @@ export class InventoryDocumentModel {
   inventoryDocumentID:number;
   inventoryID:number;
   inventoryName: string;
+  document: string;
   documentID:number;
   addressCity:string;
   documentNumber:string;
@@ -12,6 +13,8 @@ export class InventoryDocumentModel {
   documentImageNonAvailabilityReason:string;
   documentExpiry:Date;
   documentExpiryString:string;
+  documentStartDate:Date;
+  documentStartDateString:string;
   addressCityID:number;
   address:string;
   pin:string;
@@ -27,6 +30,7 @@ export class InventoryDocumentModel {
        this.inventoryDocumentID = inventoryDocumentModel.inventoryDocumentID || -1;
        this.inventoryID = inventoryDocumentModel.inventoryID || '';
        this.inventoryName = inventoryDocumentModel.inventoryName || '';
+       this.document = inventoryDocumentModel.document || '';
        this.documentID = inventoryDocumentModel.documentID || '';
        this.documentNumber = inventoryDocumentModel.documentNumber || '';
        this.documentIssuingAuthority = inventoryDocumentModel.documentIssuingAuthority || '';
@@ -35,13 +39,15 @@ export class InventoryDocumentModel {
        this.addressCityID = inventoryDocumentModel.addressCityID || 0;
        this.address = inventoryDocumentModel.address || '';
        this.documentExpiryString = inventoryDocumentModel.documentExpiryString || '';
+       this.documentStartDateString = inventoryDocumentModel.documentStartDateString || '';
        this.pin = inventoryDocumentModel.pin || '';
        this.activationStatus = inventoryDocumentModel.activationStatus || '';
        this.verified = inventoryDocumentModel.verified || '';
        this.verifiedBy = inventoryDocumentModel.verifiedBy || '';
        this.verificationRemark = inventoryDocumentModel.verificationRemark || '';
        this.verificationDate = inventoryDocumentModel.verificationDate || '';
-       this.documentExpiry=new Date();
+       this.documentExpiry = inventoryDocumentModel.documentExpiry ?? null;
+       this.documentStartDate = inventoryDocumentModel.documentStartDate ?? null;
     }
   }
   

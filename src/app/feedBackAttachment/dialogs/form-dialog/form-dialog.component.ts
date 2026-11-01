@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { FeedBackAttachmentService } from '../../feedBackAttachment.service';
 import { FormControl, Validators, FormGroup, FormBuilder } from '@angular/forms';
@@ -46,6 +47,7 @@ export class tripFeedBackAttachmentFormDialogComponent {
 
   image: any;
   fileUploadEl: any;
+  selectedAttachmentFile: File | null = null;
   UOMID: any;
   ServiceID: any;
   service: string;
@@ -64,7 +66,8 @@ export class tripFeedBackAttachmentFormDialogComponent {
     public advanceTableService: FeedBackAttachmentService,
     private fb: FormBuilder,
     private el: ElementRef,
-    public _generalService: GeneralService) {
+    public _generalService: GeneralService,
+    private snackBar: MatSnackBar) {
     // Set the defaults
     this.action = data.action;
     this.verifyDutyStatusAndCacellationStatus = data.verifyDutyStatusAndCacellationStatus;
@@ -136,32 +139,111 @@ export class tripFeedBackAttachmentFormDialogComponent {
   onNoClick(): void {
     this.dialogRef.close();
   }
+  onAttachmentFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input?.files;
+    if (!files?.length) {
+      this.selectedAttachmentFile = null;
+      return;
+    }
+    this.selectedAttachmentFile = files[0];
+    console.log('[FeedBackAttachment] file selected', {
+      name: this.selectedAttachmentFile.name,
+      size: this.selectedAttachmentFile.size,
+      type: this.selectedAttachmentFile.type,
+    });
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.ImagePath = (e.target?.result as string) || '';
+    };
+    reader.readAsDataURL(this.selectedAttachmentFile);
+    this.advanceTableForm.patchValue({ tripFeedBackAttachment: '' });
+  }
+
+  private buildSavePayload(): FeedBackAttachment {
+    const payload = { ...this.advanceTableForm.getRawValue() } as FeedBackAttachment;
+    if (this.selectedAttachmentFile) {
+      payload.tripFeedBackAttachment = '';
+    }
+    return payload;
+  }
+
+  private canSaveAttachment(): boolean {
+    if (!this.tripFeedBackID || Number(this.tripFeedBackID) === 0) {
+      console.error('[FeedBackAttachment] Save blocked: tripFeedBackID is missing. Save trip feedback first.');
+      return false;
+    }
+    const payload = this.buildSavePayload();
+    if (!this.selectedAttachmentFile && !payload.tripFeedBackAttachment) {
+      console.warn('[FeedBackAttachment] Save blocked: no attachment file selected.');
+      return false;
+    }
+    return true;
+  }
+
+  private notifySaveBlocked(message: string): void {
+    this.snackBar.open(message, '', { duration: 3500, verticalPosition: 'bottom', horizontalPosition: 'center' });
+  }
+
   public Post(): void {
+    if (!this.canSaveAttachment()) {
+      if (!this.tripFeedBackID || Number(this.tripFeedBackID) === 0) {
+        this.notifySaveBlocked('Save trip feedback first, then add an attachment.');
+      } else {
+        this.notifySaveBlocked('Please choose an attachment file before saving.');
+      }
+      this._generalService.sendUpdate('FeedBackAttachmentAll:FeedBackAttachmentView:Failure');
+      return;
+    }
     this.advanceTableForm.patchValue({ tripFeedBackID: this.tripFeedBackID });
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())
+    const payload = this.buildSavePayload();
+    payload.tripFeedBackID = this.tripFeedBackID;
+    console.log('[FeedBackAttachment] submitting create', {
+      tripFeedBackID: payload.tripFeedBackID,
+      hasFile: !!this.selectedAttachmentFile,
+    });
+    this.advanceTableService.add(payload, this.selectedAttachmentFile)
       .subscribe(
         response => {
-
+          console.log('[FeedBackAttachment] create succeeded', response);
           this.dialogRef.close();
           this._generalService.sendUpdate('FeedBackAttachmentCreate:FeedBackAttachmentView:Success');//To Send Updates  
 
         },
         error => {
+          console.error('[FeedBackAttachment] create failed', error);
           this._generalService.sendUpdate('FeedBackAttachmentAll:FeedBackAttachmentView:Failure');//To Send Updates  
         }
       )
   }
   public Put(): void {
+    if (!this.canSaveAttachment()) {
+      if (!this.tripFeedBackID || Number(this.tripFeedBackID) === 0) {
+        this.notifySaveBlocked('Save trip feedback first, then add an attachment.');
+      } else {
+        this.notifySaveBlocked('Please choose an attachment file before saving.');
+      }
+      this._generalService.sendUpdate('FeedBackAttachmentAll:FeedBackAttachmentView:Failure');
+      return;
+    }
     this.advanceTableForm.patchValue({ tripFeedBackID: this.tripFeedBackID });
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())
+    const payload = this.buildSavePayload();
+    payload.tripFeedBackID = this.tripFeedBackID;
+    console.log('[FeedBackAttachment] submitting update', {
+      tripFeedBackAttachmentID: payload.tripFeedBackAttachmentID,
+      tripFeedBackID: payload.tripFeedBackID,
+      hasFile: !!this.selectedAttachmentFile,
+    });
+    this.advanceTableService.update(payload, this.selectedAttachmentFile)
       .subscribe(
         response => {
-
+          console.log('[FeedBackAttachment] update succeeded', response);
           this.dialogRef.close();
           this._generalService.sendUpdate('FeedBackAttachmentUpdate:FeedBackAttachmentView:Success');//To Send Updates  
 
         },
         error => {
+          console.error('[FeedBackAttachment] update failed', error);
           this._generalService.sendUpdate('FeedBackAttachmentAll:FeedBackAttachmentView:Failure');//To Send Updates  
         }
       )
@@ -205,13 +287,7 @@ export class tripFeedBackAttachmentFormDialogComponent {
   }
 
   /////////////////for Image Upload////////////////////////////
-  public response: { dbPath: '' };
   public ImagePath: string = "";
-  public uploadFinished = (event) => {
-    this.response = event;
-    this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
-    this.advanceTableForm.patchValue({tripFeedBackAttachment: this.ImagePath })
-  }
 
   // Only Numbers with Decimals
   keyPressNumbersDecimal(event) {

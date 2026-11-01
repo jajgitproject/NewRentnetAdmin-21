@@ -32,6 +32,7 @@ import { PackageTypeDropDown } from '../general/packageTypeDropDown.model';
 export class CustomerAllowedPackageTypesInCDPComponent implements OnInit {
   displayedColumns = [
     'packageType',
+    'customerGivenNameToPackageType',
     'status',
     'actions'
   ];

@@ -78,8 +78,15 @@ export class FormDialogComponent
       canResetOdometer: [this.advanceTable.canResetOdometer, Validators.required],
       canDeleteFuelEntry: [this.advanceTable.canDeleteFuelEntry, Validators.required],
       canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required],
+      canCloseIncident: [this.advanceTable.canCloseIncident, Validators.required],
+      canCancelBackDateAllotment: [this.advanceTable.canCancelBackDateAllotment, Validators.required],
+      canCancelBackDateReservation: [this.advanceTable.canCancelBackDateReservation, Validators.required],
+      canReactivateBackDateReservation: [this.advanceTable.canReactivateBackDateReservation, Validators.required],
       canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required],
-      canEditAutoBilling: [this.advanceTable.canEditAutoBilling === true || this.advanceTable.canEditAutoBilling === false ? this.advanceTable.canEditAutoBilling : false, Validators.required]
+      canEditAutoBilling: [this.advanceTable.canEditAutoBilling === true || this.advanceTable.canEditAutoBilling === false ? this.advanceTable.canEditAutoBilling : false, Validators.required],
+      canBypassOTP: [this.advanceTable.canBypassOTP === true || this.advanceTable.canBypassOTP === false
+        ? this.advanceTable.canBypassOTP
+        : false, Validators.required]
     });
   }
   submit() 
@@ -108,8 +115,13 @@ export class FormDialogComponent
       canResetOdometer: toBool(raw.canResetOdometer),
       canDeleteFuelEntry: toBool(raw.canDeleteFuelEntry),
       canFindFuelEntry: toBool(raw.canFindFuelEntry),
+      canCloseIncident: toBool(raw.canCloseIncident),
+      canCancelBackDateAllotment: toBool(raw.canCancelBackDateAllotment),
+      canCancelBackDateReservation: toBool(raw.canCancelBackDateReservation),
+      canReactivateBackDateReservation: toBool(raw.canReactivateBackDateReservation),
       canEditDSAfterGoodForBilling: toBool(raw.canEditDSAfterGoodForBilling),
       canEditAutoBilling: toBool(raw.canEditAutoBilling),
+      canBypassOTP: toBool(raw.canBypassOTP),
     };
   }
 

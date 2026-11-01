@@ -31,11 +31,16 @@ export class Supplier {
    isAdhoc:boolean;
    pan:string;
    oldRentnetCode:number;
+   paymentBasis:string;
+   supplierPercentage:number;
+   dateOfAgreement:string;
+   supplierAgreementLocationID:number;
+   supplierAgreementLocation:string;
 
   constructor(supplier) {
     {
        this.supplierID = supplier.supplierID || -1;
-       this.supplierName = supplier.supplierName || '';
+       this.supplierName = (supplier.supplierName || '').toUpperCase();
        this.addressCityID = supplier.addressCityID || '';
        this.address = supplier.address || '';
        this.pin = supplier.pin || '';
@@ -53,6 +58,15 @@ export class Supplier {
       this.isAdhoc = supplier.isAdhoc || '';
       this.pan = supplier.pan || '';
       this.oldRentnetCode = (supplier.oldRentnetCode && supplier.oldRentnetCode !== 0) ? Number(supplier.oldRentnetCode) : null;
+      this.paymentBasis = supplier.paymentBasis || '';
+      this.supplierPercentage = (supplier.supplierPercentage !== null && supplier.supplierPercentage !== undefined && supplier.supplierPercentage !== '')
+        ? Number(supplier.supplierPercentage)
+        : null;
+      this.dateOfAgreement = supplier.dateOfAgreement || null;
+      this.supplierAgreementLocationID = (supplier.supplierAgreementLocationID && supplier.supplierAgreementLocationID !== 0)
+        ? Number(supplier.supplierAgreementLocationID)
+        : null;
+      this.supplierAgreementLocation = supplier.supplierAgreementLocation || '';
     }
   }
   

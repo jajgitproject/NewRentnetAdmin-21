@@ -44,7 +44,9 @@ export class VendorMisService {
       SearchCity: this.toNull(criteria.SearchCity),
       SearchBookingStatus: this.toNull(criteria.SearchBookingStatus),
       SearchBillFromDate: this.toNull(criteria.SearchBillFromDate),
-      SearchBillToDate: this.toNull(criteria.SearchBillToDate)
+      SearchBillToDate: this.toNull(criteria.SearchBillToDate),
+      SearchRes: this.toNull(criteria.SearchRes),
+      SearchDuty: this.toNull(criteria.SearchDuty)
     };
   }
 
@@ -59,6 +61,12 @@ export class VendorMisService {
   downloadExportJob(jobId: string): Observable<Blob> {
     return this.httpClient.get(`${this.API_URL}/ExportCsv/Download/${jobId}`, {
       responseType: 'blob'
+    });
+  }
+
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
     });
   }
 

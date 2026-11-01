@@ -12,9 +12,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DynamicsMis20Component } from './dynamicsMis.component';
 import { DynamicsMis20RoutingModule } from './dynamicsMis-routing.module';
 import { DynamicsMis20Service } from './dynamicsMis.service';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 
 @NgModule({
   declarations: [DynamicsMis20Component],
@@ -32,7 +34,9 @@ import { DynamicsMis20Service } from './dynamicsMis.service';
     MatCardModule,
     MatDatepickerModule,
     MatSortModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [DynamicsMis20Service]
 })

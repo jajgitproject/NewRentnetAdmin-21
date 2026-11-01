@@ -19,6 +19,7 @@ import { StateDropDown } from 'src/app/state/stateDropDown.model';
 import { SupplierDropDown } from 'src/app/supplier/supplierDropDown.model';
 import {
   filterSuppliersByDisplay,
+  formatDriverDutyRegisterName,
   formatSupplierDisplay,
   supplierMatchesDisplay,
 } from 'src/app/supplier/supplier-display.util';
@@ -30,6 +31,8 @@ import { DriverModel } from 'src/app/CarAndDriverAllotment/CarAndDriverAllotment
 import { CountryCodeDropDown } from 'src/app/general/countryCodeDropDown.model';
 import {  ValidationErrors, ValidatorFn } from '@angular/forms';
 import moment from 'moment';
+import Swal from 'sweetalert2';
+import { DriverDuplicateMobileModel } from '../../driver.model';
 
 @Component({
   standalone: false,
@@ -125,7 +128,8 @@ saveDisabled:boolean = true;
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Driver';       
-          this.advanceTable = data.advanceTable;
+          // Clone so mobile/lat-long parsing does not mutate the search-result row
+          this.advanceTable = Object.assign(new Driver({}), data.advanceTable);
           this.referenceID=this.advanceTable.driverID;
           this.loadPassword();
           this.ImagePath=this.advanceTable.driverImage;
@@ -147,20 +151,20 @@ saveDisabled:boolean = true;
           this.onBlurUpdateEndDateEdit(dateOfJoining);
           this.onBlurUpdatedateOfLeavingEdit(dateOfLeaving);
           this.onBlurUpdatedrivingSinceDateEdit(drivingSinceDate);
-          if (this.advanceTable.mobile1) {
-            const mobileParts = this.advanceTable.mobile1.split('-');
-            const countryCodes = '+'+''+mobileParts[0];
-            this.advanceTable.countryCodes=countryCodes;
-            const mobile1 = mobileParts[1];
-            this.advanceTable.mobile1=mobile1;
-        }
-        if (this.advanceTable.mobile2) {
-          const mobileParts = this.advanceTable.mobile2.split('-');
-          const countryCode = '+'+''+mobileParts[0];
-          this.advanceTable.countryCode=countryCode;
-          const mobile2 = mobileParts[1];
-          this.advanceTable.mobile2=mobile2;
-      }
+          if (this.advanceTable.driverBackGroundVerificationCheckIssueDate) {
+            const bgvIssueDate = moment(this.advanceTable.driverBackGroundVerificationCheckIssueDate).format('DD/MM/yyyy');
+            this.onBlurBackGroundVerificationIssueDateEdit(bgvIssueDate);
+          }
+          if (this.advanceTable.driverFitnessCertificateIssueDate) {
+            const fitnessIssueDate = moment(this.advanceTable.driverFitnessCertificateIssueDate).format('DD/MM/yyyy');
+            this.onBlurFitnessCertificateIssueDateEdit(fitnessIssueDate);
+          }
+          const mobile1Parsed = this.parseMobileForForm(this.advanceTable.mobile1);
+          this.advanceTable.countryCodes = mobile1Parsed.isd;
+          this.advanceTable.mobile1 = mobile1Parsed.number;
+          const mobile2Parsed = this.parseMobileForForm(this.advanceTable.mobile2);
+          this.advanceTable.countryCode = mobile2Parsed.isd;
+          this.advanceTable.mobile2 = mobile2Parsed.number;
            if(this.advanceTable.ownedSupplier==='Owned')
           {
             this.owned=true;
@@ -204,6 +208,24 @@ saveDisabled:boolean = true;
           this.advanceTableForm = this.createContactForm();
         }
   }
+
+  /** Split "91-98765..." into ISD + number without treating a bare number as an ISD. */
+  private parseMobileForForm(fullMobile: string, defaultIsd = '+91'): { isd: string; number: string } {
+    if (!fullMobile) {
+      return { isd: defaultIsd, number: '' };
+    }
+    const value = String(fullMobile).trim();
+    if (value.includes('-')) {
+      const [isdPart, ...rest] = value.split('-');
+      const number = rest.join('-');
+      const isd = isdPart.startsWith('+') ? isdPart : '+' + isdPart;
+      return { isd, number: number || '' };
+    }
+    if (value.startsWith('+')) {
+      return { isd: value, number: '' };
+    }
+    return { isd: defaultIsd, number: value };
+  }
   public ngOnInit(): void
   {
     this.advanceTableForm?.controls["password"].disable();
@@ -220,6 +242,50 @@ saveDisabled:boolean = true;
     this.InitCountryISDCodes();
     this.InitCountryISDCode();
     this.InitCompany();
+
+    this.setupConditionalDateValidators();
+
+    if (this.action === 'edit') {
+      // Show field errors immediately for incomplete/invalid DB records
+      setTimeout(() => this.showAllValidationErrors(), 0);
+    }
+  }
+
+  setupConditionalDateValidators(): void {
+    this.onBackGroundVerificationChange(
+      this.advanceTableForm?.get('driverBackGroundVerificationCheck')?.value
+    );
+    this.onFitnessCertificateChange(
+      this.advanceTableForm?.get('driverFitnessCertificate')?.value
+    );
+  }
+
+  onBackGroundVerificationChange(value: boolean): void {
+    const dateControl = this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate');
+    if (!dateControl) {
+      return;
+    }
+    if (value === true) {
+      dateControl.setValidators([Validators.required]);
+    } else {
+      dateControl.clearValidators();
+      dateControl.setValue(null);
+    }
+    dateControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  onFitnessCertificateChange(value: boolean): void {
+    const dateControl = this.advanceTableForm?.get('driverFitnessCertificateIssueDate');
+    if (!dateControl) {
+      return;
+    }
+    if (value === true) {
+      dateControl.setValidators([Validators.required]);
+    } else {
+      dateControl.clearValidators();
+      dateControl.setValue(null);
+    }
+    dateControl.updateValueAndValidity({ emitEvent: false });
   }
  
   companyNameValidator(CompanyList: any[]): ValidatorFn {
@@ -234,10 +300,9 @@ saveDisabled:boolean = true;
     this._generalService.GetCompany().subscribe(
       data=>{
         this.CompanyList=data;
-        this.advanceTableForm.controls['companyName'].setValidators([Validators.required,
+        this.applyControlValidators('companyName', [Validators.required,
           this.companyNameValidator(this.CompanyList)
         ]);
-        this.advanceTableForm.controls['companyName'].updateValueAndValidity();
         this.filteredCompanyOptions = this.advanceTableForm.controls['companyName'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterCompany(value || ''))
@@ -284,10 +349,9 @@ saveDisabled:boolean = true;
     (
       data=>{
         this.CountryCodesList=data;
-        this.advanceTableForm.controls['countryCode'].setValidators([Validators.required,
+        this.applyControlValidators('countryCode', [Validators.required,
           this.countryTypeValidator(this.CountryCodesList)
         ]);
-        this.advanceTableForm.controls['countryCode'].updateValueAndValidity();
 
         this.filteredCountryCodeOptions = this.advanceTableForm.controls['countryCode'].valueChanges.pipe(
           startWith(""),
@@ -328,10 +392,9 @@ saveDisabled:boolean = true;
     (
       data=>{
         this.CountryCodeList=data;
-        this.advanceTableForm.controls['countryCodes'].setValidators([Validators.required,
+        this.applyControlValidators('countryCodes', [Validators.required,
           this.countryTypesValidator(this.CountryCodeList)
         ]);
-        this.advanceTableForm.controls['countryCodes'].updateValueAndValidity();
         this.filteredCountryCodesOptions = this.advanceTableForm.controls['countryCodes'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterCountryCodes(value || ''))
@@ -362,15 +425,16 @@ saveDisabled:boolean = true;
       data=>
       {
         this.CityList=data;
-        this.advanceTableForm.controls['localAddressCity'].setValidators([Validators.required,
+        this.applyControlValidators('localAddressCity', [Validators.required,
           this.cityTypeValidator(this.CityList)
         ]);
-        this.advanceTableForm.controls['localAddressCity'].updateValueAndValidity();
-
-        this.filteredOptions = this.advanceTableForm.controls['localAddressCity'].valueChanges.pipe(
+        const control = this.advanceTableForm.get('localAddressCity');
+        if (control) {
+          this.filteredOptions = control.valueChanges.pipe(
           startWith(""),
           map(value => this._filter(value || ''))
         ); 
+        }
       });
   }
 
@@ -410,14 +474,16 @@ saveDisabled:boolean = true;
       data=>
       {
         this.CitiesList=data;
-        this.advanceTableForm.controls['permanentAddressCity'].setValidators([Validators.required,
+        this.applyControlValidators('permanentAddressCity', [Validators.required,
           this.permanentTypeValidator(this.CitiesList)
         ]);
-        this.advanceTableForm.controls['permanentAddressCity'].updateValueAndValidity();
-        this.filteredCityOptions =this.advanceTableForm.controls['permanentAddressCity'].valueChanges.pipe(
+        const control = this.advanceTableForm.get('permanentAddressCity');
+        if (control) {
+          this.filteredCityOptions = control.valueChanges.pipe(
           startWith(""),
           map(value => this._filtering(value || ''))
         ); 
+        }
       });
   }
 
@@ -457,10 +523,9 @@ saveDisabled:boolean = true;
       data=>
       {
         this.SupplierList=data;
-        this.advanceTableForm.controls['supplier'].setValidators([Validators.required,
+        this.applyControlValidators('supplier', [Validators.required,
           this.supplieTypeValidator(this.SupplierList)
         ]);
-        this.advanceTableForm.controls['supplier'].updateValueAndValidity();
         this.syncSupplierDisplayFromId(this.SupplierList, this.advanceTable?.supplierID);
         this.filteredSupplierOptions =this.advanceTableForm.controls['supplier'].valueChanges.pipe(
           startWith(""),
@@ -478,9 +543,22 @@ saveDisabled:boolean = true;
     }
   }
 
-  private _filterSupplier(value: string): any {
-  const filterValue = value.toLowerCase();
+  getDriverDutyRegisterDisplay(): string {
+    if (!this.advanceTableForm) {
+      return '';
+    }
+    return formatDriverDutyRegisterName({
+      driverName: this.advanceTableForm.get('driverName')?.value,
+      oldRentnetCode: this.advanceTableForm.get('oldRentnetCode')?.value,
+      mobile1: this.advanceTableForm.get('mobile1')?.value,
+    });
+  }
 
+  private _filterSupplier(value: string): any {
+    const filterValue = (value || '').trim();
+    if (filterValue.length < 3) {
+      return [];
+    }
   return filterSuppliersByDisplay(this.SupplierList, filterValue);
 }
 
@@ -550,9 +628,8 @@ saveDisabled:boolean = true;
       data=>
       {
         this.SupplierForOwnerList=data;
-        this.advanceTableForm.controls['supplier'].setValidators([Validators.required,
+        this.applyControlValidators('supplier', [Validators.required,
           this.supplierNameValidatorForOwner(this.SupplierForOwnerList)]);
-        this.advanceTableForm.controls['supplier'].updateValueAndValidity();
         this.syncSupplierDisplayFromId(this.SupplierForOwnerList, this.advanceTable?.supplierID);
         this.filteredSupplierForOwnerOptions = this.advanceTableForm.controls['supplier'].valueChanges.pipe(
           startWith(""),
@@ -561,8 +638,10 @@ saveDisabled:boolean = true;
       });
   }
   private _filtersearchSupplierForOwner(value: string): any {
-  const filterValue = value.toLowerCase();
-
+    const filterValue = (value || '').trim();
+    if (filterValue.length < 3) {
+      return [];
+    }
   return filterSuppliersByDisplay(this.SupplierForOwnerList, filterValue);
 }
 
@@ -595,14 +674,16 @@ saveDisabled:boolean = true;
       data=>
       { 
         this.HubList=data;
-        this.advanceTableForm.controls['hub'].setValidators([
+        this.applyControlValidators('hub', [
           this.hubTypeValidator(this.HubList)
         ]);
-        this.advanceTableForm.controls['hub'].updateValueAndValidity();
-        this.filteredHubOptions = this.advanceTableForm.controls['hub'].valueChanges.pipe(
+        const control = this.advanceTableForm.get('hub');
+        if (control) {
+          this.filteredHubOptions = control.valueChanges.pipe(
           startWith(""),
           map(value => this._filterHub(value || ''))
         ); 
+        }
       });
   }
 
@@ -650,10 +731,9 @@ saveDisabled:boolean = true;
       data=>
       {
         this.LocationList=data;
-        this.advanceTableForm.controls['location'].setValidators([Validators.required,
+        this.applyControlValidators('location', [Validators.required,
           this.locationTypeValidator(this.LocationList)
         ]);
-        this.advanceTableForm.controls['location'].updateValueAndValidity();
         this.filteredLocationOptions = this.advanceTableForm.controls['location'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterLocation(value || ''))
@@ -756,15 +836,16 @@ saveDisabled:boolean = true;
     this._generalService.getStateForInterstateTax().subscribe(
       data=>{
         this.StateLists=data;
-        this.advanceTableForm.controls['rtoState'].setValidators([Validators.required,
+        this.applyControlValidators('rtoState', [Validators.required,
           this.stateTypeValidator(this.StateLists)
         ]);
-        this.advanceTableForm.controls['rtoState'].updateValueAndValidity();
-        this.filteredStateOptions = this.advanceTableForm.controls['rtoState'].valueChanges.pipe(
+        const control = this.advanceTableForm.get('rtoState');
+        if (control) {
+          this.filteredStateOptions = control.valueChanges.pipe(
           startWith(""),
           map(value => this._filterState(value || ''))
         ); 
-       
+        }
       }
      
     );
@@ -861,75 +942,123 @@ saveDisabled:boolean = true;
   markAsTouched(controlName: string) {
     this.advanceTableForm.controls[controlName].markAsTouched();
   }
+
+  /** Force Material to display mat-error on every invalid control. */
+  showAllValidationErrors(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+    this.advanceTableForm.markAllAsTouched();
+    Object.keys(this.advanceTableForm.controls).forEach((key) => {
+      const control = this.advanceTableForm.get(key);
+      if (!control) {
+        return;
+      }
+      control.markAsTouched({ onlySelf: true });
+      control.markAsDirty({ onlySelf: true });
+      control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
+    this.advanceTableForm.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private scrollToFirstInvalidControl(): void {
+    setTimeout(() => {
+      const invalidControl = this.el.nativeElement.querySelector(
+        '.mat-form-field.ng-invalid, .mat-mdc-form-field.ng-invalid, .ng-invalid[formcontrolname]'
+      );
+      if (invalidControl) {
+        invalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 0);
+  }
+
+  /** Safe apply validators then re-show errors in edit mode. */
+  private applyControlValidators(controlName: string, validators: any[]): void {
+    const control = this.advanceTableForm?.get(controlName);
+    if (!control) {
+      return;
+    }
+    control.setValidators(validators);
+    control.updateValueAndValidity({ emitEvent: false });
+    if (this.action === 'edit') {
+      control.markAsTouched({ onlySelf: true });
+      control.markAsDirty({ onlySelf: true });
+    }
+  }
   
   createContactForm(): FormGroup 
   {
     return this.fb.group(
     {
       driverID: [this.advanceTable?.driverID],
-      driverName: [this.advanceTable?.driverName],
+      driverName: [this.toUpperValue(this.advanceTable?.driverName), [Validators.required]],
       //driverGradeID: [this.advanceTable?.driverGradeID],
       //driverGrade:[this.advanceTable?.driverGrade],
-      driverFatherName: [this.advanceTable?.driverFatherName],
+      driverFatherName: [this.toUpperValue(this.advanceTable?.driverFatherName), [Validators.required]],
       driverOfficialIdentityNumber: [this.advanceTable?.driverOfficialIdentityNumber],
       //aadharAuthenticationToken: [this.advanceTable?.aadharAuthenticationToken],
-      dob:[this.advanceTable?.dob],
+      dob:[this.advanceTable?.dob, [Validators.required]],
       //idMark: [this.advanceTable?.idMark],
       // password: [''],
       // confirmPassword: [''],
-      countryCodes:['+91'],
-      countryCode:['+91'],
+      countryCodes:[this.advanceTable?.countryCodes || '+91', [Validators.required]],
+      countryCode:[this.advanceTable?.countryCode || '+91', [Validators.required]],
       password: ['eco'],
       confirmPassword: ['eco'],
       //highestQualificationID: [this.advanceTable?.highestQualificationID],
       //highestQualification: [this.advanceTable?.highestQualification],
-      bloodGroup: [this.advanceTable?.bloodGroup],
-      driverStatus: [this.advanceTable?.driverStatus],
-      dateOfJoining: [this.advanceTable?.dateOfJoining],
-      //driverEmail: [this.advanceTable?.driverEmail],
+      bloodGroup: [this.advanceTable?.bloodGroup, [Validators.required]],
+      driverStatus: [this.advanceTable?.driverStatus, [Validators.required]],
+      dateOfJoining: [this.advanceTable?.dateOfJoining, [Validators.required]],
+      driverEmail: [this.advanceTable?.driverEmail],
+      driverRemark: [this.advanceTable?.driverRemark],
+      driverBackGroundVerificationCheck: [this.advanceTable?.driverBackGroundVerificationCheck, [Validators.required]],
+      driverBackGroundVerificationCheckIssueDate: [this.advanceTable?.driverBackGroundVerificationCheckIssueDate],
+      driverFitnessCertificate: [this.advanceTable?.driverFitnessCertificate, [Validators.required]],
+      driverFitnessCertificateIssueDate: [this.advanceTable?.driverFitnessCertificateIssueDate],
       dateOfLeaving: [this.advanceTable?.dateOfLeaving],
-      localAddressAddressString: [this.advanceTable?.localAddressAddressString,[this.googlePickupValidator()]],
+      localAddressAddressString: [this.advanceTable?.localAddressAddressString,[Validators.required, this.googlePickupValidator()]],
       localAddressLatLong: [this.advanceTable?.localAddressLatLong],
       //localAddressCityID: [this.advanceTable?.localAddressCityID],
       //localAddressCity: [this.advanceTable?.localAddressCity],
-      localAddress: [this.advanceTable?.localAddress],
-      localPincode: [this.advanceTable?.localPincode],
+      localAddress: [this.advanceTable?.localAddress, [Validators.required]],
+      localPincode: [this.advanceTable?.localPincode, [Validators.required]],
       companyID: [this.advanceTable?.companyID],
       //permanentAddressCityID: [this.advanceTable?.permanentAddressCityID],
       //permanentAddressCity: [this.advanceTable?.permanentAddressCity],
-      permanentAddress: [this.advanceTable?.permanentAddress],
-      permanentAddressPincode: [this.advanceTable?.permanentAddressPincode],
-      mobile1: [this.advanceTable?.mobile1],
+      permanentAddress: [this.advanceTable?.permanentAddress, [Validators.required]],
+      permanentAddressPincode: [this.advanceTable?.permanentAddressPincode, [Validators.required]],
+      mobile1: [this.advanceTable?.mobile1, [Validators.required]],
       mobile2: [this.advanceTable?.mobile2],
       //hubID: [this.advanceTable?.hubID],
       //hub: [this.advanceTable?.hub],
       locationID: [this.advanceTable?.locationID],
-      location: [this.advanceTable?.location],
-      ownedSupplier: [this.advanceTable?.ownedSupplier],
+      location: [this.advanceTable?.location, [Validators.required]],
+      ownedSupplier: [this.advanceTable?.ownedSupplier, [Validators.required]],
       driverGradeName: [this.advanceTable?.driverGradeName],
       supplierID: [this.advanceTable?.supplierID],
       supplier: [this.advanceTable?.supplier],
-      englishSpeakingSkills: [this.advanceTable?.englishSpeakingSkills],
+      englishSpeakingSkills: [this.advanceTable?.englishSpeakingSkills, [Validators.required]],
       //referenceOf: [this.advanceTable?.referenceOf],
       //rtoStateID: [this.advanceTable?.rtoStateID],
       //rtoState: [this.advanceTable?.rtoState],
-      policeVerification: [this.advanceTable?.policeVerification],
+      policeVerification: [this.advanceTable?.policeVerification, [Validators.required]],
       driverImage: [this.advanceTable?.driverImage],
-      medicalInsurance: [this.advanceTable?.medicalInsurance],
+      medicalInsurance: [this.advanceTable?.medicalInsurance, [Validators.required]],
       //drivingSinceDate: [this.advanceTable?.drivingSinceDate],
-      activationStatus: [this.advanceTable?.activationStatus],
+      activationStatus: [this.advanceTable?.activationStatus ?? true],
       latitude: [this.advanceTable?.latitude],
       longitude: [this.advanceTable?.longitude],
-      companyName:[this.advanceTable?.companyName],
-      isAdhoc: [this.advanceTable?.isAdhoc],
-      isAppLoginAllowed: [this.advanceTable?.isAppLoginAllowed],
+      companyName:[this.advanceTable?.companyName, [Validators.required]],
+      isAdhoc: [this.advanceTable?.isAdhoc, [Validators.required]],
+      isAppLoginAllowed: [this.advanceTable?.isAppLoginAllowed, [Validators.required]],
       oldRentnetCode: [
         (this.advanceTable.oldRentnetCode && this.advanceTable.oldRentnetCode !== 0)
           ? this.advanceTable.oldRentnetCode : null,
         [Validators.pattern(/^[0-9]+$/)]
       ]
     
-    },
+    }, 
     {
       validator: ConfirmPasswordValidator("password", "confirmPassword")
     }
@@ -1003,6 +1132,8 @@ public loadPassword()
        this.advanceTableForm.value.longitude
    });
     this.advanceTableForm.patchValue({ oldRentnetCode: this.getOldRentnetCode() });
+    this.forceUppercase('driverName');
+    this.forceUppercase('driverFatherName');
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -1010,6 +1141,9 @@ public loadPassword()
         if (response?.activationStatus === 'Duplicate OldRentnetCode') {
           this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
           this.saveDisabled = true;
+          return;
+        }
+        if (this.handleDuplicateMobileResponse(response)) {
           return;
         }
         this.dialogRef.close();
@@ -1056,6 +1190,8 @@ public loadPassword()
        this.advanceTableForm.value.longitude
    });
     this.advanceTableForm.patchValue({ oldRentnetCode: this.getOldRentnetCode() });
+    this.forceUppercase('driverName');
+    this.forceUppercase('driverFatherName');
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -1063,6 +1199,9 @@ public loadPassword()
         if (response?.activationStatus === 'Duplicate OldRentnetCode') {
           this._generalService.sendUpdate('DataNotFound:OldRentnetCodeDuplicacyError:Failure');
           this.saveDisabled = true;
+          return;
+        }
+        if (this.handleDuplicateMobileResponse(response)) {
           return;
         }
         this.dialogRef.close();
@@ -1079,16 +1218,136 @@ public loadPassword()
   }
   public confirmAdd(): void 
   {
-    this.saveDisabled = false;
-       if(this.action=="edit")
-       {
-          this.Put();
-       }
-       else
-       {
-          this.Post();
-       }
+    this.showAllValidationErrors();
+    if (!this.advanceTableForm.valid) {
+      this.scrollToFirstInvalidControl();
+      this.saveDisabled = true;
+      return;
+    }
 
+    this.saveDisabled = false;
+    const driverStatus = this.advanceTableForm.get('driverStatus')?.value;
+    if (driverStatus && String(driverStatus).toLowerCase() === 'active') {
+      const mobiles = this.buildMobileValues();
+      if (mobiles.mobile1 && mobiles.mobile2
+        && String(mobiles.mobile1).toLowerCase() === String(mobiles.mobile2).toLowerCase()) {
+        this.showDuplicateMobilePopup([], 'Mobile1 and Mobile2 cannot be the same.');
+        this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+        this.saveDisabled = true;
+        return;
+      }
+      const excludeDriverId = this.action === 'edit'
+        ? (this.advanceTable?.driverID || -1)
+        : -1;
+      this._generalService.DuplicateMobileForDriver(mobiles.mobile1, mobiles.mobile2, excludeDriverId)
+        .subscribe(
+          response => {
+            if (response?.isDuplicate) {
+              this.showDuplicateMobilePopup(response.duplicates || []);
+              this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+              if (mobiles.mobile2) {
+                this.advanceTableForm.get('mobile2')?.setErrors({ duplicate: true });
+              }
+              this.saveDisabled = true;
+              return;
+            }
+            this.proceedSave();
+          },
+          () => {
+            this.proceedSave();
+          }
+        );
+      return;
+    }
+    this.proceedSave();
+  }
+
+  private proceedSave(): void {
+    if (this.action == 'edit') {
+      this.Put();
+    } else {
+          this.Post();
+    }
+  }
+
+  private buildMobileValues(): { mobile1: string; mobile2: string } {
+    const phone1 = this.advanceTableForm.get('countryCodes')?.value || '';
+    const phone2 = this.advanceTableForm.get('mobile1')?.value || '';
+    const countryCodes = String(phone1).includes('+')
+      ? String(phone1).split('+')[1]
+      : String(phone1).replace(/^\+/, '');
+    const mobile1 = phone2 ? `${countryCodes}-${phone2}` : null;
+
+    const phone3 = this.advanceTableForm.get('countryCode')?.value || '';
+    const phone4 = this.advanceTableForm.get('mobile2')?.value || '';
+    const countryCode = String(phone3).includes('+')
+      ? String(phone3).split('+')[1]
+      : String(phone3).replace(/^\+/, '');
+    const mobile2 = phone4 ? `${countryCode}-${phone4}` : null;
+
+    return { mobile1, mobile2 };
+  }
+
+  private handleDuplicateMobileResponse(response: any): boolean {
+    const status = response?.activationStatus || '';
+    if (!String(status).startsWith('Duplicate:')) {
+      return false;
+    }
+    if (String(status).includes('Mobile1 and Mobile2')) {
+      this.showDuplicateMobilePopup([], status.replace(/^Duplicate:\s*/, ''));
+    } else {
+      this.showDuplicateMobilePopup(response?.duplicates || []);
+    }
+    this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+    this.saveDisabled = true;
+    return true;
+  }
+
+  private showDuplicateMobilePopup(
+    duplicates: DriverDuplicateMobileModel[],
+    customMessage: string = null
+  ): void {
+    const esc = (value: any) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+
+    const rows = (duplicates || []).map((d) => `
+      <tr>
+        <td style="border:1px solid #ccc;padding:6px;text-align:left;">${esc(d.driverName) || 'N/A'}</td>
+        <td style="border:1px solid #ccc;padding:6px;text-align:left;">${esc(d.mobile1) || 'N/A'}</td>
+        <td style="border:1px solid #ccc;padding:6px;text-align:left;">${esc(d.mobile2) || 'N/A'}</td>
+        <td style="border:1px solid #ccc;padding:6px;text-align:left;">${esc(d.driverOfficialIdentityNumber) || 'N/A'}</td>
+      </tr>
+    `).join('');
+
+    const tableHtml = rows
+      ? `
+        <p style="margin-bottom:10px;">The mobile number is already used by the following Active driver(s):</p>
+        <div style="max-height:300px;overflow:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr>
+                <th style="border:1px solid #ccc;padding:6px;text-align:left;">Driver Name</th>
+                <th style="border:1px solid #ccc;padding:6px;text-align:left;">Mobile 1</th>
+                <th style="border:1px solid #ccc;padding:6px;text-align:left;">Mobile 2</th>
+                <th style="border:1px solid #ccc;padding:6px;text-align:left;">Official Identity No.</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `
+      : `<p>${esc(customMessage) || 'Duplicate mobile number found for an Active driver.'}</p>`;
+
+    Swal.fire({
+      title: 'Duplicate Mobile Number',
+      html: tableHtml,
+      icon: 'error',
+      confirmButtonText: 'OK',
+      width: rows ? 720 : undefined
+    });
   }
 
   getOldRentnetCode(): number | null {
@@ -1097,6 +1356,35 @@ public loadPassword()
       return null;
     }
     return Number(value);
+  }
+
+  toUpperValue(value: string | null | undefined): string {
+    return value ? String(value).toUpperCase() : '';
+  }
+
+  forceUppercase(controlName: string) {
+    const control = this.advanceTableForm?.get(controlName);
+    if (!control) {
+      return;
+    }
+    const current = control.value;
+    if (current == null || current === '') {
+      return;
+    }
+    const upper = String(current).toUpperCase();
+    if (current !== upper) {
+      control.setValue(upper, { emitEvent: false });
+    }
+  }
+
+  shouldShowActivationStatus(): boolean {
+    // Create mode: always hidden (defaults to Active).
+    // Edit mode: show only when current status is Deleted so it can be reactivated.
+    if (this.action !== 'edit') {
+      return false;
+    }
+    const status = this.advanceTableForm?.get('activationStatus')?.value;
+    return status === false;
   }
 
   keyPressNumbers(event: KeyboardEvent): boolean {
@@ -1255,6 +1543,72 @@ this.advanceTableForm?.get('drivingSinceDate')?.setErrors({ invalidDate: true })
 }
 }
 
+onBlurBackGroundVerificationIssueDate(value: string): void {
+  if (!value) {
+    if (this.advanceTableForm?.get('driverBackGroundVerificationCheck')?.value === true) {
+      this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setErrors({ required: true });
+    } else {
+      this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setValue(null);
+    }
+    return;
+  }
+  value = this._generalService.resetDateiflessthan12(value);
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setValue(formattedDate);
+  } else {
+    this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setErrors({ invalidDate: true });
+  }
+}
+
+onBlurBackGroundVerificationIssueDateEdit(value: string): void {
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    if (this.action === 'edit') {
+      this.advanceTable.driverBackGroundVerificationCheckIssueDate = formattedDate;
+    } else {
+      this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setValue(formattedDate);
+    }
+  } else {
+    this.advanceTableForm?.get('driverBackGroundVerificationCheckIssueDate')?.setErrors({ invalidDate: true });
+  }
+}
+
+onBlurFitnessCertificateIssueDate(value: string): void {
+  if (!value) {
+    if (this.advanceTableForm?.get('driverFitnessCertificate')?.value === true) {
+      this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setErrors({ required: true });
+    } else {
+      this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setValue(null);
+    }
+    return;
+  }
+  value = this._generalService.resetDateiflessthan12(value);
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setValue(formattedDate);
+  } else {
+    this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setErrors({ invalidDate: true });
+  }
+}
+
+onBlurFitnessCertificateIssueDateEdit(value: string): void {
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    if (this.action === 'edit') {
+      this.advanceTable.driverFitnessCertificateIssueDate = formattedDate;
+    } else {
+      this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setValue(formattedDate);
+    }
+  } else {
+    this.advanceTableForm?.get('driverFitnessCertificateIssueDate')?.setErrors({ invalidDate: true });
+}
+}
+
   /////////////////for Image Upload////////////////////////////
   public response: { dbPath: '' };
   public ImagePath: string = "";
@@ -1270,24 +1624,59 @@ this.advanceTableForm?.get('drivingSinceDate')?.setErrors({ invalidDate: true })
     this.checkDuplicateMobile();
   }
 
+  onMobile2Change(): void {
+    this.checkDuplicateMobile();
+  }
+
   //-------- Check Duplicate Email & Mobile -----------------
 checkDuplicateMobile() {
-  const mobile1 = '91-' + this.advanceTableForm.get('mobile1').value;
+  const driverStatus = this.advanceTableForm.get('driverStatus')?.value;
+  if (driverStatus && String(driverStatus).toLowerCase() !== 'active') {
+    this.clearMobileDuplicateErrors();
+    return;
+  }
 
-  if (mobile1) {
-    this._generalService.DuplicateMobileForDriver(mobile1).subscribe(response => {
-      if (response.isDuplicate) 
-      {
-        this.advanceTableForm.get('mobile1').setErrors({ duplicate: true });
-      }
-      else 
-      {
-        if (this.advanceTableForm.get('mobile1').hasError('duplicate')) 
-        {
-          this.advanceTableForm.get('mobile1').setErrors(null);
+  const mobiles = this.buildMobileValues();
+  if (!mobiles.mobile1 && !mobiles.mobile2) {
+    return;
+  }
+
+  if (mobiles.mobile1 && mobiles.mobile2
+    && String(mobiles.mobile1).toLowerCase() === String(mobiles.mobile2).toLowerCase()) {
+    this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+    this.advanceTableForm.get('mobile2')?.setErrors({ duplicate: true });
+    return;
+  }
+
+  const excludeDriverId = this.action === 'edit'
+    ? (this.advanceTable?.driverID || -1)
+    : -1;
+
+  this._generalService.DuplicateMobileForDriver(mobiles.mobile1, mobiles.mobile2, excludeDriverId)
+    .subscribe(response => {
+      if (response?.isDuplicate) {
+        this.advanceTableForm.get('mobile1')?.setErrors({ duplicate: true });
+        if (mobiles.mobile2) {
+          this.advanceTableForm.get('mobile2')?.setErrors({ duplicate: true });
         }
+      } else {
+        this.clearMobileDuplicateErrors();
       }
     });
+}
+
+  private clearMobileDuplicateErrors(): void {
+    const mobile1Control = this.advanceTableForm.get('mobile1');
+    if (mobile1Control?.hasError('duplicate')) {
+      const errors = { ...(mobile1Control.errors || {}) };
+      delete errors['duplicate'];
+      mobile1Control.setErrors(Object.keys(errors).length ? errors : null);
+    }
+    const mobile2Control = this.advanceTableForm.get('mobile2');
+    if (mobile2Control?.hasError('duplicate')) {
+      const errors = { ...(mobile2Control.errors || {}) };
+      delete errors['duplicate'];
+      mobile2Control.setErrors(Object.keys(errors).length ? errors : null);
   }
 }
 

@@ -6,8 +6,8 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subscription } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -166,7 +166,7 @@ export class BookingConfigurationComponent implements OnInit {
     salesExecutive:[''],
     salesExecutiveID:[''],
     kam:[''],
-    kamID:[''],
+    kamID:[0],
     reservationExecutiveID:[''],
     customerTypeID:[''],
     emailLink: [''],
@@ -251,7 +251,7 @@ googlePlacesForm = this.fb.group({
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
     this.route.queryParams.subscribe(paramsData =>{
-      this.BookingID = paramsData.BookingID;
+      this.BookingID = paramsData.BookingID;     
       this.returnUrl = this.resolveReturnUrl(paramsData.returnUrl);
     });
     this.advanceTableForm.patchValue({reservationSourceID:22});
@@ -305,9 +305,7 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({vehicle:this.dataSource.vehicle});
           this.advanceTableForm.patchValue({pickupAddress:this.dataSource.pickupAddress});
           this.advanceTableForm.patchValue({
-            pickupAddressDetails: this.dataSource.pickupAddressDetails
-              ? `${this.dataSource.pickupAddressDetails} ${this.dataSource.pickupAddress}`
-              : this.dataSource.pickupAddress
+            pickupAddressDetails: this.dataSource.pickupAddressDetails || ''
           });
           this.advanceTableForm.patchValue({serviceLocationID:this.dataSource.serviceLocationID});
           this.advanceTableForm.patchValue({serviceLocation:this.dataSource.serviceLocation});
@@ -316,9 +314,7 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({dropOffTime:this.dataSource.dropOffTime});
           this.advanceTableForm.patchValue({dropOffAddress:this.dataSource.dropOffAddress});
           this.advanceTableForm.patchValue({
-            dropOffAddressDetails: this.dataSource.dropOffAddressDetails
-              ? `${this.dataSource.dropOffAddressDetails} ${this.dataSource.dropOffAddress}`
-              : this.dataSource.dropOffAddress
+            dropOffAddressDetails: this.dataSource.dropOffAddressDetails || ''
           });
           this.advanceTableForm.patchValue({dropOffPriorityOrder:this.dataSource.dropOffPriorityOrder});
 
@@ -326,6 +322,10 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({modeOfPaymentID:this.dataSource.modeOfPaymentID});
           this.advanceTableForm.patchValue({modeOfPayment:this.dataSource.modeOfPayment});
           this.advanceTableForm.patchValue({reservationStatus:this.dataSource.requestStatus || 'Approved'});
+          if (this.dataSource.packageID) {
+            this.packageID = this.dataSource.packageID;
+          }
+          this.initCascadingDropdownsIfReady();
         },
         (error: HttpErrorResponse) => {
           if (error.status === 204 || error.status === 400) {
@@ -377,16 +377,20 @@ toggleStopFold() {
             this.customerDetails.pickupDate,
             pickupTime24
           ) ?? this.mergeDateAndTime(
-            this.customerDetails.pickupDate,
-            this.customerDetails.pickupTime
+          this.customerDetails.pickupDate,
+          this.customerDetails.pickupTime
+        );
+          const dropOffDateSource = this.isMissingDate(this.customerDetails.dropOffDate)
+            ? this.customerDetails.pickupDate
+            : this.customerDetails.dropOffDate;
+          const resolvedDropOffTime24 = dropOffTime24 || pickupTime24;
+          let dropOffDateTime = this.mergeDateAndTimeFromStrings(
+            dropOffDateSource,
+            resolvedDropOffTime24
           );
-          const dropOffDateTime = this.mergeDateAndTimeFromStrings(
-            this.customerDetails.dropOffDate,
-            dropOffTime24
-          ) ?? this.mergeDateAndTime(
-            this.customerDetails.dropOffDate,
-            this.customerDetails.dropOffTime
-          );
+          if (this.isMissingDate(dropOffDateTime) && pickupDateTime) {
+            dropOffDateTime = pickupDateTime;
+          }
           this.advanceTableForm.patchValue({customerID:this.customerDetails.customerID});
           this.bookerID = this.customerDetails.primaryBookerID;
           this.advanceTableForm.patchValue({primaryBookerID:this.customerDetails.primaryBookerID});
@@ -394,14 +398,16 @@ toggleStopFold() {
           this.advanceTableForm.patchValue({pickupDate:this.extractDate(pickupDateTime)});
           this.advanceTableForm.patchValue({pickupTime:this.extractTime(pickupDateTime)});
           this.advanceTableForm.patchValue({dropOffDateTime:dropOffDateTime});
+          if (dropOffDateTime) {
           this.advanceTableForm.patchValue({dropOffDate:this.extractDate(dropOffDateTime)});
           this.advanceTableForm.patchValue({dropOffTime:this.extractTime(dropOffDateTime)});
+          }
           this.advanceTableForm.patchValue({customerGroupID:this.customerDetails.customerGroupID});
           this.advanceTableForm.patchValue({customerTypeID:this.customerDetails.customerTypeID});
-          this.advanceTableForm.patchValue({pickupDateString:this._generalService.getDateFrom(this.advanceTableForm.value.pickupDate)});
+          this.advanceTableForm.patchValue({pickupDateString:this.formatBookingDateString(this.advanceTableForm.value.pickupDate)});
           this.advanceTableForm.patchValue({pickupTimeString:pickupTime24 || this.formatTime24FromDateTime(pickupDateTime)});
-          this.advanceTableForm.patchValue({dropOffDateString:this._generalService.getDateFrom(this.advanceTableForm.value.dropOffDate)});
-          this.advanceTableForm.patchValue({dropOffTimeString:dropOffTime24 || this.formatTime24FromDateTime(dropOffDateTime)});
+          this.advanceTableForm.patchValue({dropOffDateString:this.formatBookingDateString(this.advanceTableForm.value.dropOffDate)});
+          this.advanceTableForm.patchValue({dropOffTimeString:resolvedDropOffTime24 || this.formatTime24FromDateTime(dropOffDateTime)});
           this.onPickupDateChange();
           this.getSalesManager(this.customerDetails.customerID);
           this.getCustomerKam(this.customerDetails.customerID);
@@ -537,7 +543,7 @@ toggleStopFold() {
     second: 0,
     millisecond: 0,
   }).toDate();
- }
+  }
 
  private mergeDateAndTime(pickupDate: any, pickupTime: any): Date {
   const time24 = this.formatTime24(pickupTime);
@@ -561,6 +567,14 @@ toggleStopFold() {
   );
 
   return dateObj;
+}
+
+private isMissingDate(value: any): boolean {
+  if (value === null || value === undefined || value === '') {
+    return true;
+  }
+  const asMoment = moment(value);
+  return !asMoment.isValid() || asMoment.year() <= 1970;
 }
 
 private extractDate(dateTime: Date): Date {
@@ -624,8 +638,8 @@ private extractTime(dateTime: Date): Date {
         salesExecutiveControl.setValidators([this.salesExecutiveValidator(this.salesManagerList)]);
         salesExecutiveControl.updateValueAndValidity();
         this.filteredEmployeeOptions = salesExecutiveControl.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCustomerSE(value || ''))
+        startWith(""),
+        map(value => this._filterCustomerSE(value || ''))
         );
       }
     })
@@ -661,14 +675,16 @@ private extractTime(dateTime: Date): Date {
 
       const kam = this.customerKamList[0].firstName + ' ' + this.customerKamList[0].lastName + '-' + this.customerKamList[0].mobile + '-' + this.customerKamList[0].email;
       this.advanceTableForm.patchValue({kam});
-      this.advanceTableForm.patchValue({kamID:this.customerKamList[0]?.kamID});
+      this.advanceTableForm.patchValue({
+        kamID: this.customerKamList[0]?.kamID || this.customerKamList[0]?.employeeID || 0
+      });
       const kamControl = this.advanceTableForm.controls['kam'];
       if (kamControl) {
         kamControl.setValidators([this.customerKAMValidator(this.customerKamList)]);
         kamControl.updateValueAndValidity();
         this.filteredEmployeesOptions = kamControl.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCustomerKAM(value || ''))
+        startWith(""),
+        map(value => this._filterCustomerKAM(value || ''))
         );
       }
     })
@@ -705,18 +721,18 @@ private extractTime(dateTime: Date): Date {
       this.refreshReservationStops(enrouteStops);
 
       const pickupStop = this.stopDetailsList.find(
-        x => x.integrationRequestStopType?.toLowerCase() === 'pickup'
+        x => this.isPickupIntegrationStopType(x.integrationRequestStopType)
       );
 
       const dropOffStop = this.stopDetailsList.find(
-        x => x.integrationRequestStopType?.toLowerCase() === 'dropoff'
+        x => this.isDropoffIntegrationStopType(x.integrationRequestStopType)
       );
 
       // Pickup Binding
       if (pickupStop) {
         const address = this.getStopAddress(pickupStop);
         const landmark = this.getStopLandmark(pickupStop);
-        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : `${landmark} (${address})`;
+        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : address;
   this.advanceTableForm.patchValue({
     pickupAddress: address,
     pickupAddressLatitude: pickupStop.integrationRequestStopLatitude,
@@ -730,7 +746,7 @@ private extractTime(dateTime: Date): Date {
       if (dropOffStop) {
         const address = this.getStopAddress(dropOffStop);
         const landmark = this.getStopLandmark(dropOffStop);
-        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : `${landmark} (${address})`;
+        const formattedDetails = landmark ? (address ? `${landmark} (${address})` : landmark) : address;
   this.advanceTableForm.patchValue({
     dropOffAddress: address,
     dropOffAddressLatitude: dropOffStop.integrationRequestStopLatitude,
@@ -837,6 +853,16 @@ private extractTime(dateTime: Date): Date {
       this.advanceTableForm.markAllAsTouched();
       return;
     }
+    const pickupCityId = this.resolvePickupCityId();
+    const pickupCity = this.advanceTableForm.value.pickupCity;
+    if (!this.isEmptyText(pickupCity) && this.isEmptyId(pickupCityId)) {
+      Swal.fire({
+        title: '',
+        text: 'Please select City from the list.',
+        icon: 'warning',
+      });
+      return;
+    }
     this.saving = true;
     if(this.action=="edit")
     {
@@ -857,6 +883,10 @@ private extractTime(dateTime: Date): Date {
     return Number.isFinite(parsed) ? Math.trunc(parsed) : 0;
   }
 
+  private isEmptyText(value: unknown): boolean {
+    return value === null || value === undefined || String(value).trim() === '';
+  }
+
   public Post(): void
   {
     const ctrn =
@@ -864,7 +894,7 @@ private extractTime(dateTime: Date): Date {
       this.customerDetails?.customerTravelRequestNumber ||
       this.advanceTableForm.value.customerTravelRequestNumber ||
       '';
-
+    
     this.advanceTableForm.patchValue({reservationExecutiveID:this._generalService.getUserID()});
     this.advanceTableForm.patchValue({bookingID:this.BookingID});
     this.advanceTableForm.patchValue({customerTravelRequestNumber: ctrn});
@@ -887,10 +917,29 @@ private extractTime(dateTime: Date): Date {
     this.advanceTableForm.patchValue({
       dropOffCityID: this.normalizeOptionalInt(this.advanceTableForm.value.dropOffCityID),
     });
+    const pickupCityId = this.resolvePickupCityId();
+    if (pickupCityId <= 0) {
+      this.saving = false;
+      Swal.fire({
+        title: '',
+        text: 'Please select City from the list.',
+        icon: 'warning',
+      });
+      return;
+    }
+    this.pickupCityID = pickupCityId;
+    this.advanceTableForm.patchValue({ pickupCityID: pickupCityId });
     const payload: any = this.advanceTableForm.getRawValue();
+    payload.pickupCityID = pickupCityId;
+    payload.kamID = this.normalizeOptionalInt(payload.kamID);
     payload.reservationStops = this.reservationStops;
-    payload.pickupTime = null;
-    payload.dropOffTime = null;
+    // Wall-clock strings are authoritative; omit Date fields to avoid UTC JSON shifting date/time on save.
+    delete payload.pickupDateTime;
+    delete payload.pickupDate;
+    delete payload.pickupTime;
+    delete payload.dropOffDateTime;
+    delete payload.dropOffDate;
+    delete payload.dropOffTime;
     this.bookingConfigurationService.add(payload)  
     .subscribe(
     response => 
@@ -930,7 +979,7 @@ private extractTime(dateTime: Date): Date {
   
    navigateToControlPanel(reservationID?: number) {
       const queryParams = reservationID
-        ? { reservationID: encodeURIComponent(this._generalService.encrypt(String(reservationID))) }
+        ? { reservationID: this._generalService.encrypt(String(reservationID)) }
         : undefined;
       this.router.navigate(['/controlPanelDesign'], { queryParams });
       Swal.close();
@@ -1029,8 +1078,44 @@ private extractTime(dateTime: Date): Date {
         
         this.contractID = data;
         this.InitPackageType();
+        this.initCascadingDropdownsIfReady();
       } 
     }); 
+  }
+
+  private initCascadingDropdownsIfReady(): void {
+    if (!this.contractID || !this.PackageType) {
+      return;
+    }
+    const packageId = this.packageID || this.advanceTableForm.value.packageID;
+    if (!packageId) {
+      return;
+    }
+    this.InitCity(this.PackageType);
+    this.InitVehicle(this.PackageType);
+    this.InitDropOffCity(this.PackageType);
+  }
+
+  private isEmptyId(value: unknown): boolean {
+    return value === null || value === undefined || value === '' || value === 0 || value === '0';
+  }
+
+  private resolvePickupCityId(): number {
+    let pickupCityId = this.normalizeOptionalInt(
+      this.pickupCityID ?? this.advanceTableForm.value.pickupCityID
+    );
+    if (pickupCityId > 0) {
+      return pickupCityId;
+    }
+    const cityName = String(this.advanceTableForm.value.pickupCity ?? '').trim();
+    if (!cityName || !this.CityList?.length) {
+      return 0;
+    }
+    const normalized = cityName.toLowerCase();
+    const match = this.CityList.find(
+      (city) => String(city.geoPointName ?? '').trim().toLowerCase() === normalized
+    );
+    return match?.geoPointID > 0 ? this.normalizeOptionalInt(match.geoPointID) : 0;
   }
 
   InitPackageType(){
@@ -1258,8 +1343,9 @@ private extractTime(dateTime: Date): Date {
    }
    
    onCitySelected(selectedCityName: string) {
-     const selectedCity = this.CityList.find(
-       data => data.geoPointName === selectedCityName
+     const normalized = String(selectedCityName ?? '').trim().toLowerCase();
+     const selectedCity = this.CityList?.find(
+       data => String(data.geoPointName ?? '').trim().toLowerCase() === normalized
      );
    
      if (selectedCity) {
@@ -1423,30 +1509,25 @@ private extractTime(dateTime: Date): Date {
   }
 
 
-  InitGoogleAddress(){
-    this._generalService.getGoogleAddress().subscribe(
-      data=>
-      {
-        this.GoogleAddressList=data;
+  InitGoogleAddress() {
         this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterGA(value || ''))
-        ); 
-      });
-      
-  }
-
-  private _filterGA(value: string): any {
-    const filterValue = value.toLowerCase();
-    if(filterValue.length===0)
-    {
-      return []
-    }
-    return this.GoogleAddressList.filter(
-      customer => 
-      {
-        return customer.geoSearchString.toLowerCase().includes(filterValue);
-      }
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (typeof value === 'string' ? value : '').trim();
+        if (!term) {
+          this.GoogleAddressList = [];
+          return of([]);
+        }
+        return this._generalService.searchGoogleAddress(term).pipe(
+          catchError(() => of([])),
+          map((data) => {
+            this.GoogleAddressList = data ?? [];
+            return this.GoogleAddressList;
+          })
+        );
+      })
     );
   }
 
@@ -1727,29 +1808,25 @@ private extractTime(dateTime: Date): Date {
 
 
 
- InitDropOffGoogleAddress(){
-  this._generalService.getGoogleAddress().subscribe(
-    data=>
-    {
-      this.DropOffGoogleAddressList=data;
+ InitDropOffGoogleAddress() {
       this.filteredDropOffGoogleAddressOptions = this.advanceTableForm.controls['dropOffAddress'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filterDropoffGA(value || ''))
-      ); 
-    });
-}
-
-private _filterDropoffGA(value: string): any {
-  const filterValue = value.toLowerCase();
-  if(filterValue.length===0)
-  {
-    return []
-  }
-  return this.DropOffGoogleAddressList.filter(
-    customer => 
-    {
-      return customer.geoSearchString.toLowerCase().includes(filterValue);
-    }
+    startWith(''),
+    debounceTime(300),
+    distinctUntilChanged(),
+    switchMap((value) => {
+      const term = (typeof value === 'string' ? value : '').trim();
+      if (!term) {
+        this.DropOffGoogleAddressList = [];
+        return of([]);
+      }
+      return this._generalService.searchGoogleAddress(term).pipe(
+        catchError(() => of([])),
+        map((data) => {
+          this.DropOffGoogleAddressList = data ?? [];
+          return this.DropOffGoogleAddressList;
+        })
+      );
+    })
   );
 }
 
@@ -1950,15 +2027,22 @@ OnDropOffGeoLocationClick(option:any)
     return this.stopDetailsList.filter(stop => this.isIntegrationEnrouteStop(stop));
   }
 
+  private isPickupIntegrationStopType(stopType: string | null | undefined): boolean {
+    const type = stopType?.trim().toLowerCase();
+    return type === 'start' || type === 'pickup';
+  }
+
+  private isDropoffIntegrationStopType(stopType: string | null | undefined): boolean {
+    const type = stopType?.trim().toLowerCase();
+    return type === 'end' || type === 'dropoff';
+  }
+
   private isIntegrationEnrouteStop(stop: BookingConfigurationStopDetails): boolean {
     const type = stop?.integrationRequestStopType?.trim().toLowerCase();
     if (!type) {
       return false;
     }
-    if (type === 'start' || type === 'pickup') {
-      return false;
-    }
-    if (type === 'end' || type === 'dropoff') {
+    if (this.isPickupIntegrationStopType(type) || this.isDropoffIntegrationStopType(type)) {
       return false;
     }
     return true;
@@ -2010,8 +2094,10 @@ OnDropOffGeoLocationClick(option:any)
         return linkedStop;
       }
     }
-    return this.stopDetailsList.find(
-      stop => stop.integrationRequestStopType?.toLowerCase() === fallbackType
+    return this.stopDetailsList.find(stop =>
+      fallbackType === 'pickup'
+        ? this.isPickupIntegrationStopType(stop.integrationRequestStopType)
+        : this.isDropoffIntegrationStopType(stop.integrationRequestStopType)
     ) || null;
   }
 
@@ -2035,9 +2121,25 @@ OnDropOffGeoLocationClick(option:any)
     return this.getStopLandmark(this.getPassengerDropoffStop(passenger));
   }
 
+  getBookingPickupAddressDetails(): string {
+    const v = this.advanceTableForm?.get('pickupAddressDetails')?.value;
+    if (v != null && String(v).trim() !== '') {
+      return String(v).trim();
+    }
+    return this.dataSource?.pickupAddressDetails ?? '';
+  }
+
+  getBookingDropoffAddressDetails(): string {
+    const v = this.advanceTableForm?.get('dropOffAddressDetails')?.value;
+    if (v != null && String(v).trim() !== '') {
+      return String(v).trim();
+    }
+    return this.dataSource?.dropOffAddressDetails ?? '';
+  }
+
   get pickupCityName(): string {
     const pickupStop = this.stopDetailsList?.find(
-      stop => stop.integrationRequestStopType?.toLowerCase() === 'pickup'
+      stop => this.isPickupIntegrationStopType(stop.integrationRequestStopType)
     );
     if (pickupStop?.integrationRequestStopCity) {
       return pickupStop.integrationRequestStopCity;

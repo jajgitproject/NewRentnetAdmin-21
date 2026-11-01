@@ -2,6 +2,7 @@
 import { formatDate } from '@angular/common';
 export class BookingConfigurationCustomerDetails {
   customerTravelRequestNumber :string;
+  trn :string;
   customerID : number;
   customerName : string;
   aggregatorName:string;
@@ -36,6 +37,7 @@ export class BookingConfigurationCustomerDetails {
     {
 
       this.customerTravelRequestNumber = bookingConfigurationCustomerDetails.customerTravelRequestNumber || '';
+      this.trn = bookingConfigurationCustomerDetails.trn || '';
       this.customerID  = bookingConfigurationCustomerDetails.customerID || '';
       this.customerName = bookingConfigurationCustomerDetails.customerName || '';
       this.aggregatorName = bookingConfigurationCustomerDetails.aggregatorName || '';
@@ -267,7 +269,7 @@ export class ReservationGroupModel {
       this.bookingGroupType = reservation.bookingGroupType || '';
       this.bookingID = reservation.bookingID || '';
       this.kam = reservation.kam || '';
-      this.kamID = reservation.kamID || '';
+      this.kamID = reservation.kamID || 0;
       this.customerTravelRequestNumber = reservation.customerTravelRequestNumber || '';
       this.reservationStartDate=new Date();
       this.reservationEndDate=new Date();

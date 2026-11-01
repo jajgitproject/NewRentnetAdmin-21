@@ -70,6 +70,12 @@ export class CancelAllotmentService
     return this.httpClient.delete(this.API_URL + '/'+ CancelAllotmentID);
   }
 
+  checkInvoiceNumber(reservationID: number): Observable<any> {
+    return this.httpClient.get(
+      this.generalService.BaseURL + 'controlPanel/CheckInvoiceNumber/' + reservationID
+    );
+  }
+
  
  updateAllotmentType(AllotmentTypeData:any)
   {

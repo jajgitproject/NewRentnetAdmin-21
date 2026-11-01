@@ -200,19 +200,51 @@ export class ErrorInterceptor implements HttpInterceptor {
 
 
 
+  private extractBodyMessage(errorBody: unknown): string {
+    if (typeof errorBody === 'string' && errorBody.trim()) {
+      return errorBody.trim();
+    }
+    if (errorBody && typeof errorBody === 'object' && !(errorBody instanceof Blob)) {
+      const body = errorBody as { message?: unknown; Message?: unknown };
+      const raw = body.message ?? body.Message;
+      if (typeof raw === 'string' && raw.trim()) {
+        return raw.trim();
+      }
+    }
+    return '';
+  }
+
   private extractErrorText(httpErr: HttpErrorResponse): string {
-    const msgFromBody =
-      httpErr?.error &&
-      typeof httpErr.error === 'object' &&
-      httpErr.error !== null &&
-      'message' in httpErr.error
-        ? String((httpErr.error as { message?: unknown }).message ?? '')
-        : typeof httpErr?.error === 'string' && httpErr.error.trim()
-          ? httpErr.error.trim()
-          : '';
+    const msgFromBody = this.extractBodyMessage(httpErr?.error);
+
+    const timeoutMessage =
+      'Database timeout — the server took too long to respond. Please try again or contact your administrator.';
+
+    if (this.isDatabaseTimeout(msgFromBody)) {
+      return timeoutMessage;
+    }
+
+    const validationErrors = this.flattenValidationErrors(httpErr?.error);
+    if (validationErrors) {
+      return validationErrors;
+    }
 
     if (msgFromBody) {
       return msgFromBody;
+    }
+
+    const problemTitle =
+      httpErr?.error &&
+      typeof httpErr.error === 'object' &&
+      httpErr.error !== null &&
+      'title' in httpErr.error
+        ? String((httpErr.error as { title?: unknown }).title ?? '').trim()
+        : '';
+    if (problemTitle && problemTitle.toLowerCase() !== 'one or more validation errors occurred.') {
+      return problemTitle;
+    }
+    if (problemTitle && httpErr?.status) {
+      return `Allotment request failed (HTTP ${httpErr.status}). Invalid data was sent to the API.`;
     }
 
     if (httpErr?.status === 0 || httpErr?.statusText === 'Unknown Error') {
@@ -223,7 +255,86 @@ export class ErrorInterceptor implements HttpInterceptor {
       return 'API endpoint not found. Restart or redeploy RentnetAPI with the latest Driver Payout MIS export endpoints.';
     }
 
-    return httpErr?.statusText || 'Error';
+    if (this.isDatabaseTimeout(httpErr?.message)) {
+      return timeoutMessage;
+    }
+
+    const statusText = (httpErr?.statusText || '').trim();
+    if (!statusText || statusText.toLowerCase() === 'ok' || statusText.toLowerCase() === 'error') {
+      return httpErr?.status
+        ? `Allotment request failed (HTTP ${httpErr.status}). Restart IIS Express if the API DLL is locked.`
+        : 'Allotment request failed.';
+    }
+
+    return statusText;
+  }
+
+  private isDatabaseTimeout(message?: string): boolean {
+    if (!message) {
+      return false;
+    }
+
+    const normalized = message.toLowerCase();
+    return (
+      normalized.includes('timeout expired') ||
+      normalized.includes('database timeout') ||
+      normalized.includes('cannot connect to the database') ||
+      normalized.includes('connection timeout')
+    );
+  }
+
+  private flattenValidationErrors(errorBody: unknown): string {
+    if (!errorBody || typeof errorBody !== 'object' || !('errors' in errorBody)) {
+      return '';
+    }
+    const errors = (errorBody as { errors?: unknown }).errors;
+    if (!errors) {
+      return '';
+    }
+
+    if (Array.isArray(errors)) {
+      return errors
+        .map((item) => this.formatStructuredImportError(item))
+        .filter((part) => !!part.trim())
+        .join('\n');
+    }
+
+    if (typeof errors !== 'object') {
+      return '';
+    }
+
+    return Object.entries(errors as Record<string, unknown>)
+      .map(([key, value]) => {
+        const field = String(key || '').replace(/^\$\./, '');
+        const text = Array.isArray(value) ? value.join(' ') : String(value ?? '');
+        return field ? `${field}: ${text}` : text;
+      })
+      .filter((part) => !!part.trim())
+      .join(' | ');
+  }
+
+  private formatStructuredImportError(item: unknown): string {
+    if (typeof item === 'string') {
+      return item.trim();
+    }
+    if (!item || typeof item !== 'object') {
+      return String(item ?? '');
+    }
+    const row = (item as { rowNumber?: unknown; RowNumber?: unknown }).rowNumber
+      ?? (item as { RowNumber?: unknown }).RowNumber;
+    const field = (item as { field?: unknown; Field?: unknown }).field
+      ?? (item as { Field?: unknown }).Field;
+    const message = (item as { message?: unknown; Message?: unknown }).message
+      ?? (item as { Message?: unknown }).Message;
+    const text = message != null ? String(message).trim() : '';
+    if (!text) {
+      return '';
+    }
+    const rowLabel = row != null && String(row).trim() !== '' && String(row) !== '0'
+      ? `Row ${row}`
+      : 'File';
+    const fieldLabel = field != null && String(field).trim() !== '' ? String(field).trim() : '';
+    return fieldLabel ? `${rowLabel} (${fieldLabel}): ${text}` : `${rowLabel}: ${text}`;
   }
 
 }

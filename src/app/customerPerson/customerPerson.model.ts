@@ -20,7 +20,9 @@ export class CustomerPerson {
   isAdmin:boolean;
   maskMobileNumber:boolean;
   isPostPickUpCallAllowed:boolean;
+  isFeedbackEmailAllowed:boolean;
   sendSMSWhatsApp:boolean;
+  reservationConfirmationWhatsApp:boolean;
   sendEmail:boolean;
   customerDesignationID:number;
   customerDepartmentID:number;
@@ -32,6 +34,7 @@ export class CustomerPerson {
   customerDesignation:number;
   customerDepartment:number;
  employeeCode:string;
+ costCenter:string;
  countryCode:string;
  countryCodes:string;
  mobileCode:string;
@@ -56,25 +59,30 @@ export class CustomerPerson {
        this.primaryMobile = customerPerson.primaryMobile || '';
        this.secondaryMobile1 = customerPerson.secondaryMobile1 || '';
        this.secondaryMobile2 = customerPerson.secondaryMobile2 || '';
-       this.isContactPerson = customerPerson.isContactPerson || '';
-       this.isBooker = customerPerson.isBooker || '';
-       this.isPassenger = customerPerson.isPassenger || '';
-       this.isAdmin = customerPerson.isAdmin || '';
-       this.maskMobileNumber = customerPerson.maskMobileNumber || '';
+       this.isContactPerson = customerPerson.isContactPerson ?? null;
+       this.isBooker = customerPerson.isBooker ?? null;
+       this.isPassenger = customerPerson.isPassenger ?? null;
+       this.isAdmin = customerPerson.isAdmin ?? null;
+       this.maskMobileNumber = customerPerson.maskMobileNumber ?? null;
        this.isPostPickUpCallAllowed = customerPerson.isPostPickUpCallAllowed ?? false;
-       this.sendSMSWhatsApp = customerPerson.sendSMSWhatsApp || '';
-       this.sendEmail = customerPerson.sendEmail || '';
+       this.isFeedbackEmailAllowed = customerPerson.isFeedbackEmailAllowed === true || customerPerson.isFeedbackEmailAllowed === false
+         ? customerPerson.isFeedbackEmailAllowed
+         : null;
+       this.sendSMSWhatsApp = customerPerson.sendSMSWhatsApp ?? null;
+       this.reservationConfirmationWhatsApp = customerPerson.reservationConfirmationWhatsApp === true;
+       this.sendEmail = customerPerson.sendEmail ?? null;
        this.customerDesignationID = customerPerson.customerDesignationID || 0;
        this.employeeCode = customerPerson.employeeCode || '';
+       this.costCenter = customerPerson.costCenter || '';
        this.customerDepartment=customerPerson.customerDepartment || '';
        this.customerDesignation = customerPerson.customerDesignation|| '';
        this.customerDepartmentID = customerPerson.customerDepartmentID || 0;
-       this.preferAppBasedDriver = customerPerson.preferAppBasedDriver || '';
-       this.activationStatus = customerPerson.activationStatus || '';
-       this.loyalGuest = customerPerson.loyalGuest || '';
-       this.isDefaultForIntegrationRequest = customerPerson.isDefaultForIntegrationRequest || '';
-        this.allowLoginToCDP = customerPerson.allowLoginToCDP || '';
-        this.allowLoginToCustomerApp = customerPerson.allowLoginToCustomerApp || '';
+       this.preferAppBasedDriver = customerPerson.preferAppBasedDriver ?? null;
+       this.activationStatus = customerPerson.activationStatus ?? null;
+       this.loyalGuest = customerPerson.loyalGuest ?? null;
+       this.isDefaultForIntegrationRequest = customerPerson.isDefaultForIntegrationRequest ?? null;
+        this.allowLoginToCDP = customerPerson.allowLoginToCDP ?? null;
+        this.allowLoginToCustomerApp = customerPerson.allowLoginToCustomerApp ?? null;
     }
   }
   

@@ -46,6 +46,7 @@ export class InvoicePaidStatusComponent implements OnInit {
   getCustomerDisplayLabel = getCustomerDisplayLabel;
 
   invoiceDate: Date | null = null;
+  invoiceNumberWithPrefix = '';
   paidStatus = 'No';
 
   rows: InvoicePaidStatusRow[] = [];
@@ -209,6 +210,7 @@ export class InvoicePaidStatusComponent implements OnInit {
         customerID: this.customerID || null,
         customerName: getCustomerNameFromAutocomplete(this.customer.value) || null,
         invoiceDate: this.formatDate(this.invoiceDate),
+        invoiceNumberWithPrefix: (this.invoiceNumberWithPrefix || '').trim() || null,
         paidStatus: this.paidStatus || null,
         pageNumber: this.pageNumber,
         pageSize: this.pageSize,

@@ -118,8 +118,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
   public PackageList?: PackageDropDown[] = [];
   filteredPackageOptions: Observable<PackageDropDown[]>;
 
-  SearchDutySlipID:number = 0;
-  SearchReservationID:number = 0;
+  SearchDutySlipID:string = '';
+  SearchReservationID:string = '';
   SearchGSTType:string = '';
   SearchPassengerName:string = '';
   SearchPassengerMobile:string = '';
@@ -134,6 +134,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
   InvoiceID: any;
   invoiceBillDate: Date | null = null;
   invoiceCustomerName: string = '';
+  invoiceType: string = '';
+  hasAttachedDuties = false;
   invoiceAnchorGstNumbers: string[] = [];
   hasMixedInvoiceGst = false;
   activeGstKey: string | null = null;
@@ -180,11 +182,7 @@ export class InvoiceAttachDetachComponent implements OnInit {
   loadInvoiceBillDate() {
     const invoiceId = Number(this.InvoiceID);
     if (!invoiceId || invoiceId <= 0) {
-      this.invoiceBillDate = null;
-      this.invoiceCustomerName = '';
-      this.invoiceAnchorGstNumbers = [];
-      this.hasMixedInvoiceGst = false;
-      this.activeGstKey = null;
+      this.resetInvoiceGstContext();
       return;
     }
 
@@ -192,17 +190,15 @@ export class InvoiceAttachDetachComponent implements OnInit {
       response => {
         this.invoiceBillDate = response?.invoiceDate ? new Date(response.invoiceDate) : null;
         this.invoiceCustomerName = response?.invoiceCustomerName || '';
+        this.invoiceType = response?.invoiceType || '';
+        this.hasAttachedDuties = !!response?.hasAttachedDuties;
         this.invoiceAnchorGstNumbers = response?.distinctInvoiceGstNumbers || [];
         this.hasMixedInvoiceGst = !!response?.hasMixedGst;
         this.applyInvoiceGstAnchor();
         this.buildGroupedDutySections();
       },
       () => {
-        this.invoiceBillDate = null;
-        this.invoiceCustomerName = '';
-        this.invoiceAnchorGstNumbers = [];
-        this.hasMixedInvoiceGst = false;
-        this.activeGstKey = null;
+        this.resetInvoiceGstContext();
       }
     );
   }
@@ -212,6 +208,20 @@ export class InvoiceAttachDetachComponent implements OnInit {
       return this.noGstConfiguredKey;
     }
     return String(gstNumber).trim().toUpperCase();
+  }
+
+  resetInvoiceGstContext() {
+    this.invoiceBillDate = null;
+    this.invoiceCustomerName = '';
+    this.invoiceType = '';
+    this.hasAttachedDuties = false;
+    this.invoiceAnchorGstNumbers = [];
+    this.hasMixedInvoiceGst = false;
+    this.activeGstKey = null;
+  }
+
+  isEmptyInvoiceGeneral(): boolean {
+    return this.invoiceType === 'InvoiceGeneral' && !this.hasAttachedDuties;
   }
 
   applyInvoiceGstAnchor() {
@@ -225,6 +235,11 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
 
     if (this.hasMixedInvoiceGst) {
+      this.activeGstKey = null;
+      return;
+    }
+
+    if (this.isEmptyInvoiceGeneral()) {
       this.activeGstKey = null;
       return;
     }
@@ -290,6 +305,9 @@ export class InvoiceAttachDetachComponent implements OnInit {
     }
     if (this.activeGstKey === this.noGstConfiguredKey) {
       return 'Selected group: duties with no GST configured. Mixed GSTINs cannot be billed together.';
+    }
+    if (this.isEmptyInvoiceGeneral()) {
+      return 'Select duties from one GSTIN group only. Mixed GSTINs cannot be billed together.';
     }
     return 'Select duties from one GSTIN group only. Mixed GSTINs cannot be billed together on a Multi-Duty invoice.';
   }
@@ -518,8 +536,8 @@ export class InvoiceAttachDetachComponent implements OnInit {
     this.SearchBranch.setValue('');
     this.SearchDutyFromDate = '';
     this.SearchDutyToDate = '';
-    this.SearchReservationID = 0;
-    this.SearchDutySlipID = 0;
+    this.SearchReservationID = '';
+    this.SearchDutySlipID = '';
     this.SearchGSTType = '';
     this.SearchPassengerName = '';
     this.SearchPassengerMobile = '';
@@ -757,9 +775,15 @@ export class InvoiceAttachDetachComponent implements OnInit {
     return this.isDutyDateAfterBillDate(row);
   }
 
-  /** Match legacy Attach: allow select unless billing date is after bill date / today, and GST group matches. */
+  private isDutyReadyForInvoice(row: any): boolean {
+    return this.isTrueValue(row?.verifyDuty) && this.isTrueValue(row?.goodForBilling);
+  }
+
+  /** Allow select unless billing date, GST group, Verify, or GFB blocks the row. */
   isRowSelectable(row: any): boolean {
-    return !this.isDutyDateAfterBillDate(row) && this.isSameGstGroup(row);
+    return !this.isDutyDateAfterBillDate(row)
+      && this.isSameGstGroup(row)
+      && this.isDutyReadyForInvoice(row);
   }
 
   getRowSelectTooltip(row: any): string {
@@ -777,6 +801,12 @@ export class InvoiceAttachDetachComponent implements OnInit {
         return `This duty belongs to a different GSTIN group than ${this.activeGstKey}`;
       }
       return 'Select duties from one GSTIN group only';
+    }
+    if (!this.isTrueValue(row?.verifyDuty)) {
+      return 'Duty is not Verified — cannot generate invoice';
+    }
+    if (!this.isTrueValue(row?.goodForBilling)) {
+      return 'Duty is not Good for Billing — cannot generate invoice';
     }
     return '';
   }
@@ -931,7 +961,16 @@ export class InvoiceAttachDetachComponent implements OnInit {
       });
       return;
     }
-    const duties: number[] = this.selectedInvoices.map(x => x.dutySlipID);
+    if (this.invoiceType === 'InvoiceSingleDuty' && !this.hasAttachedDuties) {
+      Swal.fire({
+        title: 'No duty on this invoice',
+        text: 'This Single Duty invoice has no duty attached yet. After it already has one duty, attaching another converts InvoiceType to InvoiceMultyDuty.',
+        icon: 'warning',
+        confirmButtonText: 'Ok'
+      });
+      return;
+    }
+    const duties: number[] = [...new Set(this.selectedInvoices.map(x => x.dutySlipID))];
     this.advanceTableForm.patchValue({invoiceID:this.InvoiceID});
     this.advanceTableForm.patchValue({invoiceType:"InvoiceMultyDuty"});
     this.advanceTableForm.patchValue({action:"Attach"});

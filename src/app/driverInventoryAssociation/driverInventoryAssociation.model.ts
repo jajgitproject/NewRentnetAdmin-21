@@ -29,6 +29,7 @@ export class DriverInventoryAssociation {
   bookingCount:number;
   userID:number
   driverPhone:string;
+  appBasedDriver:string;
   supplierName:string;
   inventory:string;
   supplier:string;

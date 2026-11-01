@@ -159,6 +159,45 @@ getHoursAndMinutes(totalMinutes: number): { hours: number; minutes: number } {
   return { hours, minutes };
 }
 
+shouldPrintSezInvoiceDeclaration(): boolean {
+  return this.isSezCustomerForInvoice();
+}
+
+getSezInvoiceDeclaration(): string {
+  if (this.isInvoiceGstCharged()) {
+    return 'Supply meant for Export/supply to SEZ unit or SEZ developer for authorised operations under bond or letter of undertaking with payment of integrated TAX';
+  }
+  return 'Supply meant for Export/supply to SEZ unit or SEZ developer for authorised operations under bond or letter of undertaking without payment of integrated TAX';
+}
+
+private isSezCustomerForInvoice(): boolean {
+  if (this.dataSource?.isSEZ === true || this.dataSource?.invoiceGSTModel?.isSEZ === true) {
+    return true;
+  }
+  const customerType = (this.dataSource?.invoiceCustomerModel?.customerType || '').toString().trim();
+  return customerType.toUpperCase() === 'SEZ';
+}
+
+private isInvoiceGstCharged(): boolean {
+  return this.hasGstCharge(this.dataSource?.invoiceGSTModel) || this.hasGstCharge(this.dataSource?.invoiceModel);
+}
+
+private hasGstCharge(src: any): boolean {
+  if (!src) {
+    return false;
+  }
+  const amount =
+    (Number(src.cgstAmount) || 0) + (Number(src.sgstAmount) || 0) + (Number(src.igstAmount) || 0);
+  if (amount > 0) {
+    return true;
+  }
+  return (
+    (Number(src.cgstPercentage) || 0) +
+    (Number(src.sgstPercentage) || 0) +
+    (Number(src.igstPercentage) || 0)
+  ) > 0;
+}
+
 }
 
 

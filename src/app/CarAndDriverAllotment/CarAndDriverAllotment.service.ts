@@ -48,6 +48,10 @@ export class CarAndDriverAllotmentService
     return this.httpClient.get(this.Allotment_URL+ '/getAllotmentStatus/'+reservationID);
   }
 
+  getAllotmentHistoryByReservation(reservationID: number) {
+    return this.httpClient.get(this.Allotment_URL + '/allotmentHistoryByReservation/' + reservationID);
+  }
+
   addBidNotification(advanceTable: DriverNotification) 
   {
     advanceTable.bidID=-1;

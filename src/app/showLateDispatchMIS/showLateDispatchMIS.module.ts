@@ -26,6 +26,8 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 @NgModule({
   declarations: [
     ShowLateDispatchMISComponent,
@@ -54,7 +56,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatProgressSpinnerModule,
     MyUploadModule,
     MatAutocompleteModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [ShowLateDispatchMISService]
 })

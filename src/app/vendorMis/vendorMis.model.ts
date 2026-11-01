@@ -17,6 +17,8 @@ export class SearchCriteria {
   SearchBookingStatus: string;
   SearchBillFromDate: string;
   SearchBillToDate: string;
+  SearchRes: string;
+  SearchDuty: string;
   PageNumber?: number;
   Order?: string;
   OrderByColumn?: string;

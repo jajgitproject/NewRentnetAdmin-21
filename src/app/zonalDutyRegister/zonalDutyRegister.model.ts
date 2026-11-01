@@ -1,5 +1,6 @@
 // @ts-nocheck
 export class ZonalDutyRegisterModel {
+  reservationGroupID: string;
   reservationID: number;
   dutySlipID: number;
   pickupDate: string;
@@ -31,6 +32,7 @@ export class ZonalDutyRegisterModel {
   driverMobile: string;
   modeOfPayment: string;
   locationOutDate: string;
+  bookingLocationOutDate: string;
   locationOutTime: string;
   locationOutKM: number;
   dsPickUpDate: string;
@@ -42,6 +44,12 @@ export class ZonalDutyRegisterModel {
   locationInDate: string;
   locationInTime: string;
   locationInKM: number;
+
+  outKmsFromZero: number;
+  reportingKmsFromZero: number;
+  releasingKmsFromZero: number;
+  inKmsFromZero: number;
+
   g2P: number;
   d2G: number;
   appP2D: number;
@@ -107,6 +115,7 @@ export class SearchCriteria {
   SearchMOP: string;
   SearchSupplierType: string;
   SearchSupplier: string;
+  SearchSupplierID: number;
   SearchFromDate: string;
   SearchToDate: string;
   SearchSalesPersonName: string;
@@ -120,6 +129,7 @@ export class SearchCriteria {
   SearchGoodForBill: boolean;
   SearchDri: string;
   SearchCarNo: string;
+  SearchInventoryID: number;
   SearchSupplierO: string;
   SearchRes: string;
   SearchDuty: string;

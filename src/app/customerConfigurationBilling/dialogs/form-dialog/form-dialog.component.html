@@ -2,7 +2,6 @@
     <div class="modalHeader">
         <div class="editRowModal">
             <div class="modalHeader clearfix">
-                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
                 <div class="modal-about">
                     <div class="font-weight-bold p-t-5 font-17">
                         {{dialogTitle}} {{CustomerName}}</div>
@@ -14,26 +13,8 @@
     </button>
     </div>
     <div mat-dialog-content>
-        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">            
+        <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row">
-                <!-- <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                        <mat-label>Eco Company</mat-label>
-                        <input required type="text" matInput formControlName
-                        ="ecoCompany" [matAutocomplete]="auto">
-                        <mat-autocomplete #auto="matAutocomplete">
-                            <mat-option *ngFor="let option of filteredCompanyOptions | async"
-                                [value]="option.organizationalEntityName"
-                                (click)="getTitles(option.organizationalEntityID)">
-                                {{option.organizationalEntityName}}
-                            </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.get('ecoCompany').hasError('required')">
-                            Eco Company is required
-                        </mat-error>
-                    </mat-form-field>
-                </div> -->
-
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Branch</mat-label>
@@ -52,17 +33,11 @@
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
-                        <mat-label>MIS Required</mat-label>
-                        <mat-select required #misVal [class.is-invalid]="misVal.invalid && misVal.touched" 
-                        formControlName="misRequired">
-                            <mat-option [value]=true>Yes</mat-option>
-                            <mat-option [value]=false>No</mat-option>
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]=true>Active</mat-option>
                         </mat-select>
-
-                        <mat-error>
-                            MIS Required is required
-                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>
@@ -297,13 +272,13 @@
                     </mat-form-field>
                 </div> 
             </div> -->
-            
+
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="openSaveDialog()">Save</button> 
-                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>                         
-                        <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">{{ action === 'add' ? 'Reset' :  'Cancel'}}</button>
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid" (click)="openSaveDialog()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">{{ action === 'add' ? 'Reset' : 'Cancel'}}</button>
                     </div>
                 </div>
             </div>

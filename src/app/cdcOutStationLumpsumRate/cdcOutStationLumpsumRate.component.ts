@@ -495,7 +495,7 @@ InitVehicleCategory(){
               this.refresh();
                this.showNotification(
                 'snackbar-danger',
-                'Duplicate Value Found.....!!!',
+                'An active rate already exists for a shared city in another city tier.',
                 'bottom',
                 'center'
               );

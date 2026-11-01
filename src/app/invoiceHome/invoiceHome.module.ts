@@ -30,6 +30,7 @@ import { InvoiceHomeRoutingModule } from './invoiceHome-routing.module';
 import { CreditNoteHistoryService } from '../creditnotehistory/creditnotehistory.service';
 import { CreditNoteHistoryModule } from '../creditnotehistory/creditnotehistory.module';
 import { InvoiceBillingHistoryService } from '../invoiceBillingHistory/invoiceBillingHistory.service';
+import { InvoiceBillingHistoryModule } from '../invoiceBillingHistory/invoiceBillingHistory.module';
 import { CancelInvoiceService } from '../cancelInvoice/cancelInvoice.service';
 import { CancelInvoiceModule } from '../cancelInvoice/cancelInvoice.module';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -69,6 +70,7 @@ import { BackfillStepDialogModule } from '../bulkBillsDownload/backfill-step-dia
     MyUploadModule,
     CurrentDesginationModule,
     CreditNoteHistoryModule,
+    InvoiceBillingHistoryModule,
     CancelInvoiceModule,
     MatExpansionModule,
     BackfillStepDialogModule

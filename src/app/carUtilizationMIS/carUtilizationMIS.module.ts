@@ -15,6 +15,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -28,6 +29,8 @@ import { CarUtilizationMISComponent } from './carUtilizationMIS.component';
 import { CarUtilizationMISRoutingModule } from './carUtilizationMIS-routing.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatNativeDateModule } from '@angular/material/core';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -59,6 +62,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
+    MatNativeDateModule,
+    RouterModule,
     MyUploadModule
   ],
   providers: [CarUtilizationMISService]

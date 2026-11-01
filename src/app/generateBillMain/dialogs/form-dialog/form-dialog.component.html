@@ -48,11 +48,11 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Customer</mat-label>
                         <input (keyup)="onKeyUpCustomer()" required matInput formControlName="customer" [matAutocomplete]="auto1">
-                        <mat-autocomplete #auto1="matAutocomplete">
+                        <mat-autocomplete #auto1="matAutocomplete" [displayWith]="displayCustomer">
                             <mat-option *ngFor="let options of filteredCustomerOptions | async"
-                                [value]="options.customerName" 
+                                [value]="options.customerName + '##' + (options.customerIdentityNumber || '')" 
                                 (click)="getCustomerID(options.customerID,options.customerGroupID,options.customerGroup)">
-                                {{options.customerName}}
+                                {{ getCustomerDropdownLabel(options) }}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['customer'].hasError('customerInvalid')">
@@ -111,6 +111,7 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Billing Address</mat-label>
                         <input required matInput formControlName="billingAddress">
+                        <mat-hint>From Customer, State, and City</mat-hint>
                         <mat-error *ngIf="advanceTableForm.get('billingAddress').hasError('required')">
                             Billing Address is required
                         </mat-error>

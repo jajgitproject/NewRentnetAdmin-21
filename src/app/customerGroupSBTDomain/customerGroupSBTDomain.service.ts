@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { CustomerGroupSBTDomain } from './customerGroupSBTDomain.model';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { CustomerPersonDropDown } from '../personShort/personShortDropDown.model';
@@ -63,6 +63,16 @@ export class CustomerGroupSBTDomainService
   {
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.put<any>(this.API_URL , advanceTable);
+  }
+  checkDuplicateSBTDomain(sbtDomain: string, customerGroupSBTDomainID: number): Observable<{ isDuplicate: boolean }>
+  {
+    const params = new HttpParams()
+      .set('sbtDomain', sbtDomain.trim())
+      .set('customerGroupSBTDomainID', customerGroupSBTDomainID.toString());
+    return this.httpClient.get<{ isDuplicate: boolean }>(
+      this.API_URL + '/checkDuplicateSBTDomain',
+      { params }
+    );
   }
   delete(customerGroupSBTDomainID: number):  Observable<any> 
   {

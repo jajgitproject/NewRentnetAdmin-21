@@ -5,6 +5,9 @@
                 <div class="modal-about">
                     <div class="font-weight-bold p-t-5 font-17">
                         {{dialogTitle}}</div>
+                    <div *ngIf="backDateCancellationBlocked" style="color:red; margin-top:5px; font-style: italic;">
+                        {{ backDateCancellationMessage }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -41,7 +44,7 @@
                         <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
                     </a>
     
-                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!backDateCancellationBlocked">
                         <app-myupload (onUploadFinished)="uploadFinished($event)"></app-myupload>
                     </div>
                 </div> 
@@ -55,7 +58,7 @@
                         </div>
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid || buttonDisabled"
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled && !backDateCancellationBlocked" [type]="submit" [disabled]="!advanceTableForm.valid || buttonDisabled"
                          (click)="confirmAdd()">Save</button>
                          <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
                          <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">Cancel</button>

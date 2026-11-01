@@ -1,0 +1,161 @@
+<section class="content br-page">
+  <div class="container-fluid">
+    <div class="br-header">
+      <div class="br-header-left">
+        <ul class="br-breadcrumb">
+          <li>
+            <a routerLink="/dashboard/main">Home</a>
+            <span class="br-breadcrumb-sep">&gt;</span>
+            <span>Admin</span>
+            <span class="br-breadcrumb-sep">&gt;</span>
+            <span>KAM Pickup Address Correction</span>
+          </li>
+        </ul>
+        <h2 class="br-title">KAM Pickup Address Correction</h2>
+        <p class="br-subtitle">Reservations flagged for pickup address correction for customers where you are the Key Account Manager.</p>
+      </div>
+      <button type="button" class="br-collapse-btn" (click)="toggleFilters()">
+        {{ filtersCollapsed ? 'Expand Filters' : 'Collapse Filters' }}
+        <mat-icon>{{ filtersCollapsed ? 'expand_more' : 'expand_less' }}</mat-icon>
+      </button>
+    </div>
+
+    <div class="br-filter-card" *ngIf="!filtersCollapsed">
+      <div class="br-filter-bar">
+        <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Pickup Date From</mat-label>
+          <input matInput [matDatepicker]="fromPicker" [(ngModel)]="searchPickupFromDate" />
+          <mat-datepicker-toggle matIconPrefix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Pickup Date To</mat-label>
+          <input matInput [matDatepicker]="toPicker" [(ngModel)]="searchPickupToDate" />
+          <mat-datepicker-toggle matIconPrefix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Booking No</mat-label>
+          <input matInput [(ngModel)]="searchBookingNo" />
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Customer Group</mat-label>
+          <input matInput [(ngModel)]="searchCustomerGroup" />
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Customer Name</mat-label>
+          <input matInput [(ngModel)]="searchCustomerName" />
+        </mat-form-field>
+      </div>
+
+      <div class="br-filter-actions">
+        <button mat-flat-button color="primary" class="br-btn-search" (click)="searchData()" [disabled]="isLoading">
+          <mat-icon>search</mat-icon>
+          Search
+        </button>
+        <mat-progress-spinner *ngIf="isLoading" diameter="28" strokeWidth="3" mode="indeterminate"></mat-progress-spinner>
+        <button mat-stroked-button type="button" class="br-btn-reset" (click)="refresh()" [disabled]="isLoading">
+          <mat-icon>refresh</mat-icon>
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <div class="br-table-card">
+      <div class="br-table-toolbar">
+        <div class="br-table-toolbar-spacer"></div>
+        <button mat-icon-button type="button" matTooltip="Refresh" (click)="reloadSearchedData()" [disabled]="isLoading || !hasSearched">
+          <mat-icon>refresh</mat-icon>
+        </button>
+        <button mat-stroked-button type="button" class="br-columns-btn" [matMenuTriggerFor]="columnsMenu">
+          <mat-icon>view_column</mat-icon>
+          Columns
+        </button>
+      </div>
+
+      <mat-menu #columnsMenu="matMenu" class="br-columns-menu">
+        <button mat-menu-item *ngFor="let col of columnDefinitions" (click)="toggleColumn(col.key); $event.stopPropagation()">
+          <mat-checkbox [checked]="col.visible" (click)="$event.stopPropagation()" (change)="setColumnVisible(col.key, $event.checked)">
+            {{ col.label }}
+          </mat-checkbox>
+        </button>
+      </mat-menu>
+
+      <div class="br-empty-state" *ngIf="!isLoading && !dataSource?.length">
+        <p>{{ hasSearched ? 'No reservations require pickup address correction.' : 'Loading...' }}</p>
+      </div>
+
+      <div class="br-table-wrap" *ngIf="dataSource?.length">
+        <mat-table
+          [dataSource]="dataSource"
+          matSort
+          (matSortChange)="onSortChange($event)"
+          class="br-table mat-elevation-z0">
+
+          <ng-container matColumnDef="bookingNo">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="bookingNo">Booking No.</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ formatBookingNo(row) }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="customerGroup">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="customerGroup">Customer Group</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.customerGroup || 'N/A' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="customerName">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="customerName">Customer Name</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.customerName || 'N/A' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="pickupDateTime">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="pickupDateTime">Pickup Date Time</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ formatDateTime(row.pickupDate, row.pickupTime) }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="pickupAddress">
+            <mat-header-cell *matHeaderCellDef>Pickup Geo Location</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.pickupAddress || 'N/A' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="pickupAddressDetails">
+            <mat-header-cell *matHeaderCellDef>Pickup Address Details</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.pickupAddressDetails || 'N/A' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="reservationStatus">
+            <mat-header-cell *matHeaderCellDef mat-sort-header="reservationStatus">Status</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <span class="br-status-pill" [ngClass]="getStatusClass(row.reservationStatus)">
+                {{ row.reservationStatus || 'N/A' }}
+              </span>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef class="br-actions-header">Actions</mat-header-cell>
+            <mat-cell *matCellDef="let row" class="br-actions-cell">
+              <button mat-stroked-button color="primary" type="button" (click)="openCorrect(row)">
+                Correct Pickup
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="visibleColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: visibleColumns;" matRipple></mat-row>
+        </mat-table>
+      </div>
+
+      <mat-paginator
+        [length]="totalCount"
+        [pageSize]="pageSize"
+        [pageIndex]="pageNumber"
+        [hidePageSize]="true"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+  </div>
+</section>

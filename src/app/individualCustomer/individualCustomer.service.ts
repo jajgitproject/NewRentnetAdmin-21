@@ -19,6 +19,19 @@ export class IndividualCustomerService {
     return this.httpClient.post<any>(this.API_URL, payload);
   }
 
+  checkDuplicate(
+    customerPersonName: string,
+    primaryEmail: string,
+    primaryMobile: string
+  ): Observable<any> {
+    const params = {
+      customerPersonName: (customerPersonName || '').trim(),
+      primaryEmail: (primaryEmail || '').trim(),
+      primaryMobile: (primaryMobile || '').trim()
+    };
+    return this.httpClient.get<any>(`${this.API_URL}/CheckDuplicate`, { params });
+  }
+
   /** Coerce empty strings to numbers/bools so System.Text.Json model binding does not return 400. */
   sanitizePayload(raw: any): any {
     const toInt = (v: any, fallback: number = 0) => {

@@ -4,6 +4,7 @@ export class BookingRequest {
   integrationRequestID:number;
   integrationRequestGroupID?: number;
   customerTravelRequestNumber :string;
+  trn :string;
   customerID : number;
   customerName : string;
   requestDate : Date;
@@ -25,6 +26,7 @@ export class BookingRequest {
        this.integrationRequestID = bookingRequest.integrationRequestID || '';
        this.integrationRequestGroupID = bookingRequest.integrationRequestGroupID || '';
        this.customerTravelRequestNumber = bookingRequest.customerTravelRequestNumber || '';
+       this.trn = bookingRequest.trn || '';
        this.customerID  = bookingRequest.customerID || '';
        this.customerName = bookingRequest.customerName || '';
        this.requestDate = bookingRequest.requestDate || '';

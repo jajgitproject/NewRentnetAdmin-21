@@ -28,6 +28,8 @@ export class PrintDutySlipWithoutMap {
   mobile1: string;
   startTripOTP: string;
   endTripOTP: string;
+  startTripOTPGeneratedAt: string;
+  endTripOTPGeneratedAt: string;
   tripType: string;
   dutySlipType: string;
   printRunningDetailOnDutySlip: string;
@@ -44,6 +46,7 @@ export class PrintDutySlipWithoutMap {
   bookerMobile: string;
   passengerName: string;
   pickUpAddressString: string;
+  dropOffAddress: string;
   passengerMobile: string;
   pickupCity: string;
   package: string;

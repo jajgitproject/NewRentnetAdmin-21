@@ -336,6 +336,9 @@ export class FormDialogComponent
   {
     const dialogRef = this.dialog.open(FormDialogComponentDocument, 
       {
+        panelClass: 'document-form-dialog',
+        width: '960px',
+        maxWidth: '96vw',
         data: 
           {
             action: 'fromVD',

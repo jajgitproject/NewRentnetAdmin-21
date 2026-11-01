@@ -110,29 +110,11 @@
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <div class="input-group">
-                                                    <!-- Dropdown for selecting Type, Parent, City -->
-                                                    <div class="input-group-append input-group-addon">
-                                                        <select style="height: 40px; width: 160px;" class="form-control"
-                                                            [(ngModel)]="selectedFilter"
-                                                            (ngModelChange)="onSelectedFilterChange()">
-                                                            <option value="search" hidden>Search By</option>
-                                                            <option value="SupplierName">Supplier Name</option>
-                                                            <option value="city">City</option>
-                                                            <option value="phone">Phone</option>
-                                                            <option value="email">Email</option>
-                                                            <option value="supplierStatus">Supplier Status</option>
-                                                            <option value="verificationStatus">Verification Status
-                                                            </option>
-                                                            <option value="supplierRegistrationDate">Registration Date
-                                                            </option>
-                                                        </select>
-                                                    </div>
-
-                                                    <!-- Input field for filtering -->
                                                     <input type="text"
                                                         matInput
-                                                        style="height: 40px; width: 300px;padding-left: 5px;"
-                                                        class="form-control" placeholder="Type 3+ characters"
+                                                        style="height: 40px; width: 460px;padding-left: 5px;"
+                                                        class="form-control"
+                                                        placeholder="Search by Supplier Name / Old Rentnet Code / PAN"
                                                         id="inputGroup"
                                                         (keyup)="onBackPress($event)"
                                                         (keyup.enter)="Filter()"
@@ -174,13 +156,32 @@
                                             <mat-icon class="col-white">refresh</mat-icon>
                                         </button>
                                         &nbsp;
-                                        <button mat-raised-button color="accent" (click)="downloadCsv()">
-                                            Download CSV
-                                        </button>
+                                        <button mat-raised-button color="accent" (click)="startExportJob()" [disabled]="isExportJobInProgress()">{{ getExportButtonLabel() }}</button>
                                         &nbsp;
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="duty-register-export-job-panel" *ngIf="exportJobId || exportJobError">
+                                <div class="panel-title">Supplier Master CSV Export</div>
+                                <div class="export-job-meta" *ngIf="exportJobId">
+                                    <span>Job: {{ exportJobId }}</span>
+                                    <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+                                    <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+                                    <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+                                </div>
+                                <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+                                <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+                                <div class="export-job-actions">
+                                    <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+                                        {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
+                                    </button>
+                                    <button mat-stroked-button type="button" (click)="cancelExportJob()" [disabled]="!isExportJobInProgress()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                            <app-stored-mis-exports></app-stored-mis-exports>
 
                             <!-- <label>
                                 <input type="checkbox" [(ngModel)]="isChecked">
@@ -220,7 +221,7 @@
                             <ng-template #elseBlock2>
                                 <div class="scrollable-table-container">
                                     <mat-table #table [dataSource]="dataSource" matSort
-                                        class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                        class="mat-cell floating-header-table supplier-table" (matSortChange)="SortingData($event)">
 
                                         <ng-container matColumnDef="id">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
@@ -228,16 +229,40 @@
                                         </ng-container>
 
                                         <ng-container matColumnDef="supplierName">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
-                                                Name</mat-header-cell>
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Name</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.supplierName}}</mat-cell>
+                                                {{ row.supplierName }}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="city">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
+                                        <ng-container matColumnDef="supplierCode">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Code</mat-header-cell>
                                             <mat-cell *matCellDef="let row">
-                                                {{row.city}}</mat-cell>
+                                                {{ getSupplierCode(row) }}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="supplierType">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier Type</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.supplierType || 'N/A' }}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="paymentBasis">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Payment Basis</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.paymentBasis || 'N/A' }}</mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="dateOfAgreement">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Date Of Agreement</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.dateOfAgreement ? (row.dateOfAgreement | date: 'dd-MM-yyyy') : 'N/A' }}
+                                            </mat-cell>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="supplierAgreementLocation">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Location</mat-header-cell>
+                                            <mat-cell *matCellDef="let row">
+                                                {{ row.supplierAgreementLocation || 'N/A' }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="phone">
@@ -252,44 +277,28 @@
                                                 {{row.email}}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="supplierCode">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
-                                                Code</mat-header-cell>
-                                            <mat-cell *matCellDef="let row">
-                                                {{ getSupplierCode(row) }}</mat-cell>
-                                        </ng-container>
-
                                         <ng-container matColumnDef="isAdhoc">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Is
-                                                Adhoc</mat-header-cell>
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Is Adhoc</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{ row.isAdhoc === true ? 'Yes' : row.isAdhoc === false ? 'No' : 'N/A' }}
                                             </mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="supplierVerificationStatus">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header><span
-                                                    matTooltip="Verification Status"
-                                                    matTooltipPosition="above">Verification...</span></mat-header-cell>
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Verification Status</mat-header-cell>
                                             <mat-cell *matCellDef="let row">
                                                 {{row.verificationStatus}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="supplierRegistrationDate">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header><span
-                                                    matTooltip="Registration Date"
-                                                    matTooltipPosition="above">Registration...</span>
-                                            </mat-header-cell>
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Registration Date</mat-header-cell>
                                             <mat-cell *matCellDef="let row">
                                                 {{row.supplierRegistrationDate | date: 'dd-MM-yyyy'}}</mat-cell>
                                         </ng-container>
-                                        <!-- actions -->
-                                        <ng-container matColumnDef="actions">
-                                            <mat-header-cell *matHeaderCellDef class="pr-0"
-                                                [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
-                                            <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
-                                                [ngClass]="'tbl-col-width-per-9'">
 
+                                        <ng-container matColumnDef="actions">
+                                            <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+                                            <mat-cell *matCellDef="let row; let i=index;">
                                                 <button mat-raised-button color="primary"
                                                     (contextmenu)="onContextMenu($event, row)"
                                                     (click)="onContextMenu($event, row)">

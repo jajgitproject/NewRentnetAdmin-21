@@ -1,14 +1,16 @@
 // @ts-nocheck
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import moment from 'moment';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './vendorMis.model';
 import { VendorMisService } from './vendorMis.service';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.model';
 import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
@@ -16,7 +18,7 @@ import { SupplierDropDown } from '../supplier/supplierDropDown.model';
 import { ModeOfPaymentDropDown } from '../modeOfPayment/modeOfPaymentDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
-import { InventoryDropDown } from '../inventory/inventoryDropDown.model';
+import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
 
 @Component({
@@ -34,6 +36,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
   exportJobError = '';
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'vendorMis';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   readonly maxPickupDateRangeDays = 15;
   IsKAMRole = false;
 
@@ -52,6 +56,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
   SearchToDate = '';
   SearchBillDateFrom = '';
   SearchBillToDate = '';
+  SearchRes = '';
+  SearchDuty = '';
 
   CustomerGroupList: CustomerGroupDropDown[] = [];
   CustomerList: CustomerDropDown[] = [];
@@ -60,18 +66,18 @@ export class VendorMisComponent implements OnInit, OnDestroy {
   MOPList: ModeOfPaymentDropDown[] = [];
   CityList: CityDropDown[] = [];
   DriverList: DriverDropDown[] = [];
-  CarNoList: InventoryDropDown[] = [];
+  CarNoList: VehicleDropDown[] = [];
   DispatchLocationList: OrganizationalEntityDropDown[] = [];
 
-  filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]>;
-  filteredCustomerOptions: Observable<CustomerDropDown[]>;
-  filteredSupplierTypeOptions: Observable<SupplierTypeDropDownModel[]>;
-  filteredSupplierOptions: Observable<SupplierDropDown[]>;
-  filteredMOPOptions: Observable<ModeOfPaymentDropDown[]>;
-  filteredCityOptions: Observable<CityDropDown[]>;
-  filteredDriverOptions: Observable<DriverDropDown[]>;
-  filteredCarNoOptions: Observable<InventoryDropDown[]>;
-  filteredDispatchLocationOptions: Observable<OrganizationalEntityDropDown[]>;
+  filteredCustomerGroupOptions: Observable<CustomerGroupDropDown[]> = of([]);
+  filteredCustomerOptions: Observable<CustomerDropDown[]> = of([]);
+  filteredSupplierTypeOptions: Observable<SupplierTypeDropDownModel[]> = of([]);
+  filteredSupplierOptions: Observable<SupplierDropDown[]> = of([]);
+  filteredMOPOptions: Observable<ModeOfPaymentDropDown[]> = of([]);
+  filteredCityOptions: Observable<CityDropDown[]> = of([]);
+  filteredDriverOptions: Observable<DriverDropDown[]> = of([]);
+  filteredCarNoOptions: Observable<VehicleDropDown[]> = of([]);
+  filteredDispatchLocationOptions: Observable<OrganizationalEntityDropDown[]> = of([]);
 
   ownedSuppliedOptions = ['All', 'Owned', 'Supplied'];
   bookingStatusOptions = ['All', 'Confirmed', 'Cancelled', 'Completed'];
@@ -94,6 +100,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.initCities();
     this.initDriver();
     this.initCarNo();
+    this.resumeExportJobIfNeeded();
   }
 
   ngOnDestroy() {
@@ -117,6 +124,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.SearchToDate = '';
     this.SearchBillDateFrom = '';
     this.SearchBillToDate = '';
+    this.SearchRes = '';
+    this.SearchDuty = '';
   }
 
   buildSearchCriteria(): SearchCriteria {
@@ -137,12 +146,15 @@ export class VendorMisComponent implements OnInit, OnDestroy {
       SearchCity: this.SearchCity?.value || '',
       SearchBookingStatus: this.normalizeSelect(this.SearchBookingStatus?.value),
       SearchBillFromDate: this.SearchBillDateFrom !== '' ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : '',
-      SearchBillToDate: this.SearchBillToDate !== '' ? moment(this.SearchBillToDate).format('MMM DD yyyy') : ''
+      SearchBillToDate: this.SearchBillToDate !== '' ? moment(this.SearchBillToDate).format('MMM DD yyyy') : '',
+      SearchRes: this.SearchRes || '',
+      SearchDuty: this.SearchDuty || ''
     };
   }
 
   SearchData() {
     if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
     }
 
@@ -153,11 +165,9 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     }
 
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
     const searchCriteria = this.buildSearchCriteria();
 
     this.exportJobRunning = true;
-    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
 
     this.vendorMisService.startExportJob(searchCriteria).subscribe(
       (startResult: any) => {
@@ -170,16 +180,19 @@ export class VendorMisComponent implements OnInit, OnDestroy {
         }
 
         this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
         this.exportJobStatus = {
           jobId,
           status: startResult?.status ?? startResult?.Status ?? 'Pending',
           message: startResult?.message ?? startResult?.Message ?? 'Export queued'
         };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
         this.startExportPolling(jobId);
+        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
       }
     );
@@ -221,7 +234,26 @@ export class VendorMisComponent implements OnInit, OnDestroy {
       },
       async (error) => {
         this.exportJobDownloading = false;
-        const message = await this.extractExportErrorMessage(error);
+        const message = await extractExportErrorMessage(error, 'Export download failed.');
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.vendorMisService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        const message = await extractExportErrorMessage(error, 'Could not cancel export.');
         this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
@@ -248,16 +280,18 @@ export class VendorMisComponent implements OnInit, OnDestroy {
   }
 
   getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) {
-      return '—';
-    }
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
   validatePickupDateRange(): string | null {
+    if (this.isIdSearchActive()) {
+      return null;
+    }
+
     if (!this.SearchFromDate || !this.SearchToDate) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
@@ -280,6 +314,10 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  isIdSearchActive(): boolean {
+    return this.isSearchValueSet(this.SearchRes) || this.isSearchValueSet(this.SearchDuty);
+  }
+
   hasAdditionalSearchFilters(): boolean {
     return this.isSearchValueSet(this.SearchCustomerGroup?.value)
       || this.isSearchValueSet(this.SearchCustomer?.value)
@@ -293,7 +331,9 @@ export class VendorMisComponent implements OnInit, OnDestroy {
       || this.isSearchValueSet(this.SearchCity?.value)
       || this.isSearchValueSet(this.SearchBookingStatus?.value)
       || this.isSearchValueSet(this.SearchBillDateFrom)
-      || this.isSearchValueSet(this.SearchBillToDate);
+      || this.isSearchValueSet(this.SearchBillToDate)
+      || this.isSearchValueSet(this.SearchRes)
+      || this.isSearchValueSet(this.SearchDuty);
   }
 
   private isSearchValueSet(value: any): boolean {
@@ -317,6 +357,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.exportPollSub = this.vendorMisService.pollExportJob(jobId).subscribe(
       (status: any) => {
         this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
 
         if (current === 'failed') {
@@ -324,6 +365,15 @@ export class VendorMisComponent implements OnInit, OnDestroy {
           this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
           this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
           this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
           return;
         }
 
@@ -337,11 +387,12 @@ export class VendorMisComponent implements OnInit, OnDestroy {
             'center'
           );
           this.stopExportPolling();
+          this.storedExports?.refresh();
         }
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
         this.stopExportPolling();
       }
@@ -355,6 +406,52 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     }
   }
 
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
+    this.vendorMisService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        this.exportJobError = '';
+        if (this.vendorMisService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobRunning = false;
+      },
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
+    );
+  }
+
   private clearExportJob() {
     this.stopExportPolling();
     this.exportJobId = null;
@@ -363,33 +460,6 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.exportJobDownloading = false;
     this.exportJobError = '';
     this.exportJobStartedAt = null;
-  }
-
-  private async extractExportErrorMessage(error: any): Promise<string> {
-    if (!error) {
-      return 'Error starting export';
-    }
-
-    const blob = error?.error;
-    if (blob instanceof Blob) {
-      const text = await blob.text();
-      try {
-        const parsed = JSON.parse(text || '{}');
-        return parsed.message || parsed.Message || text || 'Error starting export';
-      } catch {
-        return text || 'Error starting export';
-      }
-    }
-
-    if (typeof error?.error === 'string' && error.error.trim()) {
-      return error.error.trim();
-    }
-
-    if (error?.error && typeof error.error === 'object') {
-      return error.error.message || error.error.Message || 'Error starting export';
-    }
-
-    return error?.message || 'Error starting export';
   }
 
   private triggerCsvDownload(blob: Blob, preferredFileName?: string) {
@@ -418,8 +488,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.vendorMisService.GetCustomerGroupByKAMForDutyRegister(this.IsKAMRole).subscribe((data) => {
       this.CustomerGroupList = data || [];
       this.filteredCustomerGroupOptions = this.SearchCustomerGroup.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.CustomerGroupList, value, 'customerGroup'))
+        startWith(this.SearchCustomerGroup.value || ''),
+        map((value) => this.filterTypeaheadList(this.CustomerGroupList, value, 'customerGroup'))
       );
     });
   }
@@ -428,8 +498,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.vendorMisService.GetCustomerByKAMForDutyRegister(this.IsKAMRole).subscribe((data) => {
       this.CustomerList = data || [];
       this.filteredCustomerOptions = this.SearchCustomer.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.CustomerList, value, 'customerName'))
+        startWith(this.SearchCustomer.value || ''),
+        map((value) => this.filterTypeaheadList(this.CustomerList, value, 'customerName'))
       );
     });
   }
@@ -438,7 +508,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.vendorMisService.GetLocationDropDownForDutyRegister(this.IsKAMRole).subscribe((data) => {
       this.DispatchLocationList = data || [];
       this.filteredDispatchLocationOptions = this.SearchDispatchLocation.valueChanges.pipe(
-        startWith(''),
+        startWith(this.SearchDispatchLocation.value || ''),
         map((value) => this.filterList(this.DispatchLocationList, value, 'organizationalEntityName'))
       );
     });
@@ -448,7 +518,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetModeOfPayment().subscribe((data) => {
       this.MOPList = data || [];
       this.filteredMOPOptions = this.SearchMOP.valueChanges.pipe(
-        startWith(''),
+        startWith(this.SearchMOP.value || ''),
         map((value) => this.filterList(this.MOPList, value, 'modeOfPayment'))
       );
     });
@@ -458,7 +528,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetSupplierType().subscribe((data) => {
       this.SupplierTypeList = data || [];
       this.filteredSupplierTypeOptions = this.SearchSupplierType.valueChanges.pipe(
-        startWith(''),
+        startWith(this.SearchSupplierType.value || ''),
         map((value) => this.filterList(this.SupplierTypeList, value, 'supplierType'))
       );
     });
@@ -468,8 +538,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.getSupplier().subscribe((data) => {
       this.SupplierList = data || [];
       this.filteredSupplierOptions = this.SearchSupplier.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.SupplierList, value, 'supplierName'))
+        startWith(this.SearchSupplier.value || ''),
+        map((value) => this.filterTypeaheadList(this.SupplierList, value, 'supplierName'))
       );
     });
   }
@@ -478,7 +548,7 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetCitiessAll().subscribe((data) => {
       this.CityList = data || [];
       this.filteredCityOptions = this.SearchCity.valueChanges.pipe(
-        startWith(''),
+        startWith(this.SearchCity.value || ''),
         map((value) => this.filterList(this.CityList, value, 'geoPointName'))
       );
     });
@@ -488,8 +558,8 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetDriver().subscribe((data) => {
       this.DriverList = data || [];
       this.filteredDriverOptions = this.SearchDri.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.DriverList, value, 'driverName'))
+        startWith(this.SearchDri.value || ''),
+        map((value) => this.filterTypeaheadList(this.DriverList, value, 'driverName'))
       );
     });
   }
@@ -498,17 +568,38 @@ export class VendorMisComponent implements OnInit, OnDestroy {
     this.generalService.GetRegistrationNumber().subscribe((data) => {
       this.CarNoList = data || [];
       this.filteredCarNoOptions = this.SearchCarNo.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.CarNoList, value, 'registrationNumber'))
+        startWith(this.SearchCarNo.value || ''),
+        map((value) => this.filterTypeaheadList(this.CarNoList, value, 'vehicle'))
       );
     });
   }
 
-  private filterList(list: any[], value: string, field: string): any[] {
-    const filterValue = String(value || '').toLowerCase();
-    if (!filterValue) {
-      return list.slice(0, 50);
+  /** Typeahead: suggestions only after 3+ characters (no full list on focus). */
+  private filterTypeaheadList(list: any[], value: string, field: string): any[] {
+    const filterValue = String(value || '').toLowerCase().trim();
+    if (filterValue.length < 3) {
+      return [];
     }
-    return list.filter((item) => String(item[field] || '').toLowerCase().includes(filterValue)).slice(0, 50);
+
+    const pascalField = field.charAt(0).toUpperCase() + field.slice(1);
+    const getText = (item: any) => String(item?.[field] ?? item?.[pascalField] ?? '').toLowerCase();
+
+    return (list || [])
+      .filter((item) => getText(item).includes(filterValue))
+      .slice(0, 50);
+  }
+
+  private filterList(list: any[], value: string, field: string): any[] {
+    const filterValue = String(value || '').toLowerCase().trim();
+    const pascalField = field.charAt(0).toUpperCase() + field.slice(1);
+    const getText = (item: any) => String(item?.[field] ?? item?.[pascalField] ?? '').toLowerCase();
+
+    if (!filterValue) {
+      return (list || []).slice(0, 50);
+    }
+
+    return (list || [])
+      .filter((item) => getText(item).includes(filterValue))
+      .slice(0, 50);
   }
 }

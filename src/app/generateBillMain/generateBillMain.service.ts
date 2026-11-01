@@ -19,6 +19,75 @@ export class GenerateBillMainService
     this.API_URL_GetData=generalService.BaseURL+ "generalBill";
   }
 
+  private toRouteParam(value: any): string {
+    if (value === null || value === undefined) {
+      return 'null';
+    }
+    const text = String(value).trim();
+    if (text === '' || text === 'null') {
+      return 'null';
+    }
+    if (text.startsWith('#')) {
+      return encodeURIComponent(text);
+    }
+    let normalized = text;
+    while (normalized.endsWith('.')) {
+      normalized = normalized.slice(0, -1);
+    }
+    return encodeURIComponent(normalized).replace(/\./g, '%2E');
+  }
+
+  /** Invoice numbers use '/' in DB; route segments use '-' instead. */
+  private toInvoiceRouteParam(value: any): string {
+    if (value === null || value === undefined) {
+      return 'null';
+    }
+    const text = String(value).trim();
+    if (text === '' || text === 'null') {
+      return 'null';
+    }
+    // Use '~' in the URL path; commas can break ASP.NET route matching even when encoded.
+    const withTildeSeparators = text.replace(/,/g, '~');
+    return this.toRouteParam(withTildeSeparators.replace(/\//g, '-'));
+  }
+
+  private buildSearchUrl(
+    SearchCustomer: string,
+    SearchInvoiceNumberWithPrefix: string,
+    SearchGuset: string,
+    SearchBillDate: string,
+    SearchStartDate: string,
+    SearchEndDate: string,
+    SearchActivationStatus: boolean,
+    PageNumber: number,
+    orderByColumn: string,
+    sortType: string
+  ): string {
+    return (
+      this.API_URL_GetData +
+      '/GetAllGeneralBillMain/' +
+      this.toRouteParam(SearchCustomer) +
+      '/' +
+      this.toInvoiceRouteParam(SearchInvoiceNumberWithPrefix) +
+      '/' +
+      this.toRouteParam(SearchGuset) +
+      '/' +
+      this.toRouteParam(SearchBillDate) +
+      '/' +
+      this.toRouteParam(SearchStartDate) +
+      '/' +
+      this.toRouteParam(SearchEndDate) +
+      '/' +
+      this.toRouteParam(SearchActivationStatus) +
+      '/' +
+      PageNumber +
+      '/' +
+      encodeURIComponent(orderByColumn) +
+      '/' +
+      encodeURIComponent(sortType)
+    );
+  }
+
   // Alternative method to get customer address from general customer API
   getCustomerAddressFromGeneral(customerID: number): Observable<any[]> {
     return this.httpClient.get<any[]>(this.generalService.BaseURL + "generalBillMain/ForCustomerBehalfDataDetails/" + customerID);
@@ -76,7 +145,20 @@ export class GenerateBillMainService
       SearchActivationStatus=null;
     }
     
-    return this.httpClient.get(this.API_URL_GetData +"/GetAllGeneralBillMain" + "/" + SearchCustomer + '/'+ SearchInvoiceNumberWithPrefix + "/" + SearchGuset + "/" + SearchBillDate + '/' + SearchStartDate + '/' + SearchEndDate + '/' + SearchActivationStatus +'/' + PageNumber + '/InvoiceID/Ascending');
+    return this.httpClient.get(
+      this.buildSearchUrl(
+        SearchCustomer,
+        SearchInvoiceNumberWithPrefix,
+        SearchGuset,
+        SearchBillDate,
+        SearchStartDate,
+        SearchEndDate,
+        SearchActivationStatus,
+        PageNumber,
+        'InvoiceID',
+        'Ascending'
+      )
+    );
   }
   getTableDataSort(SearchCustomer:string,SearchInvoiceNumberWithPrefix:string, SearchGuset:string,SearchBillDate:string,SearchStartDate:string,SearchEndDate:string,SearchActivationStatus:Boolean, PageNumber: number,coloumName:string,sortType:string):  Observable<any> 
   {
@@ -109,7 +191,20 @@ export class GenerateBillMainService
     {
       SearchActivationStatus=null;
     }
-    return this.httpClient.get(this.API_URL_GetData + "/GetAllGeneralBillMain" + "/"+ SearchCustomer + '/'+ SearchInvoiceNumberWithPrefix + "/" + SearchGuset + "/"+ SearchBillDate + '/' + SearchStartDate + '/' + SearchEndDate + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
+    return this.httpClient.get(
+      this.buildSearchUrl(
+        SearchCustomer,
+        SearchInvoiceNumberWithPrefix,
+        SearchGuset,
+        SearchBillDate,
+        SearchStartDate,
+        SearchEndDate,
+        SearchActivationStatus,
+        PageNumber,
+        coloumName,
+        sortType
+      )
+    );
   }
 
   add(advanceTable: GenerateBillMainModel) 

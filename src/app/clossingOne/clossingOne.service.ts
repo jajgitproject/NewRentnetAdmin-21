@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, timeout } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
@@ -26,6 +26,12 @@ export interface CalculateBillSummaryResult {
   message: string;
   payload: Record<string, unknown>;
   summary: SummaryOfDutyData;
+}
+
+export interface ActiveEInvoiceState {
+  hasActiveEInvoice: boolean;
+  hasActiveInvoice: boolean;
+  irn: string | null;
 }
 
 @Injectable()
@@ -66,6 +72,55 @@ export class ClossingOneService
   GetClosingData(DutySlipID:any): Observable<any> {
     return this.httpClient.get<any>(this.API_URL +"/"+DutySlipID);
   }
+
+  getMyfLatLonEligibility(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.get(this.API_URL + '/myfLatLon/' + dutySlipID);
+  }
+
+  sendMyfLatLon(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.post(this.API_URL + '/sendMyfLatLon/' + dutySlipID, {});
+  }
+
+  sendDutySlipOnEmail(dutySlipID: number | string): Observable<any> {
+    const userID = this.generalService.getUserID();
+    return this.httpClient.post(
+      this.API_URL + '/sendDutySlipEmail/' + dutySlipID + '/' + userID,
+      {}
+    ).pipe(timeout(180000));
+  }
+
+  sendMyfClosed(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.post(this.API_URL + '/sendMyfClosed/' + dutySlipID, {});
+  }
+
+  sendMoveInSyncOnGfb(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.post(this.API_URL + '/sendMoveInSyncOnGfb/' + dutySlipID, {});
+  }
+
+  getTableDataForDriver(dutySlipID: number | string): Observable<any> {
+    return this.httpClient.get(this.API_URL_CurrentDutyInfo + '/GetDataforDriver/' + dutySlipID);
+  }
+
+  /** Re-fetch IRN block state from the server (used before saves and on poll). */
+  refreshActiveEInvoiceState(dutySlipID: number | string): Observable<ActiveEInvoiceState> {
+    return this.httpClient.get<any>(this.API_URL + '/eInvoiceState/' + dutySlipID).pipe(
+      map((data) => ({
+        hasActiveEInvoice:
+          data?.hasActiveEInvoice === true || data?.HasActiveEInvoice === true,
+        hasActiveInvoice:
+          data?.hasActiveInvoice === true || data?.HasActiveInvoice === true,
+        irn: data?.irn ?? data?.IRN ?? null,
+      })),
+      catchError(() =>
+        of({
+          hasActiveEInvoice: false,
+          hasActiveInvoice: false,
+          irn: null,
+        })
+      )
+    );
+  }
+
    GetBillFromTo(CustomerContractID:number,PackageID:number,PackageType:string): Observable<any> {
     return this.httpClient.get<any>(this.API_URL + "/" + 'GetBillFromTo' + "/" + CustomerContractID + "/" + PackageID + "/" + PackageType);
   }
@@ -73,11 +128,21 @@ export class ClossingOneService
   {
     return this.httpClient.get(this.API_URL_ReservationInfo + "/"+'getPackageTypeForLTR'+ "/"+ PackageTypeID);
   }
-    generateBill(dutySlipID:any, acknowledgeMissingGstn = false):  Observable<any> 
-  { 
-    let userID=this.generalService.getUserID();
-    const query = acknowledgeMissingGstn ? '?acknowledgeMissingGstn=true' : '';
-    return this.httpClient.get(this.API_GenerateBill+'/'+dutySlipID + '/'+userID + query);
+  generateBill(
+    dutySlipID: any,
+    acknowledgeMissingGstn = false,
+    acknowledgeOrphanAndCreateNew = false
+  ): Observable<any> {
+    let userID = this.generalService.getUserID();
+    const params: string[] = [];
+    if (acknowledgeMissingGstn) {
+      params.push('acknowledgeMissingGstn=true');
+    }
+    if (acknowledgeOrphanAndCreateNew) {
+      params.push('acknowledgeOrphanAndCreateNew=true');
+    }
+    const query = params.length ? '?' + params.join('&') : '';
+    return this.httpClient.get(this.API_GenerateBill + '/' + dutySlipID + '/' + userID + query);
   }
 
   checkCustomerInvoicingGstn(dutySlipID: number | string): Observable<CustomerInvoicingGstDutyCheckResult> {
@@ -153,7 +218,7 @@ export class ClossingOneService
 
   updateClosingAllowances(
     dutySlipID: number | string,
-    payload: { totalDriverAllowanceDays: number; totalNights: number }
+    payload: { totalDriverAllowanceDays: number }
   ): Observable<any> {
     return this.httpClient.put(
       `${this.API_URL_Bill}/closing-allowances/${dutySlipID}`,

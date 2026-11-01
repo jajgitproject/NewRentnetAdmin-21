@@ -63,7 +63,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MyUploadModule,
     //TwoDigitDecimaNumberDirective
   ],
-  providers: [FeedBackAttachmentService]
+  providers: [FeedBackAttachmentService],
+  exports: [advanceTableForm],
 })
 export class FeedBackAttachmentModule {}
 

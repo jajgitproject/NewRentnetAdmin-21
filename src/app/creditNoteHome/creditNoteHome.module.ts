@@ -30,7 +30,9 @@ import { CreditNoteHomeService } from './creditNoteHome.service';
 import { CreditNoteDutyAdjustmentService } from '../creditNoteDutyAdjustment/creditNoteDutyAdjustment.service';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
-import { CreateCreditNoteModule } from '../createCreditNote/createCreditNote.module';
+import { CreateCreditNoteSharedModule } from '../createCreditNote/createCreditNote-shared.module';
+import { CreditNoteHistoryModule } from '../creditnotehistory/creditnotehistory.module';
+import { CreditNoteHistoryService } from '../creditnotehistory/creditnotehistory.service';
 
 
 
@@ -67,10 +69,11 @@ import { CreateCreditNoteModule } from '../createCreditNote/createCreditNote.mod
     MyUploadModule,
     CurrentDesginationModule,
     MatExpansionModule,
-    CreateCreditNoteModule
+    CreateCreditNoteSharedModule,
+    CreditNoteHistoryModule
   ],
   
-  providers: [CreditNoteHomeService, CreditNoteDutyAdjustmentService]
+  providers: [CreditNoteHomeService, CreditNoteDutyAdjustmentService, CreditNoteHistoryService]
 })
 export class CreditNoteHomeModule {}
 

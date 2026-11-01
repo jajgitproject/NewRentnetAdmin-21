@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
@@ -8,8 +8,8 @@ import { MatSort } from '@angular/material/sort';
 import { Inventory } from './inventory.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
+import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -26,10 +26,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleCategory } from '../vehicleCategory/vehicleCategory.model';
 import { RegistrationDropDown } from '../interstateTaxEntry/registrationDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
+import { formatSupplierDisplay } from '../supplier/supplier-display.util';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
 interface MenuItem {
   label: string;
   action: (item: any) => void;
-  tooltip?: string;
   row?: any;
 }
 @Component({
@@ -39,23 +40,31 @@ interface MenuItem {
   styleUrls: ['./inventory.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class InventoryComponent implements OnInit {
+export class InventoryComponent implements OnInit, OnDestroy {
+  exportJobId: string | null = null;
+  exportJobStatus: any = null;
+  exportJobRunning = false;
+  exportJobDownloading = false;
+  exportJobError = '';
+  exportJobStartedAt: number | null = null;
+  private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'inventoryMaster';
   displayedColumns = [
-    'vehicleCategory',
-    'vehicle',
     'registrationNumber',
+    'vehicle',
     'supplierName',
-    'supplierOfficialIdentityNumber',
+    'supplierType',
     'locationHub',
     'isAdhoc',
     'status',
     'actions'
   ];
-  dataSource: Inventory[] | null;
+  dataSource: Inventory[] = [];
+  hasSearched = false;
   inventoryID: number;
   advanceTable: Inventory | null;
   InventoryID: number = 0;
-  SearchActivationStatus : string='';
+  SearchActivationStatus : string='All';
   PageNumber: number = 0;
   isChecked: boolean = false;
   sortingData: number;
@@ -89,21 +98,34 @@ export class InventoryComponent implements OnInit {
   public SupplierList?: SupplierDropDown[] = [];
   filteredSupplierOptions: Observable<SupplierDropDown[]>;
   menuItems: any[] = [
-    { label: 'Block', route: '/inventoryBlock', tooltip: 'Inventory Block' },
-    { label: 'Status History', route: '/inventoryStatusHistory', tooltip: 'Inventory Status History' },
-    { label: 'Target', route: '/inventoryTarget', tooltip: 'Inventory Target' },
-    { label: 'Insurance', route: '/inventoryInsurance', tooltip: 'Inventory Insurance' },
-    { label: 'Permit', route: '/inventoryPermit', tooltip: 'Inventory Permit' },
-    { label: 'Tax', route: '/interstateTaxEntry', tooltip: 'Interstate Tax' },
-    { label: 'PUC', route: '/inventoryPUC', tooltip: 'Inventory PUC' },
-    { label: 'Fitness', route: '/inventoryFitness', tooltip: 'Inventory Fitness' },
-    { label: 'Monthly Business Report', route: '/monthlyBusinessReport', tooltip: 'Monthly Business Report' },
-    { label: 'Driver Association', route:'/driverInventoryAssociation', tooltip: 'Driver Association' },
-    { label: 'Document', route:'/inventoryDocument', tooltip: 'Inventory Document' }
+    { label: 'Block', route: '/inventoryBlock' },
+    { label: 'Status History', route: '/inventoryStatusHistory' },
+    { label: 'Target', route: '/inventoryTarget' },
+    { label: 'Insurance', route: '/inventoryInsurance' },
+    { label: 'Permit', route: '/inventoryPermit' },
+    { label: 'Tax', route: '/interstateTaxEntry' },
+    { label: 'PUC', route: '/inventoryPUC' },
+    { label: 'Fitness', route: '/inventoryFitness' },
+    { label: 'Monthly Business Report', route: '/monthlyBusinessReport' },
+    { label: 'Driver Association', route:'/driverInventoryAssociation' },
+    { label: 'Document', route:'/inventoryDocument' },
+    { label: 'Vehicle Compliance', route:'/vehicleCompliance' },
   ];
   
   searchTerm: any = '';
-  selectedFilter: string = 'search';
+  /** Default to registration so typing filters immediately (old 'search' cleared the term). */
+  selectedFilter: string = 'registrationNumber';
+
+  /** Latest filter values sent to the API (plain strings — not shared modal FormControls). */
+  private queryRegistrationNumber = '';
+  private queryVehicleCategory = '';
+  private queryVehicle = '';
+  private querySupplier = '';
+  private queryLocationHub = '';
+
+  private readonly immediateQuery$ = new Subject<void>();
+  private readonly debouncedQuery$ = new Subject<void>();
+  private tableQuerySub: Subscription;
 
   constructor(
     public httpClient: HttpClient,
@@ -114,22 +136,53 @@ export class InventoryComponent implements OnInit {
     public route:ActivatedRoute,
     public _generalService: GeneralService
   ) {}
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
-  @ViewChild('filter', { static: true }) filter: ElementRef;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
   
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    this.loadData();
+    this.tableQuerySub = merge(
+      this.immediateQuery$,
+      this.debouncedQuery$.pipe(debounceTime(250))
+    ).pipe(
+      switchMap(() => {
+        if (!this.hasSearched) {
+          return of([]);
+        }
+        return this.inventoryService.getTableData(
+          this.queryRegistrationNumber,
+          this.InventoryID,
+          this.queryVehicleCategory,
+          this.queryVehicle,
+          this.querySupplier,
+          this.queryLocationHub,
+          this.getActivationStatusFilter(),
+          this.PageNumber
+        ).pipe(catchError(() => of([])));
+      })
+    ).subscribe((data) => {
+      this.dataSource = Array.isArray(data) ? data : [];
+    });
+
     this.SubscribeUpdateService();
     this.InitSupplier();
     this.initVehicleCategories();
     this.initVehicle();
     this.InitRegistrationNumber();
     this.InitLocationHub();
-    this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
+    this.resumeExportJobIfNeeded();
+  }
+
+  ngOnDestroy() {
+    this.stopExportPolling();
+    if (this.tableQuerySub) {
+      this.tableQuerySub.unsubscribe();
+    }
+    if (this.subscriptionName) {
+      this.subscriptionName.unsubscribe();
+    }
   }
   
   // InitVehicleCategory(){
@@ -236,78 +289,126 @@ export class InventoryComponent implements OnInit {
       }
     );
   }
-  getSearchOptions(): Observable<any[]> {
-    switch(this.selectedFilter) {
-      case 'vehicleCategory':
-        return this.vehicleCategory.valueChanges.pipe(
-          startWith(this.searchTerm),
-          map(value => this._filterSearchOptions(value || '', 'vehicleCategory'))
-        );
-      case 'vehicle':
-        return this.vehicle.valueChanges.pipe(
-          startWith(this.searchTerm),
-          map(value => this._filterSearchOptions(value || '', 'vehicle'))
-        );
-      case 'registrationNumber':
-        return this.registrationNumber.valueChanges.pipe(
-          startWith(this.searchTerm),
-          map(value => this._filterSearchOptions(value || '', 'registrationNumber'))
-        );
-      case 'supplier':
-        return this.supplier.valueChanges.pipe(
-          startWith(this.searchTerm),
-          map(value => this._filterSearchOptions(value || '', 'supplier'))
-        );
-      default:
-        return new Observable(observer => observer.next([]));
-    }
-  }
-
-  private _filterSearchOptions(value: string, type: string): any[] {
-    if (!value || value.length < 3) {
-      return [];
-    }
-    const filterValue = value.toLowerCase();
-    
-    switch(type) {
-      case 'vehicleCategory':
-        return this.VehicleCategoryList.filter(item =>
-          item.vehicleCategory.toLowerCase().includes(filterValue)
-        ).map(item => ({ displayValue: item.vehicleCategory }));
-      case 'vehicle':
-        return this.VehicleList.filter(item =>
-          item.vehicle.toLowerCase().includes(filterValue)
-        ).map(item => ({ displayValue: item.vehicle }));
-      case 'registrationNumber':
-        return this.RegistrationNumberList.filter(item =>
-          item.registrationNumber.toLowerCase().includes(filterValue)
-        ).map(item => ({ displayValue: item.registrationNumber }));
-      case 'supplier':
-        return this.SupplierList.filter(item =>
-          item.supplierName.toLowerCase().includes(filterValue)
-        ).map(item => ({ displayValue: item.supplierName }));
-      default:
-        return [];
-    }
-  }
 
   refresh() {
-    this.registrationNumber.setValue(''),
-    this.vehicleCategory.setValue(''),
-    this.vehicle.setValue(''),
-    this.supplier.setValue(''),
-     this.locationHub.setValue(''),
-    this.SearchActivationStatus = '';
-    this.PageNumber=0;
+    this.clearExportJob();
+    this.registrationNumber.setValue('', { emitEvent: false });
+    this.vehicleCategory.setValue('', { emitEvent: false });
+    this.vehicle.setValue('', { emitEvent: false });
+    this.supplier.setValue('', { emitEvent: false });
+    this.locationHub.setValue('', { emitEvent: false });
+    this.SearchActivationStatus = 'All';
+    this.PageNumber = 0;
     this.searchTerm = '';
-    this.selectedFilter = 'search';
-    this.loadData();
+    this.selectedFilter = 'registrationNumber';
+    this.clearQueryFilters();
+    this.hasSearched = false;
+    this.dataSource = [];
+  }
+
+  reloadCurrentSearch() {
+    if (this.hasSearched) {
+      this.immediateQuery$.next();
+    }
+  }
+
+  /** Empty / All => no status filter (all activation statuses). */
+  private getActivationStatusFilter(): string {
+    const status = (this.SearchActivationStatus || '').trim();
+    if (!status || status.toLowerCase() === 'all') {
+      return '';
+    }
+    return status;
   }
 
   public SearchData()
   {
-    this.loadData();    
+    this.hasSearched = true;
+    this.PageNumber = 0;
+    this.queryRegistrationNumber = String(this.registrationNumber.value || '');
+    this.queryVehicleCategory = String(this.vehicleCategory.value || '');
+    this.queryVehicle = String(this.vehicle.value || '');
+    this.querySupplier = String(this.supplier.value || '');
+    this.queryLocationHub = String(this.locationHub.value || '');
+    this.immediateQuery$.next();
   }
+
+  public Filter()
+  {
+    this.hasSearched = true;
+    this.PageNumber = 0;
+    this.applyInlineSearchFilter();
+    this.immediateQuery$.next();
+  }
+
+  onSearchTermChange(value: string) {
+    this.searchTerm = value ?? '';
+    this.PageNumber = 0;
+    this.applyInlineSearchFilter();
+    if (this.hasSearched) {
+      this.debouncedQuery$.next();
+    }
+  }
+
+  onSelectedFilterChange(value: string) {
+    this.selectedFilter = value || 'registrationNumber';
+    this.searchTerm = '';
+    this.PageNumber = 0;
+    this.applyInlineSearchFilter();
+    if (this.hasSearched) {
+      this.immediateQuery$.next();
+    }
+  }
+
+  onActivationStatusChange(value: string) {
+    this.SearchActivationStatus = value || 'All';
+    this.PageNumber = 0;
+    this.applyInlineSearchFilter();
+    if (this.hasSearched) {
+      this.immediateQuery$.next();
+    }
+  }
+
+  private clearQueryFilters() {
+    this.queryRegistrationNumber = '';
+    this.queryVehicleCategory = '';
+    this.queryVehicle = '';
+    this.querySupplier = '';
+    this.queryLocationHub = '';
+  }
+
+  /** Map inline Search-By + searchTerm into plain query fields (never touch modal FormControls). */
+  private applyInlineSearchFilter() {
+    const term = String(this.searchTerm || '').trim();
+    this.clearQueryFilters();
+
+    switch (this.selectedFilter) {
+      case 'vehicleCategory':
+        this.queryVehicleCategory = term;
+        break;
+      case 'vehicle':
+        this.queryVehicle = term;
+        break;
+      case 'registrationNumber':
+        this.queryRegistrationNumber = term.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        break;
+      case 'supplier':
+        this.querySupplier = term;
+        break;
+      case 'locationHub':
+        this.queryLocationHub = term;
+        break;
+      default:
+        break;
+    }
+  }
+
+  public loadData() {
+    this.hasSearched = true;
+    this.applyInlineSearchFilter();
+    this.immediateQuery$.next();
+  }
+
   addNew()
   {
     const dialogRef = this.dialog.open(FormDialogComponent, 
@@ -345,84 +446,259 @@ export class InventoryComponent implements OnInit {
     // Check if item status is 'Deactive' or any other condition you want to consider
     return item.status !== 'Deactive' && !item.isDeleted; // Assuming you have an isDeleted property
   }
-  public Filter()
-  {
-    this.PageNumber = 0;
-    this.loadData();
-  }
 
-onBackPress(event) 
-{
-  if (event.keyCode === 8) 
-  {
-    this.loadData();
-  }
-}
-
-   public loadData() 
-   {
-    switch (this.selectedFilter)
-    {
-      case 'vehicleCategory':
-        this.vehicleCategory.setValue(this.searchTerm);
-        break;
-      case 'vehicle':
-        this.vehicle.setValue(this.searchTerm);
-          break;
-      case 'registrationNumber':
-        this.registrationNumber.setValue(this.searchTerm);
-        break;
-      case 'supplier':
-        this.supplier.setValue(this.searchTerm);
-        break;
-        case 'locationHub':
-        this.locationHub.setValue(this.searchTerm);
-        break;
-      default:
-        this.searchTerm = '';
-        break;
+  startExportJob() {
+    if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
+      return;
     }
-      this.inventoryService.getTableData( this.registrationNumber.value, this.InventoryID,
-        this.vehicleCategory.value,
-        this.vehicle.value,
-        this.supplier.value,
-        this.locationHub.value,
-        this.SearchActivationStatus, 
-        this.PageNumber).subscribe
-    (
-      data =>   
-      {
-        this.dataSource = data;
+
+    this.exportJobError = '';
+    this.exportJobRunning = true;
+
+    this.inventoryService.startExportJob(
+      this.queryRegistrationNumber || '',
+      this.InventoryID,
+      this.queryVehicleCategory || '',
+      this.queryVehicle || '',
+      this.querySupplier || '',
+      this.queryLocationHub || '',
+      this.getActivationStatusFilter()
+    ).subscribe(
+      (startResult: any) => {
+        const jobId = startResult?.jobId ?? startResult?.JobId;
+        if (!jobId) {
+          this.exportJobRunning = false;
+          this.exportJobError = 'Could not start export job.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          return;
+        }
+
+        this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
+        this.exportJobStatus = {
+          jobId,
+          status: startResult?.status ?? startResult?.Status ?? 'Pending',
+          message: startResult?.message ?? startResult?.Message ?? 'Export queued'
+        };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+        this.startExportPolling(jobId);
+        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
       },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+      }
     );
   }
 
-  downloadCsv() {
-    this.inventoryService.downloadCsv(
-      this.registrationNumber.value || '',
-      this.InventoryID,
-      this.vehicleCategory.value || '',
-      this.vehicle.value || '',
-      this.supplier.value || '',
-      this.locationHub.value || '',
-      this.SearchActivationStatus || ''
-    ).subscribe(
-      (blob: Blob) => {
+  downloadExportCsv() {
+    if (!this.exportJobId || !this.inventoryService.isExportJobReady(this.exportJobStatus) || this.exportJobDownloading) {
+      return;
+    }
+
+    this.exportJobDownloading = true;
+    this.inventoryService.downloadExportJob(this.exportJobId).subscribe(
+      async (blob: Blob) => {
+        this.exportJobDownloading = false;
+        if (!blob || blob.size === 0) {
+          this.showNotification('snackbar-danger', 'Export file is empty or unavailable.', 'bottom', 'center');
+          return;
+        }
+
+        const contentType = (blob.type || '').toLowerCase();
+        if (contentType.includes('application/json') || contentType.includes('text/plain')) {
+          const text = await blob.text();
+          let message = 'Export file is not ready.';
+          try {
+            message = JSON.parse(text || '{}').message || message;
+          } catch {
+            if (text?.trim()) {
+              message = text;
+            }
+          }
+          this.showNotification('snackbar-danger', message, 'bottom', 'center');
+          return;
+        }
+
+        const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
+        this.triggerExportDownload(blob, fileName);
+      },
+      async (error) => {
+        this.exportJobDownloading = false;
+        this.showNotification('snackbar-danger', await extractExportErrorMessage(error, 'Export download failed.'), 'bottom', 'center');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.inventoryService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        this.showNotification('snackbar-danger', await extractExportErrorMessage(error, 'Could not cancel export.'), 'bottom', 'center');
+      }
+    );
+  }
+
+  canDownloadExport(): boolean {
+    return !!this.exportJobId && this.inventoryService.isExportJobReady(this.exportJobStatus) && !this.exportJobDownloading;
+  }
+
+  isExportJobInProgress(): boolean {
+    return this.exportJobRunning || this.inventoryService.isExportJobRunning(this.exportJobStatus);
+  }
+
+  getExportJobStatusLabel(): string {
+    return this.exportJobStatus?.status ?? this.exportJobStatus?.Status ?? '';
+  }
+
+  getExportJobMessage(): string {
+    return this.exportJobStatus?.message ?? this.exportJobStatus?.Message ?? this.exportJobError ?? '';
+  }
+
+  getExportRowsExported(): number {
+    return this.exportJobStatus?.rowsExported ?? this.exportJobStatus?.RowsExported ?? 0;
+  }
+
+  getExportElapsedTime(): string {
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportButtonLabel(): string {
+    const label = exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
+    return label === 'Search' ? 'Export CSV' : label;
+  }
+
+  private startExportPolling(jobId: string) {
+    this.stopExportPolling();
+    this.exportPollSub = this.inventoryService.pollExportJob(jobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
+        const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+
+        if (current === 'failed') {
+          this.exportJobRunning = false;
+          this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (current === 'completed') {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-success', status?.message ?? 'Export ready. Click Download CSV.', 'bottom', 'center');
+          this.stopExportPolling();
+        }
+      },
+      async (error) => {
+        this.exportJobRunning = false;
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
+        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        this.stopExportPolling();
+      }
+    );
+  }
+
+  private stopExportPolling() {
+    if (this.exportPollSub) {
+      this.exportPollSub.unsubscribe();
+      this.exportPollSub = undefined;
+    }
+  }
+
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
+    this.inventoryService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        this.exportJobError = '';
+        if (this.inventoryService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobRunning = false;
+      },
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
+    );
+  }
+
+  private clearExportJob() {
+    this.stopExportPolling();
+    this.exportJobId = null;
+    this.exportJobStatus = null;
+    this.exportJobRunning = false;
+    this.exportJobDownloading = false;
+    this.exportJobError = '';
+    this.exportJobStartedAt = null;
+  }
+
+  private triggerExportDownload(blob: Blob, preferredFileName?: string) {
         const url = window.URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.download = `InventoryMaster_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+    anchor.download = preferredFileName || `InventoryMaster_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
         document.body.appendChild(anchor);
         anchor.click();
         document.body.removeChild(anchor);
         window.URL.revokeObjectURL(url);
         this.showNotification('snackbar-success', 'CSV downloaded successfully', 'top', 'center');
-      },
-      () => {
-        this.showNotification('snackbar-danger', 'Failed to download CSV', 'top', 'center');
-      }
-    );
+  }
+
+  getSupplierDisplay(row: Inventory): string {
+    return formatSupplierDisplay({
+      supplierName: row?.supplierName,
+      oldRentnetCode: row?.supplierOldRentnetCode,
+    });
   }
 
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -444,7 +720,7 @@ onBackPress(event)
   
   NextCall()
   {
-    if (this.dataSource.length>0) 
+    if (this.dataSource && this.dataSource.length > 0) 
     {
      
       this.PageNumber++;
@@ -575,7 +851,7 @@ onBackPress(event)
             {
               if(this.MessageArray[2]=="Success")
               {
-                this.refresh();
+                this.reloadCurrentSearch();
                 this.showNotification(
                 'snackbar-success',
                 'Inventory Created...!!!',
@@ -591,7 +867,7 @@ onBackPress(event)
             {
               if(this.MessageArray[2]=="Success")
               {
-               this.refresh();
+               this.reloadCurrentSearch();
                this.showNotification(
                 'snackbar-success',
                 'Inventory Updated...!!!',
@@ -607,7 +883,7 @@ onBackPress(event)
             {
               if(this.MessageArray[2]=="Success")
               {
-               this.refresh();
+               this.reloadCurrentSearch();
                this.showNotification(
                 'snackbar-success',
                 'Inventory Deleted...!!!',
@@ -623,7 +899,7 @@ onBackPress(event)
             {
               if(this.MessageArray[2]=="Failure")
               {
-               this.refresh();
+               this.reloadCurrentSearch();
                this.showNotification(
                 'snackbar-danger',
                 'Operation Failed.....!!!',
@@ -639,7 +915,7 @@ onBackPress(event)
             {
               if(this.MessageArray[2]=="Failure")
               {
-               this.refresh();
+               this.reloadCurrentSearch();
                this.showNotification(
                 'snackbar-danger',
                 'Duplicate Value Found.....!!!',
@@ -664,21 +940,23 @@ onBackPress(event)
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.inventoryService.getTableDataSort(this.registrationNumber.value, this.InventoryID,
-        this.vehicleCategory.value,
-        this.vehicle.value,
-        this.supplier.value,
-        this.locationHub.value,
-        this.SearchActivationStatus,
+    this.inventoryService.getTableDataSort(
+      this.queryRegistrationNumber,
+      this.InventoryID,
+      this.queryVehicleCategory,
+      this.queryVehicle,
+      this.querySupplier,
+      this.queryLocationHub,
+      this.getActivationStatusFilter(),
       this.PageNumber,
       coloumName.active,
       this.sortType).subscribe
     (
       data =>   
       {
-        this.dataSource = data;
+        this.dataSource = Array.isArray(data) ? data : [];
       },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+      (error: HttpErrorResponse) => { this.dataSource = [];}
     );
   }
 

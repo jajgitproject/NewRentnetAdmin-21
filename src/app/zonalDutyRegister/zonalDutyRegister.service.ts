@@ -281,6 +281,7 @@ export class ZonalDutyRegisterService
       SearchMOP: criteria.SearchMOP || "null",
       SearchSupplierType: criteria.SearchSupplierType || "null",
       SearchSupplierName: criteria.SearchSupplier || "null",
+      SearchSupplierID: criteria.SearchSupplierID || 0,
       SearchFromDate: criteria.SearchFromDate || "null",
       SearchToDate: criteria.SearchToDate || "null",
       SearchSalesPersonName: criteria.SearchSalesPersonName || "null",
@@ -307,6 +308,7 @@ export class ZonalDutyRegisterService
               : null,
       SearchDri: criteria.SearchDri || "null",
       SearchCarNo: criteria.SearchCarNo || "null",
+      SearchInventoryID: criteria.SearchInventoryID || 0,
       SearchSupplierO: criteria.SearchSupplierO || "null",
       SearchRes: criteria.SearchRes || "null",
       SearchDuty: criteria.SearchDuty || "null",
@@ -347,6 +349,7 @@ export class ZonalDutyRegisterService
       SearchMOP: criteria.SearchMOP || "null",
       SearchSupplierType: criteria.SearchSupplierType || "null",
       SearchSupplierName: criteria.SearchSupplier || "null",
+      SearchSupplierID: criteria.SearchSupplierID || 0,
       SearchFromDate: criteria.SearchFromDate || "null",
       SearchToDate: criteria.SearchToDate || "null",
       SearchSalesPersonName: criteria.SearchSalesPersonName || "null",
@@ -361,6 +364,7 @@ export class ZonalDutyRegisterService
       SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,
       SearchDri: criteria.SearchDri || "null",
       SearchCarNo: criteria.SearchCarNo || "null",
+      SearchInventoryID: criteria.SearchInventoryID || 0,
       SearchSupplierO: criteria.SearchSupplierO || "null",
       SearchRes: criteria.SearchRes || "null",
       SearchDuty: criteria.SearchDuty || "null",
@@ -413,6 +417,7 @@ export class ZonalDutyRegisterService
       SearchMOP: toNull(criteria.SearchMOP),
       SearchSupplierType: toNull(criteria.SearchSupplierType),
       SearchSupplierName: toNull(criteria.SearchSupplier),
+      SearchSupplierID: criteria.SearchSupplierID || 0,
       SearchFromDate: toNull(criteria.SearchFromDate),
       SearchToDate: toNull(criteria.SearchToDate),
       SearchSalesPersonName: toNull(criteria.SearchSalesPersonName),
@@ -427,6 +432,7 @@ export class ZonalDutyRegisterService
       SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,
       SearchDri: toNull(criteria.SearchDri),
       SearchCarNo: toNull(criteria.SearchCarNo),
+      SearchInventoryID: criteria.SearchInventoryID || 0,
       SearchSupplierO: toNull(criteria.SearchSupplierO),
       SearchRes: toNull(criteria.SearchRes),
       SearchDuty: toNull(criteria.SearchDuty),
@@ -454,6 +460,12 @@ export class ZonalDutyRegisterService
 
   downloadExportJob(jobId: string): Observable<Blob> {
     return this.httpClient.get(`${this.API_URL}/ExportCsv/Download/${jobId}`, { responseType: 'blob' });
+  }
+
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
+    });
   }
 
   pollExportJob(jobId: string): Observable<any> {

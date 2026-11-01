@@ -9,6 +9,9 @@ export class Inventory {
    fuelType:string;
    supplier:string;
    supplierName:string;
+   supplierOldRentnetCode:number;
+   supplierType:string;
+   supplierOfficialIdentityNumber:string;
    company:string;
    vehicleID: number;
    registrationStateID:number;
@@ -45,6 +48,7 @@ export class Inventory {
   userID:number;
   businessDivision:string;
   isAdhoc:boolean;
+  inventoryRemark:string;
    //organizationalEntityOwnership:string;
    //organizationalEntitySupplierID:number;
    //organizationalEntitySupplier:string;
@@ -56,12 +60,15 @@ export class Inventory {
        this.vehicleID = inventory.vehicleID || '';
        this.registrationStateID = inventory.registrationStateID || 0,
        this.registrationCityID = inventory.registrationCityID || 0;
-       this.registrationNumber = inventory.registrationNumber || '';
+       this.registrationNumber = (inventory.registrationNumber || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
        this.registrationFromDateString = inventory.registrationFromDateString || '';
        this.registrationTillDateString = inventory.registrationTillDateString || '';
        this.locationHubID = inventory.locationHubID || '';
        this.ownedSupplied = inventory.ownedSupplied || '';
        this.supplierID = inventory.supplierID || '';
+       this.supplierOldRentnetCode = (inventory.supplierOldRentnetCode && inventory.supplierOldRentnetCode !== 0)
+         ? Number(inventory.supplierOldRentnetCode)
+         : null;
        this.colorID = inventory.colorID || '';
        this.fuelTypeID = inventory.fuelTypeID || '';
        this.mileage = inventory.mileage || '';
@@ -83,6 +90,7 @@ export class Inventory {
        //this.purchaseDate=new Date();
        this.businessDivision = inventory.businessDivision || '';
        this.isAdhoc = inventory.isAdhoc || '';
+       this.inventoryRemark = inventory.inventoryRemark ?? inventory.InventoryRemark ?? '';
        
     }
   }

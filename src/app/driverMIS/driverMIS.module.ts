@@ -22,7 +22,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { GooglePlaceModule } from '@compat/google-places-shim';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import { MatAutocompleteModule} from '@angular/material/autocomplete';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { DriverMISRoutingModule } from './driverMIS-routing.module';
 import { DriverMISService } from './driverMIS.service';
 import { DriverMISComponent } from './driverMIS.component';
@@ -57,6 +59,8 @@ import { DriverMISComponent } from './driverMIS.component';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent,
     MyUploadModule,
     //TwoDigitDecimaNumberDirective
   ],

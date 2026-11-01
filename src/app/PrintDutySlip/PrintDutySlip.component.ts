@@ -22,7 +22,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { DutySlipAccentureService } from '../dutySlipAccenture/dutySlipAccenture.service';
 import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
 import { ControlPanelData } from '../controlPanelDesign/controlPanelDesign.model';
@@ -39,6 +39,9 @@ import moment from 'moment';
 })
 export class PrintDutySlipComponent {
   dataSource: any;
+  signatureDriverUrl: string = null;
+  signatureProdUrl: string = null;
+  signatureUatUrl: string = null;
   dataSourceForInvoiceDuties: any[] = [];ReservationStatus: any;
   advanceTable: PrintDutySlip | null;
   ReservationID: number;
@@ -58,8 +61,7 @@ export class PrintDutySlipComponent {
     public _controlPanelDesignService: ControlPanelDesignService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService,
-    private pdfPrintService: PdfPrintService,
-    public router: Router,
+    private pdfPrintService: PdfPrintService
     ) { }
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -75,9 +77,9 @@ export class PrintDutySlipComponent {
       this.route.queryParams.subscribe(paramsData =>{
         this.DutySlipID = paramsData.dutySlipID;
         this.ReservationID = paramsData.reservationID;
+        this.loadDataForReservation();
+        this.loadData();
       });
-    this.loadDataForReservation();
-    this.loadData();
     }
   
     onNoClick(): void 
@@ -85,10 +87,14 @@ export class PrintDutySlipComponent {
 
     public loadDataForReservation() 
     {
+      if (!this.ReservationID) {
+        return;
+      }
       this._controlPanelDesignService.getReservationDetails(this.ReservationID).subscribe(
       (data: ControlPanelData) => {
           this.reservationInfo = data?.reservationDetails;
-          this.ReservationStatus = this.reservationInfo[0].reservationStatus;
+          this.ReservationStatus = this.reservationInfo?.[0]?.reservationStatus;
+          this.applyDropAddressFromReservation();
         },
       (error: HttpErrorResponse) => {this.reservationInfo = null;});
     }
@@ -99,26 +105,119 @@ export class PrintDutySlipComponent {
       data =>   
       {
         this.dataSource = data;
-        if(!this.dataSource?.runningDetailsModels)
-        {
-          this.router.navigate(['/PrintDutySlipWithoutMap'],
-            { queryParams: { dutySlipID: this.DutySlipID, reservationID: this.ReservationID } });
-        }
+        this.normalizeDutySlipPrintFlags(this.dataSource);
         if (this.dataSource?.customerSignatureImage) {
-          this.dataSource.customerSignatureImage = this._generalService.resolveStaticImageUrl(
-            this.dataSource.customerSignatureImage
-          );
+          const signatureUrls = this._generalService.signatureImageUrls(this.dataSource.customerSignatureImage);
+          this.signatureDriverUrl = signatureUrls.driver;
+          this.signatureProdUrl = signatureUrls.prod;
+          this.signatureUatUrl = signatureUrls.uat;
+          this.dataSource.customerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl || this.signatureUatUrl;
         }
-        //this.TotalKMGSG=this.dataSource?.locationInKM-this.dataSource?.locationOutKM;
+        this.applyDropAddressFromReservation();
+        // Total Kms in header uses totalRunningKM; totalKms is for Running Detail total row when distance column is shown.
         if (this.dataSource?.showDistanceOnDutySlipPdf === true) {
-          this.totalKms = this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
+          this.totalKms = this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0) ?? 0;
         } else {
           this.totalKms = 0;
         }
         //this.getTime();
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
-    }  
+    }
+
+    useProdSignature(): void {
+      const next = this._generalService.nextSignatureUrl(this.dataSource?.customerSignatureImage, {
+        driver: this.signatureDriverUrl,
+        prod: this.signatureProdUrl,
+        uat: this.signatureUatUrl
+      });
+      if (next && this.dataSource) {
+        this.dataSource.customerSignatureImage = next;
+      }
+    }
+
+    getDropAddress(): string {
+      return this.firstNonEmptyAddress(
+        this.dataSource?.dropOffAddress,
+        this.dataSource?.DropOffAddress,
+        this.dataSource?.dropOffAddressDetails,
+        this.dataSource?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.dropOffAddress,
+        this.reservationInfo?.[0]?.drop?.DropOffAddress,
+        this.reservationInfo?.[0]?.drop?.dropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.dropOffAddress,
+        this.reservationInfo?.[0]?.DropOffAddress
+      );
+    }
+
+    private applyDropAddressFromReservation(): void {
+      if (!this.dataSource) {
+        return;
+      }
+      this.dataSource.dropOffAddress = this.getDropAddress();
+    }
+
+    private firstNonEmptyAddress(...values: any[]): string {
+      for (const value of values) {
+        const text = (value ?? '').toString().trim();
+        if (text) {
+          return text;
+        }
+      }
+      return '';
+    }
+
+    private normalizeDutySlipPrintFlags(data: any): void {
+      if (!data) {
+        return;
+      }
+      const showOtp =
+        data.showOTPOnDutySlip ?? data.ShowOTPOnDutySlip;
+      data.showOTPOnDutySlip =
+        showOtp === true || showOtp === 'true' || showOtp === 1 || showOtp === '1';
+
+      data.startTripOTP = data.startTripOTP ?? data.StartTripOTP;
+      data.endTripOTP = data.endTripOTP ?? data.EndTripOTP;
+      data.startTripOTPGeneratedAt =
+        data.startTripOTPGeneratedAt ?? data.StartTripOTPGeneratedAt;
+      data.endTripOTPGeneratedAt =
+        data.endTripOTPGeneratedAt ?? data.EndTripOTPGeneratedAt;
+    }
+
+    formatOtpDisplayTime(
+      generatedAt: unknown,
+      otp: unknown,
+      datePart: unknown,
+      timePart: unknown
+    ): string {
+      const fromApi = this.formatOtpGeneratedAt(generatedAt);
+      if (fromApi) {
+        return fromApi;
+      }
+      const otpText = (otp ?? '').toString().trim();
+      if (!otpText) {
+        return '';
+      }
+      const dateMoment = moment(datePart);
+      const timeMoment = moment(timePart);
+      if (!dateMoment.isValid() && !timeMoment.isValid()) {
+        return '';
+      }
+      const combined = dateMoment.isValid() ? dateMoment.clone() : moment().startOf('day');
+      if (timeMoment.isValid()) {
+        combined.hour(timeMoment.hour()).minute(timeMoment.minute()).second(0);
+      }
+      return combined.isValid() ? combined.format('HH:mm') : '';
+    }
+
+    formatOtpGeneratedAt(value: unknown): string {
+      if (value == null || value === '') {
+        return '';
+      }
+      const parsed = moment(value);
+      return parsed.isValid() ? parsed.format('HH:mm') : '';
+    }
   
     getTime() 
     {

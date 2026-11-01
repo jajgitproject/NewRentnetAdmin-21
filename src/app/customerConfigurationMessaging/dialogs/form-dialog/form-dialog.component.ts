@@ -109,6 +109,7 @@ export class FormDialogComponent
       tripStartEmailToPassenger: [this.advanceTable.tripStartEmailToPassenger],
       tripEndEmailToPassenger: [this.advanceTable.tripEndEmailToPassenger],
       passengerSMSAlert: [this.advanceTable.passengerSMSAlert],
+      reservationConfirmationWhatsApp: [this.advanceTable.reservationConfirmationWhatsApp === true],
       activationStatus: [this.advanceTable.activationStatus],
       
     });

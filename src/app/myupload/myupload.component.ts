@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, OnInit, Output, EventEmitter, ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR } from '@angular/core';
 import { HttpEventType, HttpClient } from '@angular/common/http';
 import { GeneralService } from '../general/general.service';
 @Component({
@@ -11,6 +11,8 @@ import { GeneralService } from '../general/general.service';
 export class MyUploadComponent implements OnInit {
   public progress: number;
   public message: string;
+  @Input() buttonText = 'Upload File';
+  @Input() accept = '';
   @Output() public onUploadFinished = new EventEmitter();
   constructor(private http: HttpClient, public _generalService:GeneralService) { }
   ngOnInit() {

@@ -10,7 +10,13 @@ export function ConfirmPasswordValidator(controlName: string, matchingControlNam
       ) {
         return;
       }
-      if (control.value !== matchingControl.value) {
+      const password = control.value ?? '';
+      const confirmPassword = matchingControl.value ?? '';
+      if (!password && !confirmPassword) {
+        matchingControl.setErrors(null);
+        return;
+      }
+      if (password !== confirmPassword) {
         matchingControl.setErrors({ confirmPasswordValidator: true });
       } else {
         matchingControl.setErrors(null);

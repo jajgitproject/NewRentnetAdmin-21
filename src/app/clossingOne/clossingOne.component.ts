@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ClossingOneService } from './clossingOne.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -8,7 +8,7 @@ import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { Injectable, EventEmitter, Output } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, interval, merge, Observable, Subject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -42,7 +42,10 @@ import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import {
   confirmMissingGstnForSingleDuty,
-  extractApiErrorMessage
+  extractApiErrorMessage,
+  extractOrphanInvoiceDate,
+  extractOrphanInvoiceNumber,
+  formatOrphanInvoiceLabel
 } from '../shared/customer-invoicing-gstn-confirm.util';
 import { SummaryOfDutyData } from '../summaryOfDuty/summary-of-duty.model';
 import {
@@ -85,6 +88,15 @@ import { BillToOther } from '../billToOther/billToOther.model';
 import { DutyStateCustomer } from '../dutyStateCustomer/dutyStateCustomer.model';
 import { DutyStateCustomerFormDialogComponent } from '../dutyStateCustomer/dialogs/form-dialog/form-dialog.component';
 import { DutyStateCustomerService } from '../dutyStateCustomer/dutyStateCustomer.service';
+import { DutyNight } from '../dutyNight/dutyNight.model';
+import { DutyNightFormDialogComponent } from '../dutyNight/dialogs/form-dialog/form-dialog.component';
+import { DutyNightService } from '../dutyNight/dutyNight.service';
+import {
+  getDutyNightEntryBlockedMessage,
+  showDutyNightEntryBlockedDialog,
+} from '../dutyNight/duty-night-entry-guard.util';
+import { isDutyNightRecordActive, normalizeDutyNightRecords } from '../dutyNight/duty-night-status.util';
+import { isNightCountProvided, toNightCount } from '../shared/night-charges.util';
 import { SingleDutySingleBillForLocalService } from '../SingleDutySingleBillForLocal/SingleDutySingleBillForLocal.service';
 import { PackageRateDetailsForClosingService } from '../packageRateDetailsForClosing/packageRateDetailsForClosing.service';
 import { FormDialogComponent } from '../MOPDetailsShow/dialogs/mopDetails/mopDetails.component';
@@ -126,7 +138,7 @@ import {
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
-export class ClossingOneComponent implements OnInit, AfterViewInit {
+export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
   // dataSavedMessage: boolean = false;
   updateData = new Subject<void>();
   AllotmentID: any;
@@ -157,6 +169,10 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   DropOffDate: Date;
   PickupDate: Date;
   closureStatus: string;
+  isMyfAggregator = false;
+  isMoveInSync = false;
+  sendingMyfLatLon = false;
+  sendingDutySlipEmail = false;
   PickupTime: Date;
   DropOffTime: Date;
   LocationOutDate: Date;
@@ -194,6 +210,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   summaryOfDutyData: SummaryOfDutyData | null = null;
   /** True when duty-billing-summary shows an active InvoiceCalculation for this duty. */
   hasActiveInvoiceCalculation = false;
+  /** Shared duty-billing-summary payload (Generate Bill gate + child nights/DA). */
+  dutyBillingSummary: any = null;
   dataSource: Dispute[] | null;
   dataSourceforCard: any = null;
   reservationCloseDetail: any = null;
@@ -221,6 +239,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   showHidesettledRates: boolean = false;
   showHideDutyStateCustomer: boolean = false;
   advanceTableDutyStateCustomer: DutyStateCustomer | null;
+  showHideDutyNight: boolean = false;
+  advanceTableDutyNight: DutyNight | null;
   showMOP: boolean = false;
   invoiceID: any;
   goodForBilling: boolean;
@@ -265,6 +285,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   DutySlipMap:any;
   IRN:any;
   hasActiveEInvoice = false;
+  hasActiveInvoice = false;
+  private irnPollSubscription: Subscription | null = null;
+  private readonly irnPollIntervalMs = 60000;
    CityName:any;
   Package:any;
   carBooked:any;
@@ -287,6 +310,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     public dutyGSTPercentageService: DutyGSTPercentageService,
     public dutyStateService: DutyStateService,
     public dutyStateCustomerService: DutyStateCustomerService,
+    public dutyNightService: DutyNightService,
     public additionalKmsDetailsService: AdditionalKmsDetailsService,
     public dutySACService: DutySACService,
     public discountDetails: DiscountDetailsService,
@@ -308,6 +332,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     public _dutySlipImageService: DutySlipImageService,
     public odoMeterAndManualDutySlipImageService: OdoMeterAndManualDutySlipImageService,
     public settleRateService: SettledRateDetailsService,
+    private cdr: ChangeDetectorRef,
    
   ) {
 
@@ -342,11 +367,6 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       this.startInitialLoadsIfReady();
       
     });
-    this.checkVerifyDutyBeforeFormOpen();
-  this.GetClosingData();
-   this.BookingDataOnClosing();
-   this.GSTDataOnClosing();
-   this.CustomerSpecificFieldsloadData();
   }
 
   ngAfterViewInit(): void {
@@ -359,7 +379,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       return;
     }
     this.initialLoadsStarted = true;
+    this.checkVerifyDutyBeforeFormOpen();
     this.GetClosingData();
+    this.loadMyfLatLonEligibility();
     this.disputeService.disputeData$.subscribe(data => {
       this.disputeAdvanceTable = data ?? [];
     });
@@ -367,6 +389,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.GetTotalTollParInStDispute();
     this.loadDataForCard();
     this.BookingDataOnClosing();
+    this.GSTDataOnClosing();
+    this.CustomerSpecificFieldsloadData();
     this.TollParkingLoadData();
     this.DutyInterStateTaxLoadData();
     this.DisputeLoadData();
@@ -374,16 +398,78 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.DutyGSTPercentageLoadData();
     this.loadDutyStateData();
     this.loadDutyStateDataCustomer();
+    this.loadDutyNightData();
     this.loadDataforAdditionalKMHR();
     this.salesPersonLoadData();
     this.settledRateLoadData();
     this.MOPLoadData();
     this.loadDataForReservationDiscountClosing();
     this.loadDataForImage();
+    this.startIrnStatePolling();
+  }
+
+  ngOnDestroy(): void {
+    this.irnPollSubscription?.unsubscribe();
+  }
+
+  private startIrnStatePolling(): void {
+    this.irnPollSubscription?.unsubscribe();
+    this.irnPollSubscription = interval(this.irnPollIntervalMs).subscribe(() => {
+      this.refreshActiveEInvoiceStateQuietly();
+    });
+  }
+
+  private refreshActiveEInvoiceStateQuietly(): void {
+    if (!this.DutySlipID) {
+      return;
+    }
+    this.clossingOneService.refreshActiveEInvoiceState(this.DutySlipID).subscribe(
+      (state) => this.applyActiveEInvoiceState(state)
+    );
+  }
+
+  private applyActiveEInvoiceState(state: { hasActiveEInvoice: boolean; hasActiveInvoice?: boolean; irn?: string | null }): void {
+    this.hasActiveEInvoice = state.hasActiveEInvoice === true;
+    if (state.hasActiveInvoice !== undefined) {
+      this.hasActiveInvoice = state.hasActiveInvoice === true;
+    }
+    if (state.irn !== undefined) {
+      this.IRN = state.irn;
+    }
+    if (this.advanceTableClosingOne) {
+      this.advanceTableClosingOne.hasActiveEInvoice = this.hasActiveEInvoice;
+      this.advanceTableClosingOne.hasActiveInvoice = this.hasActiveInvoice;
+      if (state.irn !== undefined) {
+        this.advanceTableClosingOne.irn = state.irn;
+      }
+    }
+    this.applyEditBlockStatus();
+    this.dutySlipForBillingComponent?.applyExternalEInvoiceState(state);
+  }
+
+  /** Refresh IRN state from server, then run action only if edits are still allowed. */
+  private runIfEditAllowed(action: () => void): void {
+    if (!this.DutySlipID) {
+      return;
+    }
+    this.clossingOneService.refreshActiveEInvoiceState(this.DutySlipID).subscribe({
+      next: (state) => {
+        this.applyActiveEInvoiceState(state);
+        if (this.guardEInvoiceEdit()) {
+          action();
+        }
+      },
+      error: () => {
+        if (this.guardEInvoiceEdit()) {
+          action();
+        }
+      },
+    });
   }
 
   onDataSaved() {
     this.GetClosingData();
+    this.BookingDataOnClosing();
     this.DisputeLoadData();
   }
 
@@ -409,6 +495,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         this.invoiceID = this.advanceTableClosingOne?.invoiceID;
         this.IRN = this.advanceTableClosingOne?.irn;
         this.hasActiveEInvoice = !!this.advanceTableClosingOne?.hasActiveEInvoice;
+        this.hasActiveInvoice = !!this.advanceTableClosingOne?.hasActiveInvoice || Number(this.invoiceID) > 0;
         this.goodForBilling = !!this.advanceTableClosingOne?.closingDutySlipForBillingModel?.goodForBilling;
         this.verifyDuty = !!this.advanceTableClosingOne?.closingDutySlipForBillingModel?.verifyDuty;
         this.DSClosing = this.advanceTableClosingOne?.closingDutySlipForBillingModel?.dsClosing;
@@ -438,53 +525,126 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     );
   }
 
+  loadMyfLatLonEligibility() {
+    if (!this.DutySlipID) {
+      this.isMyfAggregator = false;
+      this.isMoveInSync = false;
+      return;
+    }
+    this.clossingOneService.getMyfLatLonEligibility(this.DutySlipID).subscribe(
+      data => {
+        this.isMyfAggregator = !!(data && (data.isMyf === true || data.IsMyf === true));
+        this.isMoveInSync = !!(data && (data.isMoveInSync === true || data.IsMoveInSync === true));
+      },
+      () => {
+        this.isMyfAggregator = false;
+        this.isMoveInSync = false;
+      }
+    );
+  }
+
+  sendMyfLatLon() {
+    if (!this.DutySlipID || this.sendingMyfLatLon) {
+      return;
+    }
+    this.sendingMyfLatLon = true;
+    this.clossingOneService.sendMyfLatLon(this.DutySlipID).subscribe(
+      data => {
+        this.sendingMyfLatLon = false;
+        const message = (data && (data.message || data.Message)) || 'success';
+        this.showNotification('snackbar-success', message, 'bottom', 'center');
+      },
+      (error: HttpErrorResponse) => {
+        this.sendingMyfLatLon = false;
+        const body = error && error.error;
+        const message = (body && (body.message || body.Message)) || 'MYF lat lon could not be sent.';
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
+  }
+
+  sendDutySlipOnEmail() {
+    if (!this.DutySlipID || this.sendingDutySlipEmail) {
+      return;
+    }
+    this.sendingDutySlipEmail = true;
+    this.clossingOneService.sendDutySlipOnEmail(this.DutySlipID).subscribe(
+      data => {
+        this.sendingDutySlipEmail = false;
+        const message = (data && (data.message || data.Message)) || 'Duty slip email sent successfully.';
+        this.showNotification('snackbar-success', message, 'bottom', 'center');
+      },
+      (error: HttpErrorResponse | string) => {
+        this.sendingDutySlipEmail = false;
+        let message = 'Duty slip email could not be sent.';
+        if (typeof error === 'string' && error.trim()) {
+          message = error.trim();
+        } else if (error && typeof error === 'object') {
+          const body = (error as HttpErrorResponse).error;
+          if (typeof body === 'string' && body.trim()) {
+            message = body.trim();
+          } else if (body && (body.message || body.Message)) {
+            message = body.message || body.Message;
+          } else if ((error as HttpErrorResponse).status === 404) {
+            message = 'Duty slip email API was not found. Rebuild and restart the API.';
+          }
+        }
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
+  }
+
   public BookingDataOnClosing() {
     this.clossingOneService.getClosingData(this.AllotmentID).subscribe
       (
         data => {
-          this.closingDataAdvanceTable = data;
-          console.log('Closing Data:', this.closingDataAdvanceTable);
-          this.allotmentID = this.closingDataAdvanceTable?.allotmentID;
-          this.dutySlipID = this.closingDataAdvanceTable?.dutySlipID;
-          this.ReservationID = this.closingDataAdvanceTable?.reservationID;
-          this.CustomerID = this.closingDataAdvanceTable?.customerID;
-          this.PackageID = this.closingDataAdvanceTable?.packageID;
-          this.PackageTypeID = this.closingDataAdvanceTable?.packageTypeID;
-          this.CustomerContractID = this.closingDataAdvanceTable?.customerContractID;
-          this.PackageType = this.closingDataAdvanceTable?.packageType;
-          this.DutySlipForBillingID = this.closingDataAdvanceTable?.dutySlipForBillingID;
-          this.RegistrationNumber = this.closingDataAdvanceTable?.registrationNumber;
-          this.InventoryID = this.closingDataAdvanceTable?.inventoryID;
-          this.DropOffDate = this.closingDataAdvanceTable?.dropOffDate;
-          this.PickupDate = this.closingDataAdvanceTable?.pickupDate;
-          this.closureStatus = this.closingDataAdvanceTable?.closureStatus;
-          this.PickupTime = this.closingDataAdvanceTable?.pickupTime;
-          this.DropOffTime = this.closingDataAdvanceTable?.dropOffTime;
-          this.LocationOutDate = this.closingDataAdvanceTable?.locationOutDate;
-          this.LocationOutTime = this.closingDataAdvanceTable?.locationOutTime;
-          this.PickupAddress = this.closingDataAdvanceTable?.pickupAddress;
-          this.DropOffAddress = this.closingDataAdvanceTable?.dropOffAddress;
-          this.LocationOutAddress = this.closingDataAdvanceTable?.locationOutAddress;
-          this.CustomerName = this.closingDataAdvanceTable?.customerName || '';
-          this.TallyCustomerID = this.closingDataAdvanceTable?.tallyCustomerID || 0;
-          this.PickupCityID = this.closingDataAdvanceTable?.pickupCityID;
-          this.VehicleCategoryID = this.closingDataAdvanceTable?.vehicleCategoryID;
-          this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
-          this.guestName = this.closingDataAdvanceTable?.guestName;
-          this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
-          this.CityName = this.closingDataAdvanceTable?.city;
-          this.Package = this.closingDataAdvanceTable?.package;
-          this.carBooked=this.closingDataAdvanceTable?.vehicle;
-          this.carSent=this.closingDataAdvanceTable?.carSent;
-          this.fuelType=this.closingDataAdvanceTable?.fuelType;
-         
-          this.advanceDetailsLoadData();
-          this.kamCardLoadData();
-          // this.loadDataforAdditionalKMHR();
-          this.DutySACLoadData();
-          this.salesPersonLoadData();
-          this.GetBillFromTo();
-
+          // Defer binding updates so *ngIf="closingDataAdvanceTable" does not trip NG0100
+          // (ExpressionChangedAfterItHasBeenCheckedError) during the same CD pass.
+          Promise.resolve().then(() => {
+            this.closingDataAdvanceTable = data;
+            console.log('Closing Data:', this.closingDataAdvanceTable);
+            this.allotmentID = this.closingDataAdvanceTable?.allotmentID;
+            this.dutySlipID = this.closingDataAdvanceTable?.dutySlipID;
+            this.ReservationID = this.closingDataAdvanceTable?.reservationID;
+            this.CustomerID = this.closingDataAdvanceTable?.customerID;
+            this.PackageID = this.closingDataAdvanceTable?.packageID;
+            this.PackageTypeID = this.closingDataAdvanceTable?.packageTypeID;
+            this.CustomerContractID = this.closingDataAdvanceTable?.customerContractID;
+            this.PackageType = this.closingDataAdvanceTable?.packageType;
+            this.DutySlipForBillingID = this.closingDataAdvanceTable?.dutySlipForBillingID;
+            this.RegistrationNumber = this.closingDataAdvanceTable?.registrationNumber;
+            this.InventoryID = this.closingDataAdvanceTable?.inventoryID;
+            this.DropOffDate = this.closingDataAdvanceTable?.dropOffDate;
+            this.PickupDate = this.closingDataAdvanceTable?.pickupDate;
+            this.closureStatus = this.closingDataAdvanceTable?.closureStatus;
+            this.PickupTime = this.closingDataAdvanceTable?.pickupTime;
+            this.DropOffTime = this.closingDataAdvanceTable?.dropOffTime;
+            this.LocationOutDate = this.closingDataAdvanceTable?.locationOutDate;
+            this.LocationOutTime = this.closingDataAdvanceTable?.locationOutTime;
+            this.PickupAddress = this.closingDataAdvanceTable?.pickupAddress;
+            this.DropOffAddress = this.closingDataAdvanceTable?.dropOffAddress;
+            this.LocationOutAddress = this.closingDataAdvanceTable?.locationOutAddress;
+            this.CustomerName = this.closingDataAdvanceTable?.customerName || '';
+            this.TallyCustomerID = this.closingDataAdvanceTable?.tallyCustomerID || 0;
+            this.PickupCityID = this.closingDataAdvanceTable?.pickupCityID;
+            this.VehicleCategoryID = this.closingDataAdvanceTable?.vehicleCategoryID;
+            this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
+            this.guestName = this.closingDataAdvanceTable?.guestName;
+            this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
+            this.CityName = this.closingDataAdvanceTable?.city;
+            this.Package = this.closingDataAdvanceTable?.package;
+            this.carBooked=this.closingDataAdvanceTable?.vehicle;
+            this.carSent=this.closingDataAdvanceTable?.carSent;
+            this.fuelType=this.closingDataAdvanceTable?.fuelType;
+           
+            this.advanceDetailsLoadData();
+            this.kamCardLoadData();
+            // this.loadDataforAdditionalKMHR();
+            this.DutySACLoadData();
+            this.salesPersonLoadData();
+            this.GetBillFromTo();
+            this.cdr.detectChanges();
+          });
         },
         (error: HttpErrorResponse) => { this.closingDataAdvanceTable = null; }
       );
@@ -522,9 +682,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Toll Parking ----------
   openDutyTollParkingEntry() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutyTollParking,
       {
         data:
@@ -538,6 +696,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.TollParkingLoadData();
       this.recalculateBillQuietly();
+    });
     });
   }
 
@@ -558,6 +717,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Dispute ----------
   openDisputes() {
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(FormDialogDisputeComponent,
       {
         data:
@@ -572,6 +732,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         this.DisputeLoadData();
         window.location.reload();
       }
+    });
     });
   }
 
@@ -601,9 +762,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Interstate Tax ----------
   dutyInterstateTax() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DITFormDialogComponent,
       {
         data:
@@ -621,7 +780,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.DutyInterStateTaxLoadData();
       this.recalculateBillQuietly();
-    })
+    });
+    });
   }
 
   public DutyInterStateTaxLoadData() {
@@ -641,9 +801,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Duty Expense ----------
   openDutyExpense() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutyExpenseFormDialogComponent,
       {
         data:
@@ -656,6 +814,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.dutyExpenseLoadData();
       this.recalculateBillQuietly();
+    });
     });
   }
 
@@ -676,9 +835,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Duty GST Percentage ----------
   openDutyGSTPercentage() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutyGSTPercentageFormDialogComponent,
       {
         data:
@@ -688,9 +845,13 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved !== true) {
+        return;
+      }
       this.DutyGSTPercentageLoadData();
-      window.location.reload();
+      this.recalculateBillQuietly();
+    });
     });
   }
   DutyGSTPercentageLoadData() {
@@ -717,6 +878,40 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     };
   }
 
+  get activeDutyNightNumberOnNights(): number | null {
+    if (!this.advanceTableDutyNight) {
+      return null;
+    }
+    const records = Array.isArray(this.advanceTableDutyNight)
+      ? this.advanceTableDutyNight
+      : [this.advanceTableDutyNight];
+    const active = records.find((record) => isDutyNightRecordActive(record));
+    return active?.numberOnNights ?? null;
+  }
+
+  get dutyNightEntryBlockedMessage(): string | null {
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    return getDutyNightEntryBlockedMessage(verifyDuty, goodForBilling);
+  }
+
+  get isDutyNightEntryBlocked(): boolean {
+    return this.dutyNightEntryBlockedMessage != null;
+  }
+
+  private guardDutyNightEntry(): boolean {
+    const message = this.dutyNightEntryBlockedMessage;
+    if (!message) {
+      return true;
+    }
+    showDutyNightEntryBlockedDialog(message);
+    return false;
+  }
+
+  getActiveDutyNightOverrideCount(): number | null {
+    const nights = this.activeDutyNightNumberOnNights;
+    return isNightCountProvided(nights) ? toNightCount(nights) : null;
+  }
+
   private guardDutyStateEdit(): boolean {
     if (this.hasGeneratedInvoice()) {
       this.showNotification(
@@ -731,6 +926,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
 
   openDutyState() {
+    this.runIfEditAllowed(() => {
     if (!this.guardDutyStateEdit()) {
       return;
     }
@@ -788,6 +984,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         });
       }
     );
+    });
   }
 
   resetBillingVerificationAfterEcoStateChange(): void {
@@ -819,9 +1016,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //======= Duty State Customer=======//
   openDutyStateCustomer() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutyStateCustomerFormDialogComponent,
       {
         data:
@@ -835,6 +1030,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.loadDutyStateDataCustomer();
       window.location.reload();
+    });
     });
   }
 
@@ -854,11 +1050,85 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   ///end Duty State Customer=======//
 
-  //---------- Start Add Discount ----------
-  addDiscount() {
-    if (!this.guardEInvoiceEdit()) {
+  //======= Duty Night=======//
+  openDutyNight() {
+    if (!this.guardDutyNightEntry()) {
       return;
     }
+    if (this.isDutyNightEditBlocked) {
+      this.showDutyNightEditBlockedMessage();
+      return;
+    }
+    const dialogRef = this.dialog.open(DutyNightFormDialogComponent, {
+      data: {
+        dutySlipID: this.DutySlipID,
+        advanceTable: new DutyNight({}),
+        action: 'add',
+        verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus,
+        isDutyNightEditBlocked: this.isDutyNightEditBlocked,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.loadDutyNightData(() => {
+          this.recalculateBillQuietly();
+        });
+      }
+    });
+  }
+
+  private showDutyNightEditBlockedMessage(): void {
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    let message = 'Duty Night changes are not allowed.';
+    if (this.isEInvoiceBlockingEdits) {
+      message = 'E-Invoice (IRN) is already generated and active. Duty Night changes are not allowed.';
+    } else if (goodForBilling) {
+      message = 'Duty is marked Good for Billing. Duty Night changes are not allowed.';
+    } else if (verifyDuty) {
+      message = 'Duty is verified. Duty Night changes are not allowed.';
+    }
+    this.showNotification('snackbar-warning', message, 'bottom', 'center');
+  }
+
+  loadDutyNightData(afterLoad?: () => void): void {
+    if (!this.DutySlipID) {
+      this.advanceTableDutyNight = [];
+      this.showHideDutyNight = false;
+      this.refreshClosingSectionViewDialogContext();
+      this.cdr.detectChanges();
+      afterLoad?.();
+      return;
+    }
+    this.dutyNightService.getTableDataDutyNightClosing(this.DutySlipID).subscribe(
+      (data) => {
+        const records = normalizeDutyNightRecords(data);
+        this.showHideDutyNight = records.length > 0;
+        this.advanceTableDutyNight = records;
+        this.refreshClosingSectionViewDialogContext();
+        this.cdr.detectChanges();
+        afterLoad?.();
+      },
+      () => {
+        this.advanceTableDutyNight = [];
+        this.showHideDutyNight = false;
+        this.refreshClosingSectionViewDialogContext();
+        this.cdr.detectChanges();
+        afterLoad?.();
+      }
+    );
+  }
+
+  onDutyNightSectionChanged(): void {
+    this.loadDutyNightData(() => {
+      this.recalculateBillQuietly();
+    });
+  }
+
+  ///end Duty Night=======//
+
+  //---------- Start Add Discount ----------
+  addDiscount() {
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DiscountDetailsDialogComponent,
       {
         data:
@@ -869,10 +1139,14 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved !== true) {
+        return;
+      }
       this.loadDataForReservationDiscountClosing();
-      window.location.reload();
-    })
+      this.recalculateBillQuietly();
+    });
+    });
   }
 
   public loadDataForReservationDiscountClosing() {
@@ -893,9 +1167,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Additional KM & HRs ----------
   openAdditional() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(AdditionalDialogComponent,
       {
         data:
@@ -909,8 +1181,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       if (res === true) {
         this.loadDataforAdditionalKMHR();
-        window.location.reload();
+        this.recalculateBillQuietly();
       }
+    });
     });
   }
 
@@ -934,9 +1207,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   //---------- Start Duty SAC ----------
   openDutySAC() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(DutySACFormDialogComponent,
       {
         data:
@@ -949,6 +1220,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.DutySACLoadData();
       window.location.reload();
+    });
     });
   }
 
@@ -983,9 +1255,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   //-------------LTR Details---------------
 
   public LoadLTR() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     this.clossingOneService.PackageTypeForLTR(this.PackageTypeID).subscribe
       (
         (data: any) => {
@@ -1023,6 +1293,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
+    });
   }
   //-------------View Bill-------------------------
 
@@ -1156,6 +1427,11 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     return this.isEInvoiceBlockingEdits || this.isGoodForBillingBlockingEdits;
   }
 
+  get isDutyNightEditBlocked(): boolean {
+    const { verifyDuty, goodForBilling } = this.getDutyStateBillingFlags();
+    return this.isEInvoiceBlockingEdits || verifyDuty || goodForBilling;
+  }
+
   private guardEInvoiceEdit(): boolean {
     if (this.isEInvoiceBlockingEdits) {
       this.showNotification(
@@ -1190,13 +1466,16 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   refreshHasActiveInvoiceCalculation(): void {
     if (this.DutySlipID == null || this.DutySlipID === '') {
       this.hasActiveInvoiceCalculation = false;
+      this.dutyBillingSummary = null;
       return;
     }
     this.clossingOneService.getDutyBillingSummary(this.DutySlipID).subscribe(
       (response) => {
+        this.dutyBillingSummary = response;
         this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response);
       },
       () => {
+        this.dutyBillingSummary = null;
         this.hasActiveInvoiceCalculation = false;
       }
     );
@@ -1219,6 +1498,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    let acknowledgeMissingGstn = false;
     try {
       const check = await firstValueFrom(
         this.clossingOneService.checkCustomerInvoicingGstn(this.DutySlipID)
@@ -1228,17 +1508,66 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         return;
       }
 
-      const response = await firstValueFrom(
-        this.clossingOneService.generateBill(this.DutySlipID, confirmation.acknowledgeMissingGstn)
-      );
-      this.invoiceID = response.invoiceID;
+      acknowledgeMissingGstn = confirmation.acknowledgeMissingGstn;
+      await this.createBillAfterConfirmations(acknowledgeMissingGstn, false);
+    } catch (error) {
+      const orphanInvoice =
+        error?.error?.orphanInvoice ||
+        extractOrphanInvoiceNumber(extractApiErrorMessage(error));
+
+      if (orphanInvoice) {
+        const orphanInvoiceDate =
+          error?.error?.orphanInvoiceDate || extractOrphanInvoiceDate(error);
+        await this.handleOrphanInvoiceGenerateBill(
+          orphanInvoice,
+          acknowledgeMissingGstn,
+          orphanInvoiceDate
+        );
+        return;
+      }
+
       this.showNotification(
-        'snackbar-success',
-        'Updated...!!!',
+        'snackbar-danger',
+        extractApiErrorMessage(error),
         'bottom',
         'center'
       );
-      this.getInvoiceType();
+    }
+  }
+
+  private async handleOrphanInvoiceGenerateBill(
+    orphanInvoice: string,
+    acknowledgeMissingGstn: boolean,
+    orphanInvoiceDate?: string | null
+  ): Promise<void> {
+    const invoiceLabel = formatOrphanInvoiceLabel(orphanInvoice, orphanInvoiceDate);
+    const confirm = await Swal.fire({
+      title: 'Confirm',
+      text: `This Duty can be attached from Backend to ${invoiceLabel}. Do you want to create a New Bill.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+    });
+
+    if (!confirm.isConfirmed) {
+      await Swal.fire({
+        title: 'Invoice not generated',
+        text: `Ask Backend To repair ${invoiceLabel}`,
+        icon: 'info',
+        confirmButtonText: 'Ok',
+      });
+      return;
+    }
+
+    try {
+      await this.createBillAfterConfirmations(acknowledgeMissingGstn, true);
+      await Swal.fire({
+        title: 'Bill created',
+        text: `Ask Backend to make a 0 Value ${invoiceLabel} to maintain the Invoice Series`,
+        icon: 'info',
+        confirmButtonText: 'Ok',
+      });
     } catch (error) {
       this.showNotification(
         'snackbar-danger',
@@ -1247,6 +1576,27 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         'center'
       );
     }
+  }
+
+  private async createBillAfterConfirmations(
+    acknowledgeMissingGstn: boolean,
+    acknowledgeOrphanAndCreateNew: boolean
+  ): Promise<void> {
+    const response = await firstValueFrom(
+      this.clossingOneService.generateBill(
+        this.DutySlipID,
+        acknowledgeMissingGstn,
+        acknowledgeOrphanAndCreateNew
+      )
+    );
+    this.invoiceID = response.invoiceID;
+    this.showNotification(
+      'snackbar-success',
+      'Updated...!!!',
+      'bottom',
+      'center'
+    );
+    this.getInvoiceType();
   }
   public getInvoiceType() {
     if (!this.canThisRoleViewBillOnClosingScreen) {
@@ -1276,6 +1626,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   //---------- Start Sales Person ----------
 
   addSalesPerson() {
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(RSPFormDialogComponent, {
       data: {
         advanceTable: this.advanceTableSP,
@@ -1291,6 +1642,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         this.updateData.next();
         window.location.reload();
       }
+    });
     });
   }
 
@@ -1356,22 +1708,48 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   /** Recalculate bill after extras / toll / interstate changes without opening Summary dialog. */
   recalculateBillQuietly(): void {
-    if (!this.DutySlipID || this.isEInvoiceBlockingEdits) {
+    if (!this.DutySlipID) {
       return;
     }
-    this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
-      response => {
-        this.summaryOfDutyData = response.summary;
-        this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
-          || hasInvoiceCalculationResult(response);
-        this.GetTotalTollParInStDispute();
-        this.loadDataForCard();
+    this.clossingOneService.refreshActiveEInvoiceState(this.DutySlipID).subscribe({
+      next: (state) => {
+        this.applyActiveEInvoiceState(state);
+        if (this.isEInvoiceBlockingEdits) {
+          return;
+        }
+        this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
+          response => {
+            this.summaryOfDutyData = response.summary;
+            this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
+              || hasInvoiceCalculationResult(response);
+            this.GetTotalTollParInStDispute();
+            this.loadDataForCard();
+          },
+          error => {
+            const errorMessage = error || 'Bill recalculation failed.';
+            this.showNotification('snackbar-danger', errorMessage, 'bottom', 'center');
+          }
+        );
       },
-      error => {
-        const errorMessage = error || 'Bill recalculation failed.';
-        this.showNotification('snackbar-danger', errorMessage, 'bottom', 'center');
-      }
-    );
+      error: () => {
+        if (this.isEInvoiceBlockingEdits) {
+          return;
+        }
+        this.clossingOneService.calculateBillWithSummary(this.DutySlipID).subscribe(
+          response => {
+            this.summaryOfDutyData = response.summary;
+            this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
+              || hasInvoiceCalculationResult(response);
+            this.GetTotalTollParInStDispute();
+            this.loadDataForCard();
+          },
+          error => {
+            const errorMessage = error || 'Bill recalculation failed.';
+            this.showNotification('snackbar-danger', errorMessage, 'bottom', 'center');
+          }
+        );
+      },
+    });
   }
 
   onBillingChargesChanged(): void {
@@ -1411,6 +1789,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.summaryOfDutyData = response.summary;
             this.hasActiveInvoiceCalculation = hasInvoiceCalculationResult(response.payload)
               || hasInvoiceCalculationResult(response);
+            this.BookingDataOnClosing();
             this.loadDataForCard();
             this.showNotification(
               'snackbar-success',
@@ -1421,9 +1800,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             this.openSummaryOfDutyDialog();
           },
           error => {
-            const errorMessage = error || 'Operation Failed.....!!!';
             Swal.fire({
-              title: errorMessage,
+              title: extractApiErrorMessage(error),
               icon: 'error'
             });
           }
@@ -1560,6 +1938,10 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   showAndScrollDutyStateCustomer() {
     this.openClosingSectionView('dutyStateCustomer', 'Customer Duty State');
   }
+
+  showAndScrollDutyNight() {
+    this.openClosingSectionView('dutyNight', 'Duty Night');
+  }
   //------DutySAC
   showAndScrollDutySAC() {
     this.openClosingSectionView('dutySAC', 'Duty SAC');
@@ -1599,6 +1981,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       advanceTableDGP: this.advanceTableDGP,
       advanceTableDutyState: this.advanceTableDutyState,
       advanceTableDutyStateCustomer: this.advanceTableDutyStateCustomer,
+      advanceTableDutyNight: this.advanceTableDutyNight,
       advanceTableSAC: this.advanceTableSAC,
       advanceTableAD: this.advanceTableAD,
       advanceTableMOP: this.advanceTableMOP,
@@ -1613,6 +1996,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       goodForBillingStatusAndCancellationStatus: this.goodForBillingStatusAndCancellationStatus,
       verifyDuty: billingFlags.verifyDuty,
       goodForBilling: billingFlags.goodForBilling,
+      isDutyNightEditBlocked: this.isDutyNightEditBlocked,
+      isDutyNightEntryBlocked: this.isDutyNightEntryBlocked,
+      dutyNightEntryBlockedMessage: this.dutyNightEntryBlockedMessage,
       invoiceGenerated: this.hasGeneratedInvoice(),
       from: this.from
     };
@@ -1645,6 +2031,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
         break;
       case 'dutyStateCustomer':
         this.loadDutyStateDataCustomer();
+        break;
+      case 'dutyNight':
+        this.onDutyNightSectionChanged();
         break;
       case 'dutySAC':
         this.DutySACLoadData();
@@ -1708,6 +2097,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
       openCustomerSpecificField()
       {
+        this.runIfEditAllowed(() => {
         const openDialog = () => {
           if (!this.dataSourceCSF?.length || !this.dataSourceCSF[0]) {
             this.showNotification(
@@ -1728,7 +2118,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
                   customerID:this.dataSourceCSF[0].customerID,
                   action:"edit",
                   from: this.from,
-                  allowEditAlways: true,
+                  allowEditAlways: false,
                 }
             });
           dialogRef.afterClosed().subscribe(() => {
@@ -1756,6 +2146,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
             );
           }
         );
+        });
       }
 
       checkVerifyDutyBeforeFormOpen() {
@@ -1770,9 +2161,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
 
   MOPDetails() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(FormDialogComponent,
       {
         data:
@@ -1787,7 +2176,8 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((res: any) => {
       this.MOPLoadData();
       window.location.reload();
-    })
+    });
+    });
   }
 
   public MOPLoadData() {
@@ -1808,13 +2198,15 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       );
   }
 
-  onDutyStatusChanged(event: { verifyDuty: boolean, goodForBilling: boolean, message: string }) {
+  onDutyStatusChanged(event: { verifyDuty: boolean, goodForBilling: boolean, message: string, invoiceCalculated?: boolean }) {
     this.verifyDuty = event.verifyDuty;
     this.goodForBilling = event.goodForBilling;
     this.Message = event.message;
     this.applyEditBlockStatus();
-     this.GSTDataOnClosing();
-    this.refreshHasActiveInvoiceCalculation();
+    if (event.invoiceCalculated) {
+      this.hasActiveInvoiceCalculation = true;
+      this.BookingDataOnClosing();
+    }
   }
 
   openSearchModal() {
@@ -1822,9 +2214,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
   }
 
   openDutySlipImage() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     this._dutySlipImageService.getAllotmentIDForDutySlipImage(this.allotmentID).subscribe(
       data => {
         this.dutySlipImageAllotmentID = data;
@@ -1858,7 +2248,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
         });
       });
-
+    });
   }
 
 
@@ -1876,7 +2266,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.withOdometerImageData((data) => {
       this.openOdometerImageDialog(
         'Trip Start ODO Meter Image',
-        data?.tripStartODOMeterImage,
+        this.getOdometerImagePath(data, 'start'),
         'Trip Start ODO Meter image not available.'
       );
     });
@@ -1886,10 +2276,33 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
     this.withOdometerImageData((data) => {
       this.openOdometerImageDialog(
         'Trip End ODO Meter Image',
-        data?.tripEndODOMeterImage,
+        this.getOdometerImagePath(data, 'end'),
         'Trip End ODO Meter image not available.'
       );
     });
+  }
+
+  private getOdometerImagePath(
+    data: OdoMeterAndManualDutySlipImage | Record<string, unknown> | null | undefined,
+    field: 'start' | 'end'
+  ): string | null {
+    if (!data) {
+      return null;
+    }
+    const record = data as Record<string, unknown>;
+    const camelKey = field === 'start' ? 'tripStartODOMeterImage' : 'tripEndODOMeterImage';
+    const pascalKey = field === 'start' ? 'TripStartODOMeterImage' : 'TripEndODOMeterImage';
+    const value = record[camelKey] ?? record[pascalKey] ?? (data as OdoMeterAndManualDutySlipImage)[camelKey as keyof OdoMeterAndManualDutySlipImage];
+    if (value === null || value === undefined) {
+      return null;
+    }
+    const text = String(value).trim();
+    return text !== '' ? text : null;
+  }
+
+  private isValidOdometerImagePath(path: string | null | undefined): boolean {
+    const value = (path ?? '').toString().trim();
+    return value !== '' && !/^(null|undefined)$/i.test(value);
   }
 
   private withOdometerImageData(onLoaded: (data: OdoMeterAndManualDutySlipImage) => void): void {
@@ -1915,11 +2328,10 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
 
   private openOdometerImageDialog(
     title: string,
-    imageUrl: string | null | undefined,
+    imagePath: string | null | undefined,
     missingMessage: string
   ): void {
-    const resolvedUrl = this._generalService.resolveStaticImageUrl(imageUrl) || imageUrl;
-    if (!resolvedUrl) {
+    if (!this.isValidOdometerImagePath(imagePath)) {
       this.showNotification(
         'snackbar-warning',
         missingMessage,
@@ -1933,7 +2345,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
       maxWidth: '90vw',
       data: {
         title,
-        imageUrl: resolvedUrl,
+        imagePath: imagePath.trim(),
       },
     });
   }
@@ -1984,9 +2396,7 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
    
    settledRates()
    {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     this.settleRateService.getTableData(this.ReservationID,this.SearchActivationStatus, this.PageNumber).subscribe
     (
       (dataSRD :SettledRateDetails)=>   
@@ -2004,10 +2414,12 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
               status: this.verifyDutyStatusAndCacellationStatus
             }
           });
-          dialogRef.afterClosed().subscribe((res: any) => {
+          dialogRef.afterClosed().subscribe((saved: boolean) => {
+            if (saved !== true) {
+              return;
+            }
             this.settledRateLoadData();
-            //this.ngOnInit();
-            window.location.reload();
+            this.recalculateBillQuietly();
           })
         }
         else
@@ -2021,14 +2433,17 @@ export class ClossingOneComponent implements OnInit, AfterViewInit {
               status: this.verifyDutyStatusAndCacellationStatus
             }
           });
-          dialogRef.afterClosed().subscribe((res: any) => {
+          dialogRef.afterClosed().subscribe((saved: boolean) => {
+            if (saved !== true) {
+              return;
+            }
             this.settledRateLoadData();
-            //this.ngOnInit();
-            window.location.reload();
+            this.recalculateBillQuietly();
           })
         }
       }
     );  
+    });
   }
   
   settledRateLoadData() 
@@ -2052,9 +2467,7 @@ showAndScrollOpenSettledRates() {
 }
 
  changeDutyTypeClosingDetails() {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(CDTClosingDialogComponent,
       {
         data:
@@ -2068,9 +2481,15 @@ showAndScrollOpenSettledRates() {
           verifyDutyStatusAndCacellationStatus: this.verifyDutyStatusAndCacellationStatus
         }
       });
-    dialogRef.afterClosed().subscribe((res: any) => {
-      window.location.reload();
-    })
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved !== true) {
+        return;
+      }
+      this.GetClosingData();
+      this.BookingDataOnClosing();
+      this.recalculateBillQuietly();
+    });
+    });
   }
 
   GetTotalTollParInStDispute() 
@@ -2101,9 +2520,7 @@ showAndScrollOpenSettledRates() {
  //---------- Change City ----------
   ChangeCity() 
   {
-    if (!this.guardEInvoiceEdit()) {
-      return;
-    }
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(FormDialogComponentForCity,
     {
       data:
@@ -2118,7 +2535,8 @@ showAndScrollOpenSettledRates() {
     });
     dialogRef.afterClosed().subscribe((res: any) => {
       window.location.reload();
-    })
+    });
+    });
   }
 PrintDutyMap() {
   let baseUrl = this._generalService.FormURL;
@@ -2166,6 +2584,7 @@ PrintDutyMap() {
 //---------- Change Supplier For Inventory ----------
   ChangeSupplierForInventory() 
   {
+    this.runIfEditAllowed(() => {
     const dialogRef = this.dialog.open(FormDialogChangeSupplierForInventory,
     {
       data:
@@ -2177,7 +2596,8 @@ PrintDutyMap() {
     });
     dialogRef.afterClosed().subscribe((res: any) => {
       window.location.reload();
-    })
+    });
+    });
   }
 
 

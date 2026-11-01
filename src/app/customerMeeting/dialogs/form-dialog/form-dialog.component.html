@@ -1,0 +1,179 @@
+<div class="addContainer">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17">{{dialogTitle}}</div>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content>
+    <form class="register-form m-4" [formGroup]="advanceTableForm">
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Customer Group</label>
+          <mat-form-field class="example-full-width" appearance="outline" *ngIf="action === 'view'">
+            <input matInput formControlName="customerGroup" readonly>
+          </mat-form-field>
+          <mat-form-field class="example-full-width" appearance="outline" *ngIf="action !== 'view'">
+            <input type="text" matInput [formControl]="customerGroupControl" [matAutocomplete]="autoCustomerGroup" required>
+            <mat-autocomplete #autoCustomerGroup="matAutocomplete" [displayWith]="displayCustomerGroup.bind(this)"
+              (optionSelected)="onCustomerGroupSelected($event.option.value)">
+              <mat-option *ngFor="let option of filteredCustomerGroupOptions | async" [value]="option">
+                {{option.customerGroup}}
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="!selectedCustomerGroupID">Customer Group is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Employee</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <input matInput formControlName="employeeName" readonly>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Mode Of Meeting</label>
+          <mat-form-field class="example-full-width" appearance="outline" *ngIf="action === 'view'">
+            <input matInput formControlName="modeOfMeeting" readonly>
+          </mat-form-field>
+          <mat-form-field class="example-full-width" appearance="outline" *ngIf="action !== 'view'">
+            <mat-select formControlName="modeOfMeeting" required>
+              <mat-option *ngFor="let item of modeOfMeetingList" [value]="item.value">{{item.label}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Meeting Date</label>
+          <mat-form-field class="example-full-width" appearance="outline" *ngIf="action === 'view'">
+            <input matInput [value]="advanceTableForm.get('meetingDate').value | date:'dd/MM/yyyy'" readonly>
+          </mat-form-field>
+          <mat-form-field class="example-full-width" appearance="outline" *ngIf="action !== 'view'">
+            <input matInput [matDatepicker]="picker" formControlName="meetingDate" required>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Met With Name</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <input matInput formControlName="metWithName" [readonly]="action === 'view'">
+          </mat-form-field>
+        </div>
+
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Met With Designation</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <input matInput formControlName="metWithDesignation" [readonly]="action === 'view'">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Meeting Subject</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <input matInput formControlName="meetingSubject" maxlength="250" required [readonly]="action === 'view'">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Meeting Details</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <textarea matInput formControlName="meetingDetails" maxlength="500" rows="4" required [readonly]="action === 'view'"></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row" *ngIf="action === 'view'">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Record Created On Date</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <input matInput [value]="advanceTableForm.get('recordCreatedOnDate').value | date:'dd/MM/yyyy'" readonly>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Record Created On Time</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <input matInput [value]="advanceTableForm.get('recordCreatedOnTime').value | date:'HH:mm:ss'" readonly>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Record Created By</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <input matInput formControlName="recordCreatedByName" readonly>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Meeting Status</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <input matInput formControlName="meetingStatus" readonly>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-3">
+          <label class="field-label">Meeting Status Remark</label>
+          <mat-form-field class="example-full-width" appearance="outline">
+            <textarea matInput formControlName="meetingStatusRemark" rows="3" readonly></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+          <div class="example-button-row">
+            <button mat-raised-button color="primary" *ngIf="action !== 'view' && saveDisabled"
+              [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
+            <button mat-raised-button color="primary" *ngIf="action === 'view'" (click)="dialogRef.close()">Close</button>
+            <button mat-raised-button color="accent" *ngIf="action === 'view'" (click)="openMeetingRemarks()">
+              <mat-icon>comment</mat-icon>
+              Meeting Remarks
+            </button>
+            <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+            <button *ngIf="action === 'add'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Reset</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="remarks-section" *ngIf="action === 'view'">
+      <h6 class="remarks-title">Existing Remarks</h6>
+      <div *ngIf="remarksLoading" class="no-remarks">Loading remarks...</div>
+      <div *ngIf="!remarksLoading && remarkList.length === 0" class="no-remarks">No remarks added yet.</div>
+      <div class="remarks-table-wrapper" *ngIf="!remarksLoading && remarkList.length > 0">
+        <table class="remarks-table">
+          <thead>
+            <tr>
+              <th>Remark By</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of remarkList">
+              <td>{{item.remarkByName || '-'}}</td>
+              <td>{{formatRemarkDate(item.remarkDate)}}</td>
+              <td>{{formatRemarkTime(item.remarkTime)}}</td>
+              <td class="remark-text">{{item.remark}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

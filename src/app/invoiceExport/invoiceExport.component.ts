@@ -7,6 +7,8 @@ import Swal from 'sweetalert2';
 import { firstValueFrom } from 'rxjs';
 import { TableExportUtil } from '../shared/tableExportUtil';
 import { InvoiceExportService } from './invoiceExport.service';
+import { GlobalOtpConfigurationService } from './globalOtpConfiguration.service';
+import { GeneralService } from '../general/general.service';
 import {
   InvoiceExportRow,
   GeneralLineItemInvoiceGapRow,
@@ -25,9 +27,14 @@ export class InvoiceExportComponent implements OnInit {
   fromDateCtrl = new FormControl<Date | null>(null, Validators.required);
   toDateCtrl = new FormControl<Date | null>(null, Validators.required);
   exporting = false;
+  bypassOTPForAll = false;
+  otpConfigLoading = false;
+  otpConfigSaving = false;
 
   constructor(
     private invoiceExportService: InvoiceExportService,
+    private globalOtpConfigurationService: GlobalOtpConfigurationService,
+    private generalService: GeneralService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -35,6 +42,63 @@ export class InvoiceExportComponent implements OnInit {
     const today = moment().utcOffset('+05:30');
     this.fromDateCtrl.setValue(today.clone().subtract(30, 'days').toDate());
     this.toDateCtrl.setValue(today.toDate());
+    this.loadGlobalOtpConfiguration();
+  }
+
+  get globalOtpToggleLabel(): string {
+    return this.bypassOTPForAll ? 'OTP for All Employees' : 'Bypass OTP for All';
+  }
+
+  loadGlobalOtpConfiguration(): void {
+    this.otpConfigLoading = true;
+    this.globalOtpConfigurationService.get().subscribe({
+      next: (config) => {
+        this.bypassOTPForAll = !!config?.bypassOTPForAll;
+        this.otpConfigLoading = false;
+      },
+      error: () => {
+        this.otpConfigLoading = false;
+        this.showNotification(
+          'snackbar-warning',
+          'Unable to load global OTP configuration.'
+        );
+      },
+    });
+  }
+
+  toggleGlobalOtpBypass(): void {
+    if (this.otpConfigSaving) {
+      return;
+    }
+
+    const nextValue = !this.bypassOTPForAll;
+    const performedBy = this.generalService.getUserID();
+    if (!performedBy || performedBy <= 0) {
+      this.showNotification('snackbar-warning', 'Unable to identify current user.');
+      return;
+    }
+
+    this.otpConfigSaving = true;
+    this.globalOtpConfigurationService.update(performedBy, nextValue).subscribe({
+      next: (config) => {
+        this.bypassOTPForAll = !!config?.bypassOTPForAll;
+        this.otpConfigSaving = false;
+        this.showNotification(
+          'snackbar-success',
+          this.bypassOTPForAll
+            ? 'Global OTP bypass enabled. OTP is not required for any employee on next login.'
+            : 'Global OTP bypass disabled. Role-based OTP rules apply again.'
+        );
+      },
+      error: (error) => {
+        this.otpConfigSaving = false;
+        const message =
+          error?.status === 403
+            ? 'Not authorized to change global OTP configuration.'
+            : error?.error?.message || 'Failed to update global OTP configuration.';
+        this.showNotification('snackbar-danger', message);
+      },
+    });
   }
 
   downloadAllInvoices(): void {
@@ -96,6 +160,80 @@ export class InvoiceExportComponent implements OnInit {
         this.showNotification('snackbar-success', `${rows.length} record(s) exported successfully.`);
       },
       error: (error) => this.handleExportError(error, 'general header vs linked-duty gaps'),
+    });
+  }
+
+  showDriveVersionDetails(): void {
+    this.exporting = true;
+    this.invoiceExportService.getDriverAppVersionSummary().subscribe({
+      next: (rows) => {
+        this.exporting = false;
+        const parsed = (rows || [])
+          .map((row) => ({
+            appVersion: row?.appVersion ?? row?.AppVersion ?? 'Not set',
+            driveCount: Number(row?.driveCount ?? row?.DriveCount ?? 0),
+          }))
+          .filter((row) => row.driveCount > 0);
+        const total = parsed.reduce((sum, row) => sum + row.driveCount, 0);
+        if (!total) {
+          Swal.fire({
+            title: 'Drive Version Details',
+            text: 'No active drivers found.',
+            icon: 'info',
+            confirmButtonText: 'Ok',
+          });
+          return;
+        }
+
+        const body = parsed
+          .map(
+            (row) => `<tr>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;">${this.escapeHtml(row.appVersion)}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${row.driveCount}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${this.formatDrivePercent(row.driveCount, total)}</td>
+            </tr>`
+          )
+          .join('');
+
+        Swal.fire({
+          title: 'Drive Version Details',
+          width: 640,
+          html: `
+            <table style="width:100%;border-collapse:collapse;text-align:left;">
+              <thead>
+                <tr>
+                  <th style="padding:6px 8px;border-bottom:1px solid #ddd;">App Version</th>
+                  <th style="padding:6px 8px;border-bottom:1px solid #ddd;text-align:right;">Number of Drives</th>
+                  <th style="padding:6px 8px;border-bottom:1px solid #ddd;text-align:right;">% of Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${body}
+                <tr>
+                  <td style="padding:6px 8px;border-top:1px solid #ddd;"><strong>Total</strong></td>
+                  <td style="padding:6px 8px;border-top:1px solid #ddd;text-align:right;"><strong>${total}</strong></td>
+                  <td style="padding:6px 8px;border-top:1px solid #ddd;text-align:right;"><strong>100.0%</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          `,
+          confirmButtonText: 'Ok',
+        });
+      },
+      error: (error) => {
+        this.exporting = false;
+        const text = typeof error === 'string'
+          ? error
+          : (error?.error?.message || error?.error?.Message || error?.message || 'Could not fetch drive version details.');
+        Swal.fire({
+          title: 'Failed to load drive versions',
+          text: text.includes('not found') || text.includes('404')
+            ? 'The API does not have Drive Version Details yet. Restart the API in Visual Studio, then try again.'
+            : text,
+          icon: 'error',
+          confirmButtonText: 'Ok',
+        });
+      },
     });
   }
 
@@ -223,6 +361,21 @@ export class InvoiceExportComponent implements OnInit {
       'Invoice ID': row.invoiceID ?? '',
     }));
     TableExportUtil.exportToExcel(exportRows, 'Verified-GFB-Not-Calculated');
+  }
+
+  private formatDrivePercent(count: number, total: number): string {
+    if (!total) {
+      return '0.0%';
+    }
+    return `${((count / total) * 100).toFixed(1)}%`;
+  }
+
+  private escapeHtml(value: string): string {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   private formatDisplayDate(value: string): string {

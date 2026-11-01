@@ -17,6 +17,17 @@
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
 
             <div class="row">
+                <div class="col-12 mb-2">
+                    <mat-form-field class="example-full-width confirmation-whats-field" appearance="outline" floatLabel="always">
+                        <mat-label>Reservation Confirmation Whats</mat-label>
+                        <mat-select required formControlName="reservationConfirmationWhatsApp">
+                            <mat-option [value]=true>Yes</mat-option>
+                            <mat-option [value]=false>No</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Reservation SMS To Booker</mat-label>

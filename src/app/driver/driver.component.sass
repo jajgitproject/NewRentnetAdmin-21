@@ -1,0 +1,128 @@
+.driver-table-wrap
+  width: 100%
+  position: relative
+
+.driver-top-scroll
+  width: 100%
+  overflow-x: scroll
+  overflow-y: hidden
+  height: 16px
+  margin-bottom: 6px
+  background: #f3f4f6
+  border: 1px solid #d9dde3
+  border-radius: 4px
+
+.driver-top-scroll-spacer
+  height: 1px
+  min-width: 100%
+
+.scrollable-table-container
+  width: 100%
+  overflow: auto
+  height: 70vh
+
+:host ::ng-deep .driver-table.mat-mdc-table,
+:host ::ng-deep .driver-table.mat-table
+  display: block
+  width: 100% !important
+  min-width: 100% !important
+  table-layout: fixed
+
+:host ::ng-deep .driver-table .mat-mdc-header-row,
+:host ::ng-deep .driver-table .mat-mdc-row,
+:host ::ng-deep .driver-table .mat-header-row,
+:host ::ng-deep .driver-table .mat-row
+  display: flex
+  width: 100% !important
+  min-width: 100% !important
+  max-width: 100% !important
+  box-sizing: border-box
+  align-items: flex-start
+
+:host ::ng-deep .driver-table .mat-mdc-header-cell,
+:host ::ng-deep .driver-table .mat-mdc-cell,
+:host ::ng-deep .driver-table .mat-header-cell,
+:host ::ng-deep .driver-table .mat-cell
+  flex: 1 1 0 !important
+  box-sizing: border-box
+  padding: 8px 6px !important
+  line-height: 1.35
+  overflow: visible
+  text-overflow: unset
+  white-space: normal !important
+  word-break: break-word
+  overflow-wrap: anywhere
+  font-size: 13px
+  align-items: flex-start
+  height: auto !important
+  min-height: 40px
+
+:host ::ng-deep .driver-table .mat-mdc-header-cell,
+:host ::ng-deep .driver-table .mat-header-cell
+  font-size: 12px !important
+  font-weight: 600 !important
+  white-space: normal !important
+
+:host ::ng-deep .driver-table .mat-column-driverName
+  flex: 1.4 1 0 !important
+  min-width: 0 !important
+
+:host ::ng-deep .driver-table .mat-column-oldRentnetCode
+  flex: 0.9 1 0 !important
+  min-width: 0 !important
+
+:host ::ng-deep .driver-table .mat-column-supplierName
+  flex: 1.8 1 0 !important
+  min-width: 0 !important
+
+:host ::ng-deep .driver-table .mat-column-supplierType
+  flex: 0.9 1 0 !important
+  min-width: 0 !important
+
+:host ::ng-deep .driver-table .mat-column-mobile1
+  flex: 0.9 1 0 !important
+  min-width: 0 !important
+
+:host ::ng-deep .driver-table .mat-column-location
+  flex: 0.9 1 0 !important
+  min-width: 0 !important
+
+:host ::ng-deep .driver-table .mat-column-isAdhoc
+  flex: 0 0 58px !important
+  width: 58px !important
+  min-width: 58px !important
+  max-width: 58px !important
+
+:host ::ng-deep .driver-table .mat-column-status
+  flex: 0 0 64px !important
+  width: 64px !important
+  min-width: 64px !important
+  max-width: 64px !important
+
+:host ::ng-deep .driver-table .mat-column-actions
+  flex: 0 0 88px !important
+  width: 88px !important
+  min-width: 88px !important
+  max-width: 88px !important
+  overflow: visible !important
+  text-overflow: unset !important
+  padding: 4px 6px !important
+  white-space: nowrap !important
+
+:host ::ng-deep .driver-table .mat-column-actions .mat-mdc-raised-button,
+:host ::ng-deep .driver-table .mat-column-actions .mat-raised-button
+  height: 28px !important
+  min-height: 28px !important
+  max-height: 28px !important
+  line-height: normal !important
+  padding: 0 10px !important
+  font-size: 12px !important
+  min-width: 72px !important
+
+:host ::ng-deep .driver-table .mat-row:nth-child(even),
+:host ::ng-deep .driver-table .mat-mdc-row:nth-child(even)
+  background: #fafbfe
+
+:host ::ng-deep .driver-table .mat-row:hover,
+:host ::ng-deep .driver-table .mat-mdc-row:hover
+  background: #eef4ff

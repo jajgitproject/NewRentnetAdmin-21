@@ -48,6 +48,7 @@ export class SettledRateDetailsService
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.nightChargeStartTimeString=this.generalService.getTimeFrom(advanceTable.nightChargeStartTime);
     advanceTable.nightChargeEndTimeString=this.generalService.getTimeTo(advanceTable.nightChargeEndTime);
+    this.normalizeFgrPayload(advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: SettledRateDetails)
@@ -55,7 +56,21 @@ export class SettledRateDetailsService
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.nightChargeStartTimeString=this.generalService.getTimeFrom(advanceTable.nightChargeStartTime);
     advanceTable.nightChargeEndTimeString=this.generalService.getTimeTo(advanceTable.nightChargeEndTime);
+    this.normalizeFgrPayload(advanceTable);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
+  }
+
+  private normalizeFgrPayload(advanceTable: SettledRateDetails): void {
+    advanceTable.fgrAmount = this.toNullableNumber(advanceTable.fgrAmount);
+    advanceTable.fgrKm = this.toNullableNumber(advanceTable.fgrKm);
+  }
+
+  private toNullableNumber(value: any): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
   }
   delete(reservationSettledRateID: number):  Observable<any> 
   {

@@ -92,6 +92,8 @@ import { BillingHistoryModule } from '../billingHistory/billingHistory.module';
 import { DiscountDetailsModule } from '../discountDetails/discountDetails.module';
 import { DutyStateCustomerService } from '../dutyStateCustomer/dutyStateCustomer.service';
 import { DutyStateCustomerModule } from '../dutyStateCustomer/dutyStateCustomer.module';
+import { DutyNightService } from '../dutyNight/dutyNight.service';
+import { DutyNightModule } from '../dutyNight/dutyNight.module';
 import { DisputeService } from '../dispute/dispute.service';
 import { PackageRateDetailsForClosingModule } from '../packageRateDetailsForClosing/packageRateDetailsForClosing.module';
 import { PackageRateDetailsForClosingService } from '../packageRateDetailsForClosing/packageRateDetailsForClosing.service';
@@ -183,6 +185,7 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     KAMDetailsClosingModule,
     AdditionalSMSEmailWhatsappModule,
     DutyStateCustomerModule,
+    DutyNightModule,
     BillToOtherModule,
     BillingHistoryModule,
     DiscountDetailsModule,
@@ -224,6 +227,7 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
               KAMDetailsClosingService,
               BillingHistoryService,
               DutyStateCustomerService,
+              DutyNightService,
               DisputeService,
               SingleDutySingleBillForLocalService,
               PackageRateDetailsForClosingService ,

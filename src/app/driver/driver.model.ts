@@ -7,6 +7,13 @@ export class Driver {
    driverFatherName:string;
    driverGrade:string;
    driverEmail:string;
+   driverRemark:string;
+   driverBackGroundVerificationCheck:boolean;
+   driverBackGroundVerificationCheckIssueDate:Date;
+   driverBackGroundVerificationCheckIssueDateString:string;
+   driverFitnessCertificate:boolean;
+   driverFitnessCertificateIssueDate:Date;
+   driverFitnessCertificateIssueDateString:string;
    driverOfficialIdentityNumber:string;
    aadharAuthenticationToken:string;
    dob:Date;
@@ -44,6 +51,7 @@ export class Driver {
    supplierID:number;
    supplier:string;
    supplierName:string;
+   supplierType:string;
    supplierOldRentnetCode:number;
    supplierOfficialIdentityNumber:string;
    oldRentnetCode:number;
@@ -72,6 +80,11 @@ export class Driver {
        this.driverID = driver.driverID || -1;
        this.driverName = driver.driverName || '';
        this.driverEmail = driver.driverEmail || '';
+       this.driverRemark = driver.driverRemark || '';
+       this.driverBackGroundVerificationCheck = driver.driverBackGroundVerificationCheck ?? null;
+       this.driverBackGroundVerificationCheckIssueDateString = driver.driverBackGroundVerificationCheckIssueDateString || '';
+       this.driverFitnessCertificate = driver.driverFitnessCertificate ?? null;
+       this.driverFitnessCertificateIssueDateString = driver.driverFitnessCertificateIssueDateString || '';
        this.driverGradeID = driver.driverGradeID || '';
        this.driverFatherName = driver.driverFatherName || '';
        this.driverOfficialIdentityNumber = driver.driverOfficialIdentityNumber || '';
@@ -104,6 +117,7 @@ export class Driver {
        this.supplierID = driver.supplierID || '';
        this.supplier = driver.supplier || '';
        this.supplierName = driver.supplierName || '';
+       this.supplierType = driver.supplierType || '';
        this.supplierOldRentnetCode = (driver.supplierOldRentnetCode && driver.supplierOldRentnetCode !== 0) ? Number(driver.supplierOldRentnetCode) : null;
        this.oldRentnetCode = (driver.oldRentnetCode && driver.oldRentnetCode !== 0) ? Number(driver.oldRentnetCode) : null;
        this.driverOfficialIdentityCode = driver.driverOfficialIdentityCode || '';
@@ -129,6 +143,10 @@ export class Driver {
        this.dateOfJoining=new Date();
        //this.dateOfLeaving=new Date();
        this.drivingSinceDate=new Date();
+       this.driverBackGroundVerificationCheckIssueDate = driver.driverBackGroundVerificationCheckIssueDate
+         ? new Date(driver.driverBackGroundVerificationCheckIssueDate) : null;
+       this.driverFitnessCertificateIssueDate = driver.driverFitnessCertificateIssueDate
+         ? new Date(driver.driverFitnessCertificateIssueDate) : null;
     }
   }
 
@@ -136,7 +154,16 @@ export class Driver {
 }
 
 
+  export class DriverDuplicateMobileModel {
+  driverID: number;
+  driverName: string;
+  mobile1: string;
+  mobile2: string;
+  driverOfficialIdentityNumber: string;
+}
+
   export class MobileEmailModel{
   mobile1: string;
   isDuplicate: boolean;
+  duplicates?: DriverDuplicateMobileModel[];
 }

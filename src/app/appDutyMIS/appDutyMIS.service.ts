@@ -35,6 +35,7 @@ export class AppDutyMISService
 
   private buildExportCriteria(fromDate: string, toDate: string, dispatchLocation: string, activationStatus: boolean) {
     return {
+      UserID: this.generalService.getUserID(),
       FromDate: this.toNull(fromDate),
       ToDate: this.toNull(toDate),
       LocationDispatch: this.toNull(dispatchLocation),
@@ -73,6 +74,12 @@ export class AppDutyMISService
     return this.httpClient.get(`${this.API_URL}/ExportCsv/Download/${jobId}`, { responseType: 'blob' });
   }
 
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
+    });
+  }
+
   pollExportJob(jobId: string): Observable<any> {
     return pollExportJob(this.httpClient, `${this.API_URL}/ExportCsv/JobStatus/${jobId}`);
   }
@@ -83,14 +90,5 @@ export class AppDutyMISService
 
   isExportJobReady(status: any): boolean {
     return isExportJobReady(status);
-  }
-
-  /** @deprecated Use startExportJob */
-  downloadCsv(searchFromDate: string, searchToDate: string, dispatchLocation: string, searchActivationStatus: boolean): Observable<Blob>
-  {
-    return this.httpClient.get(
-      `${this.API_URL}/export/${this.toRouteSegment(searchFromDate)}/${this.toRouteSegment(searchToDate)}/${this.toRouteSegment(dispatchLocation)}/${this.toRouteSegment(searchActivationStatus)}`,
-      { responseType: 'blob' }
-    );
   }
 }

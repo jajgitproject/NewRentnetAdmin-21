@@ -1,0 +1,21 @@
+<div class="nlp-questions-dialog">
+  <div class="modalHeader">
+    <div class="dialog-title">NLP Questions</div>
+    <button mat-icon-button type="button" (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div mat-dialog-content>
+    <p class="intro">{{ intro }}</p>
+    <section class="question-section" *ngFor="let section of sections">
+      <h3>{{ section.title }}</h3>
+      <ul>
+        <li *ngFor="let example of section.examples">{{ example }}</li>
+      </ul>
+    </section>
+    <p class="footer-note">{{ footer }}</p>
+  </div>
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="dialogRef.close()">Close</button>
+  </div>
+</div>

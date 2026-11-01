@@ -1,28 +1,131 @@
-﻿<div class="row">
+﻿<ng-container *ngIf="isPickupCorrectionView(); else fullReservationView">
+    <div class="kam-pickup-correction-fields">
+        <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
+        <form class="register-form m-0" [formGroup]="advanceTableForm" *ngIf="!isLoadingdata">
+            <div class="row">
+                <div class="col-xl-7 col-lg-7 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock;else kamPickupGeoElse">
+                    <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>Pickup Geo Location</mat-label>
+                        <textarea required matInput formControlName="pickupAddress" rows="2"
+                            [matAutocomplete]="kamAutoPickupGeo"></textarea>
+                        <mat-autocomplete #kamAutoPickupGeo="matAutocomplete"
+                            (optionSelected)="onPGLSelected($event.option.value)"
+                            panelWidth="fit-content"
+                            class="google-autocomplete-panel">
+                            <mat-option *ngFor="let option of toArray(filteredGoogleAddressOptions | async)"
+                                [value]="option.geoSearchString" (click)="OnPickupGeoLocationClick(option)">
+                                {{option.geoSearchString}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-hint align="end">
+                            <div class="pickup-geo-hint-stack">
+                                <div class="hint-actions-row">
+                                    <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
+                                    <mat-checkbox color="danger" formControlName="googleAddresses"
+                                        (change)="valueSwitch()" [(indeterminate)]="indeterminate"
+                                        [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                </div>
+                                <div class="kam-address-correction-row">
+                                    <button type="button" class="kam-address-history-btn"
+                                        title="Pickup address correction history"
+                                        (click)="openKamPickupAddressCorrectionHistory()"
+                                        [disabled]="!getReservationIdForHistory()">H</button>
+                                    <mat-checkbox class="kam-address-correction-checkbox" color="primary"
+                                        formControlName="isAddressCorrectionRequiredByKAM" [labelPosition]="labelPosition">
+                                        Address to be corrected by KAM</mat-checkbox>
+                                </div>
+                            </div>
+                        </mat-hint>
+                    </mat-form-field>
+                </div>
+                <ng-template #kamPickupGeoElse>
+                    <div class="col-xl-7 col-lg-7 col-md-12 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                            <mat-label>Geo Location</mat-label>
+                            <textarea matInput ngx-google-places-autocomplete [options]='options'
+                                #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
+                                formControlName="pickupAddress" rows="2"
+                                (input)="onPickupTyping()"></textarea>
+                            <mat-hint align="end">
+                                <div class="pickup-geo-hint-stack">
+                                    <div class="hint-actions-row">
+                                        <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
+                                        <mat-checkbox color="primary" formControlName="googleAddresses"
+                                            [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                            (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                                    </div>
+                                    <div class="kam-address-correction-row">
+                                        <button type="button" class="kam-address-history-btn"
+                                            title="Pickup address correction history"
+                                            (click)="openKamPickupAddressCorrectionHistory()"
+                                            [disabled]="!getReservationIdForHistory()">H</button>
+                                        <mat-checkbox class="kam-address-correction-checkbox" color="primary"
+                                            formControlName="isAddressCorrectionRequiredByKAM" [labelPosition]="labelPosition">
+                                            Address to be corrected by KAM</mat-checkbox>
+                                    </div>
+                                </div>
+                            </mat-hint>
+                        </mat-form-field>
+                        <mat-error *ngIf="advanceTableForm.get('pickupAddress')?.touched &&
+                                           advanceTableForm.get('pickupAddress')?.hasError('invalidPickupAddress')">
+                            Please select an address from suggestions
+                        </mat-error>
+                    </div>
+                </ng-template>
+                <div class="col-xl-5 col-lg-5 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-label>Pickup Address Details i.e Street/Flat No./Flight No./Train No.</mat-label>
+                        <textarea required matInput formControlName="pickupAddressDetails" rows="2"></textarea>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row kam-pickup-correction-actions">
+                <button type="button" mat-raised-button color="primary" (click)="confirmPickupCorrectionSave()"
+                    [disabled]="buttonDisabled">Save Pickup Correction</button>
+            </div>
+        </form>
+    </div>
+</ng-container>
+
+<ng-template #fullReservationView>
+<div class="row">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
             <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
         </div>
-        <div *ngIf="ReasonMessageShow">
-            <span style="color: red;font-size: 15px;">
-                Reservation for {{customerName}} are not allowed due to the following reason : {{Reason}}
-            </span>
-        </div>
-        <div *ngIf="ReservationAlertShow">
-            <span style="color: red;font-size: 15px;">
-                Reservation Alert Message : {{ReservationAlert}}
-            </span>
-        </div>
-        <div *ngIf="CustomerAlertMessageShow">
-            <span style="color: red;font-size: 15px;">
-                Customer Alert Message : {{CustomerAlertMessage}}
-            </span>
-        </div>
-
-        <div *ngIf="ReservationStatus === 'Cancelled'">
-            <span style="color: red;font-size: 15px;">
-                Reservation Status : {{ReservationStatus}}
-            </span>
+        <div class="reservation-notices-stack mx-4"
+            *ngIf="ReasonMessageShow || ReservationAlertShow || CustomerAlertMessageShow || ReservationStatus === 'Cancelled'">
+            <div *ngIf="ReasonMessageShow" class="reservation-notice reservation-notice--danger" role="alert">
+                <mat-icon class="reservation-notice__icon" aria-hidden="true">block</mat-icon>
+                <div class="reservation-notice__content">
+                    <div class="reservation-notice__title">Reservation not allowed</div>
+                    <p class="reservation-notice__message">
+                        Reservations for <strong>{{ customerName }}</strong> cannot be processed for the following reason:
+                        {{ Reason }}
+                    </p>
+                </div>
+            </div>
+            <div *ngIf="ReservationAlertShow" class="reservation-notice reservation-notice--warning" role="alert">
+                <mat-icon class="reservation-notice__icon" aria-hidden="true">warning_amber</mat-icon>
+                <div class="reservation-notice__content">
+                    <div class="reservation-notice__title">Reservation alert</div>
+                    <p class="reservation-notice__message">{{ ReservationAlert }}</p>
+                </div>
+            </div>
+            <div *ngIf="CustomerAlertMessageShow" class="reservation-notice reservation-notice--warning" role="alert">
+                <mat-icon class="reservation-notice__icon" aria-hidden="true">campaign</mat-icon>
+                <div class="reservation-notice__content">
+                    <div class="reservation-notice__title">Customer alert message</div>
+                    <p class="reservation-notice__message">{{ CustomerAlertMessage }}</p>
+                </div>
+            </div>
+            <div *ngIf="ReservationStatus === 'Cancelled'" class="reservation-notice reservation-notice--danger" role="alert">
+                <mat-icon class="reservation-notice__icon" aria-hidden="true">cancel</mat-icon>
+                <div class="reservation-notice__content">
+                    <div class="reservation-notice__title">Reservation cancelled</div>
+                    <p class="reservation-notice__message">This reservation status is <strong>{{ ReservationStatus }}</strong>.</p>
+                </div>
+            </div>
         </div>
 
         <div class="addContainer">
@@ -354,7 +457,7 @@
                                         panelWidth="custom-autocomplete-panel">
                                         <mat-option *ngFor="let option of toArray(filteredVehicleOptions | async)"
                                             [value]="option.vehicle"
-                                            (click)="getVehicleID(option.vehicleID,option.vehicleCategoryID)">
+                                            (click)="getVehicleID(option.vehicleID, option.vehicleCategoryID, option.vehicle)">
                                             {{option.vehicle}}
                                         </mat-option>
                                     </mat-autocomplete>
@@ -382,7 +485,8 @@
                                         [matAutocomplete]="auto20"></textarea>
                                     <mat-autocomplete #auto20="matAutocomplete"
                                         (optionSelected)="onPGLSelected($event.option.value)"
-                                       class="google-autocomplete-panel">
+                                        panelWidth="fit-content"
+                                        class="google-autocomplete-panel">
                                         <mat-option *ngFor="let option of toArray(filteredGoogleAddressOptions | async)"
                                             [value]="option.geoSearchString" (click)="OnPickupGeoLocationClick(option)">
                                             {{option.geoSearchString}}
@@ -404,11 +508,22 @@
                                             </div>
                                         </mat-error> -->
                                     <mat-hint align="end">
-                                        <div class="hint-actions-row">
-                                            <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
-                                            <mat-checkbox color="danger" formControlName="googleAddresses"
-                                                (change)="valueSwitch()" [(indeterminate)]="indeterminate"
-                                                [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                        <div class="pickup-geo-hint-stack">
+                                            <div class="hint-actions-row">
+                                                <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
+                                                <mat-checkbox color="danger" formControlName="googleAddresses"
+                                                    (change)="valueSwitch()" [(indeterminate)]="indeterminate"
+                                                    [labelPosition]="labelPosition">Google Addresses</mat-checkbox>
+                                            </div>
+                                            <div class="kam-address-correction-row">
+                                                <button type="button" class="kam-address-history-btn"
+                                                    title="Pickup address correction history"
+                                                    (click)="openKamPickupAddressCorrectionHistory()"
+                                                    [disabled]="!getReservationIdForHistory()">H</button>
+                                                <mat-checkbox class="kam-address-correction-checkbox" color="primary"
+                                                    formControlName="isAddressCorrectionRequiredByKAM" [labelPosition]="labelPosition">
+                                                    Address to be corrected by KAM</mat-checkbox>
+                                            </div>
                                         </div>
                                     </mat-hint>
                                 </mat-form-field>
@@ -440,11 +555,22 @@
                                                 </div>
                                             </mat-error> -->
                                         <mat-hint align="end">
-                                            <div class="hint-actions-row">
-                                                <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
-                                                <mat-checkbox color="primary" formControlName="googleAddresses"
-                                                    [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
-                                                    (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                                            <div class="pickup-geo-hint-stack">
+                                                <div class="hint-actions-row">
+                                                    <a class="link-action" (click)="savedAddress()">Saved Addresses</a>
+                                                    <mat-checkbox color="primary" formControlName="googleAddresses"
+                                                        [(indeterminate)]="indeterminate" [labelPosition]="labelPosition"
+                                                        (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                                                </div>
+                                                <div class="kam-address-correction-row">
+                                                    <button type="button" class="kam-address-history-btn"
+                                                        title="Pickup address correction history"
+                                                        (click)="openKamPickupAddressCorrectionHistory()"
+                                                        [disabled]="!getReservationIdForHistory()">H</button>
+                                                    <mat-checkbox class="kam-address-correction-checkbox" color="primary"
+                                                        formControlName="isAddressCorrectionRequiredByKAM" [labelPosition]="labelPosition">
+                                                        Address to be corrected by KAM</mat-checkbox>
+                                                </div>
                                             </div>
                                         </mat-hint>
                                     </mat-form-field>
@@ -800,7 +926,8 @@
                                         [matAutocomplete]="auto21"></textarea>
                                     <mat-autocomplete #auto21="matAutocomplete"
                                         (optionSelected)="onDropGLSelected($event.option.value)"
-                                        panelWidth="custom-autocomplete-panel">
+                                        panelWidth="fit-content"
+                                        class="google-autocomplete-panel">
                                         <mat-option *ngFor="let option of toArray(filteredDropOffGoogleAddressOptions | async)"
                                             [value]="option.geoSearchString"
                                             (click)="OnDropOffGeoLocationClick(option)">
@@ -967,7 +1094,7 @@
                                         Ticket Number is required
                                     </mat-error>
                                     <mat-error *ngIf="advanceTableForm.get('ticketNumber')?.hasError('pattern')">
-                                        Ticket Number must be 1 to 15 digits
+                                        Ticket Number must be 12 to 15 digits
                                     </mat-error>
                                 </mat-form-field>
                             </div>
@@ -977,7 +1104,8 @@
                                 <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                                     <mat-label>Reservation Source</mat-label>
                                     <input type="text" matInput formControlName="reservationSource"
-                                        [matAutocomplete]="auto13">
+                                        [matAutocomplete]="auto13"
+                                        [readonly]="isLockedReservationSource">
                                     <mat-autocomplete #auto13="matAutocomplete"
                                         (optionSelected)="onRSSelected($event.option.value)"
                                         panelWidth="custom-autocomplete-panel">
@@ -1301,25 +1429,39 @@
                            
                             <br>
                             
-                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action !== 'edit' && canCreateReservation"
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="!testBookingMode && this.action !== 'edit' && canCreateReservation"
                                 (click)="confirmAdd()">Save</button>
 
-                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="this.action === 'edit' && canCreateReservation"
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"  *ngIf="!testBookingMode && this.action === 'edit' && canCreateReservation"
                                 (click)="confirmAdd()" [disabled]="buttonDisabled || isAllotmentLockedForEdit()">Update</button>
-                            
+
+                            <ng-container *ngIf="testBookingMode">
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"
+                                [disabled]="testBookingBusy || !testBookingCanSave"
+                                (click)="saveFromTestPage()">Save</button>
+                            <button type="button" mat-raised-button style="background-color: #bcb4db"
+                                [disabled]="testBookingBusy"
+                                (click)="testBookingClearImei.emit()">Clear IMEI</button>
                             <button type="button" mat-raised-button style="background-color: #f29f99"
+                                [disabled]="testBookingBusy"
+                                (click)="testBookingClear.emit()">Clear</button>
+                            <mat-progress-spinner *ngIf="testBookingBusy" mode="indeterminate" diameter="28" strokeWidth="3"
+                                style="display: inline-block; vertical-align: middle; margin-left: 12px;"></mat-progress-spinner>
+                            </ng-container>
+                            
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="navigateToNewForms()">Add Details</button>
 
-                            <button type="button" mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="openSpecialInstrucation()">Special Instruction</button>
 
-                            <button type="button" mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="InternalNote()">Internal Note</button>
 
-                            <button type="button" mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="settledRates()">Settled Rate</button>
 
-                            <button type="button" mat-raised-button style="background-color: #f29f99"
+                            <button type="button" mat-raised-button style="background-color: #f29f99" *ngIf="!testBookingMode"
                                 (click)="emailInfo()"> Email format</button>
 
                         </div>
@@ -1331,3 +1473,4 @@
         </div>
     </div>
 </div>
+</ng-template>

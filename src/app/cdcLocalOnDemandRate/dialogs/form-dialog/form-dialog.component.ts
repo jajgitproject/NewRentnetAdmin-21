@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, ElementRef, HostListener, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { CDCLocalOnDemandRateService } from '../../cdcLocalOnDemandRate.service';
 import { FormControl, Validators, FormGroup, FormBuilder, ValidatorFn, ValidationErrors, AbstractControl} from '@angular/forms';
 import { CDCLocalOnDemandRate } from '../../cdcLocalOnDemandRate.model';
@@ -58,6 +58,7 @@ export class FormDialogComponent
   public dialogRef: MatDialogRef<FormDialogComponent>, 
   
   @Inject(MAT_DIALOG_DATA) public data: any,
+  private cdr: ChangeDetectorRef,
   public advanceTableService: CDCLocalOnDemandRateService,
     private fb: FormBuilder,
     private el: ElementRef,
@@ -338,22 +339,25 @@ numberOnly(event): boolean {
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
       response => {
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
+        if (this._generalService.isDuplicateSaveError(response)) 
         {
-          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-          this.saveDisabled = true;
+          this._generalService.showDuplicateSaveError(
+            'An active rate already exists for a shared city in another city tier.',
+            () => this.endSaving(),
+            response
+          );
         }
         else
         {
           this.dialogRef.close();
           this._generalService.sendUpdate('CDCLocalOnDemandRateCreate:CDCLocalOnDemandRateView:Success');//To Send Updates  
-          this.saveDisabled = true;
+          this.endSaving();
         } 
       },
       error =>
       {
         this._generalService.sendUpdate('CDCLocalOnDemandRateAll:CDCLocalOnDemandRateView:Failure');//To Send Updates 
-        this.saveDisabled = true; 
+        this.endSaving(); 
       }
     )
   }
@@ -366,28 +370,37 @@ numberOnly(event): boolean {
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
       response => {
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
+        if (this._generalService.isDuplicateSaveError(response)) 
         {
-          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-          this.saveDisabled = true;
+          this._generalService.showDuplicateSaveError(
+            'An active rate already exists for a shared city in another city tier.',
+            () => this.endSaving(),
+            response
+          );
         }
         else
         {
           this.dialogRef.close();
           this._generalService.sendUpdate('CDCLocalOnDemandRateUpdate:CDCLocalOnDemandRateView:Success');//To Send Updates  
-          this.saveDisabled = true;
+          this.endSaving();
         } 
       },
       error =>
       {
         this._generalService.sendUpdate('CDCLocalOnDemandRateAll:CDCLocalOnDemandRateView:Failure');//To Send Updates 
-        this.saveDisabled = true; 
+        this.endSaving(); 
       }
     )
   }
+  private endSaving(): void {
+    this.saveDisabled = true;
+    this.cdr.detectChanges();
+  }
+
   public confirmAdd(): void 
   {
     this.saveDisabled = false;
+    this.cdr.detectChanges();
        if(this.action=="edit")
        {
           this.Put();

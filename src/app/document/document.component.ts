@@ -29,9 +29,6 @@ import { FormControl } from '@angular/forms';
 export class DocumentComponent implements OnInit {
   displayedColumns = [
     'DocumentName',
-    'documentType',
-    'startDate',
-    'endDate',
     'mandatoryForVendorSoftRegistration',
     'mandatoryForSDGuestSoftRegistration',
     'mandatoryForDriverSoftRegistration',
@@ -88,6 +85,9 @@ export class DocumentComponent implements OnInit {
   {
     const dialogRef = this.dialog.open(FormDialogComponentDocument, 
     {
+      panelClass: 'document-form-dialog',
+      width: '960px',
+      maxWidth: '96vw',
       data: 
         {
           advanceTable: this.advanceTable,
@@ -99,6 +99,9 @@ export class DocumentComponent implements OnInit {
       //  alert(row.id);
     this.documentID = row.documentID;
     const dialogRef = this.dialog.open(FormDialogComponentDocument, {
+      panelClass: 'document-form-dialog',
+      width: '960px',
+      maxWidth: '96vw',
       data: {
         advanceTable: row,
         action: 'edit'

@@ -66,8 +66,13 @@
                       Send SMS
                     </button> -->
 
-                    <button mat-menu-item (click)="getInvoiceNumber(item,i)">
+                    <button mat-menu-item *ngIf="!isCancelledReservation(item)" (click)="getInvoiceNumber(item,i)">
                       Reservation Cancel
+                    </button>
+                    <button mat-menu-item
+                      *ngIf="isCancelledReservation(item) && showReactivateReservationOption"
+                      (click)="reactivateCancelledReservation(item)">
+                      Reactivate Reservation
                     </button>
                     <!-- </span> -->
                   </mat-menu>
@@ -170,6 +175,11 @@
                       <ng-template #stopToDropOff>
                         Stop to Drop Off
                       </ng-template>
+                      <br />
+                      <button class="BoldButton BoldButtonTopMargin" mat-button style="font-weight: 100"
+                        (click)="openPassengerPlacard(p.customerPersonName)">
+                        Welcome Placard
+                      </button>
                     </div>
                   </span>
 
@@ -917,47 +927,44 @@
                   </mat-menu>
                   <br>
 
-                  <b><button class="BoldButton" mat-button (click)="CarMovingStatusByApp(item)">Car not
-                      moving by App</button></b><br />
-                  <span
-                    [ngStyle]="{ color: data.carStatus === 'Moving' || data.carStatus === 'Car Moving' ? 'green' :
-                                                                    data.carStatus === 'Not Moving' ? 'red' : 'black' }">
-                    {{ data.carStatus || 'N/A' }}
-                  </span>
-                  <br />
-
                   <b><button class="BoldButton" mat-button>Car not moving by GPS</button></b><br />
                   Value<br />
 
-                  <b><button class="BoldButton" mat-button (click)="AppDataMissingStatus(item)">App data
-                      missing</button></b><br />
-                  <span
-                    [ngStyle]="{ color: data.appCarStatus === 'Moving' ? 'green' :
-                                                                    data.appCarStatus === 'Not Moving' ? 'red' : 'black' }">
-                    {{ data.appCarStatus || 'N/A' }}
-                  </span>
-                  <br />
-
-                  <b><button class="BoldButton" mat-button>GPS data missing</button></b><br />
-                  Value<br />
-
-                  <b><button class="BoldButton" mat-button (click)="openIntegrationLog(item.reservationID)">
+                  <!-- <b><button class="BoldButton" mat-button (click)="openIntegrationLog(item.reservationID)">
                       Integration Log
                     </button></b>
-                  <br>
+                  <br> -->
 
-                  <b *ngIf="upsellStatus?.isAuthorized"><button class="BoldButton" mat-button
+                  <b class="upsell-row" *ngIf="upsellStatus?.isAuthorized">
+                    <button class="BoldButton" mat-button
+                      [class.upsold-label]="upsellStatus?.hasActiveUpsell"
                       (click)="openUpsellDialog()"
-                      [style.opacity]="!upsellStatus?.canUpsell ? 0.55 : 1"
+                      [style.opacity]="!upsellStatus?.hasActiveUpsell && !upsellStatus?.canUpsell ? 0.55 : 1"
                       [matTooltip]="upsellStatus?.disabledReason || ''"
                       [matTooltipDisabled]="!upsellStatus?.disabledReason">
+                      {{ upsellStatus?.hasActiveUpsell ? 'Upsold' : 'Up Sell' }}
+                    </button>
+                    <mat-icon class="upsell-dots" [matMenuTriggerFor]="menuUpsell">
+                      more_vert
+                    </mat-icon>
+                  </b>
+                  <mat-menu #menuUpsell="matMenu">
+                    <button type="button" mat-menu-item (click)="openUpsellDialog()"
+                      [disabled]="!upsellStatus?.canUpsell">
                       Up Sell
-                    </button></b><br *ngIf="upsellStatus?.isAuthorized" />
-
-                  <b *ngIf="upsellStatus?.isAuthorized && upsellStatus?.hasActiveUpsell"><button class="BoldButton" mat-button
+                    </button>
+                    <button type="button" mat-menu-item *ngIf="upsellStatus?.hasActiveUpsell"
                       (click)="openCancelUpsellDialog()">
                       Cancel Upsell
-                    </button></b><br *ngIf="upsellStatus?.isAuthorized && upsellStatus?.hasActiveUpsell" />
+                    </button>
+                    <button type="button" mat-menu-item (click)="openUpsellHistoryDialog()">
+                      Upsell History
+                    </button>
+                    <button type="button" mat-menu-item (click)="openUpsellDeclineLogDialog()">
+                      Upsell Decline Log
+                    </button>
+                  </mat-menu>
+                  <br *ngIf="upsellStatus?.isAuthorized" />
 
 
 

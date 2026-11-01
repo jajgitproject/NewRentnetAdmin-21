@@ -24,7 +24,8 @@
                         <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
                     </a>
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                        <app-myupload (onUploadFinished)="uploadFinished($event)"></app-myupload>
+                        <input type="file" accept="image/*" class="upload-input"
+                            (change)="onAttachmentFileSelected($event)">
                     </div>
                 </div>
             </div>

@@ -62,20 +62,32 @@ export class InventoryPUCService
     }
     return this.httpClient.get(this.API_URL +"/"  +inventoryID+  "/"  +SearchStartDate+ "/" +SearchEndDate + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
+  private preparePayload(advanceTable: any): void {
+    advanceTable.userID = this.generalService.getUserID();
+    advanceTable.inventoryID = Number(advanceTable.inventoryID);
+    const start = advanceTable.startDate ? new Date(advanceTable.startDate) : null;
+    const end = advanceTable.endDate ? new Date(advanceTable.endDate) : null;
+    if (start && !Number.isNaN(start.getTime())) {
+      advanceTable.startDate = start;
+      advanceTable.startDateString = this.generalService.getTimeApplicable(start);
+    }
+    if (end && !Number.isNaN(end.getTime())) {
+      advanceTable.endDate = end;
+      advanceTable.endDateString = this.generalService.getTimeApplicableTO(end);
+    }
+    advanceTable.pucImage = advanceTable.pucImage || '';
+  }
+
   add(advanceTable: InventoryPUC) 
   {
     advanceTable.inventoryPUCID=-1;
-    advanceTable.userID=this.generalService.getUserID();
-    advanceTable.startDateString=this.generalService.getTimeApplicable(advanceTable.startDate);
-    advanceTable.endDateString=this.generalService.getTimeApplicableTO(advanceTable.endDate);
+    this.preparePayload(advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   
   }
   update(advanceTable: InventoryPUC)
   {
-    advanceTable.userID=this.generalService.getUserID();
-    advanceTable.startDateString=this.generalService.getTimeApplicable(advanceTable.startDate);
-    advanceTable.endDateString=this.generalService.getTimeApplicableTO(advanceTable.endDate);
+    this.preparePayload(advanceTable);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(inventoryPUCID: number):  Observable<any> 

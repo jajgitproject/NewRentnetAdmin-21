@@ -28,7 +28,7 @@
                             <div class="materialTableHeader">
                                 <div class="row">
                                 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog">
-                                    <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="exampleModalLongTitle">Inventory Document
@@ -40,9 +40,66 @@
                                             </div>
                                             <div class="modal-body">
                                                 <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                                                    <mat-label>Document Number</mat-label>
-                                                    <input type="text" matInput
-                                                        [(ngModel)]="searchDocumentNumber">
+                                                    <mat-label>Document Type</mat-label>
+                                                    <mat-select [(ngModel)]="searchDocumentID">
+                                                        <mat-option [value]="null">All</mat-option>
+                                                        <mat-option *ngFor="let doc of DocumentList" [value]="doc.documentID">
+                                                            {{doc.documentName}}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+
+                                                <div class="row">
+                                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                                                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                            <mat-label>Start Date From</mat-label>
+                                                            <input matInput [matDatepicker]="searchStartDateFromPicker" [(ngModel)]="searchDocumentStartDateFrom">
+                                                            <mat-datepicker-toggle matSuffix [for]="searchStartDateFromPicker"></mat-datepicker-toggle>
+                                                            <mat-datepicker #searchStartDateFromPicker></mat-datepicker>
+                                                        </mat-form-field>
+                                                    </div>
+                                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                                                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                            <mat-label>Start Date To</mat-label>
+                                                            <input matInput [matDatepicker]="searchStartDateToPicker" [(ngModel)]="searchDocumentStartDateTo">
+                                                            <mat-datepicker-toggle matSuffix [for]="searchStartDateToPicker"></mat-datepicker-toggle>
+                                                            <mat-datepicker #searchStartDateToPicker></mat-datepicker>
+                                                        </mat-form-field>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                                                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                            <mat-label>Expiry Date From</mat-label>
+                                                            <input matInput [matDatepicker]="searchExpiryDateFromPicker" [(ngModel)]="searchDocumentExpiryFrom">
+                                                            <mat-datepicker-toggle matSuffix [for]="searchExpiryDateFromPicker"></mat-datepicker-toggle>
+                                                            <mat-datepicker #searchExpiryDateFromPicker></mat-datepicker>
+                                                        </mat-form-field>
+                                                    </div>
+                                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                                                        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                            <mat-label>Expiry Date To</mat-label>
+                                                            <input matInput [matDatepicker]="searchExpiryDateToPicker" [(ngModel)]="searchDocumentExpiryTo">
+                                                            <mat-datepicker-toggle matSuffix [for]="searchExpiryDateToPicker"></mat-datepicker-toggle>
+                                                            <mat-datepicker #searchExpiryDateToPicker></mat-datepicker>
+                                                        </mat-form-field>
+                                                    </div>
+                                                </div>
+
+                                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                    <mat-label>Issuing Authority</mat-label>
+                                                    <input type="text" matInput [(ngModel)]="searchDocumentIssuingAuthority">
+                                                </mat-form-field>
+
+                                                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                    <mat-label>QC Status</mat-label>
+                                                    <mat-select [(ngModel)]="searchQcStatus">
+                                                        <mat-option value="">All</mat-option>
+                                                        <mat-option value="Verified">Verified</mat-option>
+                                                        <mat-option value="Rejected">Rejected</mat-option>
+                                                        <mat-option value="Unverified">Unverified</mat-option>
+                                                    </mat-select>
                                                 </mat-form-field>
 
                                                 <mat-form-field class="example-full-width mb-3"
@@ -56,8 +113,8 @@
 
                                             </div>
                                             <div class="modal-footer">
-                                                <!-- <button mat-raised-button color="primary" (click)="SearchData()"
-                                                    data-dismiss="modal">Search</button> -->
+                                                <button mat-raised-button color="primary" (click)="SearchData()"
+                                                    data-dismiss="modal">Search</button>
 
                                             </div>
                                         </div>
@@ -146,32 +203,32 @@
                                         <mat-cell *matCellDef="let row">{{row.inventoryDocumentID}}</mat-cell>
                                     </ng-container>
                                       
-                                    <ng-container matColumnDef="RegistrationNumber">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Inventory Name</mat-header-cell>
-                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.registrationNumber}}</mat-cell>
-                                    </ng-container>
-
                                     <ng-container matColumnDef="Document">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Document</mat-header-cell>
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Document Type</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.document}}</mat-cell>
                                     </ng-container>
 
-                                    <ng-container matColumnDef="SupplierName">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier</mat-header-cell>
+                                    <ng-container matColumnDef="DocumentStartDate">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Start Date</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.supplier}}</mat-cell>
+                                            {{row.documentStartDate | date:'dd/MM/yyyy'}}</mat-cell>
                                     </ng-container>
 
-                                    <!-- <ng-container matColumnDef="documentNumber">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Document No</mat-header-cell>
+                                    <ng-container matColumnDef="DocumentExpiry">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Expiry Date</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                            {{row.documentNumber}}</mat-cell>
-                                    </ng-container> -->
+                                            {{row.documentExpiry | date:'dd/MM/yyyy'}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="DocumentIssuingAuthority">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Issuing Authority</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.documentIssuingAuthority}}</mat-cell>
+                                    </ng-container>
 
                                     <ng-container matColumnDef="DocumentVerified">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Verification Status</mat-header-cell>
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>QC Status</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.verified}}</mat-cell>
                                     </ng-container>

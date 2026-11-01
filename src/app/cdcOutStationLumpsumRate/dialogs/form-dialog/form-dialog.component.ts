@@ -184,6 +184,7 @@ export class FormDialogComponent
   getTitles(customerContractCarCategoryID: any)
   {
     this.customerContractCarCategoryID=customerContractCarCategoryID;
+    this.advanceTableForm.patchValue({ customerContractCarCategoryID });
   }
 
  InitCityTier(){
@@ -226,6 +227,7 @@ export class FormDialogComponent
   getcityTierID(customerContractCityTiersID: any)
   {
     this.customerContractCityTiersID=customerContractCityTiersID;
+    this.advanceTableForm.patchValue({ customerContractCityTiersID });
   }
   InitPackage()
   {
@@ -268,6 +270,42 @@ export class FormDialogComponent
   getpackageID(packageID: any)
   {
     this.packageID=packageID;
+    this.advanceTableForm.patchValue({ packageID });
+  }
+
+  private resolveCarCategoryId(): any {
+    return this.customerContractCarCategoryID
+      || this.advanceTable?.customerContractCarCategoryID
+      || this.VehicleCategoryList?.find(
+        item => item.customerContractCarCategory === this.advanceTableForm.get('vehicleCategory')?.value
+      )?.customerContractCarCategoryID;
+  }
+
+  private resolveCityTierId(): any {
+    return this.customerContractCityTiersID
+      || this.advanceTable?.customerContractCityTiersID
+      || this.CityTierList?.find(
+        item => item.customerContractCityTier === this.advanceTableForm.get('cityTier')?.value
+      )?.customerContractCityTiersID;
+  }
+
+  private resolvePackageId(): any {
+    return this.packageID
+      || this.advanceTable?.packageID
+      || this.PackageList?.find(
+        item => item.package === this.advanceTableForm.get('package')?.value
+      )?.packageID;
+  }
+
+  private patchSaveIds(): void {
+    this.advanceTableForm.patchValue({
+      customerContractCarCategoryID: this.resolveCarCategoryId(),
+      customerContractCityTiersID: this.resolveCityTierId(),
+      packageID: this.resolvePackageId(),
+      activationStatus: this.advanceTableForm.get('activationStatus')?.value === ''
+        ? true
+        : this.advanceTableForm.get('activationStatus')?.value
+    });
   }
 
   formControl = new FormControl('', 
@@ -367,56 +405,58 @@ numberOnly(event): boolean {
   public Post(): void
   {
     this.advanceTableForm.patchValue({customerContractID:this.data.CustomerContractID});
-    this.advanceTableForm.patchValue({customerContractCarCategoryID:this.customerContractCarCategoryID});
-    this.advanceTableForm.patchValue({customerContractCityTiersID:this.customerContractCityTiersID});
-    this.advanceTableForm.patchValue({packageID:this.packageID});
+    this.patchSaveIds();
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
       response => {
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
+        if (this._generalService.isDuplicateSaveError(response)) 
         {
-          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-          this.saveDisabled = true;
+          this._generalService.showDuplicateSaveError(
+            'An active rate already exists for a shared city in another city tier.',
+            () => this.endSaving(),
+            response
+          );
         }
         else
         {
           this.dialogRef.close();
           this._generalService.sendUpdate('CDCOutStationLumpsumRateCreate:CDCOutStationLumpsumRateView:Success');//To Send Updates  
-          this.saveDisabled = true;
+          this.endSaving();
         } 
       },
       error =>
       {
         this._generalService.sendUpdate('CDCOutStationLumpsumRateAll:CDCOutStationLumpsumRateView:Failure');//To Send Updates  
-        this.saveDisabled = true;
+        this.endSaving();
       }
     )
   }
   public Put(): void
   {
     this.advanceTableForm.patchValue({customerContractID:this.advanceTable.customerContractID});
-    this.advanceTableForm.patchValue({customerContractCarCategoryID:this.customerContractCarCategoryID || this.advanceTable.customerContractCarCategoryID});
-    this.advanceTableForm.patchValue({customerContractCityTiersID:this.customerContractCityTiersID || this.advanceTable.customerContractCityTiersID});
-    this.advanceTableForm.patchValue({packageID:this.packageID || this.advanceTable.packageID});
+    this.patchSaveIds();
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
       response => {
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
+        if (this._generalService.isDuplicateSaveError(response)) 
         {
-          this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-          this.saveDisabled = true;
+          this._generalService.showDuplicateSaveError(
+            'An active rate already exists for a shared city in another city tier.',
+            () => this.endSaving(),
+            response
+          );
         }
         else
         {
           this.dialogRef.close();
           this._generalService.sendUpdate('CDCOutStationLumpsumRateUpdate:CDCOutStationLumpsumRateView:Success');//To Send Updates  
-          this.saveDisabled = true;
+          this.endSaving();
         } 
       },
       error =>
       {
         this._generalService.sendUpdate('CDCOutStationLumpsumRateAll:CDCOutStationLumpsumRateView:Failure');//To Send Updates  
-        this.saveDisabled = true;
+        this.endSaving();
       }
     )
   }
@@ -424,37 +464,43 @@ numberOnly(event): boolean {
   public Duplicate(): void
   {
     this.advanceTableForm.patchValue({customerContractID:this.advanceTable.customerContractID});
-    this.advanceTableForm.patchValue({customerContractCarCategoryID:this.customerContractCarCategoryID || this.advanceTable.customerContractCarCategoryID});
-    this.advanceTableForm.patchValue({customerContractCityTiersID:this.customerContractCityTiersID || this.advanceTable.customerContractCityTiersID});
-    this.advanceTableForm.patchValue({packageID:this.packageID || this.advanceTable.packageID});
+    this.patchSaveIds();
     this.advanceTableService.duplicateInsert(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
     {
-      if(response.activationStatus===false)
+      if (this._generalService.isDuplicateSaveError(response))
       {
-        this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
-        this.saveDisabled = true;
-        this.cdr.detectChanges();
+        this._generalService.showDuplicateSaveError(
+          'An active rate already exists for a shared city in another city tier.',
+          () => this.endSaving(),
+          response
+        );
       }
       else 
       {
         this.dialogRef.close();
         this._generalService.sendUpdate('CDCOutStationLumpsumRateUpdate:CDCOutStationLumpsumRateView:Success');
-        this.saveDisabled = true; 
+        this.endSaving(); 
       }
     },
     error =>
     {
      this._generalService.sendUpdate('CDCOutStationLumpsumRateAll:CDCOutStationLumpsumRateView:Failure');//To Send Updates 
-     this.saveDisabled = true;
+     this.endSaving();
     }
   )
+  }
+
+  private endSaving(): void {
+    this.saveDisabled = true;
+    this.cdr.detectChanges();
   }
 
   public confirmAdd(): void 
   {
     this.saveDisabled = false;
+    this.cdr.detectChanges();
     if(this.action=="duplicate")
     {
       this.Duplicate();

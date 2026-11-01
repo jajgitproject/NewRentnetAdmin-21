@@ -28,6 +28,7 @@ export class CustomerConfigurationMessaging {
    tripStartEmailToPassenger:boolean;
    tripEndEmailToPassenger:boolean;
    passengerSMSAlert:boolean;
+   reservationConfirmationWhatsApp: boolean;
    activationStatus: boolean;
   userID: number;
 
@@ -60,6 +61,7 @@ export class CustomerConfigurationMessaging {
        this.tripStartEmailToPassenger=customerConfigurationMessagings.tripStartEmailToPassenger || true;
        this.tripEndEmailToPassenger=customerConfigurationMessagings.tripEndEmailToPassenger || true;
        this.passengerSMSAlert=customerConfigurationMessagings.passengerSMSAlert || true;
+       this.reservationConfirmationWhatsApp=customerConfigurationMessagings.reservationConfirmationWhatsApp === true;
        this.activationStatus = customerConfigurationMessagings.activationStatus || true;
   
     }

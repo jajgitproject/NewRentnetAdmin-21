@@ -30,6 +30,7 @@ import { ActivatedRoute } from '@angular/router';
 export class CustomerConfigurationMessagingComponent implements OnInit {
   displayedColumns = [
    'reservationSMSToBooker',
+   'reservationConfirmationWhatsApp',
    'dispatchSMSToBooker',
    'reservationSMSToPassenger',
    'dispatchSMSToPassenger',

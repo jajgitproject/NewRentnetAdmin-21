@@ -1,0 +1,49 @@
+<div class="addContainer">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17">
+            {{ dialogTitle }} - {{ ReservationID }}
+            <span *ngIf="dataSourceForMOP?.length">({{ dataSourceForMOP.length }})</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content>
+    <div *ngIf="!dataSourceForMOP?.length" class="alert alert-primary"
+      style="background-color:#E8E8E8; text-align: center; width: 100%; margin-top: 10px;">
+      No Records Found
+    </div>
+
+    <table *ngIf="dataSourceForMOP?.length" class="table table-bordered" style="width:100%; margin-top: 8px;">
+      <thead>
+        <tr>
+          <th>Change Type</th>
+          <th>Previous MOP</th>
+          <th>New MOP</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Reason</th>
+          <th>Changed By</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of dataSourceForMOP">
+          <td>{{ row.changeType || 'N/A' }}</td>
+          <td>{{ row.previousRecordName || 'N/A' }}</td>
+          <td>{{ row.newRecordName || 'N/A' }}</td>
+          <td>{{ formatDate(row.changeDate) }}</td>
+          <td>{{ formatTime(row.changeTime) }}</td>
+          <td>{{ row.reason || 'N/A' }}</td>
+          <td>{{ row.changeEmployeeName || 'N/A' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

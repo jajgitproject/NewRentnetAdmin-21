@@ -56,27 +56,27 @@
 
                         <tr>
                           <td>
-                            <strong>D.S No : </strong><br>
+                            <strong>D.S No : </strong>
                             {{dataSource?.dutySlipID}}
                           </td>
                           <td>
-                            <strong>City : </strong><br>
+                            <strong>City : </strong>
                             {{dataSource?.pickupCity}}
                           </td>
                           <td>
-                            <strong>Bkg no : </strong><br>
+                            <strong>Bkg no : </strong>
                             {{dataSource?.reservationID}}
                           </td>
                           <td>
-                            <strong>Car Booked : </strong><br>
+                            <strong>Car Booked : </strong>
                             {{dataSource?.vehicleBooked}}
                           </td>
                           <td>
-                            <strong>Car Sent : </strong><br>
+                            <strong>Car Sent : </strong>
                             {{dataSource?.vehicleSent}}
                           </td>
                           <td>
-                            <strong>Car No : </strong><br>
+                            <strong>Car No : </strong>
                             {{dataSource?.registrationNumber}}
                           </td>
                         </tr>
@@ -117,6 +117,12 @@
 
                         <tr>
                           <td colspan="6">
+                            <strong>Drop Address : </strong>{{ getDropAddress() }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td colspan="6">
                             <p>
                               <strong>Special Instruction/Trip To : </strong>
                               {{dataSource?.specialInstruction}}
@@ -129,7 +135,7 @@
                             <strong>Out Kms : {{dataSource?.locationOutKM}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>Out Time : {{dataSource?.locationOutTime | date : 'hh:mm a'}}</strong>
+                            <strong>Out Time : {{dataSource?.locationOutTime | date : 'HH:mm'}}</strong>
                           </td>
                           <td colspan="2">
                             <strong>Out Date : {{dataSource?.locationOutDate | date : 'dd/MM/yyyy'}}</strong>
@@ -141,7 +147,7 @@
                             <strong>Reporting Kms : {{dataSource?.pickUpKM}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>Reporting Time : {{dataSource?.pickUpTime | date : 'hh:mm a'}}</strong>
+                            <strong>Reporting Time : {{dataSource?.pickUpTime | date : 'HH:mm'}}</strong>
                           </td>
                           <td colspan="2">
                             <strong>Reporting Date : {{dataSource?.pickUpDate | date : 'dd/MM/yyyy'}}</strong>
@@ -153,7 +159,7 @@
                             <strong>Releasing Kms : {{dataSource?.dropOffKM}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>Releasing time : {{dataSource?.dropOffTime | date : 'hh:mm a'}}</strong>
+                            <strong>Releasing time : {{dataSource?.dropOffTime | date : 'HH:mm'}}</strong>
                           </td>
                           <td colspan="2">
                             <strong>Releasing Date : {{dataSource?.dropOffDate | date : 'dd/MM/yyyy'}}</strong>
@@ -165,7 +171,7 @@
                             <strong>In Kms : {{dataSource?.locationInKM}}</strong>
                           </td>
                           <td colspan="2">
-                            <strong>In Time : {{dataSource?.locationInTime | date : 'hh:mm a'}}</strong>
+                            <strong>In Time : {{dataSource?.locationInTime | date : 'HH:mm'}}</strong>
                           </td>
                           <td colspan="2">
                             <strong>In Date : {{dataSource?.locationInDate | date : 'dd/MM/yyyy'}}</strong>
@@ -174,7 +180,7 @@
 
                         <tr>
                           <td colspan="2">
-                            <strong *ngIf="dataSource?.showDistanceOnDutySlipPdf === true && dataSource?.totalRunningKM > 0">Total Kms : {{dataSource?.totalRunningKM}} </strong>
+                            <strong *ngIf="dataSource?.totalRunningKM > 0">Total Kms : {{dataSource?.totalRunningKM}} </strong>
                             <!-- <strong>Total Kms : {{dataSource?.locationInKM - dataSource?.locationOutKM}} </strong> -->
                           </td>
                           <td colspan="2">
@@ -318,7 +324,7 @@
                             <div class="signature-box">
                             <app-static-image *ngIf="dataSource?.customerSignatureImage; else noSignatureImage"
                               [src]="dataSource?.customerSignatureImage" cssClass="signature-image" alt="User Signature"
-                              width="100px" height="40px" maxWidth="100px" maxHeight="40px"></app-static-image>
+                              width="100px" height="40px" maxWidth="100px" maxHeight="40px" (failed)="useProdSignature()"></app-static-image>
                             </div>
                               <ng-template #noSignatureImage>No Image</ng-template>
                           </td>
@@ -327,11 +333,17 @@
                             OTP<br />
                             Start Trip OTP
                             <br />
-                            <span *ngIf="dataSource?.showOTPOnDutySlip === true">{{dataSource?.startTripOTP}}</span>
-                            <br/>
+                            <span *ngIf="dataSource?.showOTPOnDutySlip" class="otp-code">{{dataSource?.startTripOTP}}</span>
+                            <span *ngIf="dataSource?.showOTPOnDutySlip && formatOtpDisplayTime(dataSource?.startTripOTPGeneratedAt, dataSource?.startTripOTP, dataSource?.pickUpDate, dataSource?.pickUpTime)" class="otp-generated-at">
+                              <strong>OTP Time:</strong> {{ formatOtpDisplayTime(dataSource?.startTripOTPGeneratedAt, dataSource?.startTripOTP, dataSource?.pickUpDate, dataSource?.pickUpTime) }}
+                            </span>
+                            <span class="otp-trip-block-spacer"></span>
                             End Trip OTP
                             <br />
-                            <span *ngIf="dataSource?.showOTPOnDutySlip === true">{{dataSource?.endTripOTP}}</span>
+                            <span *ngIf="dataSource?.showOTPOnDutySlip" class="otp-code">{{dataSource?.endTripOTP}}</span>
+                            <span *ngIf="dataSource?.showOTPOnDutySlip && formatOtpDisplayTime(dataSource?.endTripOTPGeneratedAt, dataSource?.endTripOTP, dataSource?.dropOffDate, dataSource?.dropOffTime)" class="otp-generated-at">
+                              <strong>OTP Time:</strong> {{ formatOtpDisplayTime(dataSource?.endTripOTPGeneratedAt, dataSource?.endTripOTP, dataSource?.dropOffDate, dataSource?.dropOffTime) }}
+                            </span>
                           </td>
                         </tr>
                       </table>

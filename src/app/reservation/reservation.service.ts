@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GoogleAddress, Reservation, SameReservationModel } from './reservation.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe, formatDate } from '@angular/common';
@@ -159,8 +159,24 @@ export class ReservationService
     return this.httpClient.post<any>(this.GA_API_URL , advanceTable);
   }
 
+  private preserveSoftCappingBypassFields(advanceTable: any): void {
+    if (!advanceTable) {
+      return;
+    }
+    const reason = advanceTable.softCappingByPassReason;
+    const details = advanceTable.softCappingByPassDetails;
+    const approverId = advanceTable.softCappingByPassApproverID;
+    if (reason == null && details == null && approverId == null) {
+      return;
+    }
+    advanceTable.softCappingByPassReason = reason ?? '';
+    advanceTable.softCappingByPassDetails = details ?? '';
+    advanceTable.softCappingByPassApproverID = approverId ?? null;
+  }
+
   update(advanceTable: any)
   {
+    this.preserveSoftCappingBypassFields(advanceTable);
     advanceTable.reservationStatusChangedByID=this.generalService.getUserID();
     advanceTable.userID=this.generalService.getUserID();
     if(advanceTable.etrDate==="")
@@ -270,6 +286,7 @@ export class ReservationService
 
   updateReservationEdit(advanceTable: any)
   {
+    this.preserveSoftCappingBypassFields(advanceTable);
     advanceTable.reservationStatusChangedByID=this.generalService.getUserID();
     advanceTable.userID=this.generalService.getUserID();
     if(advanceTable.pickupSpotTypeID==="")
@@ -360,6 +377,30 @@ export class ReservationService
     return this.httpClient.put<any>(this.API_URL+'/'+'UpdateReservationForEdit' , advanceTable);
   }
 
+  /** Pickup geo + details only (Reservation + pickup stop). Used by KAM correction and change-pickup flows. */
+  updatePickupAddressOnly(payload: {
+    reservationID: number;
+    reservationStopAddress: string;
+    reservationStopAddressDetails: string;
+    reservationStopAddressLatLong: string;
+    userID?: number;
+    isKamAddressCorrection?: boolean;
+  }): Observable<any> {
+    const body = {
+      reservationID: payload.reservationID,
+      userID: payload.userID ?? this.generalService.getUserID(),
+      reservationStopAddress: payload.reservationStopAddress,
+      reservationStopAddressDetails: payload.reservationStopAddressDetails,
+      reservationStopAddressLatLong: payload.reservationStopAddressLatLong,
+      isKamAddressCorrection: payload.isKamAddressCorrection === true,
+    };
+    return this.httpClient.put<any>(this.API_URL + '/UpdatePickupTimeChnagesReservation', body);
+  }
+
+  getKamPickupAddressCorrectionHistory(reservationID: number): Observable<any> {
+    return this.httpClient.get(this.API_URL + '/kamPickupAddressCorrectionHistory/' + reservationID);
+  }
+
   /**
    * Ensure CSF arrays + customerSpecificFields JSON are never wiped to null/"" before PUT.
    * Backend UpdateReservationForEdit writes DBNull when CustomerReservationFieldID is empty/null.
@@ -427,9 +468,16 @@ export class ReservationService
     return this.httpClient.delete(this.API_URL + '/'+ reservationID);
   }
 
-  getReservationCapping(CustomerGroupID:number,CustomerID:number,PickupDate:string,CityID:number,PackageTypeID:number,VehicleCategoryID:number):  Observable<any> 
+  getReservationCapping(CustomerGroupID:number,CustomerID:number,PickupDate:string,CityID:number,PackageTypeID:number,VehicleID:number):  Observable<any> 
   {
-    return this.httpClient.get(this.API_URL_CustomerGroupReservationCapping + "/CheckReservationCapping/" + CustomerGroupID + '/' + CustomerID + '/' + PickupDate + '/' + CityID + '/' + PackageTypeID + '/' + VehicleCategoryID);
+    return this.httpClient.get(this.API_URL_CustomerGroupReservationCapping + "/CheckReservationCapping/" + CustomerGroupID + '/' + CustomerID + '/' + PickupDate + '/' + CityID + '/' + PackageTypeID + '/' + VehicleID);
+  }
+
+  getSoftReservationCapping(CustomerGroupID:number,CustomerID:number,PickupDate:string,CityID:number,PackageTypeID:number,VehicleID:number): Observable<any> {
+    return this.httpClient.get(
+      this.API_URL_CustomerGroupReservationCapping + '/CheckSoftReservationCapping/'
+      + CustomerGroupID + '/' + CustomerID + '/' + PickupDate + '/' + CityID + '/' + PackageTypeID + '/' + VehicleID
+    );
   }
   GetResrvationGSTForCityID(customerID:number,cityID:number): Observable<any> {
     return this.httpClient.get(this.generalService.BaseURL + "customerConfigurationInvoicing/GetResrvationGSTForCityID/"+customerID +'/'+cityID);
@@ -474,23 +522,31 @@ export class ReservationService
   } else {
     advanceTable.locationOutTimeString = formatDate(advanceTable.locationOutTime, 'HH:mm:ss', 'en-IN');
   }
-  
+  if (advanceTable.locationOutDate) {
+    const locationOutDate = advanceTable.locationOutDate instanceof Date
+      ? advanceTable.locationOutDate
+      : new Date(advanceTable.locationOutDate);
+    advanceTable.locationOutDateString = formatDate(locationOutDate, 'yyyy-MM-dd', 'en-IN');
+  } else {
+    advanceTable.locationOutDateString = null;
+  }
 
   return this.httpClient.put<any>(this.API_URL + '/' + 'EditLocationOutTime', advanceTable);
 }
 
   CheckValidationForSameReservation(CustomerID: number, PassengerID: number, CityID: number, PickupDate: string, PickupTime: string):Observable<any> 
   {
-    PickupDate = this.datePipe.transform(PickupDate, 'yyyy-MM-dd');
-    // if (PickupTime) 
-    // {
-    //   const PickupTime = this.datePipe.transform(PickupTime, 'HH:mm');
-    // } 
-    // else
-    // {
-    //   PickupTime = null;
-    // }
-    return this.httpClient.get<any>(this.API_URL + '/' + 'CheckValidationForSameReservation' + '/' + CustomerID + '/' + PassengerID + '/' + CityID + '/' + PickupDate + '/' + PickupTime);
+    let formattedDate: string | null = null;
+    try {
+      formattedDate = PickupDate ? this.datePipe.transform(PickupDate, 'yyyy-MM-dd') : null;
+    } catch {
+      formattedDate = null;
+    }
+    if (!formattedDate || CustomerID == null || CustomerID === '' || PassengerID == null || PassengerID === '' || CityID == null || CityID === '') {
+      return of({ result: false });
+    }
+    const formattedTime = PickupTime || '00:00';
+    return this.httpClient.get<any>(this.API_URL + '/' + 'CheckValidationForSameReservation' + '/' + CustomerID + '/' + PassengerID + '/' + CityID + '/' + formattedDate + '/' + formattedTime);
   }
 
 }

@@ -82,7 +82,9 @@
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                             <mat-label>Reservation Source</mat-label>
-                            <input required type="text" matInput formControlName="reservationSource" [matAutocomplete]="auto13">
+                            <input required type="text" matInput formControlName="reservationSource"
+                              [matAutocomplete]="auto13"
+                              [readonly]="isLockedReservationSource">
                             <mat-autocomplete #auto13="matAutocomplete">
                               <mat-option *ngFor="let option of filteredReservationSourceOptions | async" 
                               [value]="option.reservationSource" (click)="getReservationSourceID(option.reservationSourceID)">

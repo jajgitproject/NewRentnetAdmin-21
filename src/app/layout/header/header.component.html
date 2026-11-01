@@ -21,7 +21,11 @@
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li *ngIf="showExpiryWarning">
-          <span style="font-size: large;color: red;">Password will expire in {{ daysLeft }} days!</span>&nbsp;&nbsp;
+          <span style="font-size: large;color: red;">
+            <ng-container *ngIf="daysLeft < 0">Password has expired!</ng-container>
+            <ng-container *ngIf="daysLeft === 0">Password expires today!</ng-container>
+            <ng-container *ngIf="daysLeft > 0">Password will expire in {{ daysLeft }} days!</ng-container>
+          </span>&nbsp;&nbsp;
         </li>
         <li>
           Password Expiration Date : <b>{{expirationDate | date:'dd-MM-yyyy'}}</b>

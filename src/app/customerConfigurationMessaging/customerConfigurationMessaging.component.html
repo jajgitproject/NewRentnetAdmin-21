@@ -127,6 +127,12 @@
                                         <mat-cell *matCellDef="let row">{{row.customerConfigurationMessagingID}}</mat-cell>
                                     </ng-container>
                                     
+                                    <ng-container matColumnDef="reservationConfirmationWhatsApp">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Reservation Confirmation WhatsApp" matTooltipPosition="above">Confirmation WhatsApp</span></mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.reservationConfirmationWhatsApp===true ? 'Yes' : 'No'}}</mat-cell>
+                                    </ng-container>
+
                                     <ng-container matColumnDef="reservationSMSToBooker">
                                         <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Reservation SMS To Booker" matTooltipPosition="above">Reservation...</span></mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">

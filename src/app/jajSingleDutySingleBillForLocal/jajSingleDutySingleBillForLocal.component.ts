@@ -203,6 +203,47 @@ isTollOrParking(type: string): boolean {
   return type === 'Toll' || type === 'Parking';
 }
 
+/**
+ * SEZ invoice declaration: CustomerConfigurationInvoicing.IsSEZ (or GST IsSEZ / customer type SEZ).
+ * Non-SEZ invoices never show this text.
+ */
+shouldPrintSezInvoiceDeclaration(): boolean {
+  return this.isSezCustomerForInvoice();
+}
+
+getSezInvoiceDeclaration(): string {
+  if (this.isInvoiceGstCharged()) {
+    return 'Supply meant for Export/supply to SEZ unit or SEZ developer for authorised operations under bond or letter of undertaking with payment of integrated TAX';
+  }
+  return 'Supply meant for Export/supply to SEZ unit or SEZ developer for authorised operations under bond or letter of undertaking without payment of integrated TAX';
+}
+
+private isSezCustomerForInvoice(): boolean {
+  if (this.dataSource?.isSEZ === true || this.dataSource?.invoiceGSTModel?.isSEZ === true) {
+    return true;
+  }
+  const customerType = (this.dataSource?.invoiceCustomerModel?.customerType || '').toString().trim();
+  return customerType.toUpperCase() === 'SEZ';
+}
+
+/** GST charged when InvoiceGST has tax amount or rate (same source as invoice GST calc). */
+private isInvoiceGstCharged(): boolean {
+  const gst = this.dataSource?.invoiceGSTModel;
+  if (!gst) {
+    return false;
+  }
+  const cgst = Number(gst.cgstAmount) || 0;
+  const sgst = Number(gst.sgstAmount) || 0;
+  const igst = Number(gst.igstAmount) || 0;
+  if ((cgst + sgst + igst) > 0) {
+    return true;
+  }
+  const cgstPct = Number(gst.cgstPercentage) || 0;
+  const sgstPct = Number(gst.sgstPercentage) || 0;
+  const igstPct = Number(gst.igstPercentage) || 0;
+  return (cgstPct + sgstPct + igstPct) > 0;
+}
+
 rfidFastagAttachments() {
   return (this.dataSource?.invoiceTollParkingModel ?? [])
     .filter(img => img?.tollParkingImage && !this.isTollOrParking(img.tollParkingType));

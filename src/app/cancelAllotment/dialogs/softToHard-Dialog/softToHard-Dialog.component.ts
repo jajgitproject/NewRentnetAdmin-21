@@ -6,6 +6,11 @@ import { CancelAllotmentService } from '../../cancelAllotment.service';
 import { GeneralService } from '../../../general/general.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
+import { environment } from 'src/environments/environment';
+import {
+  extractComplianceFromSoftToHardResponse,
+  showCarDriverCompliancePopup
+} from '../../../allotCarAndDriver/compliance-popup';
 
 @Component({
   standalone: true,
@@ -58,16 +63,27 @@ export class SoftToHardDialogComponent
       driverID: row?.driverID,
       userID: this._generalService.getUserID()
     };
+    this.markAllotmentPerf('allotment_submit_start');
     this.advanceTableService.updateAllotmentType(payload)
     .subscribe(
     data => 
     {
-       this.showNotification(
-        'snackbar-success',
-        'Updated...!!!',
-        'bottom',
-        'center'
-      );
+      this.markAllotmentPerf('allotment_submit_done');
+      const compliance = extractComplianceFromSoftToHardResponse(data);
+      const finish = () => {
+        this.showNotification(
+          'snackbar-success',
+          'Updated...!!!',
+          'bottom',
+          'center'
+        );
+        this.dialogRef.close({ isClose: false });
+      };
+      if (compliance) {
+        showCarDriverCompliancePopup(compliance).then(finish);
+        return;
+      }
+      finish();
     },
     error =>
     {
@@ -79,6 +95,12 @@ export class SoftToHardDialogComponent
       );
     }
     )
+  }
+
+  private markAllotmentPerf(label: string): void {
+    if (!environment.production) {
+      console.info(`[AllotmentPerf] ${label}`);
+    }
   }
 }
 

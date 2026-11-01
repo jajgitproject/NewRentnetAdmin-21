@@ -40,7 +40,7 @@ export class DynamicEInvoiceService {
     {
       SearchdynamicsAPIStatusCode = "null";
     }
-    return this.httpClient.get(this.API_URL + '/InvoiceSearch' + "/" + SearchInvoiceNumber + '/'+ SearchFromDate + '/' + SearchToDate + '/'+ SearchCustomerName + '/' + SearchdynamicsAPIStatusCode + '/' + PageNumber + '/DynamicsAPICallID/Ascending');
+    return this.httpClient.get(this.API_URL + '/InvoiceSearch' + "/" + SearchInvoiceNumber + '/'+ SearchFromDate + '/' + SearchToDate + '/'+ SearchCustomerName + '/' + SearchdynamicsAPIStatusCode + '/' + PageNumber + '/DynamicsSyncID/Ascending');
   }
 
   getTableDataSort(SearchInvoiceNumber:string,SearchFromDate:string,SearchToDate:string,SearchCustomerName:string,SearchdynamicsAPIStatusCode:string,PageNumber: number, coloumName: string, sortType: string): Observable<any> {

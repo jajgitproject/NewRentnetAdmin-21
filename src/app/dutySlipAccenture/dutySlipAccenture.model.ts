@@ -19,6 +19,7 @@ export class DutySlipAccentureModel {
   locationInDate:string;
   locationInTime:string;
   locationInKM:number;
+  totalRunningKM:number;
   runningDetails:string;
   tripStartODOMeterImage:string;
   tripEndODOMeterImaget
@@ -44,6 +45,7 @@ export class DutySlipAccentureModel {
   passengerName:string;
   passengerMobile:string;
   pickUpAddressString:string;
+  dropOffAddress:string;
   pickupCity:string;
   vehicleSent:string;
   vehicleBooked:string;

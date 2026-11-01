@@ -158,11 +158,21 @@ export class editPickupTimeFormDialogComponent
 
   public Put(): void
   {
-    
-    console.log(this.advanceTableForm.value);
     this.advanceTableForm.patchValue({reservationID:this.reservationID});
+    const raw = this.advanceTableForm.getRawValue();
+    const latitude = Number(raw.reservationStopLatitude);
+    const longitude = Number(raw.reservationStopLongitude);
+    if (!latitude || !longitude || Number.isNaN(latitude) || Number.isNaN(longitude)) {
+      this.showNotification(
+        'snackbar-warning',
+        'Please select an address from Geo Search',
+        'bottom',
+        'center'
+      );
+      return;
+    }
 
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.update(raw)  
     .subscribe(
       response => 
         {

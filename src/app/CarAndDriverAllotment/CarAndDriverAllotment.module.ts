@@ -39,6 +39,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormDialogNotificationComponent } from './form-dialog/form-dialog.component';
 import { AllotmentNotificationDialogComponent } from './allotmentNotification/allotmentNotification.component';
 import { AllotmentNotificationReplyDialogComponent } from './allotmentNotificationReply/allotmentNotificationReply.component';
+import { AllotmentHistoryModule } from './allotmentHistory/allotmentHistory.module';
 import { SearchDriverByLocationService } from '../searchDriverByLocation/searchDriverByLocation.service';
 import { GooglePlaceModule } from '@compat/google-places-shim';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
@@ -101,7 +102,8 @@ import { DriverInventoryAssociationModule } from '../driverInventoryAssociation/
     MyUploadModule,
     ReservationLocationTransferLogModule,
     AdhocCarAndDriverModule,
-    DriverInventoryAssociationModule
+    DriverInventoryAssociationModule,
+    AllotmentHistoryModule
   ],
   providers: [CarAndDriverAllotmentService,
               OtherFilterService,

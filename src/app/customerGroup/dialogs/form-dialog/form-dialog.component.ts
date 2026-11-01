@@ -42,6 +42,7 @@ export class FormDialogComponent
           this.dialogTitle = 'Customer Group';
           this.advanceTable = new CustomerGroup({});
           this.advanceTable.activationStatus=true;
+          this.advanceTable.sendDutySlipAfterDSVerification = false;
         }
         this.advanceTableForm = this.createContactForm();
   }
@@ -59,6 +60,7 @@ export class FormDialogComponent
       updatedBy: [this.advanceTable.updatedBy],
       updateDateTime: [this.advanceTable.updateDateTime],
       isGSTMandatoryWithReservation: [this.advanceTable.isGSTMandatoryWithReservation],
+      sendDutySlipAfterDSVerification: [this.advanceTable.sendDutySlipAfterDSVerification === true],
     });
   }
 

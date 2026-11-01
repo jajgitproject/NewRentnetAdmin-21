@@ -26,6 +26,8 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +58,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MyUploadModule,
     MatAutocompleteModule,
     MatExpansionModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [DutyRegisterForContractCenterService]
 })

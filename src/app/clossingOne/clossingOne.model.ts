@@ -20,6 +20,7 @@ export class ClosingModel {
   action:string;
   irn:string;
   hasActiveEInvoice:boolean;
+  hasActiveInvoice:boolean;
 
   constructor(closingModel) {
     if (!closingModel) {
@@ -47,6 +48,15 @@ export class ClosingModel {
         billingRaw.VerifyDuty ??
         dutySlipRaw.verifyDuty ??
         dutySlipRaw.VerifyDuty,
+      readyForBulkBilling:
+        billingRaw.readyForBulkBilling ??
+        billingRaw.ReadyForBulkBilling,
+      closureType:
+        billingRaw.closureType
+        || billingRaw.ClosureType
+        || dutySlipRaw.closureMethod
+        || dutySlipRaw.ClosureMethod
+        || '',
     };
 
     this.closingReservationForPickupDataModel = new ClosingReservationForPickupDataModel(
@@ -71,6 +81,9 @@ export class ClosingModel {
     this.irn = (closingModel.irn ?? closingModel.IRN) || '';
     this.hasActiveEInvoice =
       closingModel.hasActiveEInvoice === true || closingModel.HasActiveEInvoice === true;
+    this.hasActiveInvoice =
+      closingModel.hasActiveInvoice === true || closingModel.HasActiveInvoice === true
+      || Number(this.invoiceID) > 0;
   }
 }
 

@@ -42,17 +42,31 @@ export function buildAccessPagesArrayFromApi(
   data: any[]
 ): { page: string; pageID: number }[] {
   const accessPagesArray: { page: string; pageID: number }[] = [];
+  const seen = new Set<string>();
   data?.forEach((element) => {
     const activation = element?.activationStatus ?? element?.ActivationStatus;
-    const pageName = element?.page ?? element?.Page;
     const pageID = Number(element?.pageID ?? element?.PageID ?? -1);
     if (!isRoleMappingRowActive(activation)) {
       return;
     }
-    const page = normalizeMenuPageKey(pageName);
-    if (page) {
+    const names = [
+      element?.page ?? element?.Page,
+      element?.path ?? element?.Path,
+      element?.title ?? element?.Title,
+      element?.moduleName ?? element?.ModuleName,
+    ];
+    names.forEach((pageName) => {
+      const page = normalizeMenuPageKey(pageName);
+      if (!page) {
+        return;
+      }
+      const dedupe = pageID + ':' + page;
+      if (seen.has(dedupe)) {
+        return;
+      }
+      seen.add(dedupe);
       accessPagesArray.push({ pageID, page });
-    }
+    });
   });
   return accessPagesArray;
 }
@@ -78,6 +92,10 @@ export function applyMenuAccessRecursive(
       applyMenuAccessRecursive(r.submenu, accessPagesArray);
       r.isAccess = false;
     } else {
+      if (r.alwaysAccessible) {
+        r.isAccess = true;
+        continue;
+      }
       const keys = routeAccessNormalizedKeys(r);
       r.isAccess = keys.some((key) => accessPagesArray.some((p) => p.page === key));
     }
@@ -87,7 +105,7 @@ export function applyMenuAccessRecursive(
 export function denyAllMenuAccess(routes: RouteInfo[]): void {
   if (!routes) return;
   for (const r of routes) {
-    if (r.groupTitle) {
+    if (r.groupTitle || r.alwaysAccessible) {
       r.isAccess = true;
     } else {
       r.isAccess = false;
@@ -118,7 +136,7 @@ export function routePageAllowed(
   routeNode: RouteInfo,
   accessPages: { page: string }[]
 ): boolean {
-  if (routeNode.groupTitle) {
+  if (routeNode.groupTitle || routeNode.alwaysAccessible) {
     return true;
   }
   const keys = routeAccessNormalizedKeys(routeNode);

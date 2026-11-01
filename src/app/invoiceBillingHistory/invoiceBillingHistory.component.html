@@ -3,7 +3,7 @@
     <div class="modalHeader clearfix">
       <div class="modal-about">
         <div class="font-weight-bold p-t-5 font-17">
-          {{ dialogTitle }} - {{ invoiceNumberWithPrefix || 'N/A' }}
+          {{ dialogTitle }} - {{ invoiceNumberWithPrefix || ('Invoice ID: ' + invoiceID) || 'N/A' }}
         </div>
       </div>
     </div>
@@ -13,95 +13,72 @@
   </button>
 </div>
 <mat-card>
-  <mat-card-content *ngIf="invoiceBillingHistory && invoiceBillingHistory.length > 0; else noDataTemplate">
-    <mat-dialog-content class="of-hidden">
-      
-      <!-- Display all credit note history records -->
-      <div *ngFor="let historyItem of invoiceBillingHistory; let i = index" >
-        <mat-card class="mb-3" *ngIf="i === 0 || i < invoiceBillingHistory.length">
+  <mat-card-content *ngIf="loading">
+    <p>Loading invoice history for Invoice ID {{ invoiceID }}...</p>
+  </mat-card-content>
+
+  <mat-card-content *ngIf="!loading && errorMessage">
+    <p>{{ errorMessage }}</p>
+  </mat-card-content>
+
+  <mat-card-content *ngIf="!loading && !errorMessage && invoiceBillingHistory?.length > 0">
+    <mat-dialog-content class="history-dialog-content">
+      <div *ngFor="let historyItem of invoiceBillingHistory; let i = index" class="history-item">
+        <mat-card class="mb-3 history-card">
           <mat-card-header *ngIf="invoiceBillingHistory.length > 1">
             <mat-card-title>Action {{ i + 1 }}</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            
-            <!-- Row 1: Basic Information -->
-            <div class="row">
-              <!-- <div class="col-md-4 mb-2">
-                <span class="TDValueBold">History No</span><br />
+            <div class="history-grid">
+              <div class="history-field">
+                <span class="TDValueBold">Invoice Number</span>
                 <span class="TDValue">
-                  {{ historyItem?.invoiceHistoryID || 'N/A' }}
-                </span>
-              </div> -->
-              <!-- <div class="col-md-4 mb-2">
-                <span class="TDValueBold">Invoice No</span><br />
-                <span class="TDValue">
-                  {{ historyItem?.invoiceID || 'N/A' }}
-                </span>
-              </div> -->
-
-              <div class="col-md-4 mb-2">
-                <span class="TDValueBold">Invoice Number</span><br />
-                <span class="TDValue">
-                  {{ historyItem?.invoiceNumberWithPrefix || 'N/A' }}
+                  {{ historyItem?.invoiceNumberWithPrefix || invoiceNumberWithPrefix || 'N/A' }}
                 </span>
               </div>
 
-              <div class="col-md-4 mb-2">
-                <span class="TDValueBold">Duties</span><br />
+              <div class="history-field">
+                <span class="TDValueBold">Action</span>
                 <span class="TDValue">
+                  {{ historyItem?.action || 'N/A' }}
+                </span>
+              </div>
+
+              <div class="history-field history-field--duties">
+                <span class="TDValueBold">Duties</span>
+                <span class="TDValue duties-value">
                   {{ historyItem?.listOfDuties || 'N/A' }}
                 </span>
               </div>
 
-              <div class="col-md-4 mb-2">
-                <span class="TDValueBold">Action</span><br />
-                <span class="TDValue">
-                  {{ historyItem?.action || 'N/A' }}
-                </span>
-              </div>          
-              
-            </div>
-
-            <!-- Row 2: Amount and Action Information -->
-            <div class="row">
-              <!-- <div class="col-md-4 mb-2">
-                <span class="TDValueBold">Amount</span><br />
-                <span class="TDValue">
-                  {{ historyItem?.totalCreditNoteAmount || 'N/A' }}
-                </span>
-              </div> -->
-
-              <div class="col-md-4 mb-2">
-                <span class="TDValueBold">Date</span><br />
+              <div class="history-field">
+                <span class="TDValueBold">Date</span>
                 <span class="TDValue">
                   {{ (historyItem?.actionDate | date:'dd/MM/yyyy') || 'N/A' }}
                 </span>
               </div>
-              <div class="col-md-4 mb-2">
-                <span class="TDValueBold">Time</span><br />
+
+              <div class="history-field">
+                <span class="TDValueBold">Time</span>
                 <span class="TDValue">
                   {{ historyItem?.actionTime || 'N/A' }}
                 </span>
               </div>
 
-              <div class="col-md-4 mb-2">
-                <span class="TDValueBold">Action By </span><br />
+              <div class="history-field">
+                <span class="TDValueBold">Action By</span>
                 <span class="TDValue">
                   {{ historyItem?.actionBy || 'N/A' }}
                 </span>
               </div>
             </div>
           </mat-card-content>
-            </mat-card>
+        </mat-card>
       </div>
-      
     </mat-dialog-content>
   </mat-card-content>
 
-  <ng-template #noDataTemplate>
-    <mat-card-content>
-      <p>No invoice history found in InvoiceHistory for this Invoice ID.</p>
-    </mat-card-content>
-  </ng-template>
+  <mat-card-content *ngIf="!loading && !errorMessage && (!invoiceBillingHistory || invoiceBillingHistory.length === 0)">
+    <p>No invoice history found in InvoiceHistory for this Invoice ID.</p>
+  </mat-card-content>
 </mat-card>
-

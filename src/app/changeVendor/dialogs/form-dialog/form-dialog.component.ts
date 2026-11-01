@@ -1,20 +1,20 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
-import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
+import { Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { Observable } from 'rxjs';
-import { CustomerCustomerGroupDropDown } from 'src/app/customer/customerCustomerGroupDropDown.model';
 import { map, startWith } from 'rxjs/operators';
-import { ChangeVendorModel, InventoryDropDown } from 'src/app/changeVendor/changeVendor.model';
+import { ChangeVendorModel } from 'src/app/changeVendor/changeVendor.model';
 import { ChangeVendorService } from 'src/app/changeVendor/changeVendor.service';
 import { GeneralService } from 'src/app/general/general.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CustomerPersonDropDown } from 'src/app/customerPerson/customerPersonDropDown.model';
-import { SupplierDropDownModel } from 'src/app/passToSupplier/passToSupplier.model';
-import { PassToSupplierService } from 'src/app/passToSupplier/passToSupplier.service';
-import Swal from 'sweetalert2';
+import { SupplierDropDown } from 'src/app/supplier/supplierDropDown.model';
+import {
+  filterSuppliersByDisplay,
+  formatSupplierDisplay,
+  supplierMatchesDisplay,
+} from 'src/app/supplier/supplier-display.util';
 
 @Component({
   standalone: false,
@@ -33,13 +33,10 @@ export class ChangeVendorFormDialogComponent
   advanceTable?:ChangeVendorModel;
   saveDisabled:boolean=true;
 
-  public VendorList?:SupplierDropDownModel[] = [];
-  filteredVendorOptions?:Observable<SupplierDropDownModel[]>;
-  VendorID:any;  
-
-  public InventoryList?:InventoryDropDown[] = [];
-  filteredInventoryOptions?:Observable<InventoryDropDown[]>;
-  InventoryID:any;
+  public VendorList?:SupplierDropDown[] = [];
+  filteredVendorOptions?:Observable<SupplierDropDown[]>;
+  VendorID:any;
+  formatSupplierDisplay = formatSupplierDisplay;
 
   ReservationID:any;
 
@@ -49,10 +46,8 @@ export class ChangeVendorFormDialogComponent
       public advanceTableService:ChangeVendorService,
       private fb:FormBuilder,
       public _generalService:GeneralService,
-      private snackBar:MatSnackBar,
-      public passToSupplierService:PassToSupplierService)
+      private snackBar:MatSnackBar)
     {
-      // Set the defaults
       this.dialogTitle = 'Change Vendor';
       this.ReservationID = data?.advanceTable;
       this.advanceTableForm = this.createContactForm();
@@ -67,14 +62,11 @@ export class ChangeVendorFormDialogComponent
     {
       return this.fb.group(
       {
-        //reservationChangeLogID:[this.advanceTable?.reservationChangeLogID],
         reservationID:[this.ReservationID],
         changeType:['Vendor'],
-        newRecordID:[this.advanceTable?.newRecordID],
-        newRecordName:[this.advanceTable?.newRecordName],
+        newRecordID:[this.advanceTable?.newRecordID || 0],
+        newRecordName:[this.advanceTable?.newRecordName || null],
         reason:[this.advanceTable?.reason || ''],
-        inventoryID:[this.advanceTable?.inventoryID || ''],
-        inventory:[this.advanceTable?.inventory || ''],
       });
     }
 
@@ -99,16 +91,15 @@ export class ChangeVendorFormDialogComponent
       {
         if (response && response?.message === "Data not found") 
         {
-          Swal.fire({
-            icon: 'error',
-            title: 'Data Not Found',
-            text: 'The requested inventory data was not found!',
-            confirmButtonText: 'OK'
-          });
+          this.showNotification(
+            'snackbar-danger',
+            'Vendor change failed...!!!',
+            'bottom',
+            'center'
+          );
           this.saveDisabled = true;
           return;
         }
-        this.dialogRef.close();
         this.showNotification(
           'snackbar-success',
           'Vendor Changed Successfully...!!!',
@@ -130,14 +121,17 @@ export class ChangeVendorFormDialogComponent
       })
     }
   
-    //---------- Vendor ----------
+    //---------- Vendor (SupplierName + OldRentnetCode, same as closingOne Change Supplier) ----------
     InitVendor()
     {
-      this.passToSupplierService.getSupplier().subscribe(
+      this._generalService.GetAllSuppliers().subscribe(
       data=>
       {
         this.VendorList=data;
-        this.advanceTableForm.controls['newRecordName'].setValidators([Validators.required,this.VendorValidator(this.VendorList)]);
+        this.advanceTableForm.controls['newRecordName'].setValidators([
+          Validators.required,
+          this.VendorValidator(this.VendorList)
+        ]);
         this.advanceTableForm.controls['newRecordName'].updateValueAndValidity();
         this.filteredVendorOptions = this.advanceTableForm.controls['newRecordName'].valueChanges.pipe(
           startWith(""),
@@ -152,91 +146,34 @@ export class ChangeVendorFormDialogComponent
       {
         return [];
       }
-      const filterValue = value.toLowerCase();
-      return this.VendorList?.filter(
-      data => 
-      {
-        return data.supplierName.toLowerCase().includes(filterValue);
-      });
+      return filterSuppliersByDisplay(this.VendorList, value);
     }
 
     VendorValidator(VendorList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = VendorList.some(group => group.supplierName.toLowerCase() === value);
+        const match = VendorList.some(data => supplierMatchesDisplay(data, control.value));
         return match ? null : { vendorNameInvalid: true };
       };
     } 
+
     OnVendorSelect(selectedVendor: string)
     {
-      const VendorName = this.VendorList?.find(data => data.supplierName === selectedVendor);
-      if (selectedVendor) 
+      const vendor = this.VendorList?.find(data => supplierMatchesDisplay(data, selectedVendor));
+      if (vendor) 
       {
-        this.getVendorID(VendorName?.supplierID);
+        this.getVendorID(vendor.supplierID, vendor.supplierName);
       }
     }
-    getVendorID(VendorID:any)
+
+    getVendorID(VendorID:any, _supplierName?: string)
     {
       this.VendorID=VendorID;
-      this.advanceTableForm.patchValue({newRecordID:this.VendorID});      
-      this.InitInventory();
-    }
-      
-
-    //---------- Inventory ----------
-    InitInventory()
-    {
-      this.advanceTableService.getInventory(this.VendorID).subscribe(
-      data=>
-      {
-        this.InventoryList=data;
-        this.advanceTableForm.controls['inventory'].setValidators([Validators.required,this.InventoryValidator(this.InventoryList)]);
-        this.advanceTableForm.controls['inventory'].updateValueAndValidity();
-        this.filteredInventoryOptions = this.advanceTableForm.controls['inventory'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterInventory(value || ''))
-        ); 
+      this.advanceTableForm.patchValue({
+        newRecordID: this.VendorID
       });
     }
-    private _filterInventory(value: string)
-    {
-      if (!value || value.length < 3) 
-      {
-        return [];
-      }
-      const filterValue = value.toLowerCase();
-      return this.InventoryList?.filter(
-      data => 
-      {
-        return data.inventory.toLowerCase().includes(filterValue);
-      });
-    }
-    InventoryValidator(InventoryList: any[]): ValidatorFn {
-      return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = InventoryList?.some(group => group.inventory.toLowerCase().trim() === value);
-        return match ? null : { inventoryNameInvalid: true };
-      };
-    }
-    OnInventorySelect(selectedInventory: string)
-    {
-      const InventoryName = this.InventoryList?.find(
-        data => data.inventory === selectedInventory
-      );
-      if (selectedInventory) 
-      {
-        this.getInventoryID(InventoryName?.inventoryID);
-      }
-    }
-    getInventoryID(InventoryID:any)
-    {
-      this.InventoryID=InventoryID;
-      this.advanceTableForm.patchValue({inventoryID:this.InventoryID});
-    }
 
-
-
-
+    onNoClick(): void {
+      this.dialogRef.close();
+    }
 }
-
-

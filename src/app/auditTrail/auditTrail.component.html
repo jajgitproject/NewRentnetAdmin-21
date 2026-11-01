@@ -5,8 +5,7 @@
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
           <ul>
             <li class="breadcrumb-item bcrumb-1">
-              <a routerLink="/dashboard/main">
-                <i class="fas fa-home"></i> Home</a>|
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
               <a href="#">Admin</a>|
               <a href="#">Audit Trail</a>
             </li>
@@ -16,6 +15,9 @@
               <h2>Audit Trail</h2>
             </li>
           </ul>
+          <p class="page-subtitle">
+            Reservation and Allotment changes — old value, new value, and who made the change.
+          </p>
         </div>
       </div>
     </div>
@@ -23,7 +25,68 @@
     <div class="card">
       <div class="body">
         <div class="row">
-          <div class="col-lg-3 col-md-6 col-sm-12">
+          <div class="col-lg-8 col-md-12 col-sm-12 nlp-filter">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Search in plain English</mat-label>
+              <input
+                type="text"
+                matInput
+                [formControl]="nlpCtrl"
+                placeholder="Try: allotment updates by Mayank last week"
+                (keyup.enter)="ask()"
+              />
+            </mat-form-field>
+          </div>
+          <div class="col-lg-4 col-md-12 col-sm-12 filter-actions nlp-ask">
+            <button mat-raised-button color="primary" type="button" (click)="ask()" [disabled]="isLoadingEvents">
+              Ask
+            </button>
+            <button mat-stroked-button type="button" (click)="openNlpQuestions()">
+              NLP Questions
+            </button>
+          </div>
+        </div>
+        <div class="nlp-meta" *ngIf="nlpSearchText || nlpWarnings.length">
+          <span class="nlp-chip" *ngIf="nlpSearchText">In changes: {{ nlpSearchText }}</span>
+          <ul class="nlp-warnings" *ngIf="nlpWarnings.length">
+            <li *ngFor="let w of nlpWarnings">{{ w }}</li>
+          </ul>
+        </div>
+        <div class="row">
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Module</mat-label>
+              <mat-select [formControl]="moduleCtrl">
+                <mat-option value="">All</mat-option>
+                <mat-option value="Reservation">Reservation</mat-option>
+                <mat-option value="Allotment">Allotment</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Operation</mat-label>
+              <mat-select [formControl]="operationCtrl">
+                <mat-option value="">All</mat-option>
+                <mat-option value="I">Insert</mat-option>
+                <mat-option value="U">Update</mat-option>
+                <mat-option value="D">Delete</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Reservation ID</mat-label>
+              <input type="number" matInput [formControl]="reservationIdCtrl" min="1" />
+            </mat-form-field>
+          </div>
+          <div class="col-lg-2 col-md-6 col-sm-12">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Allotment ID</mat-label>
+              <input type="number" matInput [formControl]="allotmentIdCtrl" min="1" />
+            </mat-form-field>
+          </div>
+          <div class="col-lg-4 col-md-12 col-sm-12 user-filter">
             <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
               <mat-label>User</mat-label>
               <input
@@ -31,10 +94,12 @@
                 matInput
                 [formControl]="userCtrl"
                 [matAutocomplete]="autoUser"
-                placeholder="Type to search users"
+                placeholder="Type 3 characters"
               />
               <mat-autocomplete
                 #autoUser="matAutocomplete"
+                class="audit-user-panel"
+                panelWidth="auto"
                 [displayWith]="userDisplay.bind(this)"
                 (optionSelected)="onUserSelected($event.option.value)"
               >
@@ -44,204 +109,70 @@
               </mat-autocomplete>
             </mat-form-field>
           </div>
-
+        </div>
+        <div class="row">
           <div class="col-lg-3 col-md-6 col-sm-12">
             <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-              <mat-label>Reservation ID (optional)</mat-label>
-              <input
-                type="number"
-                matInput
-                [formControl]="reservationIdCtrl"
-                placeholder="e.g. 12345"
-                min="1"
-              />
+              <mat-label>From date</mat-label>
+              <input matInput [matDatepicker]="fromPicker" [formControl]="fromDateCtrl" />
+              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
             </mat-form-field>
           </div>
-
-          <div class="col-lg-2 col-md-6 col-sm-12">
+          <div class="col-lg-3 col-md-6 col-sm-12">
             <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-              <mat-label>Form Name (optional)</mat-label>
-              <input
-                type="text"
-                matInput
-                [formControl]="pageNameCtrl"
-                [matAutocomplete]="autoPage"
-                placeholder="Type to search forms"
-              />
-              <mat-autocomplete
-                #autoPage="matAutocomplete"
-                [displayWith]="pageDisplay.bind(this)"
-                (optionSelected)="onPageSelected($event.option.value)"
-              >
-                <mat-option [value]="null" (click)="onPageSelected(null)">All forms</mat-option>
-                <mat-option *ngFor="let p of filteredPageOptions | async" [value]="p">
-                  {{ pageDisplay(p) }}
-                </mat-option>
-              </mat-autocomplete>
+              <mat-label>To date</mat-label>
+              <input matInput [matDatepicker]="toPicker" [formControl]="toDateCtrl" />
+              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
             </mat-form-field>
           </div>
-
-          <div class="col-lg-2 col-md-6 col-sm-12">
-            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-              <mat-label>From Date</mat-label>
-              <input matInput [matDatepicker]="pickerFrom" [formControl]="fromDateCtrl" />
-              <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
-              <mat-datepicker #pickerFrom></mat-datepicker>
-            </mat-form-field>
-          </div>
-
-          <div class="col-lg-2 col-md-6 col-sm-12">
-            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-              <mat-label>To Date</mat-label>
-              <input matInput [matDatepicker]="pickerTo" [formControl]="toDateCtrl" />
-              <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
-              <mat-datepicker #pickerTo></mat-datepicker>
-            </mat-form-field>
-          </div>
-
-          <div
-            class="col-lg-12 col-md-12 col-sm-12"
-            style="display:flex;align-items:flex-end;gap:12px;"
-          >
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="search()"
-              [disabled]="isSearchDisabled()"
-            >
+          <div class="col-lg-6 col-md-12 col-sm-12 filter-actions">
+            <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="isLoadingEvents">
               Search
             </button>
-
-            <mat-progress-spinner
-              *ngIf="isLoadingEvents"
-              mode="indeterminate"
-              diameter="24"
-            ></mat-progress-spinner>
-            <span *ngIf="isLoadingEvents && activeReservationId" class="audit-loading-hint" style="margin-left:8px;">
-              Loading reservation audit… first search may take a few seconds.
-            </span>
+            <button mat-stroked-button type="button" (click)="clearFilters()">Clear</button>
           </div>
         </div>
 
-        <div *ngIf="events.length === 0 && !isLoadingEvents" class="alert alert-primary" style="margin-top:12px;">
-          No audit records found.
+        <div class="spinner-wrap" *ngIf="isLoadingEvents">
+          <mat-spinner diameter="36"></mat-spinner>
         </div>
 
-        <div *ngIf="isReservationTimelineView() && events.length > 0" class="alert alert-info reservation-audit-hint" style="margin-top:12px;">
-          Reservation <strong>#{{ activeReservationId }}</strong> — <strong>all users</strong> and <strong>every audited table</strong> linked to this reservation (grouped by table). Form name filter is ignored for this search.
-        </div>
-
-        <div *ngIf="isReservationTimelineView() && events.length > 0" class="reservation-table-groups" style="margin-top:12px;">
-          <div class="card reservation-table-card" *ngFor="let g of reservationTableGroups">
-            <div class="header reservation-table-card-header">
-              <h3 class="reservation-table-title">{{ g.tableLabel }}</h3>
-              <span class="reservation-table-meta">{{ g.events.length }} change(s)</span>
-            </div>
-            <div class="body" style="padding-top:0;">
-              <mat-accordion multi="true">
-                <mat-expansion-panel *ngFor="let e of g.events" (opened)="onPanelOpened(e.auditEventId)">
-                  <mat-expansion-panel-header>
-                    <mat-panel-title>
-                      {{ eventTitle(e) }}
-                    </mat-panel-title>
-                    <mat-panel-description class="reservation-panel-desc">
-                      <span class="res-user">{{ eventUserLabel(e) }}</span>
-                      <span class="res-sep"> · </span>
-                      <span class="res-time">{{ formatEventTime(e.eventAtUtc) }}</span>
-                    </mat-panel-description>
-                  </mat-expansion-panel-header>
-
-                  <div *ngIf="rowsLoadingEventIds.has(e.auditEventId)">
-                    Loading rows...
-                  </div>
-
-                  <ng-container *ngIf="!rowsLoadingEventIds.has(e.auditEventId) && rowsByEventId[e.auditEventId]">
-                    <div *ngFor="let r of rowsByEventId[e.auditEventId]; let idx = index">
-                      <hr />
-
-                      <div class="diff-grid">
-                        <div>
-                          <div class="audit-diff-table-wrap">
-                            <table class="audit-diff-table">
-                              <thead>
-                                <tr>
-                                  <th>Fields</th>
-                                  <th>Before</th>
-                                  <th>After</th>
-                                  <th>Change</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr *ngFor="let d of buildDiffTableRows(r.beforeJson, r.afterJson)" [class.changed-row]="d.change === 'Yes'">
-                                  <td class="col-name">{{ d.columnName }}</td>
-                                  <td class="col-before">{{ d.before }}</td>
-                                  <td class="col-after">{{ d.after }}</td>
-                                  <td class="col-change">{{ d.change }}</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </ng-container>
-                </mat-expansion-panel>
-              </mat-accordion>
-            </div>
-          </div>
-        </div>
-
-        <mat-accordion multi="true" *ngIf="!isReservationTimelineView() && events.length > 0" style="margin-top:12px;">
-          <mat-expansion-panel *ngFor="let e of events" (opened)="onPanelOpened(e.auditEventId)">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                {{ eventTitle(e) }}
-              </mat-panel-title>
-              <mat-panel-description class="reservation-panel-desc">
-                <span class="res-user">{{ eventUserLabel(e) }}</span>
-                <span class="res-sep"> · </span>
-                <span class="res-time">{{ formatEventTime(e.eventAtUtc) }}</span>
-              </mat-panel-description>
-            </mat-expansion-panel-header>
-
-            <div *ngIf="rowsLoadingEventIds.has(e.auditEventId)">
-              Loading rows...
-            </div>
-
-            <ng-container *ngIf="!rowsLoadingEventIds.has(e.auditEventId) && rowsByEventId[e.auditEventId]">
-              <div *ngFor="let r of rowsByEventId[e.auditEventId]; let idx = index">
-                <hr />
-
-                <div class="diff-grid">
-                  <div>
-                    <div class="audit-diff-table-wrap">
-                      <table class="audit-diff-table">
-                        <thead>
-                          <tr>
-                            <th>Fields</th>
-                            <th>Before</th>
-                            <th>After</th>
-                            <th>Change</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr *ngFor="let d of buildDiffTableRows(r.beforeJson, r.afterJson)" [class.changed-row]="d.change === 'Yes'">
-                            <td class="col-name">{{ d.columnName }}</td>
-                            <td class="col-before">{{ d.before }}</td>
-                            <td class="col-after">{{ d.after }}</td>
-                            <td class="col-change">{{ d.change }}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ng-container>
-          </mat-expansion-panel>
-        </mat-accordion>
+        <table class="audit-event-table" *ngIf="!isLoadingEvents">
+          <thead>
+            <tr>
+              <th>Time (UTC)</th>
+              <th>User</th>
+              <th>Module</th>
+              <th>Form</th>
+              <th>Operation</th>
+              <th>Reservation</th>
+              <th>Allotment</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let evt of events">
+              <td>{{ evt.timestampUtc | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+              <td>{{ evt.userDisplayName || evt.userId || '-' }}</td>
+              <td>{{ evt.module }}</td>
+              <td>{{ evt.formName }}</td>
+              <td>{{ operationLabel(evt.operation) }}</td>
+              <td>{{ evt.reservationId || '-' }}</td>
+              <td>{{ evt.allotmentId || '-' }}</td>
+              <td>
+                <button mat-stroked-button color="primary" type="button" (click)="openEvent(evt, $event)">
+                  Details
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="events.length === 0">
+              <td colspan="8">No audit events in this date range.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </section>
-

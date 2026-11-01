@@ -13,6 +13,8 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { DriverPayoutMISComponent } from './driverPayoutMIS.component';
 import { DriverPayoutMISRoutingModule } from './driverPayoutMIS-routing.module';
 import { DriverPayoutMISService } from './driverPayoutMIS.service';
@@ -34,7 +36,9 @@ import { DriverPayoutMISService } from './driverPayoutMIS.service';
     MatSortModule,
     MatAutocompleteModule,
     MatExpansionModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [DriverPayoutMISService]
 })

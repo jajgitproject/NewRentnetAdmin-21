@@ -25,6 +25,7 @@ import { GooglePlaceModule } from '@compat/google-places-shim';
 import { DutySlipAccentureService } from './dutySlipAccenture.service';
 import { DutySlipAccentureRoutingModule } from './dutySlipAccenture-routing.module';
 import { DutySlipAccentureComponent } from './dutySlipAccenture.component';
+import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
 
 
 
@@ -57,7 +58,7 @@ import { DutySlipAccentureComponent } from './dutySlipAccenture.component';
     MyUploadModule,
     GooglePlaceModule,
   ],
-  providers: [DutySlipAccentureService]
+  providers: [DutySlipAccentureService, ControlPanelDesignService]
 })
 export class DutySlipAccentureModule {}
 

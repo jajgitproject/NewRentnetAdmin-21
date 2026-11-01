@@ -85,8 +85,6 @@ import { ReservationLocationTransferLogModule } from '../reservationLocationTran
 import { SendSmsWhatsappMailService } from '../sendSmsWhatsappMail/sendSmsWhatsappMail.service';
 import { VendorDetailsService } from '../vendorDetails/vendorDetails.service';
 import { LocationDetailsService } from '../locationDetails/locationDetails.service';
-import { CarMovingStatusByAppService } from '../carMovingStatusByApp/carMovingStatusByApp.service';
-import { AppDataMissingStatusService } from '../appDataMissingStatus/appDataMissingStatus.service';
 import { IncidenceService } from '../incidence/incidence.service';
 import { ResolutionService } from '../resolution/resolution.service';
 import { TrackOnMapInfoService } from '../trackOnMapInfo/trackOnMapInfo.service';
@@ -200,8 +198,7 @@ import { ControlPanelDialogeModule } from '../controlPanelDialoge/controlPanelDi
     SendSmsWhatsappMailService,
     VendorDetailsService,
     LocationDetailsService,
-    CarMovingStatusByAppService,
-    AppDataMissingStatusService, IncidenceService,
+    IncidenceService,
     ResolutionService,
     TrackOnMapInfoService,
     TotalBookingCountDetailsService,

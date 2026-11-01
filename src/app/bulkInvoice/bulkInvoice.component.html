@@ -1,0 +1,365 @@
+<section class="content">
+  <div class="container-fluid bulk-invoice-page">
+    <div class="block-header">
+      <h2>Bulk Invoice</h2>
+      <p class="text-muted page-subtitle">
+        Create Single Duty invoices. Shadow logs what would invoice.
+        Create calls the same invoice path as Generate Bill. Does not generate IRN. GSTN, orphan, and prefix skips leave the tag on.
+      </p>
+    </div>
+
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" class="bulk-invoice-tabs">
+      <mat-tab label="Create invoices">
+        <div class="tab-body">
+          <div class="card search-panel">
+            <div class="card-header search-panel__header">
+              <span class="search-panel__title">Bulk Invoice</span>
+              <span class="search-panel__hint" *ngIf="!nightEnabled">Night schedule is off. Search, Preview, then Start.</span>
+              <span class="search-panel__hint" *ngIf="nightEnabled">Finished jobs are on the Recent Runs tab.</span>
+            </div>
+            <div class="body search-panel__body">
+              <div class="row search-panel__fields">
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Mode</mat-label>
+                    <mat-select [(ngModel)]="mode">
+                      <mat-option value="Shadow">Shadow</mat-option>
+                      <mat-option value="Create">Create</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Duty slip ID</mat-label>
+                    <input matInput [(ngModel)]="searchDutySlipIds" placeholder="e.g. 105267, 105268" />
+                    <mat-hint>Comma separated</mat-hint>
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Reservation ID</mat-label>
+                    <input matInput [(ngModel)]="searchReservationIds" placeholder="e.g. 109022, 109023" />
+                    <mat-hint>Comma separated</mat-hint>
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Pickup date</mat-label>
+                    <input matInput [matDatepicker]="pickupPicker" [(ngModel)]="searchPickupDate" />
+                    <mat-datepicker-toggle matSuffix [for]="pickupPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #pickupPicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Customer</mat-label>
+                    <input
+                      type="text"
+                      matInput
+                      [formControl]="customerCtrl"
+                      [matAutocomplete]="customerAuto"
+                      placeholder="Name or Tally code" />
+                    <mat-autocomplete
+                      #customerAuto="matAutocomplete"
+                      [displayWith]="displayCustomer"
+                      (optionSelected)="onCustomerSelected($event.option.value)">
+                      <mat-option *ngFor="let option of filteredCustomerOptions | async" [value]="getCustomerDisplayValue(option)">
+                        {{ option.customerName }}
+                        <span *ngIf="option.tallyCustomerID"> ({{ option.tallyCustomerID }})</span>
+                      </mat-option>
+                    </mat-autocomplete>
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Run status</mat-label>
+                    <mat-select [(ngModel)]="searchRunStatus">
+                      <mat-option value="NotRun">Not Run</mat-option>
+                      <mat-option value="Failed">Failed / skipped</mat-option>
+                      <mat-option value="Both">Both</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Max number</mat-label>
+                    <input matInput type="number" min="1" [max]="maxDutiesLimit" [(ngModel)]="maxDuties" />
+                    <mat-hint>Batch size {{ batchSize }} — {{ estimatedBatchCount || 1 }} batch{{ (estimatedBatchCount || 1) === 1 ? '' : 'es' }}</mat-hint>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="search-panel__actions">
+                <button mat-raised-button color="primary" type="button" (click)="previewCandidates()" [disabled]="previewLoading || jobRunning">
+                  Preview
+                </button>
+                <button mat-raised-button color="accent" type="button" (click)="startJob()" [disabled]="!canStartJob()">
+                  {{ mode === 'Create' ? 'Create invoices' : 'Run Shadow' }}
+                </button>
+                <button mat-stroked-button type="button" (click)="clearSearch()" [disabled]="previewLoading || jobRunning">
+                  Clear
+                </button>
+                <button mat-stroked-button color="warn" type="button" (click)="cancelJob()" [disabled]="!jobRunning">
+                  Cancel job
+                </button>
+                <button mat-stroked-button type="button" (click)="downloadCsv()" [disabled]="!activeRun">
+                  Download CSV
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card results-panel" *ngIf="previewLoading || preview">
+            <div class="body">
+              <div *ngIf="previewLoading">Loading preview…</div>
+              <div *ngIf="preview && !previewLoading" class="preview-summary">
+                <p>
+                  <strong>Matched:</strong> {{ preview.totalMatchedCount }} —
+                  <strong>This job:</strong> {{ preview.willProcessCount }} in {{ estimatedBatchCount }} batch{{ estimatedBatchCount === 1 ? '' : 'es' }} of {{ preview.batchSize || batchSize }} —
+                  <strong>Selected:</strong> {{ selectedCount }} of {{ preview.duties.length }} (first batch) —
+                  <strong>Mode:</strong> {{ preview.mode || mode }}
+                </p>
+                <p *ngIf="jobRunning && totalBatches">
+                  Batch {{ currentBatch }} of {{ totalBatches }} — {{ sessionProcessedCount }} / {{ sessionTargetCount }} processed
+                </p>
+                <p class="text-muted" *ngIf="!preview.duties?.length">No eligible duties match this search.</p>
+                <table mat-table [dataSource]="preview.duties" class="w-100" *ngIf="preview.duties?.length">
+                  <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef>
+                      <mat-checkbox
+                        color="primary"
+                        [checked]="allPreviewSelected"
+                        [indeterminate]="somePreviewSelected"
+                        (change)="toggleAllPreview($event.checked)"
+                        [disabled]="jobRunning">
+                      </mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let row">
+                      <mat-checkbox
+                        color="primary"
+                        [checked]="isRowSelected(row.dutySlipID)"
+                        (change)="setRowSelected(row.dutySlipID, $event.checked)"
+                        (click)="$event.stopPropagation()"
+                        [disabled]="jobRunning">
+                      </mat-checkbox>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="dutySlipID">
+                    <th mat-header-cell *matHeaderCellDef>Duty slip</th>
+                    <td mat-cell *matCellDef="let row">{{ row.dutySlipID }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="reservationID">
+                    <th mat-header-cell *matHeaderCellDef>Reservation</th>
+                    <td mat-cell *matCellDef="let row">{{ row.reservationID }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="pickupDate">
+                    <th mat-header-cell *matHeaderCellDef>Pickup</th>
+                    <td mat-cell *matCellDef="let row">{{ row.pickupDate | date: 'dd-MM-yyyy' }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="customerName">
+                    <th mat-header-cell *matHeaderCellDef>Customer</th>
+                    <td mat-cell *matCellDef="let row">{{ customerLabel(row) }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="invoicePrefix">
+                    <th mat-header-cell *matHeaderCellDef>Series</th>
+                    <td mat-cell *matCellDef="let row">{{ row.invoicePrefix }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="lastStatus">
+                    <th mat-header-cell *matHeaderCellDef>Last status</th>
+                    <td mat-cell *matCellDef="let row">
+                      <div>{{ lastStatusText(row) }}</div>
+                      <div class="last-status-detail" *ngIf="lastStatusDetail(row)">{{ lastStatusDetail(row) }}</div>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="previewColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: previewColumns"></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card results-panel" *ngIf="activeRun">
+            <div class="body">
+              <p>
+                <strong>Run {{ activeRun.bulkInvoiceRunId }}</strong> —
+                {{ activeRun.jobStatus }} / {{ activeRun.mode }} / {{ formatTrigger(activeRun.triggerSource) }} /
+                created {{ activeRun.createdCount }}, already invoiced {{ activeRun.alreadyInvoicedCount }},
+                skipped {{ activeRun.skippedCount }}, failed {{ activeRun.failedCount }}
+                of {{ activeRun.scannedCount }}
+                <span *ngIf="totalBatches"> — Batch {{ currentBatch }} of {{ totalBatches }} ({{ sessionProcessedCount }} / {{ sessionTargetCount }})</span>
+              </p>
+              <p *ngIf="activeRun.errorMessage" class="text-danger">{{ activeRun.errorMessage }}</p>
+              <mat-progress-bar *ngIf="jobRunning" mode="indeterminate"></mat-progress-bar>
+              <table mat-table [dataSource]="activeRun.items || []" class="w-100">
+                <ng-container matColumnDef="dutySlipID">
+                  <th mat-header-cell *matHeaderCellDef>Duty slip</th>
+                  <td mat-cell *matCellDef="let row">{{ row.dutySlipID }}</td>
+                </ng-container>
+                <ng-container matColumnDef="reservationID">
+                  <th mat-header-cell *matHeaderCellDef>Reservation</th>
+                  <td mat-cell *matCellDef="let row">{{ row.reservationID }}</td>
+                </ng-container>
+                <ng-container matColumnDef="pickupDate">
+                  <th mat-header-cell *matHeaderCellDef>Pickup</th>
+                  <td mat-cell *matCellDef="let row">{{ row.pickupDate | date: 'dd-MM-yyyy' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="customerName">
+                  <th mat-header-cell *matHeaderCellDef>Customer</th>
+                  <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
+                </ng-container>
+                <ng-container matColumnDef="invoicePrefix">
+                  <th mat-header-cell *matHeaderCellDef>Series</th>
+                  <td mat-cell *matCellDef="let row">{{ row.invoicePrefix }}</td>
+                </ng-container>
+                <ng-container matColumnDef="invoiceNumber">
+                  <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+                  <td mat-cell *matCellDef="let row">{{ row.invoiceNumberWithPrefix }}</td>
+                </ng-container>
+                <ng-container matColumnDef="itemStatus">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let row">{{ row.itemStatus }}</td>
+                </ng-container>
+                <ng-container matColumnDef="errorMessage">
+                  <th mat-header-cell *matHeaderCellDef>Error</th>
+                  <td mat-cell *matCellDef="let row">{{ row.errorMessage }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Recent Runs">
+        <div class="tab-body">
+          <div class="card results-panel">
+            <div class="card-header search-panel__header">
+              <span class="search-panel__title">Recent runs</span>
+              <span class="search-panel__hint">Latest 10 reports. Use dates to filter.</span>
+            </div>
+            <div class="body">
+              <div class="row search-panel__fields">
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Batch date from</mat-label>
+                    <input matInput [matDatepicker]="recentFromPicker" [(ngModel)]="recentDateFrom" />
+                    <mat-datepicker-toggle matSuffix [for]="recentFromPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #recentFromPicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Batch date to</mat-label>
+                    <input matInput [matDatepicker]="recentToPicker" [(ngModel)]="recentDateTo" />
+                    <mat-datepicker-toggle matSuffix [for]="recentToPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #recentToPicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="search-panel__actions">
+                <button mat-raised-button color="primary" type="button" (click)="loadRecentRuns()" [disabled]="recentRunsLoading">
+                  Search
+                </button>
+                <button mat-stroked-button type="button" (click)="clearRecentDateFilter()" [disabled]="recentRunsLoading">
+                  Clear
+                </button>
+              </div>
+              <p class="text-muted" *ngIf="recentRunsLoading">Loading recent runs…</p>
+              <p class="text-danger" *ngIf="recentRunsError">{{ recentRunsError }}</p>
+              <p class="text-muted" *ngIf="!recentRunsLoading && !recentRunsError && !recentRuns.length">
+                No runs yet. Start a job on the first tab — finished jobs will list here.
+              </p>
+              <table mat-table [dataSource]="recentRuns" class="w-100" *ngIf="recentRuns.length">
+                <ng-container matColumnDef="bulkInvoiceRunId">
+                  <th mat-header-cell *matHeaderCellDef>Run</th>
+                  <td mat-cell *matCellDef="let row">{{ row.bulkInvoiceRunId }}</td>
+                </ng-container>
+                <ng-container matColumnDef="batchDate">
+                  <th mat-header-cell *matHeaderCellDef>Batch date</th>
+                  <td mat-cell *matCellDef="let row">{{ row.batchDate | date: 'dd-MM-yyyy' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="mode">
+                  <th mat-header-cell *matHeaderCellDef>Mode</th>
+                  <td mat-cell *matCellDef="let row">{{ row.mode }}</td>
+                </ng-container>
+                <ng-container matColumnDef="triggerSource">
+                  <th mat-header-cell *matHeaderCellDef>Source</th>
+                  <td mat-cell *matCellDef="let row">{{ formatTrigger(row.triggerSource) }}</td>
+                </ng-container>
+                <ng-container matColumnDef="jobStatus">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let row">{{ row.jobStatus }}</td>
+                </ng-container>
+                <ng-container matColumnDef="createdCount">
+                  <th mat-header-cell *matHeaderCellDef>Created / already / skip / fail</th>
+                  <td mat-cell *matCellDef="let row">
+                    {{ row.createdCount }} / {{ row.alreadyInvoicedCount }} / {{ row.skippedCount }} / {{ row.failedCount }}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let row">
+                    <button mat-button color="primary" type="button" (click)="openRun(row.bulkInvoiceRunId)">Open</button>
+                    <button mat-button type="button" (click)="downloadCsv(row.bulkInvoiceRunId)">CSV</button>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="recentColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: recentColumns"></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="card results-panel" *ngIf="activeRun">
+            <div class="body">
+              <p>
+                <strong>Run {{ activeRun.bulkInvoiceRunId }}</strong> —
+                {{ activeRun.jobStatus }} / {{ activeRun.mode }} / {{ formatTrigger(activeRun.triggerSource) }} /
+                created {{ activeRun.createdCount }}, already invoiced {{ activeRun.alreadyInvoicedCount }},
+                skipped {{ activeRun.skippedCount }}, failed {{ activeRun.failedCount }}
+                of {{ activeRun.scannedCount }}
+              </p>
+              <p *ngIf="activeRun.errorMessage" class="text-danger">{{ activeRun.errorMessage }}</p>
+              <table mat-table [dataSource]="activeRun.items || []" class="w-100">
+                <ng-container matColumnDef="dutySlipID">
+                  <th mat-header-cell *matHeaderCellDef>Duty slip</th>
+                  <td mat-cell *matCellDef="let row">{{ row.dutySlipID }}</td>
+                </ng-container>
+                <ng-container matColumnDef="reservationID">
+                  <th mat-header-cell *matHeaderCellDef>Reservation</th>
+                  <td mat-cell *matCellDef="let row">{{ row.reservationID }}</td>
+                </ng-container>
+                <ng-container matColumnDef="pickupDate">
+                  <th mat-header-cell *matHeaderCellDef>Pickup</th>
+                  <td mat-cell *matCellDef="let row">{{ row.pickupDate | date: 'dd-MM-yyyy' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="customerName">
+                  <th mat-header-cell *matHeaderCellDef>Customer</th>
+                  <td mat-cell *matCellDef="let row">{{ row.customerName }}</td>
+                </ng-container>
+                <ng-container matColumnDef="invoicePrefix">
+                  <th mat-header-cell *matHeaderCellDef>Series</th>
+                  <td mat-cell *matCellDef="let row">{{ row.invoicePrefix }}</td>
+                </ng-container>
+                <ng-container matColumnDef="invoiceNumber">
+                  <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+                  <td mat-cell *matCellDef="let row">{{ row.invoiceNumberWithPrefix }}</td>
+                </ng-container>
+                <ng-container matColumnDef="itemStatus">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let row">{{ row.itemStatus }}</td>
+                </ng-container>
+                <ng-container matColumnDef="errorMessage">
+                  <th mat-header-cell *matHeaderCellDef>Error</th>
+                  <td mat-cell *matCellDef="let row">{{ row.errorMessage }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</section>

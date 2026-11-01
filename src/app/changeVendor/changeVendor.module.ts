@@ -32,7 +32,6 @@ import { CancelInvoiceModule } from '../cancelInvoice/cancelInvoice.module';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ChangeVendorFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { ChangeVendorDetailsComponent } from './dialogs/changeVendorDetails/changeVendorDetails.component';
-import { PassToSupplierService } from '../passToSupplier/passToSupplier.service';
 
 @NgModule({
   declarations: [
@@ -72,7 +71,7 @@ import { PassToSupplierService } from '../passToSupplier/passToSupplier.service'
     MatExpansionModule
   ],
   
-  providers: [ChangeVendorService,PassToSupplierService],
+  providers: [ChangeVendorService],
 })
 export class ChangeVendorModule {}
 

@@ -60,6 +60,7 @@ export class IncidenceComponent implements OnInit {
   reservationID: any;
   dutySlipID: any;
   reservationData: any;
+  canCloseIncident = false;
 
   displayedColumns: string[] = [
     'IncidenceID',
@@ -89,6 +90,7 @@ export class IncidenceComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
+    this.canCloseIncident = this._generalService.canCloseIncident();
     this.route.queryParams.subscribe((paramsData) => {
       const encryptedReservationID = paramsData.reservationID;
       this.reservationID = Number(
@@ -145,7 +147,9 @@ export class IncidenceComponent implements OnInit {
           action: 'edit',
           item: this.reservationData,
           advanceTable: item,
-          
+          incidenceID: item?.incidenceID,
+          reservationID: item?.reservationID || this.reservationID,
+          dutySlipID: item?.dutySlipID || this.dutySlipID,
         },
       });
 
@@ -158,6 +162,9 @@ export class IncidenceComponent implements OnInit {
   }
   //---------------------Resolution
  createResolution(row: any): void {
+  if (!this.canCloseIncident) {
+    return;
+  }
   // Defer so MatMenu can finish closing; otherwise MatDialog often fails to open.
   setTimeout(() => {
     const dialogRef = this.dialog.open(
@@ -207,6 +214,17 @@ export class IncidenceComponent implements OnInit {
 
   shouldShowDeleteButton(item: any): boolean {
     return item.activationStatus !== false; // Only show delete button if activationStatus is not false (not deleted)
+  }
+
+  isIncidenceClosed(row: any): boolean {
+    if (!row) {
+      return false;
+    }
+    if (row.closureDate) {
+      return true;
+    }
+    const closedBy = Number(row.closedByEmployeeID || 0);
+    return closedBy > 0;
   }
 
   public Filter() {

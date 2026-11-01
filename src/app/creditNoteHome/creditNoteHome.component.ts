@@ -5,7 +5,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, Subscription, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -29,6 +29,7 @@ import { Router } from '@angular/router';
 import { FormDialogComponent as CreateNote } from '../createCreditNote/dialogs/form-dialog/form-dialog.component';
 import Swal from 'sweetalert2';
 import { FormDialogComponent } from '../creditNoteHome/dialogs/form-dialog/form-dialog.component';
+import { CreditNoteHistoryComponent } from '../creditnotehistory/creditnotehistory.component';
 
 @Component({
   standalone: false,
@@ -68,9 +69,9 @@ export class CreditNoteHomeComponent implements OnInit {
   dialogRef: MatDialogRef<any>;
   ActiveStatus: any;
   last: any;
-   filteredCustomerOptions:Observable<CustomerDropDown[]>;
+   filteredCustomerOptions:Observable<CustomerDropDown[]>=of([]);
    public CustomerList?:CustomerDropDown[]=[];
-   filteredOptions: Observable<CustomerGroupDropDown[]>;
+   filteredOptions: Observable<CustomerGroupDropDown[]>=of([]);
    public customerGroupList?: CustomerGroupDropDown[] = [];
 
   searchTerm: any = '';
@@ -84,7 +85,7 @@ export class CreditNoteHomeComponent implements OnInit {
 
   SearchCreditNoteNumber: string = '';
   public OrganizationalEntityList?: OrganizationalEntityDropDown[] = [];
-  filteredBranchOptions: Observable<ModeOfPaymentDropDown[]>;
+  filteredBranchOptions: Observable<ModeOfPaymentDropDown[]>=of([]);
   SearchBranch: FormControl=new FormControl();
 
   SearchFromDate: string = '';
@@ -556,6 +557,27 @@ addCreditNote() {
     window.open(baseUrl + url, '_blank');
   }
 
+  viewCreditNoteHistory(row) {
+    const creditNoteID = Number(row?.invoiceCreditNoteID ?? row?.InvoiceCreditNoteID ?? 0);
+    if (!creditNoteID) {
+      return;
+    }
+
+    this.dialog.open(CreditNoteHistoryComponent, {
+      width: '720px',
+      data: {
+        // History is keyed by InvoiceCreditNoteID (not InvoiceID).
+        creditNoteID,
+        invoiceCreditNoteID: creditNoteID,
+        invoiceID: row?.invoiceID ?? row?.InvoiceID,
+        invoiceNumberWithPrefix:
+          row?.creditNoteNumberWithPrefix
+          || row?.CreditNoteNumberWithPrefix
+          || row?.invoiceNumberWithPrefix
+          || row?.InvoiceNumberWithPrefix
+      }
+    });
+  }
 
 }
 

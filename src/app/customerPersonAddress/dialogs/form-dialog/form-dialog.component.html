@@ -199,18 +199,20 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width cpa-google-address-field" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
                         <mat-label>Google Address String</mat-label>
-                        <input
+                        <textarea
                         placeholder="Google Address String"
                         matInput
+                        rows="3"
                         formControlName="addressStringForMap"
                         ngx-google-places-autocomplete
                         [options]="options"
                         (onAddressChange)="AddressChange($event)"
-                        required  (input)="onPickupTyping()"
-                        />
+                        required
+                        (input)="onPickupTyping()"
+                        ></textarea>
                       <mat-error *ngIf="
 advanceTableForm.get('addressStringForMap')?.invalid &&
 (advanceTableForm.get('addressStringForMap')?.touched 
@@ -297,11 +299,11 @@ advanceTableForm.get('addressStringForMap')?.invalid &&
             
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
-                    <div class="example-button-row">
-                        <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
+                    <div class="example-button-row cpa-form-actions">
+                        <button mat-flat-button color="primary" class="dialog-action-btn" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid"  (click)="confirmAdd()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
-                        <button *ngIf="action==='add'" mat-raised-button color="warn" (click)="reset()" tabindex="-1">Reset</button>
-                        <button *ngIf="action==='edit'" mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                        <button *ngIf="action==='add'" mat-stroked-button color="warn" class="dialog-action-btn" (click)="reset()" tabindex="-1">Reset</button>
+                        <button *ngIf="action==='edit'" mat-stroked-button color="warn" class="dialog-action-btn" (click)="onNoClick()" tabindex="-1">Cancel</button>
                     </div>
                 </div>
             </div>

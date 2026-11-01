@@ -83,7 +83,7 @@ export class DriverInventoryAssociationService {
     return this.httpClient.get(this.API_URL + '/GetAllSearchDriver' + "/" + driverID + "/" + searchDriverName + "/" + eTRAvailabilityDate + '/' + eTRAvailabilityTime + '/' + eTRAvailabilityGeoLocation + '/' + searchInventoryName + "/" + pickupDate + '/' + searchActivationStatus + '/' + PageNumber + '/driverInventoryAssociationID/Ascending');
   }
 
-  getTableData(servicelocationID: any, driverID: number, searchDriverName: string, DOIN: string, supplierName: string, searchCategory: string, searchVehicle: string, searchRegistration: string, searchInventoryName: string, SearchVendorType: string, SearchOwnedSupplier: string, SearchBookingCount: string, SearchMonthlyTarget: string, SearchOtherCriteria: string, pickupDate: string, searchActivationStatus: boolean, PageNumber: number): Observable<any> {
+  getTableData(servicelocationID: any, driverID: number, searchDriverName: string, DOIN: string, supplierName: string, searchCategory: string, searchVehicle: string, searchRegistration: string, searchInventoryName: string, SearchVendorType: string, SearchOwnedSupplier: string, SearchBookingCount: string, SearchMonthlyTarget: string, SearchOtherCriteria: string, SearchAppBasedCustomer: string, pickupDate: string, searchActivationStatus: boolean, PageNumber: number): Observable<any> {
     if (driverID === 0) {
       driverID = 0;
     }
@@ -122,6 +122,9 @@ export class DriverInventoryAssociationService {
     }
     if (SearchOtherCriteria === "") {
       SearchOtherCriteria = "null";
+    }
+    if (SearchAppBasedCustomer === "" || SearchAppBasedCustomer === "All") {
+      SearchAppBasedCustomer = "null";
     }
     if (pickupDate === "") {
       pickupDate = "null";
@@ -129,10 +132,10 @@ export class DriverInventoryAssociationService {
     if (searchActivationStatus === null) {
       searchActivationStatus = null;
     }
-    return this.httpClient.get(this.API_URL + "/" + servicelocationID + "/" + driverID + "/" + searchDriverName + "/" + DOIN + "/" + supplierName + "/" + searchCategory + "/" + searchVehicle + "/" + searchRegistration + "/" + searchInventoryName + '/' + SearchVendorType + '/' + SearchOwnedSupplier + '/' + SearchBookingCount + '/' + SearchMonthlyTarget + '/' + SearchOtherCriteria + "/" + pickupDate + '/' + searchActivationStatus + '/' + PageNumber + '/driverInventoryAssociationID/Ascending');
+    return this.httpClient.get(this.API_URL + "/" + servicelocationID + "/" + driverID + "/" + searchDriverName + "/" + DOIN + "/" + supplierName + "/" + searchCategory + "/" + searchVehicle + "/" + searchRegistration + "/" + searchInventoryName + '/' + SearchVendorType + '/' + SearchOwnedSupplier + '/' + SearchBookingCount + '/' + SearchMonthlyTarget + '/' + SearchOtherCriteria + '/' + SearchAppBasedCustomer + "/" + pickupDate + '/' + searchActivationStatus + '/' + PageNumber + '/driverInventoryAssociationID/Ascending');
   }
 
-  getDataInventoryUnassociation(servicelocationID: any,  driverID: number, searchDriverName: string,DOIN: string, supplierName: string, searchCategory: string, searchVehicle: string, searchRegistration: string, searchInventoryName: string, SearchVendorType: string, SearchOwnedSupplier: string, SearchBookingCount: string, SearchMonthlyTarget: string, SearchOtherCriteria: string, pickupDate: string, searchActivationStatus: boolean, PageNumber: number): Observable<any> {
+  getDataInventoryUnassociation(servicelocationID: any,  driverID: number, searchDriverName: string,DOIN: string, supplierName: string, searchCategory: string, searchVehicle: string, searchRegistration: string, searchInventoryName: string, SearchVendorType: string, SearchOwnedSupplier: string, SearchBookingCount: string, SearchMonthlyTarget: string, SearchOtherCriteria: string, SearchAppBasedCustomer: string, pickupDate: string, searchActivationStatus: boolean, PageNumber: number): Observable<any> {
     if (DOIN === "") {
       DOIN = "null";
     }
@@ -171,6 +174,9 @@ export class DriverInventoryAssociationService {
     }
     if (SearchOtherCriteria === "") {
       SearchOtherCriteria = "null";
+    }
+    if (SearchAppBasedCustomer === "" || SearchAppBasedCustomer === "All") {
+      SearchAppBasedCustomer = "null";
     }
     if (pickupDate === "") {
       pickupDate = "null";
@@ -194,6 +200,7 @@ export class DriverInventoryAssociationService {
       SearchBookingCount,
       SearchMonthlyTarget,
       SearchOtherCriteria,
+      SearchAppBasedCustomer,
       pickupDate,
       searchActivationStatus,
       PageNumber,

@@ -28,7 +28,7 @@ export class BookingMisService {
   private buildExportCriteria(criteria: SearchCriteria) {
     return {
       UserID: this.generalService.getUserID(),
-      ShowAllLocation: this.generalService.getShowAllLocation(),
+      ShowAllLocation: null,
       SearchModeOfPayment: this.toNull(criteria.SearchModeOfPayment),
       SearchServiceLocation: this.toNull(criteria.SearchServiceLocation),
       SearchCustomer: this.toNull(criteria.SearchCustomer),
@@ -40,6 +40,8 @@ export class BookingMisService {
       SearchToDate: this.toNull(criteria.SearchToDate),
       SearchCancellationFrom: this.toNull(criteria.SearchCancellationFrom),
       SearchCancellationTo: this.toNull(criteria.SearchCancellationTo),
+      SearchBookingDateFrom: this.toNull(criteria.SearchBookingDateFrom),
+      SearchBookingDateTo: this.toNull(criteria.SearchBookingDateTo),
       SearchSalesPerson: this.toNull(criteria.SearchSalesPerson),
       SearchDispatchStatus: this.toNull(criteria.SearchDispatchStatus),
       SearchBookingStatus: this.toNull(criteria.SearchBookingStatus),
@@ -63,6 +65,12 @@ export class BookingMisService {
   downloadExportJob(jobId: string): Observable<Blob> {
     return this.httpClient.get(`${this.API_URL}/ExportCsv/Download/${jobId}`, {
       responseType: 'blob'
+    });
+  }
+
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
     });
   }
 

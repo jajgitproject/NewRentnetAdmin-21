@@ -239,7 +239,13 @@
                                     <ng-container matColumnDef="operationalStatus">
                                         <mat-header-cell *matHeaderCellDef mat-sort-header>Operational</mat-header-cell>
                                         <mat-cell *matCellDef="let row">
-                                            {{row.operationalStatus===true ? 'Operational' :'Non-Operational'}}</mat-cell>row.includeChildren===true? 'Yes':'No'
+                                            {{row.operationalStatus===true ? 'Operational' :'Non-Operational'}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="defaultCDPLocation">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>DefaultCDPLocation</mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            {{row.defaultCDPLocation===true ? 'Yes' : 'No'}}</mat-cell>
                                     </ng-container>
                                     
                                     <ng-container matColumnDef="status">

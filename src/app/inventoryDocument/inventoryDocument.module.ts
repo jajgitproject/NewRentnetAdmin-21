@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InventoryDocumentComponent } from './inventoryDocument.component';
-import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -24,25 +23,19 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { InventoryDocumentService } from './inventoryDocument.service';
 import { InventoryDocumentRoutingModule } from './inventoryDocument-routing.module';
-import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import { FormDialogInventoryVerificationsComponent } from './dialogs/verification/verification.component';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { InventoryDocumentSharedModule } from './inventory-document-shared.module';
 
 @NgModule({
-  declarations: [
-    InventoryDocumentComponent,
-    advanceTableForm,
-    DeleteDialogComponent,
-    FormDialogInventoryVerificationsComponent
-    //LicenseVerificationComponent
-  ],
+  declarations: [InventoryDocumentComponent, DeleteDialogComponent],
   imports: [
     MatAutocompleteModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     InventoryDocumentRoutingModule,
+    InventoryDocumentSharedModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -61,10 +54,7 @@ import { FormDialogInventoryVerificationsComponent } from './dialogs/verificatio
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
-    //TwoDigitDecimaNumberDirective
   ],
-  providers: [InventoryDocumentService]
+  providers: [InventoryDocumentService],
 })
 export class InventoryDocumentModule {}
-
-

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
@@ -9,6 +9,8 @@ import { map, startWith } from 'rxjs/operators';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './billDetailMis.model';
 import { BillDetailMisService } from './billDetailMis.service';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.model';
 import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
@@ -34,6 +36,8 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
   exportJobError = '';
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'billDetailMis';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   readonly maxPickupDateRangeDays = 15;
   IsKAMRole = false;
 
@@ -48,11 +52,12 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
   SearchCarNo: FormControl = new FormControl();
   SearchCity: FormControl = new FormControl();
   SearchBookingStatus: FormControl = new FormControl('');
-  SearchFromDate = '';
-  SearchToDate = '';
+  SearchFromDate: Date | string | null = null;
+  SearchToDate: Date | string | null = null;
   SearchDuty = '';
-  SearchBillDateFrom = '';
-  SearchBillToDate = '';
+  SearchBillDateFrom: FormControl = new FormControl(null);
+  SearchBillToDate: FormControl = new FormControl(null);
+  SearchPaidStatus: FormControl = new FormControl('All');
 
   CustomerGroupList: CustomerGroupDropDown[] = [];
   CustomerList: CustomerDropDown[] = [];
@@ -76,6 +81,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
 
   ownedSuppliedOptions = ['All', 'Owned', 'Supplied'];
   bookingStatusOptions = ['All', 'Confirmed', 'Cancelled', 'Completed'];
+  billStatusOptions = ['All', 'Paid', 'Unpaid'];
 
   constructor(
     private snackBar: MatSnackBar,
@@ -95,6 +101,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     this.initCities();
     this.initDriver();
     this.initCarNo();
+    this.resumeExportJobIfNeeded();
   }
 
   ngOnDestroy() {
@@ -114,11 +121,12 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     this.SearchCarNo.setValue('');
     this.SearchCity.setValue('');
     this.SearchBookingStatus.setValue('');
-    this.SearchFromDate = '';
-    this.SearchToDate = '';
+    this.SearchFromDate = null;
+    this.SearchToDate = null;
     this.SearchDuty = '';
-    this.SearchBillDateFrom = '';
-    this.SearchBillToDate = '';
+    this.SearchBillDateFrom.setValue(null);
+    this.SearchBillToDate.setValue(null);
+    this.SearchPaidStatus.setValue('All');
   }
 
   buildSearchCriteria(): SearchCriteria {
@@ -131,25 +139,29 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       SearchMOP: this.SearchMOP?.value || '',
       SearchSupplierType: this.SearchSupplierType?.value || '',
       SearchSupplier: this.SearchSupplier?.value || '',
-      SearchFromDate: this.isDutySlipIdSearchActive()
-        ? ''
-        : (this.SearchFromDate !== '' ? moment(this.SearchFromDate).format('MMM DD yyyy') : ''),
-      SearchToDate: this.isDutySlipIdSearchActive()
-        ? ''
-        : (this.SearchToDate !== '' ? moment(this.SearchToDate).format('MMM DD yyyy') : ''),
+      SearchFromDate: this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.SearchFromDate),
+      SearchToDate: this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.SearchToDate),
       SearchSupplierO: this.normalizeSelect(this.SearchSupplierO?.value),
       SearchDri: this.SearchDri?.value || '',
       SearchCarNo: this.SearchCarNo?.value || '',
       SearchCity: this.SearchCity?.value || '',
       SearchBookingStatus: this.normalizeSelect(this.SearchBookingStatus?.value),
       SearchDuty: this.SearchDuty || '',
-      SearchBillFromDate: this.SearchBillDateFrom !== '' ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : '',
-      SearchBillToDate: this.SearchBillToDate !== '' ? moment(this.SearchBillToDate).format('MMM DD yyyy') : ''
+      SearchBillFromDate: this.formatSearchDate(this.SearchBillDateFrom?.value),
+      SearchBillToDate: this.formatSearchDate(this.SearchBillToDate?.value),
+      SearchPaidStatus: this.normalizeSelect(this.SearchPaidStatus?.value)
     };
   }
 
   SearchData() {
     if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
+      return;
+    }
+
+    const billDateRangeError = this.validateBillDateRange();
+    if (billDateRangeError) {
+      this.showNotification('snackbar-danger', billDateRangeError, 'bottom', 'center');
       return;
     }
 
@@ -160,11 +172,9 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     }
 
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
     const searchCriteria = this.buildSearchCriteria();
 
     this.exportJobRunning = true;
-    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
 
     this.billDetailMisService.startExportJob(searchCriteria).subscribe(
       (startResult: any) => {
@@ -177,16 +187,19 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
         }
 
         this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
         this.exportJobStatus = {
           jobId,
           status: startResult?.status ?? startResult?.Status ?? 'Pending',
           message: startResult?.message ?? startResult?.Message ?? 'Export queued'
         };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
         this.startExportPolling(jobId);
+        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
       }
     );
@@ -228,7 +241,26 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       },
       async (error) => {
         this.exportJobDownloading = false;
-        const message = await this.extractExportErrorMessage(error);
+        const message = await extractExportErrorMessage(error, 'Export download failed.');
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.billDetailMisService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        const message = await extractExportErrorMessage(error, 'Could not cancel export.');
         this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
@@ -255,25 +287,44 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
   }
 
   getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) {
-      return '—';
-    }
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
   isDutySlipIdSearchActive(): boolean {
     return this.isSearchValueSet(this.SearchDuty);
   }
 
+  isBillDateSearchActive(): boolean {
+    return this.hasValidDate(this.SearchBillDateFrom?.value) && this.hasValidDate(this.SearchBillToDate?.value);
+  }
+
+  isPickupDateRequired(): boolean {
+    return !this.isDutySlipIdSearchActive() && !this.isBillDateSearchActive();
+  }
+
+  openDatePicker(picker: { open?: () => void }, disabled = false) {
+    if (disabled || !picker?.open) {
+      return;
+    }
+    picker.open();
+  }
+
   validatePickupDateRange(): string | null {
-    if (this.isDutySlipIdSearchActive()) {
-      return null;
+    if (this.isDutySlipIdSearchActive() || this.isBillDateSearchActive()) {
+      if (this.hasValidDate(this.SearchFromDate) || this.hasValidDate(this.SearchToDate)) {
+        if (!this.hasValidDate(this.SearchFromDate) || !this.hasValidDate(this.SearchToDate)) {
+          return 'Please select both Pickup Date From and Pickup Date To, or leave both blank when using bill dates.';
+        }
+      } else {
+        return null;
+      }
     }
 
-    if (!this.SearchFromDate || !this.SearchToDate) {
+    if (!this.hasValidDate(this.SearchFromDate) || !this.hasValidDate(this.SearchToDate)) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
 
@@ -295,6 +346,29 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  validateBillDateRange(): string | null {
+    const fromValue = this.SearchBillDateFrom?.value;
+    const toValue = this.SearchBillToDate?.value;
+    if (!this.hasValidDate(fromValue) && !this.hasValidDate(toValue)) {
+      return null;
+    }
+
+    if (!this.hasValidDate(fromValue) || !this.hasValidDate(toValue)) {
+      return 'Please select both Bill From Date and Bill To Date.';
+    }
+
+    const fromDate = moment(fromValue).startOf('day');
+    const toDate = moment(toValue).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      return 'Please enter valid bill dates.';
+    }
+    if (toDate.isBefore(fromDate)) {
+      return 'Bill To Date cannot be earlier than Bill From Date.';
+    }
+
+    return null;
+  }
+
   hasAdditionalSearchFilters(): boolean {
     return this.isSearchValueSet(this.SearchCustomerGroup?.value)
       || this.isSearchValueSet(this.SearchCustomer?.value)
@@ -308,8 +382,24 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       || this.isSearchValueSet(this.SearchCity?.value)
       || this.isSearchValueSet(this.SearchBookingStatus?.value)
       || this.isSearchValueSet(this.SearchDuty)
-      || this.isSearchValueSet(this.SearchBillDateFrom)
-      || this.isSearchValueSet(this.SearchBillToDate);
+      || this.hasValidDate(this.SearchBillDateFrom?.value)
+      || this.hasValidDate(this.SearchBillToDate?.value)
+      || this.isSearchValueSet(this.SearchPaidStatus?.value);
+  }
+
+  private hasValidDate(value: any): boolean {
+    if (value === null || value === undefined || value === '') {
+      return false;
+    }
+    const parsed = moment(value);
+    return parsed.isValid();
+  }
+
+  private formatSearchDate(value: any): string {
+    if (!this.hasValidDate(value)) {
+      return '';
+    }
+    return moment(value).format('MMM DD yyyy');
   }
 
   private isSearchValueSet(value: any): boolean {
@@ -333,6 +423,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     this.exportPollSub = this.billDetailMisService.pollExportJob(jobId).subscribe(
       (status: any) => {
         this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
 
         if (current === 'failed') {
@@ -340,6 +431,15 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
           this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
           this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
           this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
           return;
         }
 
@@ -353,11 +453,12 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
             'center'
           );
           this.stopExportPolling();
+          this.storedExports?.refresh();
         }
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await this.extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
         this.stopExportPolling();
       }
@@ -371,6 +472,52 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     }
   }
 
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
+    this.billDetailMisService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        this.exportJobError = '';
+        if (this.billDetailMisService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobRunning = false;
+      },
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
+    );
+  }
+
   private clearExportJob() {
     this.stopExportPolling();
     this.exportJobId = null;
@@ -379,33 +526,6 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     this.exportJobDownloading = false;
     this.exportJobError = '';
     this.exportJobStartedAt = null;
-  }
-
-  private async extractExportErrorMessage(error: any): Promise<string> {
-    if (!error) {
-      return 'Error starting export';
-    }
-
-    const blob = error?.error;
-    if (blob instanceof Blob) {
-      const text = await blob.text();
-      try {
-        const parsed = JSON.parse(text || '{}');
-        return parsed.message || parsed.Message || text || 'Error starting export';
-      } catch {
-        return text || 'Error starting export';
-      }
-    }
-
-    if (typeof error?.error === 'string' && error.error.trim()) {
-      return error.error.trim();
-    }
-
-    if (error?.error && typeof error.error === 'object') {
-      return error.error.message || error.error.Message || 'Error starting export';
-    }
-
-    return error?.message || 'Error starting export';
   }
 
   private triggerCsvDownload(blob: Blob, preferredFileName?: string) {

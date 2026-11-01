@@ -23,6 +23,8 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { ActivatedRoute } from '@angular/router';
 import { DutySlipAccentureService } from '../dutySlipAccenture/dutySlipAccenture.service';
 import { PrintBlankDutySlip } from './PrintBlankDutySlip.model';
+import { ControlPanelDesignService } from '../controlPanelDesign/controlPanelDesign.service';
+import { ControlPanelData } from '../controlPanelDesign/controlPanelDesign.model';
 import moment from 'moment';
 
 @Component({
@@ -44,6 +46,7 @@ export class PrintBlankDutySlipComponent {
     vehicleName: any;
     DutySlipID: any;
     dialogTitle: string;
+    reservationInfo: any;
     dataSourceForCalculate: any = { 
       totalRecivableAfterAdvace: 0,
       totalBasicAmount: 0,
@@ -51,6 +54,10 @@ export class PrintBlankDutySlipComponent {
       totalAmountAfterGSTInWords: ''
     };
   totalDays: number;
+  blankOutTime = '';
+  blankOutDate = '';
+  blankReportingTime = '';
+  blankReportingDate = '';
   
     constructor(
       @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
@@ -58,6 +65,7 @@ export class PrintBlankDutySlipComponent {
       public dialog: MatDialog,
       public route:ActivatedRoute,
       public dutySlipAccentureService: DutySlipAccentureService,
+      public _controlPanelDesignService: ControlPanelDesignService,
       private snackBar: MatSnackBar,
       public _generalService: GeneralService
     ) {
@@ -75,8 +83,10 @@ export class PrintBlankDutySlipComponent {
     {
       this.route.queryParams.subscribe(paramsData =>{
       this.DutySlipID = paramsData.dutySlipID;
-    });
+      this.reservationID = paramsData.reservationID;
+      this.loadDataForReservation();
       this.loadData();
+    });
     }
   
     onNoClick(): void 
@@ -87,61 +97,133 @@ export class PrintBlankDutySlipComponent {
       // }
     }
   
+    public loadDataForReservation()
+    {
+      const reservationId = this.reservationID || this.dataSource?.reservationID;
+      if (!reservationId) {
+        return;
+      }
+      this._controlPanelDesignService.getReservationDetails(reservationId).subscribe(
+      (data: ControlPanelData) =>
+      {
+        this.reservationInfo = data?.reservationDetails;
+        this.applyDropAddressFromReservation();
+      },
+      (error: HttpErrorResponse) => { this.reservationInfo = null; });
+    }
+
     public loadData() 
     {
       this.dutySlipAccentureService.printDutySlipInfo(this.DutySlipID).subscribe(
       data =>   
       {
         this.dataSource = data;
-        this.getTime()
+        this.normalizePrintData(this.dataSource);
+        this.refreshBlankOdometerDisplay();
+        this.applyDropAddressFromReservation();
+        if (!this.reservationID && this.dataSource?.reservationID) {
+          this.reservationID = this.dataSource.reservationID;
+          this.loadDataForReservation();
+        }
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
     }
+
+    /** API may return camelCase or PascalCase (dates/times for blank slip print). */
+    private normalizePrintData(data: any): void {
+      if (!data) {
+        return;
+      }
+      data.reservationID = data.reservationID ?? data.ReservationID;
+      data.locationOutDate = data.locationOutDate ?? data.LocationOutDate;
+      data.locationOutTime = data.locationOutTime ?? data.LocationOutTime;
+      data.pickUpDate = data.pickUpDate ?? data.PickUpDate;
+      data.pickUpTime = data.pickUpTime ?? data.PickUpTime;
+      data.dropOffDate = data.dropOffDate ?? data.DropOffDate;
+      data.dropOffTime = data.dropOffTime ?? data.DropOffTime;
+      data.locationInDate = data.locationInDate ?? data.LocationInDate;
+      data.locationInTime = data.locationInTime ?? data.LocationInTime;
+    }
+
+    /** Blank slip grid: only Out + Reporting schedule (per blank form layout); no kms or trip legs. */
+    private refreshBlankOdometerDisplay(): void {
+      this.blankOutTime = '';
+      this.blankOutDate = '';
+      this.blankReportingTime = '';
+      this.blankReportingDate = '';
+      if (!this.dataSource) {
+        return;
+      }
+      this.blankOutTime = this.formatBlankDutySlipTime(
+        this.dataSource.locationOutDate,
+        this.dataSource.locationOutTime
+      );
+      this.blankOutDate = this.formatBlankDutySlipDate(this.dataSource.locationOutDate);
+      this.blankReportingTime = this.formatBlankDutySlipTime(
+        this.dataSource.pickUpDate,
+        this.dataSource.pickUpTime
+      );
+      this.blankReportingDate = this.formatBlankDutySlipDate(this.dataSource.pickUpDate);
+    }
+
+    getDropAddress(): string {
+      return this.firstNonEmptyAddress(
+        this.dataSource?.dropOffAddress,
+        this.dataSource?.DropOffAddress,
+        this.dataSource?.dropOffAddressDetails,
+        this.dataSource?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.dropOffAddress,
+        this.reservationInfo?.[0]?.drop?.DropOffAddress,
+        this.reservationInfo?.[0]?.drop?.dropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.dropOffAddress,
+        this.reservationInfo?.[0]?.DropOffAddress
+      );
+    }
+
+    private applyDropAddressFromReservation(): void {
+      if (!this.dataSource) {
+        return;
+      }
+      this.dataSource.dropOffAddress = this.getDropAddress();
+    }
+
+    private firstNonEmptyAddress(...values: any[]): string {
+      for (const value of values) {
+        const text = (value ?? '').toString().trim();
+        if (text) {
+          return text;
+        }
+      }
+      return '';
+    }
   
-   getTime() 
-       {
-         // ------------LocationOutDateTime--------------
-         var locOutTimeConversion = moment(this.dataSource.locationOutTime).format('HH:mm');
-         var locOutDateConversion = moment(this.dataSource.locationOutDate).format('yyyy-MM-DD');
-         var locationOutDateTime = locOutDateConversion + ' ' + locOutTimeConversion;
-       
-         // ------------PickupDateTime--------------
-         var pickUpTimeConversion = moment(this.dataSource.pickUpTime).format('HH:mm');
-         var pickUpDateConversion = moment(this.dataSource.pickUpDate).format('yyyy-MM-DD');
-         var pickUpDateTime = pickUpDateConversion + ' ' + pickUpTimeConversion;
-       
-         // ------------DropoffDateTime--------------
-         var dropOffTimeConversion = moment(this.dataSource.dropOffTime).format('HH:mm');
-         var dropOffDateConversion = moment(this.dataSource.dropOffDate).format('yyyy-MM-DD');
-         var dropOffDateTime = dropOffDateConversion + ' ' + dropOffTimeConversion;
-       
-         // ------------LocationInDateTime--------------
-         var locInTimeConversion = moment(this.dataSource.locationInTime).format('HH:mm');
-         var locInDateConversion = moment(this.dataSource.locationInDate).format('yyyy-MM-DD');
-         var locInDateTime = locInDateConversion + ' ' + locInTimeConversion;
-       
-         // Calculate differences
-         var diff3 = new Date(pickUpDateTime).getTime() - new Date(locationOutDateTime).getTime();
-         var diff2 = new Date(dropOffDateTime).getTime() - new Date(pickUpDateTime).getTime();
-         var diff1 = new Date(locInDateTime).getTime() - new Date(dropOffDateTime).getTime();
-         
-         var totalMilliseconds = diff1 + diff2 + diff3;
-       
-         // Convert to total minutes
-         var totalMinutes = totalMilliseconds / (1000 * 60);
-         this.totalDays = Math.ceil(totalMilliseconds/(1000 * 60 * 60 * 24));
-       
-         // Extract hours and minutes
-         var hours = Math.floor(totalMinutes / 60);
-         var minutes = Math.floor(totalMinutes % 60);
-       
-         // Combine hours and minutes in desired format
-         this.datetime = hours + "." + minutes;
-     }
-   
-  
- 
-  
+    formatBlankDutySlipTime(datePart: unknown, timePart: unknown): string {
+      let combined = moment(timePart);
+      if (!combined.isValid() || combined.year() < 2000) {
+        const dateMoment = moment(datePart);
+        const timeMoment = moment(timePart);
+        if (!dateMoment.isValid() && !timeMoment.isValid()) {
+          return '';
+        }
+        combined = dateMoment.isValid() ? dateMoment.clone() : moment().startOf('day');
+        if (timeMoment.isValid()) {
+          combined.hour(timeMoment.hour()).minute(timeMoment.minute()).second(0);
+        }
+      }
+      return combined.isValid()
+        ? combined.format('HH') + 'hrs' + combined.format('mm')
+        : '';
+    }
+
+    formatBlankDutySlipDate(value: unknown): string {
+      if (value == null || value === '') {
+        return '';
+      }
+      const parsed = moment(value);
+      return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
+    }
+
   print() 
   {
     window.print();

@@ -28,6 +28,26 @@
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Dynamic GL Code</mat-label>
+                        <input matInput formControlName="dynamicGLcode" maxlength="10">
+                        <mat-error *ngIf="advanceTableForm.get('dynamicGLcode').hasError('maxlength')">
+                            Maximum 10 characters allowed
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                        <mat-label>Dynamic GL Name</mat-label>
+                        <input matInput formControlName="dynamicGLName" maxlength="50">
+                        <mat-error *ngIf="advanceTableForm.get('dynamicGLName').hasError('maxlength')">
+                            Maximum 50 characters allowed
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Is Default</mat-label>
                         <mat-select formControlName="isDefault" required #isdefaultVal [class.is-invalid]="isdefaultVal.invalid && isdefaultVal.touched">
                             <mat-option [value]=true>Yes</mat-option>

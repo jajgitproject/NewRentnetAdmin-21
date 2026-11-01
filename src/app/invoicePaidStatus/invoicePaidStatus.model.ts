@@ -5,6 +5,7 @@ export interface InvoicePaidStatusSearchCriteria {
   customerID?: number | null;
   customerName?: string | null;
   invoiceDate?: string | null;
+  invoiceNumberWithPrefix?: string | null;
   paidStatus?: string | null;
   pageNumber?: number;
   pageSize?: number;

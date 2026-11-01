@@ -159,6 +159,7 @@ export class FormDialogComponent
       customerName: [this.advanceTable.customerName],
       customerID: [this.advanceTable.customerID],
       invoiceTotalAmountAfterGST: [this.advanceTable.invoiceTotalAmountAfterGST],
+      pendingAmount: [this.advanceTable.pendingAmount],
       creditNoteAmount: [this.advanceTable.creditNoteAmount],
       cgstAmount: [this.advanceTable.cgstAmount],
       cgstPercentage :[this.advanceTable.cgstPercentage],
@@ -178,7 +179,12 @@ export class FormDialogComponent
     });
   }
   calculateTax() {
-  const creditNoteAmount = parseFloat(this.advanceTableForm.get('creditNoteAmount')?.value) || 0;
+  let creditNoteAmount = parseFloat(this.advanceTableForm.get('creditNoteAmount')?.value) || 0;
+  const remainingBalance = parseFloat(this.advanceTableForm.get('pendingAmount')?.value) || 0;
+  if (remainingBalance > 0 && creditNoteAmount > remainingBalance + 1) {
+    creditNoteAmount = remainingBalance;
+    this.advanceTableForm.patchValue({ creditNoteAmount: remainingBalance });
+  }
   const sgst_rate = parseFloat(this.advanceTableForm.get('sgstPercentage')?.value) || 0;
   const cgst_rate = parseFloat(this.advanceTableForm.get('cgstPercentage')?.value) || 0;
   const igst_rate = parseFloat(this.advanceTableForm.get('igstPercentage')?.value) || 0;
@@ -254,10 +260,7 @@ resetTaxes() {
                  }).then(result => {
                    if (result.isConfirmed) 
                    {
-                     const url = this.router.serializeUrl(
-                       this.router.createUrlTree(['/creditNoteHome'])
-                     );
-                     window.open(this._generalService.FormURL + url, '_blank');
+                     this.router.navigate(['/invoiceHome']);
                    }
                  }); 
        this.saveDisabled = true; 
@@ -317,6 +320,7 @@ resetTaxes() {
   public confirmAdd(): void {
     const amount = Number(this.advanceTableForm.get('invoiceTotalAmountAfterGST')?.value);
     const creditNoteAmount = Number(this.advanceTableForm.get('creditNoteAmount')?.value);
+    const remainingBalance = Number(this.advanceTableForm.get('pendingAmount')?.value);
     const requiresReBilling = this.isRequiresRebillingYes(
       this.advanceTableForm.get('requiresReBilling')?.value
     );
@@ -324,37 +328,51 @@ resetTaxes() {
     // Always store a real boolean on the form for the API
     this.advanceTableForm.patchValue({ requiresReBilling });
 
-    if (this.action !== 'edit') {
-      // Error ONLY when Requires Re-Billing = Yes and amounts differ
-      if (requiresReBilling && amount !== creditNoteAmount) {
-        Swal.fire({
-          title: 'Invalid Selection',
-          text: 'Credit Note Amount should be equal to Invoice Amount for Re-billing.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-        return;
-      }
+    if (remainingBalance > 0 && creditNoteAmount > remainingBalance + 1) {
+      Swal.fire({
+        title: 'Invalid Amount',
+        text: `Credit note amount cannot exceed the remaining balance of ${remainingBalance}.`,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
 
-      // Requires Re-Billing = No and amounts equal — confirm user does not want to rebill
-      if (!requiresReBilling && amount === creditNoteAmount) {
-        Swal.fire({
-          title: 'Are you sure?',
-          text: 'Are you sure you do not want to rebill the Duty Slips (DS) associated with this bill?',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Yes',
-          cancelButtonText: 'No'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            this.saveDisabled = false;
+    const amountsMatch =
+      Math.round((amount + Number.EPSILON) * 100) / 100 ===
+      Math.round((creditNoteAmount + Number.EPSILON) * 100) / 100;
+
+    // Error when Requires Re-Billing = Yes and amounts differ (create and edit)
+    if (requiresReBilling && !amountsMatch) {
+      Swal.fire({
+        title: 'Invalid Selection',
+        text: 'Credit Note Amount should be equal to Invoice Amount for Re-billing.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    // Requires Re-Billing = No and amounts equal — confirm user does not want to rebill
+    if (!requiresReBilling && amountsMatch) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Are you sure you do not want to rebill the Duty Slips (DS) associated with this bill?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.saveDisabled = false;
+          if (this.action === 'edit') {
+            this.Put();
+          } else {
             this.Post();
           }
-        });
-        return;
-      }
-
-      // Requires Re-Billing = No and amounts different — allow save (no error)
+        }
+      });
+      return;
     }
 
     this.saveDisabled = false;

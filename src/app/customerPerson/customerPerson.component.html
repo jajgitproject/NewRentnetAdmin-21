@@ -202,7 +202,7 @@
 
                             <ng-template #elseBlock2  >
                                 <div class="scrollable-table-container">
-                                <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table customer-person-table" (matSortChange)="SortingData($event)">
 
                                     <ng-container matColumnDef="id">
                                         <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
@@ -210,13 +210,13 @@
                                     </ng-container>
 
                                     <ng-container matColumnDef="customerPersonName">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Customer Person Name" matTooltipPosition="above">Customer...</span></mat-header-cell>
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Person Name</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.salutation}} {{row.customerPersonName}}</mat-cell>
                                     </ng-container>
 
                                     <ng-container matColumnDef="customerName">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Customer Name" matTooltipPosition="above">Customer...</span></mat-header-cell>
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.customerName}}</mat-cell>
                                     </ng-container>
@@ -234,7 +234,7 @@
                                     </ng-container>
 
                                     <ng-container matColumnDef="isContactPerson">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Is Contact Person" matTooltipPosition="above">Is Con...</span></mat-header-cell>
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Is Contact Person</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.isContactPerson===true? 'Yes' : 'No'}}</mat-cell>
                                     </ng-container>
@@ -252,10 +252,15 @@
                                     </ng-container>
 
                                     <ng-container matColumnDef="isPassenger">
-                                        <mat-header-cell *matHeaderCellDef mat-sort-header><span matTooltip="Is Passenger" matTooltipPosition="above">Is Pass..</span>
-                                        </mat-header-cell>
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Is Passenger</mat-header-cell>
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.isPassenger===true? 'Yes' : 'No'}}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="isDefaultForIntegrationRequest">
+                                        <mat-header-cell *matHeaderCellDef mat-sort-header>Is Default For Integration Request</mat-header-cell>
+                                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                            {{row.isDefaultForIntegrationRequest===true? 'Yes' : 'No'}}</mat-cell>
                                     </ng-container>
 
                                       <ng-container matColumnDef="oldRentNetID">

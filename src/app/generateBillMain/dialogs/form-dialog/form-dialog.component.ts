@@ -136,6 +136,57 @@ export class FormDialogComponent
         this.advanceTableForm = this.createContactForm();
           this.advanceTable.activationStatus=true;
         this.advanceTableForm.controls["invoiceDate"].disable();
+        if (this.action === 'edit') {
+          this.organizationalEntityID =
+            this.advanceTable.organizationalEntityID ?? this.advanceTable.branchID;
+        }
+        this.lockEcoBillingBranchIfInvoiceGenerated();
+        this.lockBillingAddressField();
+  }
+
+  get ecoBillingBranchLocked(): boolean {
+    return this.isInvoiceNumberGenerated();
+  }
+
+  private isInvoiceNumberGenerated(): boolean {
+    const raw =
+      this.advanceTable?.invoiceNumberWithPrefix ??
+      this.advanceTable?.InvoiceNumberWithPrefix ??
+      '';
+    return String(raw ?? '').trim().length > 0;
+  }
+
+  private lockEcoBillingBranchIfInvoiceGenerated(): void {
+    if (!this.isInvoiceNumberGenerated()) {
+      return;
+    }
+    const branchControl = this.advanceTableForm.get('organizationalEntityName');
+    if (branchControl && !branchControl.disabled) {
+      branchControl.disable({ emitEvent: false });
+    }
+  }
+
+  /** Billing address is derived from Customer + State + City; not editable manually. */
+  private lockBillingAddressField(): void {
+    const billingAddressControl = this.advanceTableForm.get('billingAddress');
+    if (billingAddressControl && !billingAddressControl.disabled) {
+      billingAddressControl.disable({ emitEvent: false });
+    }
+  }
+
+  private setBillingAddressFromSelection(address: string | null | undefined): void {
+    const billingAddressControl = this.advanceTableForm.get('billingAddress');
+    if (!billingAddressControl) {
+      return;
+    }
+    const wasDisabled = billingAddressControl.disabled;
+    if (wasDisabled) {
+      billingAddressControl.enable({ emitEvent: false });
+    }
+    billingAddressControl.setValue(address ?? '', { emitEvent: false });
+    if (wasDisabled) {
+      billingAddressControl.disable({ emitEvent: false });
+    }
   }
   
   createContactForm(): FormGroup 
@@ -334,6 +385,7 @@ export class FormDialogComponent
           startWith(""),
           map(value => this._filterOrganizational(value || ''))
         );
+        this.lockEcoBillingBranchIfInvoiceGenerated();
       });
   }
 
@@ -351,6 +403,9 @@ export class FormDialogComponent
 
   getorganizationalEntityID(organizationalEntityID: any) 
   {
+    if (this.ecoBillingBranchLocked) {
+      return;
+    }
     this.organizationalEntityID = organizationalEntityID;
     this.advanceTableForm.patchValue({ecoBillingBranchID:this.organizationalEntityID});
   }
@@ -364,9 +419,45 @@ export class FormDialogComponent
   }
 
   //------------- Customer's Drop Down -------------
+  private getCustomerDisplayValue(data: CustomerCustomerGroupDropDown): string {
+    return (data.customerName || '') + '##' + (data.customerIdentityNumber || '');
+  }
+
+  getCustomerDropdownLabel(data: CustomerCustomerGroupDropDown): string {
+    const name = data?.customerName || '';
+    const newCustomerId = data?.customerID || '';
+    const tally = data?.tallyCustomerID;
+    const oldRentNetId =
+      tally === null || tally === undefined || tally === '' || tally === 0 || tally === '0'
+        ? ''
+        : tally;
+    return `${name} # NewRNID: ${newCustomerId} # OldRNID: ${oldRentNetId}`;
+  }
+
+  displayCustomer = (value: string): string => {
+    if (!value) {
+      return '';
+    }
+    const match = (this.CustomerList ?? []).find(
+      (customer) => this.getCustomerDisplayValue(customer) === value
+    );
+    return match ? this.getCustomerDropdownLabel(match) : this.getCustomerNameForSearch(value);
+  };
+
+  private getCustomerNameForSearch(value: any): string {
+    const raw = (value || '').toString().trim();
+    if (!raw) {
+      return raw;
+    }
+    if (raw.includes('##')) {
+      return raw.split('##')[0].trim();
+    }
+    return raw.split(' # ')[0].trim();
+  }
+
   onKeyUpCustomer()
   {
-    const prefix = (this.advanceTableForm.get('customer')?.value || '').trim();
+    const prefix = this.getCustomerNameForSearch(this.advanceTableForm.get('customer')?.value);
     if (prefix.length < 3) {
       this.CustomerList = [];
       return;
@@ -383,13 +474,16 @@ export class FormDialogComponent
     );
   }
   private _filterCustomer(value: string): CustomerCustomerGroupDropDown[] {
-    const filterValue = (value || '').trim().toLowerCase();
+    const filterValue = this.getCustomerNameForSearch(value).toLowerCase();
     if (filterValue.length < 3) {
       return [];
     }
-    return (this.CustomerList ?? []).filter(
-      data => data.customerName?.toLowerCase().includes(filterValue)
-    ).slice(0, 50);
+    return (this.CustomerList ?? []).filter(data => {
+      const identity = (data.customerIdentityNumber || '').toString().toLowerCase();
+      return data.customerName?.toLowerCase().includes(filterValue)
+        || identity.includes(filterValue)
+        || this.getCustomerDisplayValue(data).toLowerCase().includes(filterValue);
+    }).slice(0, 50);
   };
   getCustomerID(customerID:any, customerGroupID:any, customerGroup:any)
   {     
@@ -403,13 +497,13 @@ export class FormDialogComponent
       stateID: '',
       city: '',
       cityID: '',
-      billingAddress: '',
       pinCode: '',
       isSEZ: '',
       passengerName: '',
       passengerID: null,
       customerPersonNameID: null
     });
+    this.setBillingAddressFromSelection('');
     this.stateID = null;
     this.cityID = null;
     this.CustomerPersonList = [];
@@ -460,16 +554,18 @@ export class FormDialogComponent
             customerDetails.customerCity || 
             customerDetails.billingCity || '',
             
-      billingAddress: customerDetails.billingAddress || 
-                     customerDetails.address || 
-                     customerDetails.customerAddress || 
-                     customerDetails.fullAddress || '',
-                     
       pinCode: customerDetails.pinCode || 
                customerDetails.pin || 
                customerDetails.zipCode || 
                customerDetails.postalCode || ''
     });
+    this.setBillingAddressFromSelection(
+      customerDetails.billingAddress ||
+        customerDetails.address ||
+        customerDetails.customerAddress ||
+        customerDetails.fullAddress ||
+        ''
+    );
 
     // Update the IDs for autocomplete
     if (customerDetails.stateID || customerDetails.state_ID) {
@@ -512,9 +608,9 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({
       state: 'Delhi',
       city: 'New Delhi',
-      billingAddress: `Customer Address for ID: ${customerID}`,
       pinCode: '110001'
     });
+    this.setBillingAddressFromSelection(`Customer Address for ID: ${customerID}`);
     
     this.clearAddressValidationErrors();
   }
@@ -549,7 +645,6 @@ export class FormDialogComponent
       stateID: '',
       city: '',
       cityID: '',
-      billingAddress: '',
       pinCode: '',
       customerID: '',
       isSEZ: '',
@@ -571,6 +666,7 @@ export class FormDialogComponent
     this.advanceTableForm.get('passengerName')?.disable({ emitEvent: false });
 
     this.clearBillToShipToSection();
+    this.setBillingAddressFromSelection('');
 
     // Clear validation errors
     this.clearAddressValidationErrors();
@@ -579,8 +675,11 @@ export class FormDialogComponent
 
   customerValidator(CustomerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = CustomerList.some(group => group.customerName?.toLowerCase() === value);
+      const value = (control.value || '').toString().trim().toLowerCase();
+      const match = CustomerList.some(group =>
+        this.getCustomerDisplayValue(group).toLowerCase() === value
+        || group.customerName?.toLowerCase() === value
+      );
       return match ? null : { customerInvalid: true };
     };
   }
@@ -619,7 +718,7 @@ export class FormDialogComponent
       return;
     }
 
-    const customerName = (this.advanceTableForm.get('customer')?.value || '').trim();
+    const customerName = this.getCustomerNameForSearch(this.advanceTableForm.get('customer')?.value);
     const guestCustomerDetail = {
       ...this.customerDetailData,
       customerID: this.customerID,
@@ -630,7 +729,7 @@ export class FormDialogComponent
       ...this.customerPersonQuickAddDialog,
       hasBackdrop: true,
       data: {
-        action: 'add',
+          action: 'add',
         forCP: 'CP',
         fromGeneralBill: true,
         advanceTable: guestCustomerDetail,
@@ -1088,10 +1187,11 @@ export class FormDialogComponent
   getTitle(geoPointID: any,option) 
   {
     this.cityID=geoPointID;
-    this.advanceTableForm.patchValue({cityID:this.cityID,
-       billingAddress: option.billingAddress,
-    pinCode: option.billingPin
+    this.advanceTableForm.patchValue({
+      cityID: this.cityID,
+      pinCode: option.billingPin
     });
+    this.setBillingAddressFromSelection(option.billingAddress);
   }
   cityValidator(CityList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
@@ -1281,6 +1381,10 @@ getcsGSTPercentageID(csgstPercentageID:any)
   private prepareSavePayload(): any
   {
     const payload = this.advanceTableForm.getRawValue();
+    if (payload.customer)
+    {
+      payload.customer = this.getCustomerNameForSearch(payload.customer);
+    }
     if (!payload.invoiceDate)
     {
       payload.invoiceDate = new Date();

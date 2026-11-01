@@ -1,0 +1,25 @@
+<div class="cg-msg-dialog cg-bulk-vehicles-dialog">
+  <div class="cg-msg-dialog__header">
+    <div class="cg-msg-dialog__icon" aria-hidden="true">
+      <mat-icon>directions_car</mat-icon>
+    </div>
+    <h2 class="cg-msg-dialog__title">Selected Vehicles</h2>
+    <button mat-icon-button type="button" class="cg-msg-dialog__close" (click)="onClose()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div mat-dialog-content class="cg-bulk-vehicles-dialog__content">
+    <p class="cg-bulk-vehicles-dialog__hint" *ngIf="vehicles.length">
+      {{ vehicles.length }} unique vehicle(s) across the selected records:
+    </p>
+    <p class="cg-bulk-vehicles-dialog__empty" *ngIf="!vehicles.length">No vehicle names found on the selected records.</p>
+    <ul class="cg-bulk-vehicles-dialog__list" *ngIf="vehicles.length">
+      <li *ngFor="let vehicle of vehicles">
+        <mat-checkbox [checked]="true" disabled>{{ vehicle }}</mat-checkbox>
+      </li>
+    </ul>
+  </div>
+  <div mat-dialog-actions class="cg-msg-dialog__actions">
+    <button mat-flat-button color="primary" type="button" (click)="onClose()">Close</button>
+  </div>
+</div>

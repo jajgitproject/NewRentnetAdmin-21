@@ -9,7 +9,8 @@ import { Customer } from './customer.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, fromEvent, merge, Observable, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, startWith, switchMap, catchError, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
@@ -54,7 +55,6 @@ export class CustomerComponent implements OnInit {
     'customerID',
     'tallyCustomerID',
     'customerName',
-    'customerIdentityNumber',
     'customerGroup',
     'customerType',
     'customerCategory',
@@ -93,7 +93,6 @@ export class CustomerComponent implements OnInit {
   supplier:FormControl=new FormControl('');
   
   // regNumber:FormControl=new FormControl();
-  public customerGroupList?: CustomerGroupDropDown[] = [];
   public CustomerTypeList?: CustomerTypeDropDown[] = [];
   public customerCategoryList?: CustomerCategoryDropDown[] = [];
   public SupplierList?: SupplierDropDown[] = [];
@@ -141,7 +140,9 @@ export class CustomerComponent implements OnInit {
     { label: 'Customer OTP Configuration', pageName: 'Customer OTP Configuration' },
     { label: 'Change KAM for Customers', pageName: 'Change KAM for Customers' },
     { label: 'Payment Terms Code', pageName: 'customerPaymentTermsCode' },
+    { label: 'Customer Payment Mapping', pageName: 'customerPaymentMapping' },
     { label: 'Customer Growth Person', pageName: 'customerGrowthPerson' },
+    { label: 'Charge Higher Extra KM/HR Based on City', pageName: 'customerCityHigherExtraKMorHR' },
   ];
 
   
@@ -177,7 +178,20 @@ export class CustomerComponent implements OnInit {
     // keystroke. 300ms is the sweet spot between responsiveness and backend load.
     this.searchTerm$
       .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(() => this.loadData(false));
+      .subscribe(() => {
+        if (this.selectedFilter !== 'customerGroup') {
+          this.loadData(false);
+        }
+      });
+
+    this.customerGroup.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => {
+        if (this.selectedFilter === 'customerGroup') {
+          this.searchTerm = this.customerGroup.value || '';
+          this.loadData(false);
+        }
+      });
 
     this.loadData();
     this.SubscribeUpdateService();
@@ -251,27 +265,28 @@ export class CustomerComponent implements OnInit {
   }
 
 
+  private openCustomerFormDialog(component: any, data: any) {
+    return this.dialog.open(component, {
+      data,
+      width: '1400px',
+      maxWidth: '96vw',
+      panelClass: 'customer-page-form-dialog'
+    });
+  }
+
   CIPlus()
   {
-    const dialogRef = this.dialog.open(CIPlusComponent, 
-    {
-      data: 
-        {
-          advanceTable: this.advanceTable,
-          action: 'add'
-        }
+    this.openCustomerFormDialog(CIPlusComponent, {
+      advanceTable: this.advanceTable,
+      action: 'add'
     });
   }
 
   IndividualCustomer()
   {
-    this.dialog.open(IndividualCustomerComponent,
-    {
-      data:
-        {
-          advanceTable: this.advanceTable,
-          action: 'add'
-        }
+    this.openCustomerFormDialog(IndividualCustomerComponent, {
+      advanceTable: this.advanceTable,
+      action: 'add'
     });
   }
 
@@ -330,10 +345,28 @@ export class CustomerComponent implements OnInit {
     this.selectedFilter = 'name';
   }
 
-  this.searchCustomerName = this.searchTerm; // 🔥 MOST IMPORTANT LINE
+  if (this.selectedFilter === 'customerGroup') {
+    this.searchTerm = this.customerGroup.value || '';
+  } else {
+    this.searchCustomerName = this.searchTerm;
+  }
 
-  this.loadData(true); // exact match
+  this.loadData(true);
 }
+
+  onCustomerGroupSearchClick() {
+    this.searchTerm = this.customerGroup.value || '';
+    this.loadData(true);
+  }
+
+  onCustomerGroupOptionSelected(option: CustomerGroupDropDown) {
+    if (!option) {
+      return;
+    }
+    this.customerGroup.setValue(option.customerGroup, { emitEvent: false });
+    this.searchTerm = option.customerGroup;
+    this.loadData(true);
+  }
 
   onSearchTermChange(value: string) {
     this.searchTerm = value ?? '';
@@ -389,30 +422,11 @@ export class CustomerComponent implements OnInit {
   };
 
   initCustomerGroup(){
-    this._generalService.getCustomerGroup().subscribe(
-      data=>{
-        this.customerGroupList=data;
-        this.filteredOptions = this.customerGroup.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filter(value || ''))
-        );
-
-      }
-    )
-  }
-  private _filter(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (!value || value.length < 3) {
-      return [];   
-    }
-    return this.customerGroupList.filter(
-      customer => 
-      {
-        return customer.customerGroup.toLowerCase().indexOf(filterValue)===0;
-      }
+    this.filteredOptions = this.customerGroup.valueChanges.pipe(
+      debounceTime(300),
+      switchMap((value: string) => this._generalService.getCustomerGroupForDropDown(value))
     );
-    
-  };
+  }
 
   initCustomerType(){
     this._generalService.getCustomerType().subscribe(
@@ -446,24 +460,17 @@ export class CustomerComponent implements OnInit {
   }
   addNew()
   {
-    const dialogRef = this.dialog.open(FormDialogComponent, 
-    {
-      data: 
-        {
-          advanceTable: this.advanceTable,
-          action: 'add'
-        }
+    this.openCustomerFormDialog(FormDialogComponent, {
+      advanceTable: this.advanceTable,
+      action: 'add'
     });
   }
   editCall(row) {
       //  alert(row.id);
     this.customerID = row.customerID;
-    const dialogRef = this.dialog.open(FormDialogComponent, {
-      data: {
-        advanceTable: row,
-        action: 'edit'
-        
-      }
+    this.openCustomerFormDialog(FormDialogComponent, {
+      advanceTable: row,
+      action: 'edit'
     });
   }
   deleteItem(row)
@@ -483,6 +490,61 @@ export class CustomerComponent implements OnInit {
   {
     this.PageNumber = 0;
     this.loadData();
+  }
+
+  private coerceOptionalBoolFlag(value: any): boolean | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    if (value === true || value === false) {
+      return value;
+    }
+    if (value === 1) {
+      return true;
+    }
+    if (value === 0) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+        return true;
+      }
+      if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+        return false;
+      }
+    }
+    return null;
+  }
+
+  /** API may return camelCase or PascalCase manager name fields. */
+  private normalizeCustomerGridRows(rows: any[]): any[] {
+    if (!Array.isArray(rows)) {
+      return rows;
+    }
+    return rows.map((row) => {
+      const kam =
+        row?.keyAccountManagerName ??
+        row?.KeyAccountManagerName ??
+        null;
+      const sales =
+        row?.salesManagerName ??
+        row?.SalesManagerName ??
+        null;
+      const kamText = kam != null ? String(kam).trim() : '';
+      const salesText = sales != null ? String(sales).trim() : '';
+      const cpEmailMandatory = this.coerceOptionalBoolFlag(
+        row?.isCPEmailMandatry ?? row?.IsCPEmailMandatry
+          ?? row?.isCPEmailIDMandatory ?? row?.IsCPEmailIDMandatory
+      );
+      return {
+        ...row,
+        keyAccountManagerName: kamText || null,
+        salesManagerName: salesText || null,
+        isCPEmailMandatry: cpEmailMandatory,
+        isCPEmailIDMandatory: cpEmailMandatory,
+      };
+    });
   }
 
   public loadData(exactMatch: boolean = false)
@@ -515,7 +577,7 @@ export class CustomerComponent implements OnInit {
       this.PageNumber).subscribe(
       data =>
       {
-      let filteredData: any = data;
+      let filteredData: any = Array.isArray(data) ? data : [];
 
 // ✅ PARTIAL MATCH (Typing time)
 if (!exactMatch) {
@@ -580,7 +642,7 @@ if (exactMatch) {
   }
 }
 
-        this.dataSource = filteredData;
+        this.dataSource = this.normalizeCustomerGridRows(filteredData);
         this.isLoading = false;
       },
       (error: HttpErrorResponse) => { this.dataSource = null; this.isLoading = false; }
@@ -827,7 +889,7 @@ if (exactMatch) {
     (
       data =>   
       {
-        this.dataSource = data;
+        this.dataSource = this.normalizeCustomerGridRows(data);
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
@@ -1140,8 +1202,26 @@ else if (menuItem.label.toLowerCase() === 'payment terms code') {
   }));
   window.open(baseUrl + url, '_blank');
 }
+else if (menuItem.label.toLowerCase() === 'customer payment mapping') {
+  const url = this.router.serializeUrl(this.router.createUrlTree(['/customerPaymentMapping'], {
+    queryParams: {
+      CustomerID: encryptedCustomerID,
+      CustomerName: encryptedCustomerName
+    }
+  }));
+  window.open(baseUrl + url, '_blank');
+}
 else if (menuItem.label.toLowerCase() === 'customer growth person') {
   const url = this.router.serializeUrl(this.router.createUrlTree(['/customerGrowthPerson'], {
+    queryParams: {
+      CustomerID: encryptedCustomerID,
+      CustomerName: encryptedCustomerName
+    }
+  }));
+  window.open(baseUrl + url, '_blank');
+}
+else if (menuItem.pageName === 'customerCityHigherExtraKMorHR') {
+  const url = this.router.serializeUrl(this.router.createUrlTree(['/customerCityHigherExtraKMorHR'], {
     queryParams: {
       CustomerID: encryptedCustomerID,
       CustomerName: encryptedCustomerName

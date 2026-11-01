@@ -5,6 +5,7 @@ import { Inventory } from './inventory.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
+import { isExportJobReady, isExportJobRunning, pollExportJob } from '../general/export-job.helper';
 @Injectable()
 export class InventoryService 
 {
@@ -16,6 +17,14 @@ export class InventoryService
   {
     this.API_URL=generalService.BaseURL+ "inventory";
   }
+
+  private pathSegment(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return 'null';
+    }
+    return encodeURIComponent(String(value));
+  }
+
   /** CRUD METHODS */
   getTableData( RegistrationNumber:string,
     InventoryID:number,
@@ -26,39 +35,12 @@ export class InventoryService
     SearchActivationStatus:string, 
     PageNumber: number):  Observable<any> 
   {
-    if(RegistrationNumber==="")
-      {
-        RegistrationNumber="null";
-      }
-    if(InventoryID===0)
-    {
-      InventoryID=0;
-    }
-
-    if(SearchVehcileCategory==="")
-    {
-      SearchVehcileCategory="null";
-    }
-
-    if(SearchVehicle==="")
-    {
-      SearchVehicle="null";
-    }
-
-    if(SearchSupplier==="")
-    {
-      SearchSupplier="null";
-    }
-    if(searchLocationHub==="")
-    {
-      searchLocationHub="null";
-    }
-
-    if(SearchActivationStatus==="")
-    {
-      SearchActivationStatus="null";
-    }
-    return this.httpClient.get(this.API_URL + "/" + RegistrationNumber + "/" + InventoryID + '/'+ SearchVehcileCategory + '/'+ SearchVehicle + '/'+ SearchSupplier + '/'+ searchLocationHub + '/' + SearchActivationStatus +'/' + PageNumber + '/InventoryID/Ascending');
+    return this.httpClient.get(
+      this.API_URL + "/" + this.pathSegment(RegistrationNumber) + "/" + (InventoryID || 0) + '/' +
+      this.pathSegment(SearchVehcileCategory) + '/' + this.pathSegment(SearchVehicle) + '/' +
+      this.pathSegment(SearchSupplier) + '/' + this.pathSegment(searchLocationHub) + '/' +
+      this.pathSegment(SearchActivationStatus) + '/' + PageNumber + '/InventoryID/Ascending'
+    );
   }
   getTableDataSort(
     RegistrationNumber:string,InventoryID:number, 
@@ -71,86 +53,71 @@ export class InventoryService
     coloumName:string,
     sortType:string):  Observable<any> 
   {
-    if(RegistrationNumber==="")
-      {
-        RegistrationNumber="null";
-      }
-    if(InventoryID===0)
-    {
-      InventoryID=0;
-    }
-    if(SearchVehcileCategory==="")
-    {
-      SearchVehcileCategory="null";
-    }
-
-    if(SearchVehicle==="")
-    {
-      SearchVehicle="null";
-    }
-
-    if(SearchSupplier==="")
-    {
-      SearchSupplier="null";
-    }
-     if(searchLocationHub==="")
-    {
-      searchLocationHub="null";
-    }
-    if(SearchActivationStatus==="")
-    {
-      SearchActivationStatus="null";
-    }
-    return this.httpClient.get(this.API_URL + "/"+ RegistrationNumber + "/" + InventoryID + '/'+ SearchVehcileCategory + '/'+ SearchVehicle + '/'+ SearchSupplier + '/' + searchLocationHub + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
-  }
-  downloadCsv(
-    RegistrationNumber:string,InventoryID:number,
-    SearchVehcileCategory:string,
-    SearchVehicle:string,
-    SearchSupplier:string,
-    searchLocationHub:string,
-    SearchActivationStatus:string): Observable<Blob>
-  {
-    if(RegistrationNumber==="")
-      {
-        RegistrationNumber="null";
-      }
-    if(InventoryID===0)
-    {
-      InventoryID=0;
-    }
-    if(SearchVehcileCategory==="")
-    {
-      SearchVehcileCategory="null";
-    }
-
-    if(SearchVehicle==="")
-    {
-      SearchVehicle="null";
-    }
-
-    if(SearchSupplier==="")
-    {
-      SearchSupplier="null";
-    }
-     if(searchLocationHub==="")
-    {
-      searchLocationHub="null";
-    }
-    if(SearchActivationStatus==="")
-    {
-      SearchActivationStatus="null";
-    }
     return this.httpClient.get(
-      this.API_URL + "/export/"+ RegistrationNumber + "/" + InventoryID + '/'+ SearchVehcileCategory + '/'+ SearchVehicle + '/'+ SearchSupplier + '/' + searchLocationHub + '/' + SearchActivationStatus,
-      { responseType: 'blob' }
+      this.API_URL + "/" + this.pathSegment(RegistrationNumber) + "/" + (InventoryID || 0) + '/' +
+      this.pathSegment(SearchVehcileCategory) + '/' + this.pathSegment(SearchVehicle) + '/' +
+      this.pathSegment(SearchSupplier) + '/' + this.pathSegment(searchLocationHub) + '/' +
+      this.pathSegment(SearchActivationStatus) + '/' + PageNumber + '/' + coloumName + '/' + sortType
     );
   }
+  startExportJob(
+    registrationNumber: string,
+    inventoryID: number,
+    vehicleCategory: string,
+    vehicle: string,
+    supplierName: string,
+    locationHub: string,
+    status: string
+  ): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/export/StartJob`, {
+      userID: this.generalService.getUserID(),
+      registrationNumber: registrationNumber || null,
+      inventoryID: inventoryID || 0,
+      vehicleCategory: vehicleCategory || null,
+      vehicle: vehicle || null,
+      supplierName: supplierName || null,
+      locationHub: locationHub || null,
+      status: status || null
+    });
+  }
+
+  getExportJobStatus(jobId: string): Observable<any> {
+    return this.httpClient.get(`${this.API_URL}/export/JobStatus/${jobId}`);
+  }
+
+  downloadExportJob(jobId: string): Observable<Blob> {
+    return this.httpClient.get(`${this.API_URL}/export/Download/${jobId}`, {
+      responseType: 'blob'
+    });
+  }
+
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/export/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
+    });
+  }
+
+  pollExportJob(jobId: string): Observable<any> {
+    return pollExportJob(this.httpClient, `${this.API_URL}/export/JobStatus/${jobId}`);
+  }
+
+  isExportJobRunning(status: any): boolean {
+    return isExportJobRunning(status);
+  }
+
+  isExportJobReady(status: any): boolean {
+    return isExportJobReady(status);
+  }
+
   add(advanceTable: Inventory) 
   {
     advanceTable.inventoryID=-1;
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.inventoryCreatedBy=this.generalService.getUserID();
+    advanceTable.registrationNumber = String(advanceTable.registrationNumber || '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
+    advanceTable.fuelCardNo = advanceTable.fuelCardNo ?? advanceTable.FuelCardNo ?? '';
     if(advanceTable.isGPSAvailable){
       advanceTable.isGPSAvailable=true;
     }
@@ -166,6 +133,10 @@ export class InventoryService
   {
     advanceTable.userID=this.generalService.getUserID();
     advanceTable.inventoryCreatedBy=this.generalService.getUserID();
+    advanceTable.registrationNumber = String(advanceTable.registrationNumber || '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
+    advanceTable.fuelCardNo = advanceTable.fuelCardNo ?? advanceTable.FuelCardNo ?? '';
     advanceTable.registrationFromDateString=this.generalService.getTimeApplicable(advanceTable.registrationFromDate);
     advanceTable.registrationTillDateString=this.generalService.getTimeApplicableTO(advanceTable.registrationTillDate);
     advanceTable.purchaseDateString=this.generalService.getTimeApplicable(advanceTable.purchaseDate);
@@ -175,5 +146,10 @@ export class InventoryService
   {
     let userID=this.generalService.getUserID();
     return this.httpClient.delete(this.API_URL + '/'+ inventoryID + '/' + userID);
+  }
+  checkRegistrationNumberDuplicate(registrationNumber: string, excludeInventoryID: number): Observable<boolean>
+  {
+    const regNo = encodeURIComponent(registrationNumber || '');
+    return this.httpClient.get<boolean>(this.API_URL + '/CheckRegistrationNumberDuplicate/' + regNo + '/' + (excludeInventoryID || 0));
   }
 }

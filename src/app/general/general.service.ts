@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Injectable, Input } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { IproofDocuments } from './IProofDocument';
 import { DepartmentDropDown } from './departmentDropDown.model';
 import { DesignationDropDown } from './designationDropDown.model';
@@ -75,6 +75,7 @@ import { ReservationCustomerDetails } from './reservationCustomerDetailsDropDown
 import { AllotmentDetails } from '../dutySlipQualityCheck/dutySlipQualityCheck.model';
 import { DutyAllotmentDetails } from '../dutySlipQualityCheckedByExecutive/dutySlipQualityCheckedByExecutive.model';
 import { AuthService } from '../core/service/auth.service';
+import Swal from 'sweetalert2';
 import { ParentMenuDropDown } from './parentMenuDropDown.model';
 import { PageDropDown } from './pageDropDown.model';
 import { PageAuditDropDown } from '../auditTrail/pageAuditDropDown.model';
@@ -91,6 +92,7 @@ import { GSTPercentageDropDown } from '../dutyGSTPercentage/gSTPercentageDropDow
 import { InvoiceTemplateDropDown } from '../invoiceTemplate/invoiceTemplateDropDown.model';
 import { DutySACCDropDown } from '../dutySAC/dutySACDropDownModel';
 import { MobileEmailModel } from '../employee/employee.model';
+import { MobileEmailModel as DriverMobileEmailModel } from '../driver/driver.model';
 import { CustomerAlertMessageTypeForDropDown } from '../customerAlertMessage/customerAlertMessage.model';
 //import { AllotmentDetails } from '../dutySlipQualityChecked/dutySlipQualityCheckedBy.model';
 import { TransmissionTypeDropDown } from '../transmissionType/transmissionTypeDropDown.model';
@@ -130,9 +132,13 @@ export class GeneralService {
 
   BaseURL: string;
   ImageURL: string;
-  FormURL: string;
   UnlockEmployeeUrl: string;
   lengthToCheck:number = 3;
+
+  /** Resolves at read time so local dev (localhost:4200) never opens prod FormURL (10.0.6.8). */
+  get FormURL(): string {
+    return this.runtimeConfig.getFormUrl();
+  }
 
   // In-memory cache for read-only dropdown/lookup endpoints. Populated lazily
   // on first call per key and reused across the whole app session to avoid
@@ -167,7 +173,6 @@ export class GeneralService {
   ) {
     this.BaseURL = this.runtimeConfig.getBaseUrl();
     this.ImageURL = this.runtimeConfig.getImageUrl();
-    this.FormURL = this.runtimeConfig.getFormUrl();
     this.UnlockEmployeeUrl = this.runtimeConfig.getUnlockEmployeeUrl();
   }
 
@@ -260,12 +265,27 @@ export class GeneralService {
     return this.authService?.currentUserValue?.employee?.RoleID ?? 0;
   }
 
+  private isTruthyRoleFlag(value: any): boolean {
+    return (
+      value === true ||
+      value === 1 ||
+      value === '1' ||
+      value === 'true' ||
+      value === 'True'
+    );
+  }
+
   private readRoleFlagFromStorage(key: string): boolean | null {
     const value = localStorage.getItem(key);
-    if (value === 'true') {
+    if (this.isTruthyRoleFlag(value)) {
       return true;
     }
-    if (value === 'false') {
+    if (
+      value === 'false' ||
+      value === 'False' ||
+      value === '0' ||
+      value === 0
+    ) {
       return false;
     }
     return null;
@@ -312,6 +332,82 @@ export class GeneralService {
 
   canFindFuelEntry(): boolean {
     return this.readRoleFlagFromStorage('canFindFuelEntry') === true;
+  }
+
+  canCloseIncident(): boolean {
+    if (this.readRoleFlagFromStorage('canCloseIncident') === true) {
+      return true;
+    }
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee;
+      return !!(employee?.CanCloseIncident ?? employee?.canCloseIncident);
+    } catch {
+      return false;
+    }
+  }
+
+  canCancelBackDateAllotment(): boolean {
+    if (this.readRoleFlagFromStorage('canCancelBackDateAllotment') === true) {
+      return true;
+    }
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee;
+      return !!(
+        employee?.CanCancelBackDateAllotment ?? employee?.canCancelBackDateAllotment
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  canCancelBackDateReservation(): boolean {
+    const stored = this.readRoleFlagFromStorage('canCancelBackDateReservation');
+    if (stored === true) {
+      return true;
+    }
+    if (stored === false) {
+      return false;
+    }
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee;
+      return !!(
+        employee?.CanCancelBackDateReservation ?? employee?.canCancelBackDateReservation
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  canReactivateBackDateReservation(): boolean {
+    try {
+      const currentUser =
+        this.authService?.currentUserValue ??
+        JSON.parse(localStorage.getItem('currentUser') || '{}');
+      const employee = currentUser?.employee ?? currentUser?.Employee;
+      if (
+        this.isTruthyRoleFlag(
+          employee?.CanReactivateBackDateReservation ??
+            employee?.canReactivateBackDateReservation
+        )
+      ) {
+        return true;
+      }
+    } catch {
+      // Fall through to localStorage.
+    }
+
+    const stored = this.readRoleFlagFromStorage('canReactivateBackDateReservation');
+    if (stored === true) {
+      return true;
+    }
+    if (stored === false) {
+      return false;
+    }
+
+    return false;
   }
 
   getContractTariffRoleTrack(): 'Auditor' | 'Verifier' | null {
@@ -370,13 +466,13 @@ export class GeneralService {
     return base + 'StaticFiles/Images/' + path.replace(/^\/+/, '');
   }
 
-  /** Build URL for StaticFiles/Images assets; absolute URLs from the API are returned as-is. */
+  /** Build URL for StaticFiles/Images assets using the configured ImageURL base. */
   resolveStaticImageUrl(path: string | null | undefined): string | null {
     const value = (path ?? '').toString().trim();
     if (!value || /^(null|undefined)$/i.test(value)) {
       return null;
     }
-    if (/^https?:\/\//i.test(value)) {
+    if (value.startsWith('data:')) {
       return value;
     }
 
@@ -385,6 +481,65 @@ export class GeneralService {
       return null;
     }
     return this.buildStaticImageUrlFromPath(relativePath, this.ImageURL);
+  }
+
+  /** Driver-app host, then production, then the UAT driver app. */
+  signatureImageUrls(path: string | null | undefined): { driver: string | null; prod: string | null; uat: string | null } {
+    const relativePath = this.normalizeStaticImagePath(path);
+    if (!relativePath) {
+      return { driver: null, prod: null, uat: null };
+    }
+    return {
+      driver: this.buildStaticImageUrlFromPath(relativePath, 'https://newdriverapp.ecoserp.in/'),
+      prod: this.buildStaticImageUrlFromPath(relativePath, 'https://prodapi.ecoserp.in/'),
+      uat: this.buildStaticImageUrlFromPath(relativePath, 'https://uatdriverapp.ecoserp.in/')
+    };
+  }
+
+  nextSignatureUrl(current: string | null | undefined, urls: { driver: string | null; prod: string | null; uat: string | null }): string | null {
+    if (current === urls.driver && urls.prod && urls.prod !== current) {
+      return urls.prod;
+    }
+    if (urls.uat && urls.uat !== current) {
+      return urls.uat;
+    }
+    return null;
+  }
+
+  /** QC photos: driver, prod, UAT, then admin ImageURL base (deduped). */
+  qcPhotoUrlCandidates(path: string | null | undefined): string[] {
+    const urls = this.signatureImageUrls(path);
+    const admin = this.resolveStaticImageUrl(path);
+    const ordered = [urls.driver, urls.prod, urls.uat, admin, (path ?? '').toString().trim()];
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const candidate of ordered) {
+      const value = (candidate ?? '').trim();
+      if (!value || seen.has(value) || !this.isValidStaticImageUrl(value)) {
+        continue;
+      }
+      seen.add(value);
+      result.push(value);
+    }
+    return result;
+  }
+
+  qcPhotoInitialDisplayUrl(path: string | null | undefined): string | null {
+    const candidates = this.qcPhotoUrlCandidates(path);
+    return candidates.length > 0 ? candidates[0] : null;
+  }
+
+  qcPhotoNextDisplayUrl(current: string | null | undefined, path: string | null | undefined): string | null {
+    const candidates = this.qcPhotoUrlCandidates(path);
+    const currentValue = (current ?? '').trim();
+    const index = candidates.findIndex((url) => url === currentValue);
+    if (index >= 0 && index < candidates.length - 1) {
+      return candidates[index + 1];
+    }
+    if (index < 0 && candidates.length > 0 && candidates[0] !== currentValue) {
+      return candidates[0];
+    }
+    return null;
   }
 
   /** Rejects empty paths and folder-only StaticFiles/Images URLs with no filename. */
@@ -685,7 +840,40 @@ decrypt(textToDecrypt: string): string{
 
   GetKAMDropDownForControlPanel(Prefix: string): Observable<EmployeeDropDown[]> 
   {
-    return this.http.get<EmployeeDropDown[]>(this.BaseURL + 'controlPanelDropDown/GetKAMForDropDown' + '/' + Prefix);
+    return this.http.get<EmployeeDropDown[]>(this.BaseURL + 'controlPanelDropDown/GetKAMForDropDown' + '/' + encodeURIComponent(Prefix));
+  }
+
+  GetCityDropDownForControlPanel(Prefix: string): Observable<CityDropDown[]> {
+    return this.http.get<CityDropDown[]>(
+      this.BaseURL + 'controlPanelDropDown/GetCityForDropDown/' + encodeURIComponent(Prefix)
+    );
+  }
+
+  GetPackageDropDownForControlPanel(Prefix: string, packageTypeID: number = 0): Observable<PackageDropDown[]> {
+    const typeId = packageTypeID || 0;
+    return this.http.get<PackageDropDown[]>(
+      this.BaseURL + 'controlPanelDropDown/GetPackageForDropDown/' + typeId + '/' + encodeURIComponent(Prefix)
+    );
+  }
+
+  GetSupplierDropDownForControlPanel(Prefix: string): Observable<SupplierDropDown[]> {
+    return this.http.get<SupplierDropDown[]>(
+      this.BaseURL + 'controlPanelDropDown/GetSupplierForDropDown/' + encodeURIComponent(Prefix)
+    );
+  }
+
+  GetDriverInventoryDropDownForControlPanel(Prefix: string, supplierID: number = 0): Observable<DriverInventoryAssociationDropDown[]> {
+    const supplierId = supplierID || 0;
+    return this.http.get<DriverInventoryAssociationDropDown[]>(
+      this.BaseURL + 'controlPanelDropDown/GetDriverInventoryForDropDown/' + supplierId + '/' + encodeURIComponent(Prefix)
+    );
+  }
+
+  GetDOINDropDownForControlPanel(Prefix: string, supplierID: number = 0): Observable<DriverOfficialIdentityNumberDD[]> {
+    const supplierId = supplierID || 0;
+    return this.http.get<DriverOfficialIdentityNumberDD[]>(
+      this.BaseURL + 'controlPanelDropDown/GetDOINForDropDown/' + supplierId + '/' + encodeURIComponent(Prefix)
+    );
   }
 
 
@@ -764,6 +952,16 @@ GetCitiessAl(): Observable<CityDropDown[]> {
     return this.http.get<any[]>(this.BaseURL + "customer/GetCustomerKAM/"+customerID);
   }
 
+  GetCustomerKamBatch(customerIDs: number[]): Observable<any[]> {
+    const ids = (customerIDs || []).filter((id) => id > 0).join(',');
+    if (!ids) {
+      return of([]);
+    }
+    return this.http.get<any[]>(
+      this.BaseURL + 'customer/GetCustomerKAMBatch?ids=' + encodeURIComponent(ids)
+    );
+  }
+
   GetCustomerAlertMessage(customerID:number): Observable<any[]> {
     return this.http.get<any[]>(this.BaseURL + "customer/GetCustomerAlertMessage/"+customerID);
   }
@@ -820,6 +1018,10 @@ GetCitiessAl(): Observable<CityDropDown[]> {
   }
   getPaymentModeByContractID(ContractID:number): Observable<PaymentModel[]> {
     return this.http.get<PaymentModel[]>(this.BaseURL + "ContractPaymentMapping/GetAllModeOfPayment/"+ContractID);
+  }
+
+  getPaymentModeByCustomerID(CustomerID: number): Observable<PaymentModel[]> {
+    return this.http.get<PaymentModel[]>(this.BaseURL + 'customerPaymentMapping/GetAllModeOfPayment/' + CustomerID);
   }
  
     getPaymentModeByVendorContractID(VendorContractID:number): Observable<PaymentModel[]> {
@@ -908,6 +1110,17 @@ GetCitiessAl(): Observable<CityDropDown[]> {
   }
   getGoogleAddress(): Observable<GoogleAddressDropDown[]> {
     return this.http.get<GoogleAddressDropDown[]>(this.BaseURL + "GoogleAddress/ForDropDown");
+  }
+
+  searchGoogleAddress(prefix: string): Observable<GoogleAddressDropDown[]> {
+    const term = (prefix ?? '').trim();
+    if (!term) {
+      return of([]);
+    }
+    return this.http.get<GoogleAddressDropDown[]>(
+      this.BaseURL + 'GoogleAddress/SearchForDropDown',
+      { params: { prefix: term } }
+    );
   }
   
   getCustomerPersonDetails(): Observable<CustomerPersonDetailsDropDown[]> {
@@ -1112,8 +1325,23 @@ nameEmailDuplicateMobile(payload: {
   );
 }
 
-   DuplicateMobileForDriver(Mobile1:string): Observable<MobileEmailModel>{
-    return this.http.get<MobileEmailModel>(this.BaseURL + "driver/checkDuplicateMobile/" + Mobile1);
+   DuplicateMobileForDriver(
+    Mobile1: string,
+    Mobile2: string = null,
+    ExcludeDriverID: number = -1
+  ): Observable<DriverMobileEmailModel> {
+    let url = this.BaseURL + 'driver/checkDuplicateMobile/' + encodeURIComponent(Mobile1 || 'null');
+    const params: string[] = [];
+    if (Mobile2) {
+      params.push('Mobile2=' + encodeURIComponent(Mobile2));
+    }
+    if (ExcludeDriverID != null && ExcludeDriverID > 0) {
+      params.push('ExcludeDriverID=' + ExcludeDriverID);
+    }
+    if (params.length) {
+      url += '?' + params.join('&');
+    }
+    return this.http.get<DriverMobileEmailModel>(url);
   }
 
   DuplicateEmail(Email:string): Observable<MobileEmailModel>{
@@ -1293,6 +1521,12 @@ GetDriverBySupplierID(SupplierID: number): Observable<DriverDropDown[]> {
  GetModeOfPaymentByContract(contractID: number): Observable<ModeOfPaymentDropDown[]> {
     return this.http.get<ModeOfPaymentDropDown[]>(
       this.BaseURL + 'supplierContract/ForModeOfPaymentbyContractDropDown/' + contractID
+    );
+  }
+
+  GetModeOfPaymentByCustomerAndContract(customerID: number, contractID: number): Observable<ModeOfPaymentDropDown[]> {
+    return this.http.get<ModeOfPaymentDropDown[]>(
+      this.BaseURL + 'supplierContract/ForModeOfPaymentByCustomerAndContractDropDown/' + customerID + '/' + contractID
     );
   }
   GetPaymentCycle(): Observable<PaymentCycleDropDown[]> {
@@ -1540,6 +1774,16 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
    GetEmployees(): Observable<EmployeeDropDown[]> {
     return this.http.get<EmployeeDropDown[]>(this.BaseURL + "employee/ForDropDowns");
   }
+
+  searchEmployeesByPrefix(prefix: string): Observable<EmployeeDropDown[]> {
+    const trimmed = String(prefix ?? '').trim();
+    if (trimmed.length < 3) {
+      return of([]);
+    }
+    return this.http.get<EmployeeDropDown[]>(
+      this.BaseURL + 'employee/SearchByPrefix/' + encodeURIComponent(trimmed)
+    );
+  }
     GetCustomerChangesKam(): Observable<EmployeeDropDown[]> {
     return this.http.get<EmployeeDropDown[]>(this.BaseURL + "customerKAMChange/ForOLDKAMDropDown");
   }
@@ -1699,6 +1943,15 @@ GetVehicleBasedOnContractIDForOutStationRoundTrip(contractID: any,PackageID:numb
   getCustomerGroup(): Observable<CustomerGroupDropDown[]> {
     return this.cachedGet('getCustomerGroup', () =>
       this.http.get<CustomerGroupDropDown[]>(this.BaseURL + "CustomerGroup/ForDropDown"));
+  }
+
+  getCustomerGroupForDropDown(Prefix: string): Observable<CustomerGroupDropDown[]> {
+    const searchPrefix = (Prefix || '').trim();
+    if (searchPrefix.length < 3) {
+      return of([]);
+    }
+    return this.http.get<CustomerGroupDropDown[]>(
+      this.BaseURL + "CustomerGroup/ForDropDownPrefix/" + encodeURIComponent(searchPrefix));
   }
   GetCustomerForIndividual(): Observable<CustomerGroupDropDown[]> {
     return this.http.get<CustomerGroupDropDown[]>(this.BaseURL + "CustomerGroup/GetCustomerForIndividual");
@@ -1968,6 +2221,83 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
   getUpdate(): Observable<any> {
     //the receiver component calls this function 
     return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
+
+  showErrorMessageBox(message: string): Promise<void> {
+    return Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: message,
+      confirmButtonText: 'OK',
+      allowOutsideClick: false,
+      allowEscapeKey: false
+    }).then(() => undefined);
+  }
+
+  normalizeSaveResponse(response: any): any {
+    if (response == null) {
+      return response;
+    }
+
+    let normalized = response;
+    if (typeof response === 'string') {
+      const trimmed = response.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        try {
+          normalized = JSON.parse(trimmed);
+        } catch {
+          return { activationStatus: trimmed };
+        }
+      } else if (trimmed.toLowerCase().includes('duplicate')) {
+        return { activationStatus: trimmed };
+      } else {
+        return response;
+      }
+    }
+
+    if (normalized && typeof normalized === 'object') {
+      const status = normalized.activationStatus ?? normalized.ActivationStatus;
+      if (status !== undefined && normalized.activationStatus === undefined) {
+        return { ...normalized, activationStatus: status };
+      }
+    }
+
+    return normalized;
+  }
+
+  isDuplicateSaveError(response: any): boolean {
+    const normalized = this.normalizeSaveResponse(response);
+    if (!normalized || typeof normalized !== 'object') {
+      return false;
+    }
+    if (normalized.activationStatus === false) {
+      return true;
+    }
+    return typeof normalized.activationStatus === 'string'
+      && normalized.activationStatus.toLowerCase().includes('duplicate');
+  }
+
+  getDuplicateErrorMessage(response: any, defaultMessage: string): string {
+    const normalized = this.normalizeSaveResponse(response);
+    if (normalized?.activationStatus && typeof normalized.activationStatus === 'string') {
+      const status = normalized.activationStatus.replace(/^\+/, '').trim();
+      if (status.toLowerCase().startsWith('duplicate data -')) {
+        const detail = status.substring('duplicate data -'.length).trim();
+        return detail || defaultMessage;
+      }
+      if (status.toLowerCase().includes('duplicate')) {
+        return defaultMessage;
+      }
+    }
+    return defaultMessage;
+  }
+
+  showDuplicateSaveError(defaultMessage: string, onClose: () => void, response?: any): void {
+    const message = this.getDuplicateErrorMessage(response, defaultMessage);
+    onClose();
+    setTimeout(() => {
+      void this.showErrorMessageBox(message);
+    }, 0);
   }
 
   getCustomerID(): number {

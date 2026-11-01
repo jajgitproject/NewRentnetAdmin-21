@@ -31,6 +31,9 @@ export class SettledRateDetails {
   activationStatus: boolean;
   userID:number;
   nextDayCharging:string;
+  fgrAmount: number;
+  fgrKm: number;
+  fuelSurcharge: boolean;
   constructor(settledRateDetails) {
     {
        this.reservationSettledRateID = settledRateDetails.reservationSettledRateID || -1;
@@ -60,6 +63,9 @@ export class SettledRateDetails {
        this.airportFee=settledRateDetails.airportFee || '';
        this.activationStatus = settledRateDetails.activationStatus || '';
        this.nextDayCharging = settledRateDetails.nextDayCharging || '';
+       this.fgrAmount = settledRateDetails.fgrAmount ?? null;
+       this.fgrKm = settledRateDetails.fgrKm ?? null;
+       this.fuelSurcharge = settledRateDetails.fuelSurcharge ?? false;
     }
   }
   

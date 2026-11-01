@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Customer, CustomerNameModel } from './customer.model';
+import { CustomerDropDown } from './customerDropDown.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
@@ -162,8 +163,13 @@ export class CustomerService
     const toBool = (v: any, fallback: boolean = false) => {
       if (v === null || v === undefined || v === '') return fallback;
       if (typeof v === 'boolean') return v;
-      if (v === 'true' || v === 1 || v === '1') return true;
-      if (v === 'false' || v === 0 || v === '0') return false;
+      if (typeof v === 'string') {
+        const normalized = v.trim().toLowerCase();
+        if (normalized === 'true' || normalized === '1' || normalized === 'yes') return true;
+        if (normalized === 'false' || normalized === '0' || normalized === 'no') return false;
+      }
+      if (v === 1) return true;
+      if (v === 0) return false;
       return fallback;
     };
 
@@ -191,16 +197,48 @@ export class CustomerService
       printRunningDetailOnDutySlip: toBool(raw.printRunningDetailOnDutySlip, false),
       showRateOnDutySlip: toBool(raw.showRateOnDutySlip, false),
       showOTPOnDutySlip: toBool(raw.showOTPOnDutySlip, false),
+      roundOffTime: toBool(raw.roundOffTime, true),
       showDistanceOnDutySlipPdf: toBool(raw.showDistanceOnDutySlipPdf, false),
+      geocage: toBool(raw.geocage, false),
+      showOdometerFromZero: toBool(raw.showOdometerFromZero ?? raw.ShowOdometerFromZero, false),
       isBookerAllowedToBeCreatedFromReservation: toBool(raw.isBookerAllowedToBeCreatedFromReservation, false),
       isPostPickUpCallAllowed: toBool(raw.isPostPickUpCallAllowed, false),
+      isFeedbackEmailAllowed: raw.isFeedbackEmailAllowed === null || raw.isFeedbackEmailAllowed === undefined || raw.isFeedbackEmailAllowed === ''
+        ? null
+        : toBool(raw.isFeedbackEmailAllowed, true),
+      isCPEmailMandatry: (() => {
+        const v = raw.isCPEmailMandatry ?? raw.isCPEmailIDMandatory ?? raw.IsCPEmailIDMandatory
+          ?? raw.IsCPEmailMandatry;
+        return v === null || v === undefined || v === '' ? null : toBool(v, false);
+      })(),
+      isCPEmailIDMandatory: (() => {
+        const v = raw.isCPEmailMandatry ?? raw.isCPEmailIDMandatory ?? raw.IsCPEmailIDMandatory
+          ?? raw.IsCPEmailMandatry;
+        return v === null || v === undefined || v === '' ? null : toBool(v, false);
+      })(),
       isBillToShipToCustomer: toBool(raw.isBillToShipToCustomer, false),
+      isAggregator: toBool(raw.isAggregator, false),
+      aggregatorCustomerID:
+        raw.aggregatorCustomerID === null ||
+        raw.aggregatorCustomerID === undefined ||
+        raw.aggregatorCustomerID === '' ||
+        raw.aggregatorCustomerID === 0
+          ? null
+          : toInt(raw.aggregatorCustomerID),
       customerIdentityNumber: raw.customerIdentityNumber || '',
       panNo: raw.panNo || '',
       gstCustomerType: raw.gstCustomerType || '',
       segment: raw.segment || '',
       businessType: raw.businessType || '',
       businessServices: raw.businessServices || '',
+      isAppBasedCustomer: (() => {
+        const v = raw.isAppBasedCustomer ?? raw.IsAppBasedCustomer;
+        if (v === null || v === undefined || v === '') {
+          return 'No';
+        }
+        const normalized = String(v).trim().toLowerCase();
+        return normalized === 'yes' || normalized === 'true' || normalized === '1' ? 'Yes' : 'No';
+      })(),
     };
   }
   delete(customerID: number):  Observable<any> 
@@ -212,5 +250,16 @@ export class CustomerService
   DuplicateCustomer(CustomerName:string): Observable<CustomerNameModel>
   {
     return this.httpClient.get<CustomerNameModel>(this.API_URL + "/checkDuplicateCustomerName/" + CustomerName);
+  }
+
+  getAggregatorCustomers(): Observable<CustomerDropDown[]>
+  {
+    return this.httpClient.get<CustomerDropDown[]>(this.API_URL + "/ForAggregatorDropDown");
+  }
+
+  getIsAppBasedCustomer(customerID: number): Observable<{ isAppBasedCustomer: string }> {
+    return this.httpClient.get<{ isAppBasedCustomer: string }>(
+      this.API_URL + '/GetIsAppBasedCustomer/' + customerID
+    );
   }
 }

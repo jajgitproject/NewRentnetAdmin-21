@@ -30,6 +30,13 @@
                                         </div> 
 
                                         <div style="width: 100%; text-align: right;">
+                                            <button mat-raised-button color="accent" data-dismiss="modal"
+                                                data-toggle="modal" data-backDrop="false" *ngIf="InvoiceNumberWithPrefix"
+                                                [disabled]="refreshInProgress"
+                                                (click)="RefreshMultiDutyInvoice()">
+                                                Refresh Invoice Totals
+                                            </button>
+                                            &nbsp;
                                             <button mat-raised-button color="primary" data-dismiss="modal"
                                                 data-toggle="modal" data-backDrop="false" *ngIf="InvoiceNumberWithPrefix"
                                                 (click)="DetachDuty()">

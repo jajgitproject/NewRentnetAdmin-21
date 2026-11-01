@@ -200,6 +200,7 @@ export class FormDialogComponent {
               advanceTable: this.customerDetailData,
               action: 'add',
               forCP: 'CP',
+              reservationID: this.reservationID,
               CustomerGroupID: this.customerDetailData.customerGroupID,
               CustomerGroupName: this.customerDetailData.customerGroup
             }
@@ -221,6 +222,7 @@ export class FormDialogComponent {
               advanceTable: this.customerDetailData,
               action: 'add',
               forCP: 'CP',
+              reservationID: this.reservationID,
               CustomerGroupID: this.customerDetailData.customerGroupID,
               CustomerGroupName: this.customerDetailData.customerGroup
             }

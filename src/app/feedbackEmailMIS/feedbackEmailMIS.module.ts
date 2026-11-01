@@ -24,10 +24,10 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { CurrentDesginationModule } from '../currentDesgination/currentDesgination.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { FeedbackEmailMISService } from './feedbackEmailMIS.service';
 import { FeedbackEmailMISRoutingModule } from './feedbackEmailMIS-routing.module';
 import { FeedbackEmailMISComponent } from './feedbackEmailMIS.component';
-import { SendFeedbackMailService } from '../sendFeedbackMail/sendFeedbackMail.service';
 
 
 @NgModule({
@@ -60,12 +60,13 @@ import { SendFeedbackMailService } from '../sendFeedbackMail/sendFeedbackMail.se
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
     MyUploadModule,
     CurrentDesginationModule
  
   ],
   
-  providers: [FeedbackEmailMISService,SendFeedbackMailService ]
+  providers: [FeedbackEmailMISService ]
 })
 export class FeedbackEmailMISModule {}
 

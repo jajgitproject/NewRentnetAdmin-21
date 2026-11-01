@@ -86,7 +86,9 @@ import { FormDialogComponent as AdhocCarAndDriverFormDialogComponent } from '../
 import { DriverOfficialIdentityNumberDD } from '../general/driverOfficialIdentityNumberDD.model';
 import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
 import { SoftToHardDialogComponent } from '../cancelAllotment/dialogs/softToHard-Dialog/softToHard-Dialog.component';
+import { CancelAllotmentService } from '../cancelAllotment/cancelAllotment.service';
 import { UpdateDriverMobileComponent } from '../driverInventoryAssociation/dialogs/updateDriverMobile/updateDriverMobile.component';
+import { AllotmentHistoryDialogComponent } from './allotmentHistory/allotmentHistory.component';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -176,7 +178,12 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   private driverDropdownLoaded = false;
   private vehicleDropdownLoaded = false;
   private vendorTypeDropdownLoaded = false;
+  private vehicleCategoryDropdownLoaded = false;
   private restrictionsPreloaded = false;
+  rowActionsMenuIndex: number | null = null;
+  private driverFeedbackAverageCache = new Map<number, unknown>();
+  allotmentModeOfPayment: string | null = null;
+  openedReservationPanelIndex: number | null = null;
   private fullReservationLoadStarted = false;
   private deferFullReservationUntilGridLoaded = false;
   private readonly perfMarks: Record<string, number> = {};
@@ -242,6 +249,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   bookingCount: FormControl = new FormControl();
   vendorType: FormControl = new FormControl();
   ownedSupplier: FormControl = new FormControl();
+  appBasedCustomer: FormControl = new FormControl();
   category: FormControl = new FormControl();
   vehicle: FormControl = new FormControl();
   public VehicleList?: VehicleDropDown[] = [];
@@ -302,6 +310,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   modalBookingCount: FormControl = new FormControl();
   modalVendorType: FormControl = new FormControl();
   modalOwnedSupplier: FormControl = new FormControl();
+  modalAppBasedCustomer: FormControl = new FormControl();
   modalCategory: FormControl = new FormControl();
   modalVehicle: FormControl = new FormControl();
   modalInventory: FormControl = new FormControl();
@@ -323,6 +332,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     public feedBackDetailsService: FeedBackDetailsService,
     public dispatchByExecutiveService: DispatchByExecutiveService,
     public reservationLocationTransferLogService: ReservationLocationTransferLogService,
+    public cancelAllotmentService: CancelAllotmentService,
     public router: ActivatedRoute
   ) { }
 
@@ -357,18 +367,13 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     });
 
     if (this.reservationID != null && this.reservationID > 0) {
-      this._filters = new Filters({});
-      this._filters.reservationID = this.reservationID;
-      this._filters.userID = this._generalService.getUserID();
-      this.InitShowAllLocationCheck();
+      this.initAllotmentPageLoad();
     }
 
     //this.carAndDriverAllotment();
 
     // Defer geo lookup and dropdown APIs until the user opens Advance Search.
     //this.updateSelected();
-    this.initVehicleCategories();
-    this.InitVendorType();
     // this.getAllDriver();
     //this.GetDriverDutyData();
     // this.reservationInfo?.forEach(item => item.isOpen = true);
@@ -427,9 +432,18 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     this.ensureRegNumberDropdownLoaded();
     this.ensureDriverDropdownLoaded();
     this.ensureVehicleDropdownLoaded();
+    this.ensureVehicleCategoryDropdownLoaded();
     this.ensureVendorTypeDropdownLoaded();
     this.InitDOINOnPageLoad();
     this.InitSupplier();
+  }
+
+  ensureVehicleCategoryDropdownLoaded(): void {
+    if (this.vehicleCategoryDropdownLoaded) {
+      return;
+    }
+    this.vehicleCategoryDropdownLoaded = true;
+    this.initVehicleCategories();
   }
 
   ensureRegNumberDropdownLoaded(): void {
@@ -464,25 +478,100 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     this.InitVendorType();
   }
 
-  private applyReservationHeader(data: ControlPanelData, triggerGridLoad: boolean): void {
+  private applyReservationHeader(data: ControlPanelData, triggerGridLoad: boolean, reloadRestrictions = true): void {
     if (data?.reservationDetails?.length) {
       this.reservationInfo = data.reservationDetails;
+      this.normalizeAllotmentHeaderFields();
       this.allotmentType = this.reservationInfo[0]?.allotmentType;
       this.filterByVehicleCategoryID = this.reservationInfo[0]?.vehicle?.vehicleCategoryID;
       this.filterByVehicleCategory = this.reservationInfo[0]?.vehicle?.vehicleCategory;
+      this.enrichReservationDisplayFields();
       if (triggerGridLoad) {
         this.carAndDriverAllotmentDataForUnassociated();
+        if (reloadRestrictions) {
         this.preloadPassengerRestrictions();
+        } else if (this.restrictionsPreloaded) {
+          this.applyAllRestrictions();
+        }
       }
     } else {
       this.reservationInfo = null;
+      this.allotmentModeOfPayment = null;
     }
+  }
+
+  private refreshReservationHeaderLite(reloadGrid = false): void {
+    this._controlPanelDesignService.getReservationDetailsForAllotmentLite(this.reservationID).subscribe(
+      (data: ControlPanelData) => {
+        this.applyReservationHeader(data, reloadGrid, false);
+        this.markPerf('allotment_post_action_refresh_done');
+      },
+      () => {
+        this.loadData(this._filters, this.currentPage, this.recordsPerPage, reloadGrid);
+      }
+    );
+  }
+
+  private applyOptimisticCancelledHeader(): void {
+    if (!this.reservationInfo?.length) {
+      return;
+    }
+    this.reservationInfo[0].allotmentStatus = 'Cancelled';
+    this.reservationInfo[0].allotmentType = null;
+    this.reservationInfo[0].allotmentID = null;
+    this.allotmentType = null;
+  }
+
+  private normalizeAllotmentHeaderFields(): void {
+    this.reservationInfo?.forEach((item) => {
+      const status = (item?.allotmentStatus ?? '').toString().trim();
+      item.allotmentStatus = status || null;
+      const allotmentId = Number(item?.allotmentID);
+      item.allotmentID = Number.isFinite(allotmentId) && allotmentId > 0 ? allotmentId : null;
+      const allotmentType = (item?.allotmentType ?? '').toString().trim();
+      item.allotmentType = allotmentType || null;
+    });
+  }
+
+  private getHeaderAllotmentStatus(): string {
+    return (this.reservationInfo?.[0]?.allotmentStatus || '').toString().trim();
+  }
+
+  private hasNoActiveAllotment(): boolean {
+    const status = this.getHeaderAllotmentStatus().toLowerCase();
+    return !status || status === 'cancelled';
+  }
+
+  private hasHardAllotment(): boolean {
+    return (this.reservationInfo || []).some((row) =>
+      (row?.allotmentType || '').toString().trim().toLowerCase() === 'hard' &&
+      (row?.allotmentStatus || '').toString().trim().toLowerCase() === 'alloted'
+    );
+  }
+
+  private getActiveAllotmentId(fallback?: any): number | null {
+    const raw = fallback ?? this.reservationInfo?.[0]?.allotmentID;
+    const allotmentId = Number(raw);
+    return Number.isFinite(allotmentId) && allotmentId > 0 ? allotmentId : null;
+  }
+
+  private enrichReservationDisplayFields(): void {
+    const modeOfPayment = (this.reservationInfo?.[0]?.modeOfPayment ?? '').toString().trim();
+    this.allotmentModeOfPayment = modeOfPayment || null;
+    this.reservationInfo?.forEach((item) => {
+      item.displayPassengerName = this.computeDisplayPassengerName(item);
+      if (!item.pickup) {
+        item.pickup = {};
+      }
+      if (!item.drop) {
+        item.drop = {};
+      }
+    });
   }
 
   private preloadPassengerRestrictions(): void {
     if (this.restrictionsPreloaded) {
-      this.updateDriverRestrictions();
-      this.updateCarRestrictions();
+      this.applyAllRestrictions();
       this.tryAutoOpenSingleSearchResult();
       return;
     }
@@ -501,8 +590,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         this.markPerf('allotment_restrictions_loaded');
         this.DriversRestrictedForPassengerList = drivers || [];
         this.CarsRestrictedForPassengerList = cars || [];
-        this.updateDriverRestrictions();
-        this.updateCarRestrictions();
+        this.applyAllRestrictions();
         this.tryAutoOpenSingleSearchResult();
       },
       () => {
@@ -557,8 +645,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
             this.allotmentType = this.reservationInfo[0]?.allotmentType;
             this.filterByVehicleCategoryID = this.reservationInfo[0]?.vehicle?.vehicleCategoryID;
             this.filterByVehicleCategory = this.reservationInfo[0]?.vehicle?.vehicleCategory;
-            this.updateDriverRestrictions();
-            this.updateCarRestrictions();
+            this.enrichReservationDisplayFields();
+            this.applyAllRestrictions();
           }
         },
         () => {
@@ -586,7 +674,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         this.markPerf('allotment_lite_loaded');
         // Load reservation header only; car/driver table loads after Search.
         this.applyReservationHeader(data, false);
-        this.loadFullReservationDetails();
+        this.scheduleFullReservationDetailsAfterGrid();
         this.isLoading = false;
       },
       () => {
@@ -606,19 +694,50 @@ export class CarAndDriverAllotmentComponent implements OnInit {
     );
   }
 
-  public InitShowAllLocationCheck() {
+  public initAllotmentPageLoad(): void {
     this.markPerf('allotment_load_start');
+
+    this._filters = new Filters({});
+    this._filters.reservationID = this.reservationID;
+    this._filters.userID = this._generalService.getUserID();
+    this._filters.showAllLocation = false;
+    this.loadAllotmentPageFast();
+
     this._controlPanelDesignService.getShowAllLocationCheck(this._generalService.getUserID()).subscribe(
       data => {
         this.markPerf('allotment_location_check_loaded');
         this.ShowAllLocation = data.showAllLocation;
         this._filters.showAllLocation = this.ShowAllLocation;
-        this.loadAllotmentPageFast();
       },
       () => {
         this.isLoading = false;
       }
     );
+  }
+
+  onReservationPanelOpened(index: number): void {
+    this.openedReservationPanelIndex = index;
+    this.loadFullReservationDetails();
+  }
+
+  trackByReservationId(_: number, item: any): number {
+    return item?.reservationID ?? _;
+  }
+
+  trackByInventoryId(_: number, row: any): number {
+    return row?.inventoryID ?? row?.driverInventoryAssociationID ?? _;
+  }
+
+  trackByPassengerId(_: number, passenger: any): number {
+    return passenger?.customerPersonID ?? _;
+  }
+
+  trackBySpecialInstructionId(_: number, instruction: any): number {
+    return instruction?.reservationSpecialInstructionID ?? _;
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 
   onVehicleAutoCompleteChange(event: any) {
@@ -1101,11 +1220,10 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   }
 
   getAllotmentModeOfPayment(): string | null {
-    const v = (this.reservationInfo?.[0]?.modeOfPayment ?? '').toString().trim();
-    return v || null;
+    return this.allotmentModeOfPayment;
   }
 
-  getDisplayPassengerName(item: any): string {
+  private computeDisplayPassengerName(item: any): string {
     if (!item) {
       return 'N/A';
     }
@@ -1134,6 +1252,10 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       }
     }
     return item.primaryPassenger || item.passengerName || item.customerPerson?.customerPersonName || 'N/A';
+  }
+
+  getDisplayPassengerName(item: any): string {
+    return item?.displayPassengerName ?? this.computeDisplayPassengerName(item);
   }
 
   locationTimeSet(event) {
@@ -1169,6 +1291,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.monthlyTarget.setValue(this.modalMonthlyTarget.value || '');
       this.otherCriteria.setValue(this.modalOtherCriteria.value || '');
       this.ownedSupplier.setValue(this.modalOwnedSupplier.value || '');
+      this.appBasedCustomer.setValue(this.modalAppBasedCustomer.value || '');
       this.supplier.setValue(this.modalSupplier.value || '');
       this.driver.setValue(this.modalDriver.value || '');
       this.driverOfficialIdentityNumber.setValue(this.modalDriverOfficialIdentityNumber.value || '');
@@ -1275,7 +1398,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.driverID, this.driver.value, this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
       this.vehicle.value, this.inventory.value, this.searchInventoryName,
       this.vendorType.value, this.ownedSupplier.value, this.bookingCount.value, this.monthlyTarget.value,
-      this.otherCriteria.value, this.pickupDate, this.searchActivationStatus, this.PageNumber
+      this.otherCriteria.value, this.appBasedCustomer.value, this.pickupDate, this.searchActivationStatus, this.PageNumber
     ).subscribe(
       (data: CarAndDriverAllotmentData) => {
         if (data != null) {
@@ -1337,7 +1460,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.driverOfficialIdentityNumber.value, this.supplier.value, this.category.value,
       this.vehicle.value, this.inventory.value, this.searchInventoryName,
       this.vendorType.value, this.ownedSupplier.value, this.bookingCount.value, this.monthlyTarget.value,
-      this.otherCriteria.value, pickupDateParam, this.searchActivationStatus, this.PageNumber
+      this.otherCriteria.value, this.appBasedCustomer.value, pickupDateParam, this.searchActivationStatus, this.PageNumber
     ).subscribe(
       (data: CarAndDriverAllotmentData) => {
         const rowCount = data?.driverInventoryAssociationModel?.length ?? 0;
@@ -1394,7 +1517,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   private autoOpenSingleSearchResult(): void {
     requestAnimationFrame(() => {
-      this.openAllotCarAndDriver(0, 'Soft or Hard', this.reservationInfo[0]?.allotmentID);
+        this.openAllotCarAndDriver(0, 'Soft or Hard', this.reservationInfo[0]?.allotmentID);
     });
   }
   
@@ -1506,26 +1629,32 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   }
 
   updateDriverRestrictions() {
-    if (this.driverInventoryAssociationDataSource && this.DriversRestrictedForPassengerList) {
-      this.driverInventoryAssociationDataSource.forEach(driver => {
-        if (this.DriversRestrictedForPassengerList.some((restrictedDriver: DriversRestrictedForPassengerModel) => restrictedDriver.driverID === driver.driverID)) {
-          Object.assign(driver, { restrictedMessage: "Driver Restricted" });
-        } else {
-          Object.assign(driver, { restrictedMessage: "" });
-        }
-      });
-    }
+    this.applyAllRestrictions();
   }
 
   updateCarRestrictions() {
-    if (this.driverInventoryAssociationDataSource && this.CarsRestrictedForPassengerList) {
-      this.driverInventoryAssociationDataSource.forEach(car => {
-        if (this.CarsRestrictedForPassengerList.some((restrictedDriver: CarsRestrictedForPassengerModel) => restrictedDriver.inventoryID === car.inventoryID)) {
-          Object.assign(car, { carRestrictedMessage: "Car Restricted" });
-        } else {
-          Object.assign(car, { carRestrictedMessage: "" });
-        }
-      });
+    this.applyAllRestrictions();
+  }
+
+  private applyAllRestrictions(): void {
+    if (!this.driverInventoryAssociationDataSource) {
+      return;
+    }
+
+    const restrictedDriverIds = new Set(
+      (this.DriversRestrictedForPassengerList || []).map(
+        (restrictedDriver: DriversRestrictedForPassengerModel) => restrictedDriver.driverID
+      )
+    );
+    const restrictedInventoryIds = new Set(
+      (this.CarsRestrictedForPassengerList || []).map(
+        (restrictedCar: CarsRestrictedForPassengerModel) => restrictedCar.inventoryID
+      )
+    );
+
+    for (const row of this.driverInventoryAssociationDataSource) {
+      row.restrictedMessage = restrictedDriverIds.has(row.driverID) ? 'Driver Restricted' : '';
+      row.carRestrictedMessage = restrictedInventoryIds.has(row.inventoryID) ? 'Car Restricted' : '';
     }
   }
 
@@ -1592,14 +1721,56 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
   // }
 
-  openAllotCarAndDriver(i: any, allotmentType: string, allotmentID: any) {
-    // 👉 Check if HARD allotment already exists
-    let isHardAllotted = this.reservationInfo.some(
-      r => r.allotmentType === 'Hard' && r.allotmentStatus === 'Alloted'
-    );
-    let allottedDriverIndex = this.reservationInfo.findIndex(r => r.allotmentStatus === 'Alloted');
+  private isPreferAppBasedYes(value: any): boolean {
+    if (value === true || value === 1 || value === '1') {
+      return true;
+    }
+    const text = String(value ?? '').trim().toLowerCase();
+    return text === 'yes' || text === 'true';
+  }
 
-    if (this.reservationInfo[0].allotmentStatus === 'Cancelled' || this.reservationInfo[0].allotmentStatus === null) {
+  getAllotmentAppBasedPreferenceContext(): {
+    customerPreferYes: boolean;
+    customerPersonPreferYes: boolean;
+    customerPreferLabel: string;
+    customerPersonPreferLabel: string;
+  } {
+    const item = this.reservationInfo?.[0];
+    if (!item) {
+      return {
+        customerPreferYes: false,
+        customerPersonPreferYes: false,
+        customerPreferLabel: 'No',
+        customerPersonPreferLabel: 'No',
+      };
+    }
+    const customerPreferYes = this.isPreferAppBasedYes(
+      item.customerPreferAppBasedDriver ?? item.CustomerPreferAppBasedDriver
+    );
+    const personRaw =
+      item.customerPerson?.preferAppBasedDriver ??
+      item.customerPerson?.PreferAppBasedDriver;
+    const customerPersonPreferYes = this.isPreferAppBasedYes(personRaw);
+    return {
+      customerPreferYes,
+      customerPersonPreferYes,
+      customerPreferLabel: customerPreferYes ? 'Yes' : 'No',
+      customerPersonPreferLabel: customerPersonPreferYes ? 'Yes' : 'No',
+    };
+  }
+
+  openAllotCarAndDriver(i: any, allotmentType: string, allotmentID: any) {
+    if (this.hasHardAllotment()) {
+      Swal.fire({
+        title: '',
+        text: 'Driver is already assigned on this trip. If you want to change then first deattach assigned driver.',
+        icon: 'warning',
+      });
+      return;
+    }
+
+    const activeAllotmentId = this.getActiveAllotmentId(allotmentID);
+    if (this.hasNoActiveAllotment() || !activeAllotmentId) {
       const dialogRef = this.dialog.open(FormDialogComponent, {
         data: {
           advanceTable: this.driverInventoryAssociationDataSource[i],
@@ -1607,7 +1778,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           Text: 'AllotCarDriver',
           reservationID: this.reservationID,
           allotmentType: allotmentType,
-          status: this.status
+          status: this.status,
+          reservationPreferences: this.getAllotmentAppBasedPreferenceContext()
         }
       });
 
@@ -1619,37 +1791,13 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           this.ownedSupplier.setValue('');
           this.vehicle.setValue('');
           // Refresh reservation header only — search table loads via Search button.
-          this.loadData(this._filters, this.currentPage, this.recordsPerPage, false);
+          this.refreshReservationHeaderLite(false);
         }
       });
 
       return;
     }
 
-    ////  If a driver is already allotted, restrict popup to only that driver
-    // if (allottedDriverIndex !== -1) {
-    //   let allottedDriverID = this.reservationInfo[allottedDriverIndex].driverID;
-
-    //   if (this.driverInventoryAssociationDataSource[i].driverID !== allottedDriverID) {
-    //     //  Prevent popup for any other driver
-    //     Swal.fire({
-    //       title: '',
-    //       text: 'Driver is already assigned on this trip. If you want to change then first deattach assigned driver.',
-    //       icon: 'warning',
-    //     });
-    //     return;
-    //   }
-    // }
-    if (isHardAllotted) {
-      Swal.fire({
-        title: '',
-        text: 'Driver is already assigned on this trip. If you want to change then first deattach assigned driver.',
-        icon: 'warning',
-      });
-      return;
-    }
-
-    //  Open popup only for the correct driver
     const dialogRef = this.dialog.open(FormDialogComponent, {
       data: {
         advanceTable: this.driverInventoryAssociationDataSource[i],
@@ -1657,15 +1805,16 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         Text: 'AllotCarDriver',
         reservationID: this.reservationID,
         allotmentType: allotmentType,
-        allotmentID: allotmentID,
-        status: this.status
+        allotmentID: activeAllotmentId,
+        status: this.status,
+        reservationPreferences: this.getAllotmentAppBasedPreferenceContext()
       }
     });
 
     dialogRef.afterClosed().subscribe(res => {
       if (res && !res.isClose) {
         // Refresh reservation header only — search table loads via Search button.
-        this.loadData(this._filters, this.currentPage, this.recordsPerPage, false);
+        this.refreshReservationHeaderLite(false);
       }
     });
   }
@@ -1683,15 +1832,26 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   }
 
   GetDriverFeedbackAverage(driverID: any, index: number) {
+    const normalizedDriverId = Number(driverID);
+    if (!Number.isFinite(normalizedDriverId) || normalizedDriverId <= 0) {
+      this.driverAvg[index] = 0;
+      return;
+    }
 
-    this._carAndDriverAllotmentService.GetDriverFeedbackAverage(driverID).subscribe
-      (
-        data => {
+    if (this.driverFeedbackAverageCache.has(normalizedDriverId)) {
+      this.driverAvg[index] = this.driverFeedbackAverageCache.get(normalizedDriverId);
+      return;
+    }
 
+    this._carAndDriverAllotmentService.GetDriverFeedbackAverage(driverID).subscribe(
+      (data) => {
+        this.driverFeedbackAverageCache.set(normalizedDriverId, data);
           this.driverAvg[index] = data;
-
         },
-        (error: HttpErrorResponse) => { this.driverAvg[index] = 0; }
+      () => {
+        this.driverFeedbackAverageCache.set(normalizedDriverId, 0);
+        this.driverAvg[index] = 0;
+      }
       );
   }
 
@@ -1792,10 +1952,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           }
         });
       dialogRef.afterClosed().subscribe(res => {
-        if (res.isClose === false) {
-          this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-          //this.carAndDriverAllotmentData();
-          this.carAndDriverAllotmentDataForUnassociated();
+        if (res && res.isClose === false) {
+          this.refreshReservationHeaderLite(false);
         }
       })
     }
@@ -1849,10 +2007,8 @@ export class CarAndDriverAllotmentComponent implements OnInit {
           }
         });
       dialogRef.afterClosed().subscribe(res => {
-        if (res.isClose === true) {
-          this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-          // this.carAndDriverAllotmentData();
-          this.carAndDriverAllotmentDataForUnassociated();
+        if (res && res.isClose === false) {
+          this.refreshReservationHeaderLite(false);
         }
       })
     }
@@ -2285,8 +2441,57 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         icon: 'warning',
 
       })
+      return;
     }
-    if (this.reservationInfo[0].allotmentStatus === 'Alloted') {
+    if (this.reservationInfo[0].allotmentStatus !== 'Alloted') {
+      return;
+    }
+
+    this.cancelAllotmentService.checkInvoiceNumber(reservationID).subscribe(
+      (data) => {
+        if (data?.invoiceNumber === true) {
+          Swal.fire({
+            title: 'Cancellation not allowed',
+            icon: 'warning',
+            text: 'This allotment cannot be cancelled because an active invoice has already been generated.'
+          });
+          return;
+        }
+
+        if (this.isPastPickupDate() && !this._generalService.canCancelBackDateAllotment()) {
+          Swal.fire({
+            title: '',
+            icon: 'warning',
+            text: 'Past allotment cancellation is not permitted for your role.'
+          });
+          return;
+        }
+
+        this.openCancelAllotmentDialog(allotmentID, reservationID);
+      },
+      () => {
+        Swal.fire({
+          title: '',
+          icon: 'error',
+          text: 'Unable to verify invoice status. Please try again.'
+        });
+      }
+    );
+  }
+
+  private isPastPickupDate(): boolean {
+    const pickupDateValue =
+      this.reservationInfo?.[0]?.pickupDate ??
+      this.reservationInfo?.[0]?.PickupDate ??
+      this.pickupDate;
+    if (!pickupDateValue) {
+      return false;
+    }
+    const parsed = moment(pickupDateValue).startOf('day');
+    return parsed.isValid() && parsed.isBefore(moment().startOf('day'));
+  }
+
+  private openCancelAllotmentDialog(allotmentID: any, reservationID: any) {
       const dialogRef = this.dialog.open(FormDialogCAComponent,
         {
           width: '400px',
@@ -2301,16 +2506,12 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
         });
       dialogRef.afterClosed().subscribe(res => {
-        if (res.isClose === false) {
-          this.allotmentDeleted(allotmentID);
-          this.loadData(this._filters, this.currentPage, this.recordsPerPage);
-          //this.carAndDriverAllotmentData(); 
-          this.carAndDriverAllotmentDataForUnassociated();
+        if (res?.isClose === false) {
+          this.applyOptimisticCancelledHeader();
+          this.refreshReservationHeaderLite(false);
         }
 
       })
-
-    }
   }
 
   CovertSoftToHard(allotmentID: any, reservationInfo) {
@@ -2326,7 +2527,9 @@ export class CarAndDriverAllotmentComponent implements OnInit {
 
         });
       dialogRef.afterClosed().subscribe(res => {
-        this.loadData(this._filters, this.currentPage, this.recordsPerPage);
+        if (res && res.isClose === false) {
+          this.refreshReservationHeaderLite(false);
+        }
       })
 
     }
@@ -2752,6 +2955,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
         this.bookingCount?.value,
         this.monthlyTarget?.value || '',
         this.otherCriteria?.value || '',
+        this.appBasedCustomer?.value || '',
         this.PickupDate || '',
         this.searchActivationStatus,
         this.PageNumber
@@ -2805,6 +3009,7 @@ export class CarAndDriverAllotmentComponent implements OnInit {
       this.bookingCount?.value || '',
       this.monthlyTarget?.value || '',
       this.otherCriteria?.value || '',
+      this.appBasedCustomer?.value || '',
       this.PickupDate || '',  // this.pickupDate
       this.searchActivationStatus,
       this.PageNumber
@@ -2832,6 +3037,23 @@ export class CarAndDriverAllotmentComponent implements OnInit {
   submit() {
 
   }
+  openAllotmentHistory() {
+    const row = this.reservationInfo?.[0];
+    const reservationID =
+      Number(row?.reservationID) || Number(this.reservationID);
+    if (!reservationID) {
+      this.showNotification('snackbar-danger', 'Reservation not available.', 'top', 'center');
+      return;
+    }
+    this.dialog.open(AllotmentHistoryDialogComponent, {
+      width: '1200px',
+      maxWidth: '95vw',
+      panelClass: 'allotment-history-dialog-panel',
+      autoFocus: false,
+      data: { reservationID, row }
+    });
+  }
+
   UpdateDriverMobile() {
 
     const dialogRef = this.dialog.open(UpdateDriverMobileComponent,

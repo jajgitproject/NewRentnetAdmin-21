@@ -24,6 +24,7 @@ export class CreateCreditNote {
   sgstPercentage:number;
   igstPercentage:number;
   creditNoteAmount:number;
+  pendingAmount:number;
   userID:number;
   year:number;
   baseAmount:number;
@@ -57,6 +58,7 @@ export class CreateCreditNote {
        this.cgstPercentage = createCreditNote.cgstPercentage || '';
        this.sgstPercentage = createCreditNote.sgstPercentage || '';
        this.creditNoteAmount = createCreditNote.creditNoteAmount || '';
+      this.pendingAmount = createCreditNote.pendingAmount || 0;
       this.userID = createCreditNote.userID || '';
        this.year = createCreditNote.year || '';
        this.monthName = createCreditNote.monthName || '';

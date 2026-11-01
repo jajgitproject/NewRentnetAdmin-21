@@ -95,6 +95,7 @@ export class Reservation {
    billingStateName:string;
    customerConfigurationInvoicingID:number;
    isTimeNotConfirmed:boolean;
+   isAddressCorrectionRequiredByKAM:boolean;
    tripTo:string;
    tripType:string;
   constructor(reservation) {
@@ -144,6 +145,7 @@ export class Reservation {
        this.gstRate=reservation.gstRate || '';
        this.billingStateName=reservation.billingStateName || '';
        this.isTimeNotConfirmed=reservation.isTimeNotConfirmed || '';
+       this.isAddressCorrectionRequiredByKAM=reservation.isAddressCorrectionRequiredByKAM === true;
        this.tripTo=reservation.tripTo || '';
        this.tripType=reservation.tripType || '';
     }
@@ -175,6 +177,58 @@ export class GoogleAddress {
  
 }
 
+/** Delimiter stored in DB between pickup geo and pickup address details (rendered as &lt;hr&gt; in history UI). */
+export const KAM_PICKUP_ADDRESS_HISTORY_SEPARATOR = '<hr/>';
+
+export function parseKamPickupAddressHistoryValue(value: string | null | undefined): { geo: string; details: string } {
+  const raw = (value ?? '').trim();
+  if (!raw) {
+    return { geo: '', details: '' };
+  }
+  const sep = KAM_PICKUP_ADDRESS_HISTORY_SEPARATOR;
+  if (raw.includes(sep)) {
+    const index = raw.indexOf(sep);
+    return {
+      geo: raw.slice(0, index).trim(),
+      details: raw.slice(index + sep.length).trim(),
+    };
+  }
+  const legacySep = ' | ';
+  if (raw.includes(legacySep)) {
+    const index = raw.indexOf(legacySep);
+    return {
+      geo: raw.slice(0, index).trim(),
+      details: raw.slice(index + legacySep.length).trim(),
+    };
+  }
+  return { geo: raw, details: '' };
+}
+
+export class KamPickupAddressCorrectionHistory {
+  reservationAddressCorrectedByKAMID: number;
+  reservationID: number;
+  addressBeforeCorrection: string;
+  correctedAddressByKAM: string;
+  addressCorrectingKAMEmployeeID: number;
+  correctedByEmployeeName: string;
+  correctionDate: Date;
+  correctionTimeString: string;
+  correctionDateTime: Date;
+
+  constructor(item: Partial<KamPickupAddressCorrectionHistory> = {}) {
+    this.reservationAddressCorrectedByKAMID = item.reservationAddressCorrectedByKAMID ?? 0;
+    this.reservationID = item.reservationID ?? 0;
+    this.addressBeforeCorrection = item.addressBeforeCorrection || '';
+    this.correctedAddressByKAM = item.correctedAddressByKAM || '';
+    this.addressCorrectingKAMEmployeeID = item.addressCorrectingKAMEmployeeID ?? 0;
+    this.correctedByEmployeeName = item.correctedByEmployeeName || '';
+    this.correctionDate = item.correctionDate ? new Date(item.correctionDate as any) : undefined;
+    this.correctionTimeString = item.correctionTimeString || '';
+    const dt = item.correctionDateTime ?? item.correctionDate;
+    this.correctionDateTime = dt ? new Date(dt as any) : undefined;
+  }
+}
+
 export class SavedAddress {
   country: number;
   state: string;;
@@ -183,6 +237,7 @@ export class SavedAddress {
   landamrk:string;
   isFavourite:boolean;
   addressStringForMap:string;
+  latLong:string;
 
  constructor(savedAddress) {
    {
@@ -193,6 +248,7 @@ export class SavedAddress {
       this.landamrk = savedAddress.landamrk || '';
       this.isFavourite = savedAddress.isFavourite || '';
       this.addressStringForMap= savedAddress.addressStringForMap||'';
+      this.latLong = savedAddress.latLong || '';
    }
  }
 
@@ -260,17 +316,25 @@ export class ModelForReservation {
 }
 export class UpdatePickupModel{
    reservationID : number;
+   pickupDate: Date;
+   pickupDateString: string;
       pickupTime:Date;
    pickupTimeString:string;
      dropOffTime:Date;
   dropOffTimeString:string;
+  locationOutDate: Date;
+  locationOutDateString: string;
   locationOutTime:Date;
   locationOutTimeString:string;
   constructor(modelForReservation) {
    {
-      this.reservationID = modelForReservation.reservationID || '';    
+      this.reservationID = modelForReservation.reservationID || '';
+      this.pickupDate = modelForReservation.pickupDate || null;
+      this.pickupDateString = modelForReservation.pickupDateString || '';
       this.pickupTimeString = modelForReservation.pickupTimeString || '';
       this.dropOffTimeString= modelForReservation.dropOffTimeString||'';
+      this.locationOutDate = modelForReservation.locationOutDate || null;
+      this.locationOutDateString = modelForReservation.locationOutDateString || '';
       this.locationOutTimeString = modelForReservation.locationOutTimeString || '';
       
    }

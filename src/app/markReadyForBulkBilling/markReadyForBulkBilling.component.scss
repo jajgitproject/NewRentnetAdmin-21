@@ -1,0 +1,39 @@
+.mark-rfbb-page {
+  .w-100 {
+    width: 100%;
+  }
+
+  .page-subtitle {
+    margin-bottom: 0;
+    max-width: 960px;
+  }
+
+  .search-panel,
+  .results-panel {
+    margin-bottom: 1rem;
+  }
+
+  .search-panel__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .search-panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .search-panel__fields {
+    .mat-mdc-form-field,
+    .mat-form-field {
+      width: 100%;
+    }
+  }
+
+  .text-danger {
+    color: #b91c1c;
+  }
+}

@@ -39,6 +39,9 @@ import moment from 'moment';
 })
 export class PrintDutySlipWithoutMapComponent {
   dataSource: any;
+  signatureDriverUrl: string = null;
+  signatureProdUrl: string = null;
+  signatureUatUrl: string = null;
   dataSourceForInvoiceDuties: any[] = [];ReservationStatus: any;
   advanceTable: PrintDutySlipWithoutMap | null;
   ReservationID: number;
@@ -77,9 +80,9 @@ export class PrintDutySlipWithoutMapComponent {
       this.route.queryParams.subscribe(paramsData =>{
         this.DutySlipID = paramsData.dutySlipID;
         this.ReservationID = paramsData.reservationID;
+        this.loadDataForReservation();
+        this.loadData();
       });
-      this.loadDataForReservation();
-      this.loadData();
     }
   
     onNoClick(): void 
@@ -87,11 +90,15 @@ export class PrintDutySlipWithoutMapComponent {
 
     public loadDataForReservation()
     {
+      if (!this.ReservationID) {
+        return;
+      }
       this._controlPanelDesignService.getReservationDetails(this.ReservationID).subscribe(
       (data: ControlPanelData) => 
       {
         this.reservationInfo = data?.reservationDetails;
-        this.ReservationStatus = this.reservationInfo[0].reservationStatus;
+        this.ReservationStatus = this.reservationInfo?.[0]?.reservationStatus;
+        this.applyDropAddressFromReservation();
       },
       (error: HttpErrorResponse) => {this.reservationInfo = null;});
     }
@@ -102,10 +109,13 @@ export class PrintDutySlipWithoutMapComponent {
       data =>   
       {
         this.dataSource = data;
+        this.normalizeDutySlipPrintFlags(this.dataSource);
         if (this.dataSource?.customerSignatureImage) {
-          this.dataSource.customerSignatureImage = this._generalService.resolveStaticImageUrl(
-            this.dataSource.customerSignatureImage
-          );
+          const signatureUrls = this._generalService.signatureImageUrls(this.dataSource.customerSignatureImage);
+          this.signatureDriverUrl = signatureUrls.driver;
+          this.signatureProdUrl = signatureUrls.prod;
+          this.signatureUatUrl = signatureUrls.uat;
+          this.dataSource.customerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl || this.signatureUatUrl;
         }
         this.dataSource.tollParkingsImages = this.normalizeAttachmentImages(
           this.dataSource?.tollParkingsImages,
@@ -115,16 +125,114 @@ export class PrintDutySlipWithoutMapComponent {
           this.dataSource?.interStateTaxImages,
           'interStateTaxImage'
         );
+        this.applyDropAddressFromReservation();
         console.log("dataSource",this.dataSource);
         if (this.dataSource?.showDistanceOnDutySlipPdf === true) {
-          this.totalKms = this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
+          this.totalKms = this.dataSource?.totalRunningKM > 0
+            ? this.dataSource.totalRunningKM
+            : this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0);
         } else {
-          this.totalKms = 0;
+          this.totalKms = this.dataSource?.totalRunningKM > 0 ? this.dataSource.totalRunningKM : 0;
         }
         setTimeout(() => this.notifyEmbedParentHeight(), 0);
         //this.getTime();
       },
       (error: HttpErrorResponse) => { this.dataSource = null});
+    }
+
+    useProdSignature(): void {
+      const next = this._generalService.nextSignatureUrl(this.dataSource?.customerSignatureImage, {
+        driver: this.signatureDriverUrl,
+        prod: this.signatureProdUrl,
+        uat: this.signatureUatUrl
+      });
+      if (next && this.dataSource) {
+        this.dataSource.customerSignatureImage = next;
+      }
+    }
+
+    getDropAddress(): string {
+      return this.firstNonEmptyAddress(
+        this.dataSource?.dropOffAddress,
+        this.dataSource?.DropOffAddress,
+        this.dataSource?.dropOffAddressDetails,
+        this.dataSource?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.dropOffAddress,
+        this.reservationInfo?.[0]?.drop?.DropOffAddress,
+        this.reservationInfo?.[0]?.drop?.dropOffAddressDetails,
+        this.reservationInfo?.[0]?.drop?.DropOffAddressDetails,
+        this.reservationInfo?.[0]?.dropOffAddress,
+        this.reservationInfo?.[0]?.DropOffAddress
+      );
+    }
+
+    private applyDropAddressFromReservation(): void {
+      if (!this.dataSource) {
+        return;
+      }
+      const dropAddress = this.getDropAddress();
+      this.dataSource.dropOffAddress = dropAddress;
+    }
+
+    private normalizeDutySlipPrintFlags(data: any): void {
+      if (!data) {
+        return;
+      }
+      const showOtp =
+        data.showOTPOnDutySlip ?? data.ShowOTPOnDutySlip;
+      data.showOTPOnDutySlip =
+        showOtp === true || showOtp === 'true' || showOtp === 1 || showOtp === '1';
+
+      data.startTripOTP = data.startTripOTP ?? data.StartTripOTP;
+      data.endTripOTP = data.endTripOTP ?? data.EndTripOTP;
+      data.startTripOTPGeneratedAt =
+        data.startTripOTPGeneratedAt ?? data.StartTripOTPGeneratedAt;
+      data.endTripOTPGeneratedAt =
+        data.endTripOTPGeneratedAt ?? data.EndTripOTPGeneratedAt;
+    }
+
+    formatOtpGeneratedAt(value: unknown): string {
+      if (value == null || value === '') {
+        return '';
+      }
+      const parsed = moment(value);
+      return parsed.isValid() ? parsed.format('HH:mm') : '';
+    }
+
+    formatOtpDisplayTime(
+      generatedAt: unknown,
+      otp: unknown,
+      datePart: unknown,
+      timePart: unknown
+    ): string {
+      const fromApi = this.formatOtpGeneratedAt(generatedAt);
+      if (fromApi) {
+        return fromApi;
+      }
+      const otpText = (otp ?? '').toString().trim();
+      if (!otpText) {
+        return '';
+      }
+      const dateMoment = moment(datePart);
+      const timeMoment = moment(timePart);
+      if (!dateMoment.isValid() && !timeMoment.isValid()) {
+        return '';
+      }
+      const combined = dateMoment.isValid() ? dateMoment.clone() : moment().startOf('day');
+      if (timeMoment.isValid()) {
+        combined.hour(timeMoment.hour()).minute(timeMoment.minute()).second(0);
+      }
+      return combined.isValid() ? combined.format('HH:mm') : '';
+    }
+
+    private firstNonEmptyAddress(...values: any[]): string {
+      for (const value of values) {
+        const text = (value ?? '').toString().trim();
+        if (text) {
+          return text;
+        }
+      }
+      return '';
     }
 
     notifyEmbedParentHeight(): void {

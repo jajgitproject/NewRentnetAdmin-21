@@ -2,6 +2,7 @@
 import { formatDate, Time } from '@angular/common';
 export class DutyRegisterModel {
 
+  reservationGroupID: string;
   reservationID: number;
 
   dutySlipID: number;
@@ -13,6 +14,9 @@ export class DutyRegisterModel {
   dutySlipImage: string;
   closingDate: Date | null;
   runningDetails: string;
+  /** Remark on DS Closing (same as runningDetails from API). */
+  billRemark: string;
+  vendorRemark: string;
 
   dispatchLocation: string;
 
@@ -44,6 +48,7 @@ export class DutyRegisterModel {
   modeOfPayment: string;
 
   locationOutDate: Date | null;
+  bookingLocationOutDate: string;
   locationOutTime: string;
   locationOutKM: number;
 
@@ -58,6 +63,11 @@ export class DutyRegisterModel {
   locationInDate: Date | null;
   locationInTime: string;
   locationInKM: number;
+
+  outKmsFromZero: number;
+  reportingKmsFromZero: number;
+  releasingKmsFromZero: number;
+  inKmsFromZero: number;
 
   g2P: number;
   d2G: number;
@@ -177,6 +187,7 @@ export class SearchCriteria
   SearchMOP: string;
   SearchSupplierType: string;
   SearchSupplier: string;
+  SearchSupplierID: number;
   SearchFromDate: string;
   SearchToDate: string;
   SearchSalesPersonName: string;
@@ -190,6 +201,7 @@ export class SearchCriteria
   SearchGoodForBill: boolean;
   SearchDri: string;
   SearchCarNo: string;
+  SearchInventoryID: number;
   SearchSupplierO: string;
   SearchRes: string;
   SearchDuty: string;

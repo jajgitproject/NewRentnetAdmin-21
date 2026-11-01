@@ -28,9 +28,9 @@ export class AdhocCarAndDriverService
       {
       advanceTable.inventoryID=-1;
     }
-    if(advanceTable.supplierID === null)
+    if(advanceTable.supplierID === null || advanceTable.supplierID === undefined || advanceTable.supplierID <= 0)
       {
-      advanceTable.supplierID=-1;
+      advanceTable.supplierID=0;
     }
      if(advanceTable.rtoStateID === null)
       {

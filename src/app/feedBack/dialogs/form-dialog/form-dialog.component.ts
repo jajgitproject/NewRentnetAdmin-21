@@ -1,6 +1,6 @@
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Component, ElementRef, HostListener, Inject, Input, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, Inject, Input, ViewChild } from '@angular/core';
 import { FeedBackService } from '../../feedBack.service';
 import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { FeedBack } from '../../feedBack.model';
@@ -28,12 +28,17 @@ import { EmployeesDropDown } from '../../employeeDropDown.model';
 import { tripFeedBackAttachmentFormDialogComponent } from 'src/app/feedBackAttachment/dialogs/form-dialog/form-dialog.component';
 import { FeedBackAttachmentService } from 'src/app/feedBackAttachment/feedBackAttachment.service';
 import { DeleteDialogComponent as DeleteDialogComponentForfeedBackAttachment } from 'src/app/feedBackAttachment/dialogs/delete/delete.component';
+import { FeedBackAttachment } from 'src/app/feedBackAttachment/feedBackAttachment.model';
 @Component({
   standalone: false,
     selector: 'app-form-dialog',
     templateUrl: './form-dialog.component.html',
     styleUrls: ['./form-dialog.component.sass'],
-    providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
+    providers: [
+      { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
+      FeedBackService,
+      FeedBackAttachmentService,
+    ]
   })
 
 export class FormDialogComponent {
@@ -48,7 +53,7 @@ export class FormDialogComponent {
 
   ];
   dataSource: FeedBack[] | null;
-  attachmentDataSource : FeedBack[] | null;
+  attachmentDataSource : any[] | null = null;
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
@@ -106,6 +111,9 @@ export class FormDialogComponent {
   saveDisabled:boolean=true;
   verifyDutyStatusAndCacellationStatus: string;
   isSaveAllowed: boolean = false;
+  pendingAttachmentFile: File | null = null;
+  pendingAttachmentPreviewUrl: string = '';
+  pendingAttachmentFileName: string = '';
   //dialog: any;
   constructor(
     public dialogRef: MatDialogRef<FormDialogComponent>,
@@ -113,6 +121,7 @@ export class FormDialogComponent {
     public dialog: MatDialog,
     private snackBar: MatSnackBar,
     public route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: any,
     public advanceTableService: FeedBackService,
     public feedBackService: FeedBackService,
@@ -163,6 +172,7 @@ export class FormDialogComponent {
     this.DriverName = data.driverName;
     this.ReservationPassengerID = data.reservationPassengerID;
     this.DutySlipID = data.dutySlipID;
+    this.tripFeedBackID = data.tripFeedBackID || data.advanceTable?.tripFeedBackID || null;
     if (this.verifyDutyStatusAndCacellationStatus !== 'Changes allow') 
     {
       this.isSaveAllowed = true;
@@ -186,21 +196,23 @@ export class FormDialogComponent {
   // }
 
   ngOnInit() {
-    debugger;
     this.route.queryParams.subscribe(paramsData => {
-      this.tripFeedBackID = paramsData.tripFeedBackID;
-      this.dutySlipID = paramsData.dutySlipID;
-      this.reservationID = paramsData.reservationID;
+      if (paramsData?.tripFeedBackID) {
+        this.tripFeedBackID = paramsData.tripFeedBackID;
+      }
+      if (paramsData?.dutySlipID) {
+        this.dutySlipID = paramsData.dutySlipID;
+      }
+      if (paramsData?.reservationID) {
+        this.reservationID = paramsData.reservationID;
+        this.ReservationID = paramsData.reservationID;
+      }
 
       this.advanceTableForm.patchValue({ customerPersonName: this.customerPersonName });
-      this.advanceTableForm.patchValue({ CustomerPersonID: this.CustomerPersonID });
-      // this.CustomerPersonID=paramsData.customerPersonID;
-
-
+      this.advanceTableForm.patchValue({ customerPersonID: this.CustomerPersonID });
     });
     this.InitEmployee();
     this.loadData();
-
   }
   onContextMenu(event: MouseEvent, item: FeedBack) {
     event.preventDefault();
@@ -368,38 +380,49 @@ export class FormDialogComponent {
     };
   }
   public loadData() {
-    debugger;
     this.feedBackService.getTableData(this.ReservationID, this.SearchActivationStatus, this.PageNumber).subscribe
       (
         data => {
-          debugger;
-          console.log(data);
-          this.dataSource = data;
-          console.log(this.dataSource);
-          this.dataSource.forEach((row: any) => {
-            const feedbackPointsOutOfFive = parseFloat(row?.feedbackPointsOutOfFive)?.toString();
-            this.action = 'edit';
-            this.tripFeedBackID = row.tripFeedBackID;
-            this.advanceTableForm.patchValue({ tripFeedBackID: row.tripFeedBackID });
-            this.advanceTableForm.patchValue({ driverName: row.driverName });
-            this.advanceTableForm.patchValue({ registrationNumber: row.registrationNumber });
-            this.advanceTableForm.patchValue({ employeeID: row.employeeID });
-            this.searchEmployee.setValue(row.firstName + " " + row.lastName);
-            this.advanceTableForm.patchValue({ dateOfFeedback: row.dateOfFeedback });
-            this.advanceTableForm.patchValue({ timeOfFeedback: row.timeOfFeedback });
-            this.advanceTableForm.patchValue({ feedbackPointsOutOfFive: feedbackPointsOutOfFive });
-            this.advanceTableForm.patchValue({ feedbackRemark: row.feedbackRemark });
-            this.advanceTableForm.patchValue({ customerPersonName: row.customerPersonName });
-            this.advanceTableForm.patchValue({ activationStatus: row.activationStatus });
-            if (this.tripFeedBackID !== 0) {
-              this.tripBackAttachmentloadData();
-            }
-          });
+          const rows = Array.isArray(data) ? data : (data ? [data] : []);
+          this.dataSource = rows.length ? rows : null;
 
+          if (!rows.length) {
+            this.attachmentDataSource = null;
+            this.cdr.detectChanges();
+            return;
+          }
+
+          const row: any = rows[0];
+          const feedbackPointsOutOfFive = parseFloat(row?.feedbackPointsOutOfFive)?.toString();
+          this.action = 'edit';
+          this.tripFeedBackID = row.tripFeedBackID ?? row.TripFeedBackID;
+          this.advanceTableForm.patchValue({ tripFeedBackID: this.tripFeedBackID });
+          this.advanceTableForm.patchValue({ driverName: row.driverName });
+          this.advanceTableForm.patchValue({ registrationNumber: row.registrationNumber });
+          this.advanceTableForm.patchValue({ employeeID: row.employeeID });
+          this.searchEmployee.setValue((row.firstName || '') + " " + (row.lastName || ''));
+          this.advanceTableForm.patchValue({ dateOfFeedback: row.dateOfFeedback });
+          this.advanceTableForm.patchValue({ timeOfFeedback: row.timeOfFeedback });
+          this.advanceTableForm.patchValue({ feedbackPointsOutOfFive: feedbackPointsOutOfFive });
+          this.advanceTableForm.patchValue({ feedbackRemark: row.feedbackRemark });
+          if (row.customerPersonName) {
+            this.advanceTableForm.patchValue({ customerPersonName: row.customerPersonName });
+          }
+          this.advanceTableForm.patchValue({ activationStatus: row.activationStatus });
+
+          if (this.tripFeedBackID && Number(this.tripFeedBackID) !== 0) {
+            this.tripBackAttachmentloadData();
+          } else {
+            this.attachmentDataSource = null;
+            this.cdr.detectChanges();
+          }
         },
-        (error: HttpErrorResponse) => { this.dataSource = null; }
+        (error: HttpErrorResponse) => {
+          this.dataSource = null;
+          this.attachmentDataSource = null;
+          this.cdr.detectChanges();
+        }
       );
-    //  this.tripBackAttachmentloadData();
   }
 
   submit() {
@@ -416,7 +439,87 @@ export class FormDialogComponent {
       panelClass: colorName
     });
   }
-  public Post(): void {
+
+  brokenAttachmentImageKeys = new Set<string>();
+
+  openImageInNewTab(imageUrl: string): void {
+    const resolvedUrl = this.getAttachmentImageUrl({ tripFeedBackAttachment: imageUrl }) || imageUrl;
+    if (!resolvedUrl) {
+      return;
+    }
+    window.open(resolvedUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  getAttachmentImageUrl(row: any): string | null {
+    if (!row) {
+      return null;
+    }
+    const raw =
+      row.tripFeedBackAttachment ||
+      row.TripFeedBackAttachment ||
+      row.imageUrl ||
+      row.ImageUrl ||
+      '';
+    const value = (raw ?? '').toString().trim();
+    if (!value || /^(null|undefined)$/i.test(value)) {
+      return null;
+    }
+    return this._generalService.resolveStaticImageUrl(value);
+  }
+
+  private getAttachmentImageKey(row: any): string {
+    return String(
+      row?.tripFeedBackAttachmentID ??
+      row?.TripFeedBackAttachmentID ??
+      this.getAttachmentImageUrl(row) ??
+      ''
+    );
+  }
+
+  isAttachmentImageBroken(row: any): boolean {
+    const key = this.getAttachmentImageKey(row);
+    return !!key && this.brokenAttachmentImageKeys.has(key);
+  }
+
+  onAttachmentImageError(row: any): void {
+    const key = this.getAttachmentImageKey(row);
+    if (!key || this.brokenAttachmentImageKeys.has(key)) {
+      return;
+    }
+    this.brokenAttachmentImageKeys.add(key);
+    this.cdr.detectChanges();
+  }
+  onPendingAttachmentSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input?.files;
+    if (!files?.length) {
+      this.pendingAttachmentFile = null;
+      this.pendingAttachmentPreviewUrl = '';
+      this.pendingAttachmentFileName = '';
+      return;
+    }
+    this.pendingAttachmentFile = files[0];
+    this.pendingAttachmentFileName = this.pendingAttachmentFile.name;
+    console.log('[TripFeedback] pending attachment selected', {
+      name: this.pendingAttachmentFile.name,
+      size: this.pendingAttachmentFile.size,
+      type: this.pendingAttachmentFile.type,
+    });
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.pendingAttachmentPreviewUrl = (e.target?.result as string) || '';
+      this.cdr.detectChanges();
+    };
+    reader.readAsDataURL(this.pendingAttachmentFile);
+  }
+
+  clearPendingAttachment(): void {
+    this.pendingAttachmentFile = null;
+    this.pendingAttachmentPreviewUrl = '';
+    this.pendingAttachmentFileName = '';
+  }
+
+  private patchFeedbackFormIds(): void {
     this.advanceTableForm.patchValue({ customerPersonID: this.CustomerPersonID });
     this.advanceTableForm.patchValue({ dutySlipID: this.DutySlipID });
     this.advanceTableForm.patchValue({ reservationID: this.ReservationID });
@@ -424,23 +527,72 @@ export class FormDialogComponent {
     this.advanceTableForm.patchValue({ allotmentID: this.AllotmentID });
     this.advanceTableForm.patchValue({ inventoryID: this.InventoryID });
     this.advanceTableForm.patchValue({ driverID: this.DriverID });
+  }
 
-    this.advanceTableService.add(this.advanceTableForm.getRawValue()).subscribe(
-      (response) => {
-        this.messageSubject.next(this.advanceTableForm.getRawValue());
-        this._generalService.sendUpdate('FeedBackCreate:FeedBackView:Success');
-        this.loadData();
+  private uploadPendingAttachmentIfNeeded(tripFeedBackId: number, onComplete: () => void): void {
+    if (!this.pendingAttachmentFile || !tripFeedBackId) {
+      onComplete();
+      return;
+    }
+    const attachmentPayload = new FeedBackAttachment({});
+    attachmentPayload.tripFeedBackID = tripFeedBackId;
+    attachmentPayload.activationStatus = true;
+    console.log('[TripFeedback] uploading pending attachment after feedback save', {
+      tripFeedBackID: tripFeedBackId,
+      fileName: this.pendingAttachmentFile.name,
+    });
+    this.feedBackAttachmentService.add(attachmentPayload, this.pendingAttachmentFile).subscribe(
+      (attachResponse) => {
+        console.log('[TripFeedback] pending attachment upload succeeded', attachResponse);
+        this.clearPendingAttachment();
+        onComplete();
+      },
+      (attachError) => {
+        console.error('[TripFeedback] pending attachment upload failed', attachError);
         this.showNotification(
-          'snackbar-success',
-          'Tripfeedback Created ...!!!',
+          'snackbar-danger',
+          'Feedback saved but attachment upload failed. Please try Add attachment again.',
           'bottom',
           'center'
         );
-
         this.saveDisabled = true;
-        this.dialogRef.close();
+      }
+    );
+  }
+
+  private finishFeedbackSave(isCreate: boolean): void {
+    this.messageSubject.next(this.advanceTableForm.getRawValue());
+    this._generalService.sendUpdate(isCreate ? 'FeedBackCreate:FeedBackView:Success' : 'FeedBackUpdate:FeedBackView:Success');
+    this.loadData();
+    this.showNotification(
+      'snackbar-success',
+      isCreate ? 'Tripfeedback Created ...!!!' : 'Tripfeedback Updated ...!!!',
+      'bottom',
+      'center'
+    );
+    this.saveDisabled = true;
+    this.dialogRef.close();
+  }
+
+  private handleFeedbackSaveResponse(response: any, isCreate: boolean): void {
+    const createdId = response?.tripFeedBackID ?? response?.TripFeedBackID ?? this.tripFeedBackID;
+    if (createdId) {
+      this.tripFeedBackID = createdId;
+      this.advanceTableForm.patchValue({ tripFeedBackID: createdId });
+      this.action = 'edit';
+      console.log('[TripFeedback] feedback saved', { tripFeedBackID: createdId, isCreate });
+    }
+    this.uploadPendingAttachmentIfNeeded(createdId, () => this.finishFeedbackSave(isCreate));
+  }
+
+  public Post(): void {
+    this.patchFeedbackFormIds();
+    this.advanceTableService.add(this.advanceTableForm.getRawValue()).subscribe(
+      (response) => {
+        this.handleFeedbackSaveResponse(response, true);
       },
       (error) => {
+        console.error('[TripFeedback] feedback create failed', error);
         this._generalService.sendUpdate('FeedBackAll:FeedBackView:Failure');
         this.saveDisabled = true;
       }
@@ -448,29 +600,14 @@ export class FormDialogComponent {
   }
 
   public Put(): void {
-    this.advanceTableForm.patchValue({ customerPersonID: this.CustomerPersonID });
-    this.advanceTableForm.patchValue({ reservationID: this.ReservationID });
-    this.advanceTableForm.patchValue({ allotmentID: this.AllotmentID });
-    this.advanceTableForm.patchValue({ inventoryID: this.InventoryID });
-    this.advanceTableForm.patchValue({ driverID: this.DriverID });
-    this.advanceTableForm.patchValue({ passengerID: this.ReservationPassengerID });
+    this.patchFeedbackFormIds();
     this.advanceTableService.update(this.advanceTableForm.getRawValue())
       .subscribe(
         response => {
-
-          this.messageSubject.next(this.advanceTableForm.getRawValue());
-          this._generalService.sendUpdate('FeedBackUpdate:FeedBackView:Success');//To Send Updates 
-          this.loadData();
-          this.showNotification(
-            'snackbar-success',
-            'Tripfeedback Updated ...!!!',
-            'bottom',
-            'center'
-          );//To Send Updates
-          this.saveDisabled = true;
-          this.dialogRef.close();
+          this.handleFeedbackSaveResponse(response, false);
         },
         error => {
+          console.error('[TripFeedback] feedback update failed', error);
           this._generalService.sendUpdate('FeedBackAll:FeedBackView:Failure');//To Send Updates  
           this.saveDisabled = true;
         }
@@ -500,15 +637,12 @@ export class FormDialogComponent {
   //   );
   // }
   deleteItemfeedBackAttachment(row) {
-
-    this.tripFeedBackID = row.tripFeedBackAttachmentID;
     const dialogRef = this.dialog.open(DeleteDialogComponentForfeedBackAttachment,
       {
-
         data: row
       });
     dialogRef.afterClosed().subscribe((res: any) => {
-      this.loadData();
+      this.tripBackAttachmentloadData();
       this.showNotification(
         'snackbar-success',
         'TripFeedBack Deleted ...!!!',
@@ -541,6 +675,16 @@ export class FormDialogComponent {
   }
 
   tripFeedBackAttachment() {
+    if (!this.tripFeedBackID || Number(this.tripFeedBackID) === 0) {
+      console.warn('[TripFeedback] Add attachment dialog requires tripFeedBackID; use "Choose attachment file" and Save on this form for new feedback.');
+      this.showNotification(
+        'snackbar-warning',
+        'For new feedback, choose a file below and click Save. Use + after feedback is saved for more attachments.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
     const dialogRef = this.dialog.open(tripFeedBackAttachmentFormDialogComponent, {
       width: '500px',
       data: {
@@ -566,24 +710,62 @@ export class FormDialogComponent {
   }
 
   public tripBackAttachmentloadData() {
+    if (!this.tripFeedBackID || Number(this.tripFeedBackID) === 0) {
+      this.attachmentDataSource = null;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.feedBackAttachmentService.getTableData(this.tripFeedBackID, this.SearchActivationStatus, this.PageNumber).subscribe
       (
         data => {
-          console.log(data);
-          this.attachmentDataSource = data;
-          this.attachmentDataSource.forEach((ele) => {
+          const rows = Array.isArray(data) ? data : (data ? [data] : []);
+          this.attachmentDataSource = rows.length
+            ? rows.map((row: any) => this.normalizeAttachmentRow(row))
+            : null;
+          this.brokenAttachmentImageKeys.clear();
+          this.attachmentDataSource?.forEach((ele) => {
             if (ele.activationStatus === true) {
               this.activation = "Active";
-
             }
             if (ele.activationStatus === false) {
               this.activation = "Deleted"
             }
-          })
-
+          });
+          this.cdr.detectChanges();
         },
-        (error: HttpErrorResponse) => { this.dataSource = null; }
+        (error: HttpErrorResponse) => {
+          this.attachmentDataSource = null;
+          this.cdr.detectChanges();
+        }
       );
+  }
+
+  private normalizeAttachmentRow(row: any): any {
+    const imageUrl = this.getAttachmentImageUrl(row);
+    return {
+      ...row,
+      tripFeedBackAttachmentID: row.tripFeedBackAttachmentID ?? row.TripFeedBackAttachmentID,
+      tripFeedBackID: row.tripFeedBackID ?? row.TripFeedBackID ?? this.tripFeedBackID,
+      reservationID: row.reservationID ?? row.ReservationID ?? this.ReservationID,
+      dutySlipID: row.dutySlipID ?? row.DutySlipID ?? this.DutySlipID,
+      tripFeedBackAttachment: imageUrl || row.tripFeedBackAttachment || row.TripFeedBackAttachment || '',
+      activationStatus: row.activationStatus ?? row.ActivationStatus,
+    };
+  }
+
+  NextCall() {
+    if (this.attachmentDataSource?.length > 0) {
+      this.PageNumber++;
+      this.tripBackAttachmentloadData();
+    }
+  }
+
+  PreviousCall() {
+    if (this.PageNumber > 0) {
+      this.PageNumber--;
+      this.tripBackAttachmentloadData();
+    }
   }
 
   /////////////////for Image Upload////////////////////////////

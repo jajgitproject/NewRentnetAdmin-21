@@ -1,8 +1,7 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { GeneralService } from '../general/general.service';
 import { CreditNoteHistory } from './creditnotehistory.model';
 import { CreditNoteHistoryService } from './creditnotehistory.service';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -22,45 +21,45 @@ export class CreditNoteHistoryComponent implements OnInit {
   dialogTitle: string;
   dataSource: MatTableDataSource<CreditNoteHistory>;
   creditNoteID: number;
-  creditNoteHistoryDataSource: any;
+  creditNoteHistoryDataSource: any[] = [];
   noDataFound: boolean = false;
+  loading = false;
   selectedLifeCycleStatus: string = 'all';
   lifeCycleStatuses: string[] = [];
-   PageNumber: number = 0;
+  PageNumber: number = 0;
   @Input() invoiceID: number;
   invoiceNumberWithPrefix: string;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-    InvoiceCreditNoteHistoryID: string;
+  InvoiceCreditNoteHistoryID: string;
   
   constructor(
     public dialogRef: MatDialogRef<CreditNoteHistoryComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     public creditNoteHistoryService: CreditNoteHistoryService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {
     this.dialogTitle = 'Credit Note History';
-    this.invoiceID = data?.invoiceID || data?.invoiceID || 0;
-    this.invoiceNumberWithPrefix = data?.invoiceNumberWithPrefix || '';
-    this.creditNoteID = data?.creditNoteID || data?.invoiceID || 0;
+    this.creditNoteID = Number(
+      data?.creditNoteID
+      ?? data?.invoiceCreditNoteID
+      ?? data?.InvoiceCreditNoteID
+      ?? 0
+    );
+    this.invoiceID = Number(data?.invoiceID ?? data?.InvoiceID ?? 0);
+    this.invoiceNumberWithPrefix =
+      data?.invoiceNumberWithPrefix
+      || data?.creditNoteNumberWithPrefix
+      || data?.CreditNoteNumberWithPrefix
+      || '';
     this.selectedLifeCycleStatus = data?.preSelectedStatus || 'all';
     this.dataSource = new MatTableDataSource<CreditNoteHistory>([]);
-    
-    // Validate input data
-    if (!this.invoiceID || this.invoiceID <= 0) {
-      console.warn('No valid invoice ID provided to CreditNoteHistoryComponent');
-    }
   }
 
   ngOnInit() {
     this.getCreditNoteHistoryData();
-    //this.loadCreditNoteHistoryData();
-    
-    // Set dialog title based on pre-selected status
-    // if (this.selectedLifeCycleStatus !== 'all') {
-    //   this.dialogTitle = `Credit Note History - ${this.selectedLifeCycleStatus.replace('_', ' ')}`;
-    // }
   }
 
   ngAfterViewInit() {
@@ -73,56 +72,74 @@ export class CreditNoteHistoryComponent implements OnInit {
   }
 
   public getCreditNoteHistoryData() {
-    if (!this.invoiceID || this.invoiceID <= 0) {
-      console.error('Invalid invoice ID:', this.invoiceID);
-      this.creditNoteHistoryDataSource = [];
-      this.noDataFound = true;
+    // Credit Note Home: require InvoiceCreditNoteID.
+    // Invoice Home: fall back to InvoiceID (all CNs under that invoice).
+    if (this.creditNoteID > 0) {
+      this.loadByCreditNoteId();
       return;
     }
 
-    this.creditNoteHistoryService.getCreditNoteHistory(this.invoiceID).subscribe(
+    if (this.invoiceID > 0) {
+      this.loadByInvoiceId();
+      return;
+    }
+
+    this.creditNoteHistoryDataSource = [];
+    this.dataSource.data = [];
+    this.noDataFound = true;
+    this.cdr.detectChanges();
+  }
+
+  private loadByCreditNoteId() {
+    this.loading = true;
+    this.noDataFound = false;
+    this.creditNoteHistoryService.getCreditNoteHistoryByCreditNoteId(this.creditNoteID).subscribe(
       (data: CreditNoteHistory[]) => {
-        this.creditNoteHistoryDataSource = data || [];
-        this.dataSource.data = this.creditNoteHistoryDataSource;
-        this.noDataFound = this.creditNoteHistoryDataSource.length === 0;
+        this.applyRows(data);
       },
       (error: HttpErrorResponse) => {
-        console.error('Error fetching credit note history:', error);
-        this.creditNoteHistoryDataSource = [];
-        this.dataSource.data = [];
-        this.noDataFound = true;
-        
-        // Show user-friendly error message
-        if (error.status === 500) {
-          console.error('Server error - please check the backend API');
-        } else if (error.status === 404) {
-          console.error('Credit note history not found for invoice ID:', this.invoiceID);
-        }
+        console.error('Error fetching credit note history by InvoiceCreditNoteID:', error);
+        this.applyRows([]);
       }
     );
   }
 
+  private loadByInvoiceId() {
+    this.loading = true;
+    this.noDataFound = false;
+    this.creditNoteHistoryService.getCreditNoteHistory(this.invoiceID).subscribe(
+      (data: CreditNoteHistory[]) => {
+        this.applyRows(data);
+      },
+      (error: HttpErrorResponse) => {
+        console.error('Error fetching credit note history by InvoiceID:', error);
+        this.applyRows([]);
+      }
+    );
+  }
+
+  private applyRows(data: CreditNoteHistory[]) {
+    const rows = Array.isArray(data) ? data : [];
+    this.creditNoteHistoryDataSource = rows.map((row: any) => ({
+      invoiceCreditNoteHistoryID: row.invoiceCreditNoteHistoryID ?? row.InvoiceCreditNoteHistoryID ?? 0,
+      invoiceCreditNoteID: row.invoiceCreditNoteID ?? row.InvoiceCreditNoteID ?? 0,
+      invoiceID: row.invoiceID ?? row.InvoiceID ?? 0,
+      amount: row.amount ?? row.Amount ?? 0,
+      action: row.action ?? row.Action ?? null,
+      actionValue: row.actionValue ?? row.ActionValue ?? null,
+      actionByID: row.actionByID ?? row.ActionByID ?? 0,
+      actionByName: row.actionByName ?? row.ActionByName ?? null,
+      actionDate: row.actionDate ?? row.ActionDate ?? null,
+      actionTime: row.actionTime ?? row.ActionTime ?? null,
+    }));
+    this.dataSource.data = this.creditNoteHistoryDataSource;
+    this.noDataFound = this.creditNoteHistoryDataSource.length === 0;
+    this.loading = false;
+    this.cdr.detectChanges();
+  }
+
   onLifeCycleStatusChange(): void {
-    if (this.selectedLifeCycleStatus === 'all') {
-      this.getCreditNoteHistoryData();
-    } else {
-      this.creditNoteHistoryService.getCreditNoteHistoryByLifeCycleStatus(
-        this.invoiceID, 
-        this.selectedLifeCycleStatus
-      ).subscribe(
-        (data: CreditNoteHistory[]) => {
-          this.creditNoteHistoryDataSource = data || [];
-          this.dataSource.data = this.creditNoteHistoryDataSource;
-          this.noDataFound = this.creditNoteHistoryDataSource.length === 0;
-        },
-        (error: HttpErrorResponse) => {
-          console.error('Error filtering credit note history:', error);
-          this.creditNoteHistoryDataSource = [];
-          this.dataSource.data = [];
-          this.noDataFound = true;
-        }
-      );
-    }
+    this.getCreditNoteHistoryData();
   }
 
   getStatusBadgeClass(status: string): string {
@@ -138,5 +155,3 @@ export class CreditNoteHistoryComponent implements OnInit {
     }
   }
 }
-
-

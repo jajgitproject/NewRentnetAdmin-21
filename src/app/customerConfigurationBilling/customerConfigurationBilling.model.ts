@@ -30,22 +30,22 @@ export class CustomerConfigurationBilling {
        this.customerID = customerConfigurationBilling.customerID || '';
        this.ecoCompanyID = customerConfigurationBilling.ecoCompanyID || '';
        this.fixBillingBranchID = customerConfigurationBilling.fixBillingBranchID || '';
-       this.misRequired = customerConfigurationBilling.misRequired || '';
-       this.documentRequired = customerConfigurationBilling.documentRequired || '';
-       this.useOnlyAppDataForBilling = customerConfigurationBilling.useOnlyAppDataForBilling || '';
+       this.misRequired = customerConfigurationBilling.misRequired ?? false;
+       this.documentRequired = customerConfigurationBilling.documentRequired ?? false;
+       this.useOnlyAppDataForBilling = customerConfigurationBilling.useOnlyAppDataForBilling ?? false;
        this.triggerBillingFromApp = customerConfigurationBilling.triggerBillingFromApp === true || customerConfigurationBilling.triggerBillingFromApp === false
          ? customerConfigurationBilling.triggerBillingFromApp
          : false;
-       this.mapMandatoryWithDutySlip = customerConfigurationBilling.mapMandatoryWithDutySlip || '';
-       this.runningDetailsMandatoryWithDutySlip = customerConfigurationBilling.runningDetailsMandatoryWithDutySlip || '';
+       this.mapMandatoryWithDutySlip = customerConfigurationBilling.mapMandatoryWithDutySlip ?? false;
+       this.runningDetailsMandatoryWithDutySlip = customerConfigurationBilling.runningDetailsMandatoryWithDutySlip ?? false;
       //  this.fuelSurchargeFormula = customerConfigurationBilling.fuelSurchargeFormula || '';
       //  this.fuelSurchargeOnBasePackageRate = customerConfigurationBilling.fuelSurchargeOnBasePackageRate || '';
       //  this.fuelSurchargeOnExtraKM = customerConfigurationBilling.fuelSurchargeOnExtraKM || '';
       //  this.fuelSurchargeOnExtraHour = customerConfigurationBilling.fuelSurchargeOnExtraHour || '';
        this.isSEZCustomer = customerConfigurationBilling.isSEZCustomer || '';
-       this.useDataFromAppToPrintOnDutySlip = customerConfigurationBilling.useDataFromAppToPrintOnDutySlip || '';
-       this.runningDetailsSource = customerConfigurationBilling.runningDetailsSource || '';
-       this.activationStatus = customerConfigurationBilling.activationStatus || '';
+       this.useDataFromAppToPrintOnDutySlip = customerConfigurationBilling.useDataFromAppToPrintOnDutySlip ?? false;
+       this.runningDetailsSource = customerConfigurationBilling.runningDetailsSource || 'App';
+       this.activationStatus = customerConfigurationBilling.activationStatus ?? true;
     }
   }
   

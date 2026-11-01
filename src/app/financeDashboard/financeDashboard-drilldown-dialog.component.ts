@@ -38,7 +38,7 @@ export class FinanceDashboardDrilldownDialogComponent implements OnInit {
     } else {
       this.displayedColumns = this.isInvoiceDrillDown()
         ? ['invoiceID', 'customerID', 'invoiceCalculationID', 'irnStatus', 'documentNumber', 'invoiceType', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription']
-        : ['documentNumber', 'invoiceType', 'irnStatus', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription'];
+        : ['documentNumber', 'linkedInvoiceNumber', 'invoiceType', 'irnStatus', 'date', 'customer', 'branch', 'amount', 'user', 'errorDescription'];
     }
     this.load();
   }
@@ -104,6 +104,7 @@ export class FinanceDashboardDrilldownDialogComponent implements OnInit {
       invoiceCalculationID: row?.invoiceCalculationID ?? row?.InvoiceCalculationID,
       irnStatus: row?.irnStatus ?? row?.IrnStatus,
       documentNumber: row?.documentNumber ?? row?.DocumentNumber,
+      linkedInvoiceNumber: row?.linkedInvoiceNumber ?? row?.LinkedInvoiceNumber,
       seriesName: row?.seriesName ?? row?.SeriesName,
       invoiceType: row?.invoiceType ?? row?.InvoiceType,
       date: row?.date ?? row?.Date,

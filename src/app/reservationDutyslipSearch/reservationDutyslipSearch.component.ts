@@ -59,6 +59,7 @@ export class ReservationDutyslipSearchComponent implements OnInit {
       data =>   
       {
         this.dataSource = data;
+        console.log(this.dataSource);
         if (!data || data.length === 0) 
         {
           Swal.fire({
@@ -68,7 +69,20 @@ export class ReservationDutyslipSearchComponent implements OnInit {
           });
           return;
         }
-        this.openClosingScreen(this.dataSource)
+        if(data.dsLocationOutDate === null || data.dsLocationOutDate === undefined)
+        {
+          Swal.fire({
+            title: '',
+            icon: 'warning',
+            html: `<b>Closing can not be done without dispatch.</b>`
+          });
+          return;
+        }
+        else
+        {
+          this.openClosingScreen(this.dataSource)
+        }
+        
         },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );

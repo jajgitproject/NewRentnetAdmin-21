@@ -29,6 +29,8 @@ export class ChangeEntityModel {
   primaryPassenger: string;
   pickupAddress: string;
   pickupAddressDetails: string;
+  vendor: string;
+  billingStatus: string;
   customerContractID: number;
   userID: number;
   checked:boolean;
@@ -56,6 +58,8 @@ export class ChangeEntityModel {
       this.primaryBookerID = changeEntityModel.primaryBookerID || '';
       this.primaryBooker = changeEntityModel.primaryBooker || '';       
       this.pickupAddress = changeEntityModel.pickupAddress || '';
+      this.vendor = changeEntityModel.vendor || '';
+      this.billingStatus = changeEntityModel.billingStatus || '';
     }
   }  
 }

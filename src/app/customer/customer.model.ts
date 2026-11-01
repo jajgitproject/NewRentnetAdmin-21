@@ -45,9 +45,12 @@ export class Customer {
     printRunningDetailOnDutySlip:boolean;  
     showRateOnDutySlip:boolean;
       showOTPOnDutySlip:boolean;
+      roundOffTime:boolean;
       showDistanceOnDutySlipPdf:boolean;
       isBookerAllowedToBeCreatedFromReservation:boolean;
       isPostPickUpCallAllowed:boolean;
+      isFeedbackEmailAllowed:boolean;
+      isCPEmailMandatry:boolean;
       panNo:string;
       customerIdentityNumber:string;
       gstCustomerType:string;
@@ -56,6 +59,13 @@ export class Customer {
       businessServices:string;
       businessTypeID:number;
       isBillToShipToCustomer:boolean;
+      isAggregator:boolean;
+      aggregatorCustomerID:number;
+      aggregatorCustomerName:string;
+      showBillingInApp:boolean;
+      geocage:boolean;
+      showOdometerFromZero:boolean;
+      isAppBasedCustomer:string;
   constructor(customer) {
     {
        this.customerID = customer.customerID || -1;
@@ -88,9 +98,17 @@ export class Customer {
        this.printRunningDetailOnDutySlip = customer.printRunningDetailOnDutySlip ?? false;
        this.showRateOnDutySlip = customer.showRateOnDutySlip ?? false;
        this.showOTPOnDutySlip = customer.showOTPOnDutySlip ?? false;
+       this.roundOffTime = customer.roundOffTime ?? true;
        this.showDistanceOnDutySlipPdf = customer.showDistanceOnDutySlipPdf ?? false;
        this.isBookerAllowedToBeCreatedFromReservation = customer.isBookerAllowedToBeCreatedFromReservation ?? false;
        this.isPostPickUpCallAllowed = customer.isPostPickUpCallAllowed ?? false;
+       this.isFeedbackEmailAllowed = customer.isFeedbackEmailAllowed === true || customer.isFeedbackEmailAllowed === false
+         ? customer.isFeedbackEmailAllowed
+         : null;
+       const cpEmailMandatory = customer.isCPEmailMandatry ?? customer.isCPEmailIDMandatory;
+       this.isCPEmailMandatry = cpEmailMandatory === true || cpEmailMandatory === false
+         ? cpEmailMandatory
+         : null;
        this.customerSector = customer.customerSector || '';
        this.contactPerson = customer.contactPerson || '';
        this.locationOutIntervalInMinutes =customer.locationOutIntervalInMinutes || 0;
@@ -103,6 +121,13 @@ export class Customer {
        this.businessType = customer.businessType || '';
        this.businessServices = customer.businessServices || '';
        this.isBillToShipToCustomer = customer.isBillToShipToCustomer ?? false;
+       this.isAggregator = customer.isAggregator ?? false;
+       this.aggregatorCustomerID = customer.aggregatorCustomerID || null;
+       this.aggregatorCustomerName = customer.aggregatorCustomerName || '';
+       this.showBillingInApp = customer.showBillingInApp ?? false;
+       this.geocage = customer.geocage ?? false;
+       this.showOdometerFromZero = customer.showOdometerFromZero ?? customer.ShowOdometerFromZero ?? false;
+       this.isAppBasedCustomer = customer.isAppBasedCustomer ?? customer.IsAppBasedCustomer ?? 'No';
     }
   }
   

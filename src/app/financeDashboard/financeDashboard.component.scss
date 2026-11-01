@@ -379,7 +379,8 @@
 }
 
 .fd-table-wrap {
-  overflow-x: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -433,6 +434,8 @@
 }
 
 .fd-table-wrap--invoice ::ng-deep .fd-series-table {
+  min-width: 1400px;
+
   .mat-mdc-header-row,
   tr.mat-mdc-header-row {
     background-color: #4f46e5 !important;

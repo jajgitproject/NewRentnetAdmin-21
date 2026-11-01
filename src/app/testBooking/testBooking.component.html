@@ -1,0 +1,42 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-12">
+          <ul>
+            <li class="breadcrumb-item">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a> |
+              <a href="#" (click)="false">Admin</a> |
+              <a href="#" (click)="false">Test Booking</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="body">
+            <h4>Test Booking</h4>
+            <div *ngIf="statusMessage" style="margin-top: 10px; font-style: italic;"
+              [style.color]="lookupError ? 'rgb(112,3,3)' : '#333'">
+              {{statusMessage}}
+            </div>
+            <mat-progress-spinner *ngIf="busy && !ready" mode="indeterminate" diameter="28" strokeWidth="3"
+              style="margin-top: 10px;"></mat-progress-spinner>
+            <br>
+            <app-reservation *ngIf="ready"
+              [testBookingMode]="true"
+              [testBookingBusy]="busy"
+              [testBookingCanSave]="ready && !lookupError && defaultsApplied"
+              (testBookingSave)="onSave()"
+              (testBookingSaved)="onSavedAfterBooking($event)"
+              (testBookingClearImei)="onClearImei()"
+              (testBookingClear)="onClear()"></app-reservation>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,12 @@
+<div class="drpd-dialog">
+  <h2 mat-dialog-title class="drpd-dialog__title">{{ dialogTitle }}</h2>
+
+  <mat-dialog-content class="drpd-dialog__content">
+    <p *ngIf="!formattedPayload" class="drpd-dialog__empty">No request payload is stored for this Dynamics sync record.</p>
+    <pre *ngIf="formattedPayload" class="drpd-dialog__json">{{ formattedPayload }}</pre>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="drpd-dialog__actions" align="end">
+    <button mat-stroked-button type="button" (click)="close()">Close</button>
+  </mat-dialog-actions>
+</div>

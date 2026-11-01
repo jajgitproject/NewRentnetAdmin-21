@@ -1,0 +1,91 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Developer Performance</h2>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>On time and late</h2>
+          </div>
+          <div class="body">
+            <p class="m-b-20">This score uses the developer finish time only. Eco Tester time is not included. A reopen starts a new mark.</p>
+            <div class="row align-items-center">
+              <div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>From</mat-label>
+                  <input matInput type="date" [(ngModel)]="fromDate" />
+                </mat-form-field>
+              </div>
+              <div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>To</mat-label>
+                  <input matInput type="date" [(ngModel)]="toDate" />
+                </mat-form-field>
+              </div>
+              <div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 mb-2">
+                <button mat-raised-button color="primary" (click)="load()">Show</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr><th>Developer</th><th>On time</th><th>Late</th><th>Percent on time</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of summary" (click)="show(row.employeeID)" style="cursor: pointer">
+                    <td>{{ row.developerName }}</td>
+                    <td><span class="ticket-on-time">{{ row.onTimeCount }}</span></td>
+                    <td><span class="ticket-late">{{ row.lateCount }}</span></td>
+                    <td>{{ row.percentOnTime }}%</td>
+                  </tr>
+                  <tr *ngIf="summary.length === 0"><td colspan="4">No developer finishes in this range.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>Finishes</h2>
+          </div>
+          <div class="body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr><th>Ticket</th><th>Developer</th><th>Cycle</th><th>Due</th><th>Finished</th><th>Result</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of visibleTickets()">
+                    <td><a [routerLink]="['/ticket', row.ticketID]">{{ row.ticketNo }}</a></td>
+                    <td>{{ row.developerName }}</td>
+                    <td>{{ row.cycleNumber }}</td>
+                    <td>{{ row.dueAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ row.finishedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td><span [class.ticket-on-time]="onTime(row)" [class.ticket-late]="!onTime(row)">{{ onTime(row) ? 'On time' : 'Late' }}</span></td>
+                  </tr>
+                  <tr *ngIf="visibleTickets().length === 0"><td colspan="6">No finishes to show.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

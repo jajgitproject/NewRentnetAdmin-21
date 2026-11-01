@@ -18,8 +18,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSortModule } from '@angular/material/sort';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule } from '@angular/material/dialog';
 import { ForcedCreditNoteRebillingService } from './forcedCreditNoteRebilling.service';
 import { ForcedCreditNoteRebillingRoutingModule } from './forcedCreditNoteRebilling-routing.module';
+import { CreditNoteHistoryModule } from '../creditnotehistory/creditnotehistory.module';
+import { CreditNoteHistoryService } from '../creditnotehistory/creditnotehistory.service';
 
 @NgModule({
   declarations: [ForcedCreditNoteRebillingComponent],
@@ -42,8 +45,10 @@ import { ForcedCreditNoteRebillingRoutingModule } from './forcedCreditNoteRebill
     MatNativeDateModule,
     MatSortModule,
     MatMenuModule,
-    MatProgressSpinnerModule
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    CreditNoteHistoryModule
   ],
-  providers: [ForcedCreditNoteRebillingService]
+  providers: [ForcedCreditNoteRebillingService, CreditNoteHistoryService]
 })
 export class ForcedCreditNoteRebillingModule {}

@@ -206,6 +206,12 @@
                         <th style="width:9%;text-align:left;padding:8px 4px;border:1px solid #cccccc;background-color:#f1f1f1;font-size:10px;">Package</th>
                         <th style="width:18%;text-align:left;padding:8px 4px;border:1px solid #cccccc;background-color:#f1f1f1;font-size:10px;">Pickup Address</th>
                         <th style="width:12%;text-align:left;padding:8px 4px;border:1px solid #cccccc;background-color:#f1f1f1;font-size:10px;">Drop Address</th>
+                        <th
+                          *ngFor="let fieldName of customerSpecificFieldColumns; trackBy: trackCustomerSpecificFieldColumn"
+                          style="width:10%;text-align:left;padding:8px 4px;border:1px solid #cccccc;background-color:#f1f1f1;font-size:10px;"
+                        >
+                          {{ fieldName }}
+                        </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -221,6 +227,12 @@
                         <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ info?.package?.package || 'N/A' }}</td>
                         <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ getPickupAddressDisplay(info) }}</td>
                         <td style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;">{{ getDropAddressDisplay(info) }}</td>
+                        <td
+                          *ngFor="let fieldName of customerSpecificFieldColumns; trackBy: trackCustomerSpecificFieldColumn"
+                          style="text-align:left;padding:8px 6px;border:1px solid #bfbfbf;font-size:11px;"
+                        >
+                          {{ getCustomerSpecificFieldValue(info, fieldName) }}
+                        </td>
                         </tr>
                     </tbody>
                 </table>

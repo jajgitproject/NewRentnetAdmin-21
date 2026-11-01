@@ -47,6 +47,12 @@
                                 ">
                             Enter a valid domain (e.g. example.com)
                         </mat-error>
+                        <mat-error *ngIf="
+                            advanceTableForm.get('sbtDomain')?.hasError('duplicate') &&
+                            advanceTableForm.get('sbtDomain')?.touched
+                            ">
+                            This SBT Domain already exists
+                        </mat-error>
                     </mat-form-field>
                 </div>
 

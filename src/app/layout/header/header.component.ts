@@ -148,14 +148,22 @@ export class HeaderComponent implements OnInit, AfterViewInit {
   }
 
   calculateDaysLeft(): void {
-    const currentDate = new Date();
     const expirationDate = new Date(this.expirationDate);
-    const timeDiff = expirationDate.getTime() - currentDate.getTime();
-    this.daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    if (this.daysLeft <= 10) {
-        this.showExpiryWarning = true;
+    if (isNaN(expirationDate.getTime())) {
+      this.daysLeft = null;
+      this.showExpiryWarning = false;
+      return;
     }
-}
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfExpiration = new Date(expirationDate);
+    startOfExpiration.setHours(0, 0, 0, 0);
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    this.daysLeft = Math.round((startOfExpiration.getTime() - startOfToday.getTime()) / msPerDay);
+    this.showExpiryWarning = this.daysLeft <= 10;
+  }
 
   ngAfterViewInit() {
     // set theme on startup

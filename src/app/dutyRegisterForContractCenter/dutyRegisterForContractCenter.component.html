@@ -36,21 +36,42 @@
                                 </div>
                                 <br/>
                                 <div class="duty-register-inline-search-actions quick-search-actions">
-                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
+                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
                                         Search
                                     </button>
                                     &nbsp;&nbsp;
                                     
-                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()">
+                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()" [disabled]="isExportJobInProgress()">
                                         Refresh
                                     </button>
                                     &nbsp;&nbsp;
-                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
-                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
+                                    <button mat-raised-button color="accent" (click)="startExportJob()" [disabled]="isExportJobInProgress() || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
+                                        {{ getExportButtonLabel() }}
                                     </button>
                                 </div>
                             </mat-expansion-panel>
                         </mat-accordion>
+
+                        <div class="duty-register-export-job-panel" *ngIf="exportJobId || exportJobError">
+                            <div class="panel-title">Duty Register For Contract Center CSV Export</div>
+                            <div class="export-job-meta" *ngIf="exportJobId">
+                                <span>Job: {{ exportJobId }}</span>
+                                <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+                                <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+                                <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+                            </div>
+                            <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+                            <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+                            <div class="export-job-actions">
+                                <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+                                    {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
+                                </button>
+                                <button mat-stroked-button type="button" (click)="cancelExportJob()" [disabled]="!isExportJobInProgress()">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                        <app-stored-mis-exports></app-stored-mis-exports>
                         
                         <br/>
                         <mat-accordion class="duty-register-search-accordion">
@@ -66,17 +87,17 @@
                                 </div>
                                 <br/>
                                 <div class="duty-register-inline-search-actions quick-search-actions">
-                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()">
+                                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="SearchData()" [disabled]="isExportJobInProgress()">
                                         Search
                                     </button>
                                     &nbsp;&nbsp;
                                     
-                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()">
+                                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="refresh()" [disabled]="isExportJobInProgress()">
                                         Refresh
                                     </button>
                                     &nbsp;&nbsp;
-                                    <button mat-raised-button color="accent" (click)="downloadFilteredCsv()" [disabled]="csvExporting || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
-                                        {{ csvExporting ? 'Downloading...' : 'Download CSV' }}
+                                    <button mat-raised-button color="accent" (click)="startExportJob()" [disabled]="isExportJobInProgress() || !hasManualSearch" [matTooltip]="!hasManualSearch ? 'Pehle Search karein' : ''">
+                                        {{ getExportButtonLabel() }}
                                     </button>
                                 </div>
                             </mat-expansion-panel>

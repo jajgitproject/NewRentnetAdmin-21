@@ -26,6 +26,8 @@ import { CarMasterMISRoutingModule } from './carMasterMIS-routing.module';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { GooglePlaceModule } from '@compat/google-places-shim';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 // import { TwoDigitDecimaNumberDirective } from './twodigitdecimalnumber.directive';
 
 @NgModule({
@@ -57,6 +59,8 @@ import { GooglePlaceModule } from '@compat/google-places-shim';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
+    StoredMisExportsComponent,
     MyUploadModule,
     //TwoDigitDecimaNumberDirective
   ],

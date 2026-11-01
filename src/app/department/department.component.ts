@@ -153,7 +153,7 @@ export class DepartmentComponent implements OnInit {
         // })
        
       },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+      (error: HttpErrorResponse) => { this.dataSource = null; }
     );
   }
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -321,7 +321,7 @@ export class DepartmentComponent implements OnInit {
       {
         this.dataSource = data;
       },
-      (error: HttpErrorResponse) => { this.dataSource = null;}
+      (error: HttpErrorResponse) => { this.dataSource = null; }
     );
   }
 }

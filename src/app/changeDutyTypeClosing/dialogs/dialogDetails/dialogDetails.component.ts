@@ -153,7 +153,7 @@ export class FormDialogComponent
     .subscribe(
       response => 
         {
-          this.dialogRef.close();
+          this.dialogRef.close(true);
           this.showNotification(
             'snackbar-success',
             'Duty Type Updated...!!!',

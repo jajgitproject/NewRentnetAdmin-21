@@ -1,0 +1,56 @@
+<div class="audit-change-dialog">
+  <div class="modalHeader">
+    <div class="dialog-title">
+      Change details
+      <span class="dialog-sub" *ngIf="data?.event">
+        {{ data.event.formName }} ({{ data.operationLabel }})
+      </span>
+    </div>
+    <button mat-icon-button type="button" (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div mat-dialog-content>
+    <div class="spinner-wrap" *ngIf="data.loading">
+      <mat-spinner diameter="28"></mat-spinner>
+    </div>
+    <ng-container *ngIf="!data.loading">
+      <div class="driver-pair" *ngIf="hasDriverPair()">
+        <div class="driver-card">
+          <div class="driver-label">Old Driver</div>
+          <div class="driver-value">{{ displayValue(driverPair().oldDriver) }}</div>
+        </div>
+        <div class="driver-card driver-card-new">
+          <div class="driver-label">New Driver</div>
+          <div class="driver-value">{{ displayValue(driverPair().newDriver) }}</div>
+        </div>
+      </div>
+      <table class="audit-diff-table">
+        <thead>
+          <tr>
+            <th class="col-name">Field</th>
+            <th class="col-before">Old value</th>
+            <th class="col-after">New value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let row of changedFields()"
+            class="changed-row"
+            [class.driver-row]="isDriverRow(row)"
+          >
+            <td class="col-name">{{ row.field }}</td>
+            <td class="col-before">{{ displayValue(row.oldValue) }}</td>
+            <td class="col-after">{{ displayValue(row.newValue) }}</td>
+          </tr>
+          <tr *ngIf="changedFields().length === 0">
+            <td colspan="3">No field-level differences (insert/delete or identical snapshots).</td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+  </div>
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="dialogRef.close()">Close</button>
+  </div>
+</div>

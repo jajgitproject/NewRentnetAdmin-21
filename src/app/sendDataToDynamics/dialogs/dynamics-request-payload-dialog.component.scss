@@ -1,0 +1,55 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.drpd-dialog {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.drpd-dialog__title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.drpd-dialog__content {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: auto;
+}
+
+.drpd-dialog__empty {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.drpd-dialog__json {
+  margin: 0;
+  padding: 12px;
+  border-radius: 6px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: min(70vh, 560px);
+  overflow: auto;
+}
+
+.drpd-dialog__actions {
+  flex-shrink: 0;
+  padding-top: 8px;
+}

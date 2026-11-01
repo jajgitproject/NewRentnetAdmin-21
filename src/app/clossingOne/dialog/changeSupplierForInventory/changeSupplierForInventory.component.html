@@ -25,12 +25,15 @@
                         <input required type="text" matInput [matAutocomplete]="auto7" formControlName="supplierName">
                         <mat-autocomplete #auto7="matAutocomplete" (optionSelected)="OnSupplierSelect($event.option.value)">
                             <mat-option *ngFor="let supplier of filteredSupplierOptions | async"
-                                [value]="supplier.supplierName" (click)="getSupplierID(supplier.supplierID)">
-                                {{supplier.supplierName}} - {{supplier.supplierPhone}}
+                                [value]="formatSupplierDisplay(supplier)" (click)="getSupplierID(supplier.supplierID)">
+                                {{formatSupplierDisplay(supplier)}}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['supplierName'].hasError('required')">
                             Please select a  Vendor
+                        </mat-error>
+                        <mat-error *ngIf="advanceTableForm.controls['supplierName'].hasError('pickupCityInvalid')">
+                            Please select a valid Supplier
                         </mat-error>
                     </mat-form-field>
                 </div>

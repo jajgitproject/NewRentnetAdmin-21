@@ -120,6 +120,18 @@ export class OrganizationalEntityService
       {
         advanceTable.oldRentNetService_Location = advanceTable.oldRentNetService_Location;
       }
+      if (!advanceTable.isECommerceBranch || advanceTable.preFixForEcommerce === "") 
+      {
+        advanceTable.preFixForEcommerce = null;
+      }
+      if (!advanceTable.isECommerceBranch)
+      {
+        advanceTable.isECommerceBranch = false;
+      }
+      if (advanceTable.organizationalEntityType !== 'Branch' || advanceTable.dynamicBranchCode === '')
+      {
+        advanceTable.dynamicBranchCode = null;
+      }
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: OrganizationalEntity)
@@ -146,6 +158,18 @@ export class OrganizationalEntityService
       {
         advanceTable.oldRentNetService_Location = advanceTable.oldRentNetService_Location;
       }
+      if (!advanceTable.isECommerceBranch || advanceTable.preFixForEcommerce === "") 
+      {
+        advanceTable.preFixForEcommerce = null;
+      }
+      if (!advanceTable.isECommerceBranch)
+      {
+        advanceTable.isECommerceBranch = false;
+      }
+      if (advanceTable.organizationalEntityType !== 'Branch' || advanceTable.dynamicBranchCode === '')
+      {
+        advanceTable.dynamicBranchCode = null;
+      }
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(organizationalEntityID: number):  Observable<any> 
@@ -162,5 +186,10 @@ export class OrganizationalEntityService
   GetOrganizationalEntityForHub(OrganizationalEntityType:string,OrganizationalEntity:string): Observable<OrganizationalEntityDropDown[]>
   {
     return this.httpClient.get<OrganizationalEntityDropDown[]>(this.API_URL + "/GetDropDownForParentForHub/" + OrganizationalEntityType + '/' + OrganizationalEntity);
+  }
+
+  getDefaultCDPLocation(organizationalEntityID: number): Observable<OrganizationalEntityDropDown>
+  {
+    return this.httpClient.get<OrganizationalEntityDropDown>(this.API_URL + "/GetDefaultCDPLocation/" + organizationalEntityID);
   }
 }

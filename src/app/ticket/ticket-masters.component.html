@@ -1,0 +1,139 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Ticket Masters</h2>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>Application data</h2>
+          </div>
+          <div class="body">
+            <p class="m-b-20">Create application names here. Raise a Ticket reads this list.</p>
+            <div class="row align-items-center">
+              <div class="col-xl-6 col-lg-6 col-md-8 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>Application name</mat-label>
+                  <input matInput [(ngModel)]="applicationName" />
+                </mat-form-field>
+              </div>
+              <div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 mb-2">
+                <button mat-raised-button color="primary" (click)="saveApplication()">Add application</button>
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr><th>Application</th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of applications"><td>{{ row.applicationName }}</td></tr>
+                <tr *ngIf="applications.length === 0"><td>No application yet. Add the first name above.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>Developer</h2>
+          </div>
+          <div class="body">
+            <p class="m-b-20">Create developer names here. Assign reads this list.</p>
+            <div class="row align-items-center">
+              <div class="col-xl-6 col-lg-6 col-md-8 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>Developer name</mat-label>
+                  <input matInput [(ngModel)]="developerName" />
+                </mat-form-field>
+              </div>
+              <div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 mb-2">
+                <button mat-raised-button color="primary" type="button" (click)="saveDeveloper()">Add developer</button>
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr><th>Developer</th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of developers"><td>{{ row.name }}</td></tr>
+                <tr *ngIf="developers.length === 0"><td>No developer yet. Add the first name above.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>Lead</h2>
+          </div>
+          <div class="body">
+            <p class="m-b-20">Create lead names here. A Lead can assign tickets.</p>
+            <div class="row align-items-center">
+              <div class="col-xl-6 col-lg-6 col-md-8 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>Lead name</mat-label>
+                  <input matInput [(ngModel)]="leadName" />
+                </mat-form-field>
+              </div>
+              <div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 mb-2">
+                <button mat-raised-button color="primary" type="button" (click)="saveLead()">Add lead</button>
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr><th>Lead</th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of leads"><td>{{ row.name }}</td></tr>
+                <tr *ngIf="leads.length === 0"><td>No lead yet. Add the first name above.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>Resolution targets</h2>
+          </div>
+          <div class="body">
+            <p class="m-b-20">The due time is the assignment time plus these minutes.</p>
+            <div class="row align-items-center" *ngFor="let row of targets">
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>{{ row.priorityName }} (minutes)</mat-label>
+                  <input matInput type="number" [(ngModel)]="row.resolutionMinutes" />
+                </mat-form-field>
+              </div>
+              <div class="col-xl-3 col-lg-3 col-md-4 col-sm-12 mb-2">
+                <button mat-stroked-button color="primary" (click)="saveTarget(row)">Save</button>
+              </div>
+            </div>
+            <a mat-stroked-button routerLink="/raiseTicket">Back to Raise a Ticket</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

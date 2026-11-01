@@ -551,16 +551,31 @@ export class FormDialogComponent
  onNoClick():void{
   this.dialogRef.close();
  }
- AddressChange(address: Address) {
-  this.addressString = address.formatted_address;
+  private googlePlaceDisplayText(address: any): string {
+    const fromPac = address?.rentnetDisplayText?.trim();
+    if (fromPac) {
+      return fromPac;
+    }
+    const formatted = address?.formatted_address?.trim();
+    if (formatted) {
+      return formatted;
+    }
+    return address?.name?.trim() || '';
+  }
 
-  this.advanceTableForm.patchValue({
-    latitude: address.geometry.location.lat(),
-    longitude: address.geometry.location.lng()
-  });
+  AddressChange(address: Address) {
+    const placeTitle = this.googlePlaceDisplayText(address);
+    this.addressString = placeTitle;
 
-  this.advanceTableForm.get('addressStringForMap')?.updateValueAndValidity();
-}
+    this.advanceTableForm.patchValue({
+      addressStringForMap: placeTitle,
+      latitude: address.geometry.location.lat(),
+      longitude: address.geometry.location.lng()
+    });
+
+    this.advanceTableForm.get('addressStringForMap')?.setErrors(null);
+    this.advanceTableForm.get('addressStringForMap')?.updateValueAndValidity();
+  }
 
 
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -602,7 +617,9 @@ onPickupTyping() {
        ',' +
        this.advanceTableForm.value.longitude
    });
-   this.advanceTableForm.patchValue({addressStringForMap:this.addressString});
+   const mapAddress =
+     (this.advanceTableForm.get('addressStringForMap')?.value || this.addressString || '').trim();
+   this.advanceTableForm.patchValue({ addressStringForMap: mapAddress });
    this.advanceTableForm.patchValue({customerPersonID:this.data.CustomerPersonID});
    this.advanceTableForm.patchValue({countryID:this.geoPointID});
    this.advanceTableForm.patchValue({stateID:this.geoPointStateID});
@@ -649,7 +666,9 @@ onPickupTyping() {
        ',' +
        this.advanceTableForm.value.longitude
    });
-   this.advanceTableForm.patchValue({addressStringForMap:this.addressString || this.advanceTable.addressStringForMap});
+   const mapAddress =
+     (this.advanceTableForm.get('addressStringForMap')?.value || this.addressString || this.advanceTable.addressStringForMap || '').trim();
+   this.advanceTableForm.patchValue({ addressStringForMap: mapAddress });
    this.advanceTableForm.patchValue({customerPersonID:this.advanceTable.customerPersonID});
    this.advanceTableForm.patchValue({countryID:this.geoPointID || this.advanceTable.countryID});
     this.advanceTableForm.patchValue({stateID:this.geoPointStateID || this.advanceTable.stateID});

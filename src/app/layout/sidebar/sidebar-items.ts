@@ -3,6 +3,67 @@ import { RouteInfo } from './sidebar.metadata';
 export const ROUTES: RouteInfo[] = [
   {
     path: '',
+    title: 'Ticketing',
+    moduleName: 'ticketing',
+    icon: 'fas fa-ticket-alt',
+    class: 'menu-toggle',
+    groupTitle: false,
+    submenu: [
+      {
+        path: 'ticket',
+        title: 'Tickets',
+        moduleName: 'ticket',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'raiseTicket',
+        title: 'Raise Ticket',
+        moduleName: 'raiseTicket',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'ticketDashboard',
+        title: 'Ticket Dashboard',
+        moduleName: 'ticketDashboard',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'ticketPerformance',
+        title: 'Developer Performance',
+        moduleName: 'ticketPerformance',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'ticketMasters',
+        title: 'Ticket Masters',
+        moduleName: 'ticketMasters',
+        icon: 'fas fa-ticket-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      }
+    ],
+    isAccess: false
+  },
+  {
+    path: '',
     title: 'Menu',
     moduleName: 'Masters',
     icon: 'fas fa-tachometer-alt',
@@ -34,6 +95,19 @@ export const ROUTES: RouteInfo[] = [
         path: 'controlPanelTemp',
         title: 'Control Panel Temp',
         moduleName: 'controlPanelTemp',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'upsellDeclineReason',
+        title: 'UpSell Decline Reason',
+        pageKey: 'UpSell Decline Reason',
+        moduleName: 'upsellDeclineReason',
+        alternateAccessPageKeys: ['upsellDeclineReason', 'UpSell Decline Reason'],
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,
@@ -106,28 +180,6 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
-        path: 'applicationAuditLog',
-        title: 'Application Audit Log',
-        moduleName: 'applicationAuditLog',
-        icon: 'fas fa-file-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-
-      {
-        path: 'applicationAuditSettings',
-        title: 'Application Audit Settings',
-        moduleName: 'applicationAuditSettings',
-        icon: 'fas fa-toggle-on',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-
-      {
         path: 'addB2CServiceLocation',
         title: 'Add B2C Service Location',
         moduleName: 'addB2CServiceLocation',
@@ -193,6 +245,78 @@ export const ROUTES: RouteInfo[] = [
         path: 'bookingRequest',
         title: 'Booking Request',
         moduleName: 'bookingRequest',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+       {
+        path: 'rejectedQCDriverPhoto',
+        title: 'Rejected QC Driver Photo',
+        pageKey: 'Rejected QC Driver Photo',
+        moduleName: 'rejectedQCDriverPhoto',
+        alternateAccessPageKeys: ['rejectedQCDriverPhoto', 'Rejected QC Driver Photo'],
+        icon: 'fas fa-file-archive',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'integrationLogDetail',
+        title: 'Integration Log',
+        moduleName: 'integrationLogDetail',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'integrationHealth',
+        title: 'Integration Health',
+        moduleName: 'integrationHealth',
+        icon: 'fas fa-heartbeat',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'cdpBookingRequest',
+        title: 'Cab Drive Pro Booking Request',
+        moduleName: 'cdpBookingRequest',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'kamAddressCorrection',
+        title: 'KAM Pickup Address Correction',
+        moduleName: 'kamAddressCorrection',
+        alternateAccessPageKeys: [
+          'kamAddressCorrection',
+          'KAM Pickup Address Correction',
+          'KAM Address Correction'
+        ],
+        icon: 'fas fa-map-marked-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'migrationBookingRequest',
+        title: 'Migration Booking Request',
+        moduleName: 'migrationBookingRequest',
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,
@@ -398,7 +522,9 @@ export const ROUTES: RouteInfo[] = [
       {
         path: 'carUtilizationMIS',
         title: 'Car Utilization MIS',
+        pageKey: 'Car Utilization MIS',
         moduleName: 'carUtilizationMIS',
+        alternateAccessPageKeys: ['carUtilizationMIS', 'Car Utilization MIS'],
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,
@@ -443,6 +569,17 @@ export const ROUTES: RouteInfo[] = [
         path: 'changePassenger',
         title: 'Change Passenger',
         moduleName: 'changePassenger',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'changeModeOfPayment',
+        title: 'Change Mode Of Payment',
+        moduleName: 'changeModeOfPayment',
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,
@@ -682,6 +819,17 @@ export const ROUTES: RouteInfo[] = [
         path: 'customerGroup',
         title: 'Customer Group',
         moduleName: 'customerGroup',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'customerMeeting',
+        title: 'Customer Meeting',
+        moduleName: 'customerMeeting',
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,
@@ -1168,6 +1316,58 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'bulkGfb',
+        title: 'Bulk GFB',
+        pageKey: 'Bulk GFB',
+        moduleName: 'bulkGfb',
+        alternateAccessPageKeys: ['bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-check-square',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'markReadyForBulkBilling',
+        title: 'Mark Ready For Bulk Billing',
+        pageKey: 'Mark Ready For Bulk Billing',
+        moduleName: 'markReadyForBulkBilling',
+        alternateAccessPageKeys: ['markReadyForBulkBilling', 'bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-tags',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'bulkInvoice',
+        title: 'Bulk Invoice',
+        pageKey: 'Bulk Invoice',
+        moduleName: 'bulkInvoice',
+        alternateAccessPageKeys: ['bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        icon: 'fas fa-file-invoice-dollar',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'gtrackRunningDetails',
+        title: 'Gtrack Running Details',
+        pageKey: 'Gtrack Running Details',
+        moduleName: 'gtrackRunningDetails',
+        alternateAccessPageKeys: ['gtrackRunningDetails', 'bulkInvoice', 'Closing', 'closingOne'],
+        icon: 'fas fa-route',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
 
       {
         path: 'gstPercentage',
@@ -1234,6 +1434,33 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+
+      {
+        path: 'qcMisCst',
+        title: 'QC MIS (CST)',
+        pageKey: 'QC MIS (CST)',
+        moduleName: 'qcMisCst',
+        alternateAccessPageKeys: ['qcMisCst', 'QC MIS (CST)', 'QCMIS(CST)'],
+        icon: 'fas fa-clipboard-check',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false,
+        alwaysAccessible: true
+      },
+      {
+        path: 'postPickupCallMis',
+        title: 'Post Pickup Call MIS',
+        pageKey: 'Post Pickup Call MIS',
+        moduleName: 'postPickupCallMis',
+        alternateAccessPageKeys: ['postPickupCallMis', 'Post Pickup Call MIS'],
+        icon: 'fas fa-phone',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false,
+        alwaysAccessible: true
+      },
       {        
         path: 'incidenceMIS',
         title: 'Incidence MIS',
@@ -1255,6 +1482,87 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'dynamicsMenu',
+        title: 'Dynamics',
+        moduleName: 'dynamicsMenu',
+        icon: 'fas fa-cloud',
+        class: '',
+        groupTitle: false,
+        submenu: [
+          {
+            path: 'sendDataToDynamics',
+            title: 'Invoices → Dynamics',
+            pageKey: 'Send Data To Dynamics',
+            moduleName: 'sendDataToDynamics',
+            alternateAccessPageKeys: [
+              'Send Data To Dynamics',
+              'sendDataToDynamics',
+              'Send Invoice to Dynamics',
+              'Send Invoices To Dynamics'
+            ],
+            icon: 'fas fa-cloud-upload-alt',
+            class: '',
+            groupTitle: false,
+            submenu: [],
+            isAccess: false
+          },
+          {
+            path: 'sendCreditNotesToDynamics',
+            title: 'Credit note → Dynamics',
+            pageKey: 'Send Credit Notes To Dynamics',
+            moduleName: 'sendCreditNotesToDynamics',
+            alternateAccessPageKeys: [
+              'Send Credit Notes To Dynamics',
+              'sendCreditNotesToDynamics',
+              'DynamicsCreditNote',
+              'Dynamics Credit Note'
+            ],
+            icon: 'fas fa-file-invoice-dollar',
+            class: '',
+            groupTitle: false,
+            submenu: [],
+            isAccess: false
+          },
+          {
+            path: 'dynamicsMis20',
+            title: 'Dynamics MIS 2.0',
+            pageKey: 'dynamicsMis20',
+            moduleName: 'dynamicsMis20',
+            alternateAccessPageKeys: ['dynamicsMis20', 'Dynamics MIS 2.0', 'Dynamics MIS'],
+            icon: 'fas fa-chart-bar',
+            class: '',
+            groupTitle: false,
+            submenu: [],
+            isAccess: false
+          }
+        ],
+        isAccess: false
+      },
+      {
+        path: 'sendDataToMyf',
+        title: 'Duties → MYF',
+        pageKey: 'Send Data To MYF',
+        moduleName: 'sendDataToMyf',
+        alternateAccessPageKeys: ['Send Data To MYF', 'sendDataToMyf'],
+        icon: 'fas fa-location-arrow',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'sendVendorClosingData',
+        title: 'Send Vendor Closing Data',
+        pageKey: 'Send Vendor Closing Data',
+        moduleName: 'sendVendorClosingData',
+        alternateAccessPageKeys: ['Send Vendor Closing Data', 'sendVendorClosingData'],
+        icon: 'fas fa-paper-plane',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'invoicePaidStatus',
         title: 'Invoice Paid Status',
         moduleName: 'invoicePaidStatus',
@@ -1269,13 +1577,6 @@ export const ROUTES: RouteInfo[] = [
         title: 'Bulk Bills Download',
         pageKey: 'Bulk Bills Download',
         moduleName: 'bulkBillsDownload',
-        alternateAccessPageKeys: [
-          'bulkBillsDownload',
-          'invoiceHome',
-          'Invoice Home',
-          'controlPanelDesign',
-          'Control Panel',
-        ],
         icon: 'fas fa-file-archive',
         class: '',
         groupTitle: false,
@@ -1283,11 +1584,11 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
-        path: 'invoiceExport',
+        path: 'Forensic',
         title: 'Forensic',
-        pageKey: 'Invoice Export',
-        moduleName: 'invoiceExport',
-        alternateAccessPageKeys: ['invoiceExport', 'Forensic'],
+        pageKey: 'Forensic',
+        moduleName: 'Forensic',
+        alternateAccessPageKeys: ['invoiceExport', 'Invoice Export', 'Forensic'],
         icon: 'fas fa-file-excel',
         class: '',
         groupTitle: false,
@@ -1301,6 +1602,17 @@ export const ROUTES: RouteInfo[] = [
         moduleName: 'appBillingReceipt',
         alternateAccessPageKeys: ['appBillingReceipt', 'invoiceExport', 'Invoice Export'],
         icon: 'fas fa-receipt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'testBooking',
+        title: 'Test Booking',
+        pageKey: 'testBooking',
+        moduleName: 'testBooking',
+        icon: 'fas fa-clipboard-check',
         class: '',
         groupTitle: false,
         submenu: [],
@@ -1331,6 +1643,18 @@ export const ROUTES: RouteInfo[] = [
         path: 'locationGroup',
         title: 'Location Group',
         moduleName: 'locationGroup',
+        icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'locationCityMapping',
+        title: 'Location City Mapping',
+        pageKey: 'Location City Mapping',
+        moduleName: 'locationCityMapping',
+        alternateAccessPageKeys: ['locationCityMapping', 'Location City Mapping'],
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,
@@ -1443,19 +1767,6 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
-      {
-        path: 'dynamicsMis20',
-        title: 'Dynamics MIS 2.0',
-        pageKey: 'dynamicsMis20',
-        moduleName: 'dynamicsMis20',
-        alternateAccessPageKeys: ['dynamicsMis20', 'Dynamics MIS 2.0'],
-        icon: 'fas fa-tachometer-alt',
-        class: '',
-        groupTitle: false,
-        submenu: [],
-        isAccess: false
-      },
-
       {
         path: 'driverCarChangesMIS',
         title: 'Driver Car Changes',

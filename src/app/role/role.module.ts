@@ -22,6 +22,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RoleService } from './role.service';
 import { RoleRoutingModule } from './role-routing.module';
 //import { RolePageMappingService } from '../rolepagemapping/rolepagemapping.service';
@@ -53,7 +54,8 @@ import { RoleRoutingModule } from './role-routing.module';
     MatSortModule,
     MatToolbarModule,
     MatMenuModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule
   ],
   providers: [RoleService,]
 })

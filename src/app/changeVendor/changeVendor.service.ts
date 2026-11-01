@@ -20,106 +20,34 @@ export class ChangeVendorService {
   }
 
   /** CRUD METHODS */
+  private toRouteParam(value: any): string {
+    if (value === null || value === undefined || value === '') {
+      return 'null';
+    }
+    return encodeURIComponent(String(value));
+  }
+
   getTableData(SearchCustomerGroup:any,SearchCustomerName:any,SearchCity:any,SearchVehicle:any,SearchPackageType:any,SearchPakcage:any,
-              SearchFromDate:any,SearchToDate:any,SearchReservationID:any,SearchDutySlipID:any,SearchActivationStatus:any,PageNumber:number):Observable<any> 
+              SearchFromDate:any,SearchToDate:any,SearchReservationID:any,SearchDutySlipID:any,SearchActivationStatus:any,PageNumber:number,
+              SearchVendor:any = null):Observable<any> 
   {
-    if (SearchCustomerGroup === "") 
-    {
-      SearchCustomerGroup = null;
+    let url = `${this.API_URL}/${this.toRouteParam(SearchCustomerGroup)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchCity)}/${this.toRouteParam(SearchVehicle)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPakcage)}/${this.toRouteParam(SearchFromDate)}/${this.toRouteParam(SearchToDate)}/${this.toRouteParam(SearchReservationID)}/${this.toRouteParam(SearchDutySlipID)}/${SearchActivationStatus}/${PageNumber}/ReservationID/Descending`;
+    if (SearchVendor) {
+      url += `?Vendor=${this.toRouteParam(SearchVendor)}`;
     }
-    if (SearchCustomerName === "") 
-    {
-      SearchCustomerName = null;
-    }
-    if (SearchCity === "") 
-    {
-      SearchCity = null;
-    }
-    if (SearchVehicle === "") 
-    {
-      SearchVehicle = null;
-    }
-    if (SearchPackageType === "") 
-    {
-      SearchPackageType = null;
-    }
-    if (SearchPakcage === "") 
-    {
-      SearchPakcage = null;
-    }
-    if (SearchFromDate === "") 
-    {
-      SearchFromDate = null;
-    }
-    if (SearchToDate === "") 
-    {
-      SearchToDate = null;
-    }
-    if (SearchReservationID === "") 
-    {
-      SearchReservationID = null;
-    }
-    if (SearchDutySlipID === "") 
-    {
-      SearchDutySlipID = null;
-    }
-    if(SearchActivationStatus === null) 
-    {
-      SearchActivationStatus = null;
-    }
-    return this.httpClient.get(this.API_URL + '/' + SearchCustomerGroup + '/' + SearchCustomerName + '/' + SearchCity + '/' + SearchVehicle + '/' + SearchPackageType + '/' + SearchPakcage + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchReservationID + '/'+ SearchDutySlipID + '/' + SearchActivationStatus + '/' + PageNumber + '/ReservationID/Descending');
+    return this.httpClient.get(url);
   }
 
 
   getTableDataSort(SearchCustomerGroup:any,SearchCustomerName:any,SearchCity:any,SearchVehicle:any,SearchPackageType:any,SearchPakcage:any,
                    SearchFromDate:any,SearchToDate:any,SearchReservationID:any,SearchDutySlipID:any,SearchActivationStatus:any,PageNumber:number,
-                   coloumName:string,sortType:string):Observable<any> 
+                   coloumName:string,sortType:string,SearchVendor:any = null):Observable<any> 
   {
-     if (SearchCustomerGroup === "") 
-    {
-      SearchCustomerGroup = null;
+    let url = `${this.API_URL}/${this.toRouteParam(SearchCustomerGroup)}/${this.toRouteParam(SearchCustomerName)}/${this.toRouteParam(SearchCity)}/${this.toRouteParam(SearchVehicle)}/${this.toRouteParam(SearchPackageType)}/${this.toRouteParam(SearchPakcage)}/${this.toRouteParam(SearchFromDate)}/${this.toRouteParam(SearchToDate)}/${this.toRouteParam(SearchReservationID)}/${this.toRouteParam(SearchDutySlipID)}/${SearchActivationStatus}/${PageNumber}/${coloumName}/${sortType}`;
+    if (SearchVendor) {
+      url += `?Vendor=${this.toRouteParam(SearchVendor)}`;
     }
-    if (SearchCustomerName === "") 
-    {
-      SearchCustomerName = null;
-    }
-    if (SearchCity === "") 
-    {
-      SearchCity = null;
-    }
-    if (SearchVehicle === "") 
-    {
-      SearchVehicle = null;
-    }
-    if (SearchPackageType === "") 
-    {
-      SearchPackageType = null;
-    }
-    if (SearchPakcage === "") 
-    {
-      SearchPakcage = null;
-    }
-    if (SearchFromDate === "") 
-    {
-      SearchFromDate = null;
-    }
-    if (SearchToDate === "") 
-    {
-      SearchToDate = null;
-    }  
-    if (SearchReservationID === "") 
-    {
-      SearchReservationID = null;
-    }
-    if (SearchDutySlipID === "") 
-    {
-      SearchDutySlipID = null;
-    }
-    if(SearchActivationStatus === null) 
-    {
-      SearchActivationStatus = null;
-    }
-    return this.httpClient.get(this.API_URL + '/' + SearchCustomerGroup + '/' + SearchCustomerName + '/' + SearchCity + '/' + SearchVehicle + '/' + SearchPackageType + '/' + SearchPakcage + '/' + SearchFromDate + '/' + SearchToDate + '/' + SearchReservationID + '/'+ SearchDutySlipID + '/' + SearchActivationStatus + '/' + PageNumber + '/'+coloumName+'/'+sortType);
+    return this.httpClient.get(url);
   }
 
 

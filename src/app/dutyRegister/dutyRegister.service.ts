@@ -8,6 +8,7 @@ import { GeneralService } from '../general/general.service';
 import { S } from '@angular/cdk/keycodes';
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
 import { switchMap, takeWhile } from 'rxjs/operators';
+import { formatMisSearchDateForApi } from '../general/export-job.helper';
 @Injectable()
 export class DutyRegisterService 
 {
@@ -254,7 +255,27 @@ export class DutyRegisterService
   //      + PageNumber +  '/'+coloumName+'/'+sortType);
   // }
 
+  private formatCriteriaDate(value: any): string | null {
+    const formatted = formatMisSearchDateForApi(value);
+    return formatted || null;
+  }
+
+  private applyDateFields(criteria: SearchCriteria) {
+    return {
+      SearchFeedbackDate: this.formatCriteriaDate(criteria.SearchFeedbackDate),
+      SearchFromDate: this.formatCriteriaDate(criteria.SearchFromDate),
+      SearchToDate: this.formatCriteriaDate(criteria.SearchToDate),
+      SearchCancellationDateFrom: this.formatCriteriaDate(criteria.SearchCancellationDateFrom),
+      SearchCancellationDateTo: this.formatCriteriaDate(criteria.SearchCancellationDateTo),
+      SearchBookingDateFrom: this.formatCriteriaDate(criteria.SearchBookingDateFrom),
+      SearchBookingDate: this.formatCriteriaDate(criteria.SearchBookingDate),
+      SearchBillFromDate: this.formatCriteriaDate(criteria.SearchBillFromDate),
+      SearchBillToDate: this.formatCriteriaDate(criteria.SearchBillToDate),
+    };
+  }
+
   getTableData(criteria: SearchCriteria, pageNumber: number): Observable<any> {
+    const dates = this.applyDateFields(criteria);
     const updatedCriteria = {
       UserID:this.generalService.getUserID(),
       ShowAllLocation:this.generalService.getShowAllLocation(),
@@ -266,15 +287,15 @@ export class DutyRegisterService
       SearchKAMID: criteria.SearchKAMID || 0,
       SearchCustomerPersonName: criteria.SearchCustomerPersonName || "null",
       SearchDutyType: criteria.SearchDutyType || "null",
-      SearchFeedbackDate: criteria.SearchFeedbackDate || "null",
+      SearchFeedbackDate: dates.SearchFeedbackDate || "null",
       SearchSlipReceipt: criteria.SearchSlipReceipt,
       SearchClosureType: criteria.SearchClosureType || "null",
       SearchDispatchLocationName: criteria.SearchDispatchLocation || "null",
       SearchMOP: criteria.SearchMOP || "null",
       SearchSupplierType: criteria.SearchSupplierType || "null",
       SearchSupplierName: criteria.SearchSupplier || "null",
-      SearchFromDate: criteria.SearchFromDate || "null",
-      SearchToDate: criteria.SearchToDate || "null",
+      SearchFromDate: dates.SearchFromDate || "null",
+      SearchToDate: dates.SearchToDate || "null",
       SearchSalesPersonName: criteria.SearchSalesPersonName || "null",
       SearchCarSent: criteria.SearchCarSent || "null",
       SearchCarBook: criteria.SearchCarBook || "null",
@@ -299,6 +320,7 @@ export class DutyRegisterService
               : null,
       SearchDri: criteria.SearchDri || "null",
       SearchCarNo: criteria.SearchCarNo || "null",
+      SearchInventoryID: criteria.SearchInventoryID || 0,
       SearchSupplierO: criteria.SearchSupplierO || "null",
       SearchRes: criteria.SearchRes || "null",
       SearchDuty: criteria.SearchDuty || "null",
@@ -306,14 +328,14 @@ export class DutyRegisterService
       // SearchGuestEmail: criteria.SearchGuestEmail || "null",
       SearchGuestMobile: criteria.SearchGuestMobile || "null",  
       SearchCity: criteria.SearchCity || "null",
-      SearchCancellationDateFrom: criteria.SearchCancellationDateFrom || "null",
-      SearchCancellationDateTo: criteria.SearchCancellationDateTo || "null",
-      SearchBookingDateFrom: criteria.SearchBookingDateFrom || "null",
-      SearchBookingDate: criteria.SearchBookingDate || "null",
+      SearchCancellationDateFrom: dates.SearchCancellationDateFrom || "null",
+      SearchCancellationDateTo: dates.SearchCancellationDateTo || "null",
+      SearchBookingDateFrom: dates.SearchBookingDateFrom || "null",
+      SearchBookingDate: dates.SearchBookingDate || "null",
       SearchChangeMOPCase: criteria.SearchChangeMOPCase || "null",
       SearchLocationGroup: criteria.SearchLocationGroup || "null",
-      SearchBillToDate: criteria.SearchBillToDate || "null",
-      SearchBillFromDate: criteria.SearchBillFromDate || "null",
+      SearchBillToDate: dates.SearchBillToDate || "null",
+      SearchBillFromDate: dates.SearchBillFromDate || "null",
       PageNumber: pageNumber,
       Order: "Descending",
       OrderByColumn: "ReservationID"
@@ -323,6 +345,7 @@ export class DutyRegisterService
   }
 
   getTableDataSort(criteria: SearchCriteria,pageNumber: number,coloumName: string,sortType: string): Observable<any> {
+    const dates = this.applyDateFields(criteria);
     const updatedCriteria = {
       UserID:this.generalService.getUserID(),
       ShowAllLocation:this.generalService.getShowAllLocation(),
@@ -334,15 +357,15 @@ export class DutyRegisterService
       SearchKAMID: criteria.SearchKAMID || 0,
       SearchCustomerPersonName: criteria.SearchCustomerPersonName || "null",
       SearchDutyType: criteria.SearchDutyType || "null",
-      SearchFeedbackDate: criteria.SearchFeedbackDate || "null",
+      SearchFeedbackDate: dates.SearchFeedbackDate || "null",
       SearchSlipReceipt: criteria.SearchSlipReceipt,
       SearchClosureType: criteria.SearchClosureType || "null",
       SearchDispatchLocationName: criteria.SearchDispatchLocation || "null",
       SearchMOP: criteria.SearchMOP || "null",
       SearchSupplierType: criteria.SearchSupplierType || "null",
       SearchSupplierName: criteria.SearchSupplier || "null",
-      SearchFromDate: criteria.SearchFromDate || "null",
-      SearchToDate: criteria.SearchToDate || "null",
+      SearchFromDate: dates.SearchFromDate || "null",
+      SearchToDate: dates.SearchToDate || "null",
       SearchSalesPersonName: criteria.SearchSalesPersonName || "null",
       SearchCarSent: criteria.SearchCarSent || "null",
       SearchCarBook: criteria.SearchCarBook || "null",
@@ -355,6 +378,7 @@ export class DutyRegisterService
       SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,
       SearchDri: criteria.SearchDri || "null",
       SearchCarNo: criteria.SearchCarNo || "null",
+      SearchInventoryID: criteria.SearchInventoryID || 0,
       SearchSupplierO: criteria.SearchSupplierO || "null",
       SearchRes: criteria.SearchRes || "null",
       SearchDuty: criteria.SearchDuty || "null",
@@ -362,14 +386,14 @@ export class DutyRegisterService
       // SearchGuestEmail: criteria.SearchGuestEmail || "null",
       SearchGuestMobile: criteria.SearchGuestMobile || "null",
       SearchCity: criteria.SearchCity || "null",
-      SearchCancellationDateFrom: criteria.SearchCancellationDateFrom || "null",
-      SearchCancellationDateTo: criteria.SearchCancellationDateTo || "null",
-      SearchBookingDateFrom: criteria.SearchBookingDateFrom || "null",
-      SearchBookingDate: criteria.SearchBookingDate || "null",
+      SearchCancellationDateFrom: dates.SearchCancellationDateFrom || "null",
+      SearchCancellationDateTo: dates.SearchCancellationDateTo || "null",
+      SearchBookingDateFrom: dates.SearchBookingDateFrom || "null",
+      SearchBookingDate: dates.SearchBookingDate || "null",
       SearchChangeMOPCase: criteria.SearchChangeMOPCase || "null",  
       SearchLocationGroup: criteria.SearchLocationGroup || "null",
-      SearchBillFromDate: criteria.SearchBillFromDate || "null",
-      SearchBillToDate: criteria.SearchBillToDate || "null",
+      SearchBillFromDate: dates.SearchBillFromDate || "null",
+      SearchBillToDate: dates.SearchBillToDate || "null",
       PageNumber: pageNumber,
       Order: sortType || "Descending",
       OrderByColumn: coloumName || "ReservationID"
@@ -390,6 +414,8 @@ export class DutyRegisterService
       return value;
     };
 
+    const dates = this.applyDateFields(criteria);
+
     return {
       UserID: this.generalService.getUserID(),
       ShowAllLocation: this.generalService.getShowAllLocation(),
@@ -401,15 +427,16 @@ export class DutyRegisterService
       SearchKAMID: criteria.SearchKAMID || 0,
       SearchCustomerPersonName: toNull(criteria.SearchCustomerPersonName),
       SearchDutyType: toNull(criteria.SearchDutyType),
-      SearchFeedbackDate: toNull(criteria.SearchFeedbackDate),
+      SearchFeedbackDate: toNull(dates.SearchFeedbackDate),
       SearchSlipReceipt: criteria.SearchSlipReceipt,
       SearchClosureType: toNull(criteria.SearchClosureType),
       SearchDispatchLocationName: toNull(criteria.SearchDispatchLocation),
       SearchMOP: toNull(criteria.SearchMOP),
       SearchSupplierType: toNull(criteria.SearchSupplierType),
       SearchSupplierName: toNull(criteria.SearchSupplier),
-      SearchFromDate: toNull(criteria.SearchFromDate),
-      SearchToDate: toNull(criteria.SearchToDate),
+      SearchSupplierID: criteria.SearchSupplierID || 0,
+      SearchFromDate: toNull(dates.SearchFromDate),
+      SearchToDate: toNull(dates.SearchToDate),
       SearchSalesPersonName: toNull(criteria.SearchSalesPersonName),
       SearchCarSent: toNull(criteria.SearchCarSent),
       SearchCarBook: toNull(criteria.SearchCarBook),
@@ -422,20 +449,21 @@ export class DutyRegisterService
       SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,
       SearchDri: toNull(criteria.SearchDri),
       SearchCarNo: toNull(criteria.SearchCarNo),
+      SearchInventoryID: criteria.SearchInventoryID || 0,
       SearchSupplierO: toNull(criteria.SearchSupplierO),
       SearchRes: toNull(criteria.SearchRes),
       SearchDuty: toNull(criteria.SearchDuty),
       SearchGuestName: toNull(criteria.SearchGuestName),
       SearchGuestMobile: toNull(criteria.SearchGuestMobile),
       SearchCity: toNull(criteria.SearchCity),
-      SearchCancellationDateFrom: toNull(criteria.SearchCancellationDateFrom),
-      SearchCancellationDateTo: toNull(criteria.SearchCancellationDateTo),
-      SearchBookingDateFrom: toNull(criteria.SearchBookingDateFrom),
-      SearchBookingDate: toNull(criteria.SearchBookingDate),
+      SearchCancellationDateFrom: toNull(dates.SearchCancellationDateFrom),
+      SearchCancellationDateTo: toNull(dates.SearchCancellationDateTo),
+      SearchBookingDateFrom: toNull(dates.SearchBookingDateFrom),
+      SearchBookingDate: toNull(dates.SearchBookingDate),
       SearchChangeMOPCase: toNull(criteria.SearchChangeMOPCase),
       SearchLocationGroup: toNull(criteria.SearchLocationGroup),
-      SearchBillFromDate: toNull(criteria.SearchBillFromDate),
-      SearchBillToDate: toNull(criteria.SearchBillToDate)
+      SearchBillFromDate: toNull(dates.SearchBillFromDate),
+      SearchBillToDate: toNull(dates.SearchBillToDate)
     };
   }
 
@@ -451,6 +479,12 @@ export class DutyRegisterService
   downloadExportJob(jobId: string): Observable<Blob> {
     return this.httpClient.get(`${this.API_URL}/ExportCsv/Download/${jobId}`, {
       responseType: 'blob'
+    });
+  }
+
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
     });
   }
 

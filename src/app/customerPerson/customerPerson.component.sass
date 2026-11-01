@@ -1,0 +1,84 @@
+$cp-table-width: 1640px
+
+.scrollable-table-container
+  width: 100%
+  overflow: auto
+
+:host ::ng-deep .customer-person-table.floating-header-table
+  width: $cp-table-width !important
+  min-width: $cp-table-width !important
+  max-width: $cp-table-width !important
+
+:host ::ng-deep .customer-person-table .mat-header-row,
+:host ::ng-deep .customer-person-table .mat-mdc-header-row,
+:host ::ng-deep .customer-person-table .mat-row,
+:host ::ng-deep .customer-person-table .mat-mdc-row
+  display: flex !important
+  width: $cp-table-width !important
+  min-width: $cp-table-width !important
+  max-width: $cp-table-width !important
+  box-sizing: border-box
+
+:host ::ng-deep .customer-person-table .mat-header-cell,
+:host ::ng-deep .customer-person-table .mat-mdc-header-cell,
+:host ::ng-deep .customer-person-table .mat-cell,
+:host ::ng-deep .customer-person-table .mat-mdc-cell
+  flex: 0 0 auto !important
+  box-sizing: border-box
+  padding: 6px 8px !important
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap !important
+  font-size: 13px
+
+:host ::ng-deep .customer-person-table .mat-header-cell,
+:host ::ng-deep .customer-person-table .mat-mdc-header-cell
+  font-weight: 600
+  white-space: nowrap !important
+
+@mixin cp-column($width)
+  width: $width !important
+  min-width: $width !important
+  max-width: $width !important
+  flex-basis: $width !important
+
+:host ::ng-deep .customer-person-table .mat-column-customerPersonName
+  @include cp-column(200px)
+
+:host ::ng-deep .customer-person-table .mat-column-customerName
+  @include cp-column(180px)
+
+:host ::ng-deep .customer-person-table .mat-column-gender
+  @include cp-column(90px)
+
+:host ::ng-deep .customer-person-table .mat-column-importance
+  @include cp-column(110px)
+
+:host ::ng-deep .customer-person-table .mat-column-isContactPerson
+  @include cp-column(150px)
+
+:host ::ng-deep .customer-person-table .mat-column-isAdmin,
+:host ::ng-deep .customer-person-table .mat-column-isBooker,
+:host ::ng-deep .customer-person-table .mat-column-isPassenger
+  @include cp-column(110px)
+
+:host ::ng-deep .customer-person-table .mat-column-isDefaultForIntegrationRequest
+  @include cp-column(270px)
+
+:host ::ng-deep .customer-person-table .mat-column-oldRentNetID
+  @include cp-column(110px)
+
+:host ::ng-deep .customer-person-table .mat-column-status
+  @include cp-column(90px)
+
+:host ::ng-deep .customer-person-table .mat-column-actions
+  @include cp-column(110px)
+  overflow: visible !important
+
+:host ::ng-deep .customer-person-table .mat-column-actions .mat-mdc-raised-button,
+:host ::ng-deep .customer-person-table .mat-column-actions .mat-raised-button
+  height: 28px !important
+  min-height: 28px !important
+  padding: 0 10px !important
+  font-size: 12px !important
+  min-width: 72px !important

@@ -330,12 +330,31 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
       input.addEventListener('input', this.pacLayoutListener);
       this.placeChangedListener = this.autocomplete.addListener('place_changed', () => {
         const place = this.autocomplete.getPlace();
+        const displayText = (input.value || '').trim();
+        if (displayText && place && typeof place === 'object') {
+          place.rentnetDisplayText = displayText;
+        }
         this.zone.run(() => this.onAddressChange.emit(place));
       });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn('[google-places-shim] Autocomplete init failed:', err);
     }
+  }
+
+  private measurePacPanelWidth(pac: HTMLElement, minWidth: number): number {
+    let maxItem = 0;
+    const items = pac.querySelectorAll('.pac-item');
+    items.forEach((node) => {
+      const el = node as HTMLElement;
+      maxItem = Math.max(maxItem, el.scrollWidth, el.offsetWidth);
+    });
+    const content = Math.max(maxItem, pac.scrollWidth, minWidth);
+    const viewportCap =
+      typeof window !== 'undefined'
+        ? Math.min(window.innerWidth * 0.92, window.innerWidth - 24)
+        : content;
+    return Math.min(Math.max(minWidth, content + 16), viewportCap);
   }
 
   private applyPacLayerStyles(input: HTMLInputElement, pacEls: HTMLElement[]): void {
@@ -349,17 +368,19 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
     if (ir.width <= 0 && ir.height <= 0) {
       return;
     }
-    const w = Math.max(Math.round(ir.width), 260);
+    const minW = Math.max(Math.round(ir.width), 260);
     const usePop = supportsManualPopover();
     const host = usePop ? getOrCreatePacPopHost() : null;
 
     for (const pac of pacEls) {
+      const w = this.measurePacPanelWidth(pac, minW);
       if (usePop && host) {
         host.appendChild(pac);
         host.style.setProperty('position', 'fixed', 'important');
         host.style.setProperty('left', `${Math.round(ir.left)}px`, 'important');
         host.style.setProperty('top', `${Math.round(ir.bottom)}px`, 'important');
         host.style.setProperty('width', `${w}px`, 'important');
+        host.style.setProperty('max-width', 'min(92vw, calc(100vw - 24px))', 'important');
         host.style.setProperty('z-index', '2147483647', 'important');
         host.style.setProperty('bottom', 'auto', 'important');
         host.style.setProperty('right', 'auto', 'important');
@@ -367,7 +388,9 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
         pac.style.setProperty('position', 'static', 'important');
         pac.style.setProperty('left', 'auto', 'important');
         pac.style.setProperty('top', 'auto', 'important');
-        pac.style.setProperty('width', '100%', 'important');
+        pac.style.setProperty('width', 'max-content', 'important');
+        pac.style.setProperty('min-width', '100%', 'important');
+        pac.style.setProperty('max-width', '100%', 'important');
         pac.style.setProperty('z-index', 'auto', 'important');
         pac.style.setProperty('bottom', 'auto', 'important');
         pac.style.setProperty('right', 'auto', 'important');
@@ -375,7 +398,8 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
         pac.style.setProperty('opacity', '1', 'important');
         pac.style.setProperty('transform', 'translateZ(0)', 'important');
         pac.style.setProperty('isolation', 'isolate', 'important');
-        pac.style.setProperty('overflow', 'visible', 'important');
+        pac.style.setProperty('overflow-x', 'auto', 'important');
+        pac.style.setProperty('overflow-y', 'visible', 'important');
         pac.style.setProperty('background-color', '#ffffff', 'important');
         try {
           (host as unknown as { showPopover?: () => void }).showPopover?.();
@@ -388,6 +412,7 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
         pac.style.setProperty('left', `${Math.round(ir.left)}px`, 'important');
         pac.style.setProperty('top', `${Math.round(ir.bottom)}px`, 'important');
         pac.style.setProperty('width', `${w}px`, 'important');
+        pac.style.setProperty('max-width', 'min(92vw, calc(100vw - 24px))', 'important');
         pac.style.setProperty('z-index', '2147483647', 'important');
         pac.style.setProperty('bottom', 'auto', 'important');
         pac.style.setProperty('right', 'auto', 'important');
@@ -395,7 +420,8 @@ export class GooglePlaceDirective implements AfterViewInit, OnChanges, OnDestroy
         pac.style.setProperty('opacity', '1', 'important');
         pac.style.setProperty('transform', 'translateZ(0)', 'important');
         pac.style.setProperty('isolation', 'isolate', 'important');
-        pac.style.setProperty('overflow', 'visible', 'important');
+        pac.style.setProperty('overflow-x', 'auto', 'important');
+        pac.style.setProperty('overflow-y', 'visible', 'important');
         pac.style.setProperty('background-color', '#ffffff', 'important');
       }
     }

@@ -23,20 +23,18 @@ import { IncidenceService } from '../incidence/incidence.service';
 import { InterstateTaxEntryService } from '../interstateTaxEntry/interstateTaxEntry.service';
 import { DutyPostPickUPCallService } from '../dutyPostPickUPCall/dutyPostPickUPCall.service';
 import { PassToSupplierService } from '../passToSupplier/passToSupplier.service';
-import { AppDataMissingStatusService } from '../appDataMissingStatus/appDataMissingStatus.service';
 import { PassengerDetailsService } from '../passengerDetails/passengerDetails.service';
 import { ClossingOneService } from '../clossingOne/clossingOne.service';
 import { SpecialInstructionInfoComponent } from '../SpecialInstructionInfo/SpecialInstructionInfo.component';
 import moment from 'moment';
 import { DutyPostPickUPCallModel } from '../dutyPostPickUPCall/dutyPostPickUPCall.model';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ReservationDetails } from '../reservationDetails/reservationDetails.model';
 import { PassengerDetails } from '../passengerDetails/passengerDetails.model';
 import { ReservationLocationTransferLogModel } from '../reservationLocationTransferLog/reservationLocationTransferLog.model';
 import { PassToSupplierModel } from '../passToSupplier/passToSupplier.model';
 import { InterstateTaxEntry } from '../interstateTaxEntry/interstateTaxEntry.model';
-import { AppDataMissingStatusModel } from '../appDataMissingStatus/appDataMissingStatus.model';
 import { DriverOfficialIdentityNumberDD } from '../general/driverOfficialIdentityNumberDD.model';
 import { DisputeTypeDropDown } from '../dispute/disputeTypeDropDown.model';
 import { DriverInventoryAssociationDropDown } from '../driverInventoryAssociation/driverInventoryAssociationDropDown';
@@ -53,6 +51,7 @@ import { FormDialogComponent as PassToSupplierFormDialogComponent } from '../pas
 import { FormDialogComponent as MessagingDialog } from '../reservationMessaging/dialogs/form-dialog/form-dialog.component';
 import { MTSFormDialogComponent } from '../mailSupplier/dialogs/form-dialog/form-dialog.component';
 import { PassengerInfoComponent } from '../PassengerInfo/PassengerInfo.component';
+import { PassengerPlacardComponent } from '../PassengerPlacard/PassengerPlacard.component';
 import { TimeAndAddressInfoComponent } from '../TimeAndAddressInfo/TimeAndAddressInfo.component';
 import { StopOnMapInfoComponent } from '../StopOnMapInfo/StopOnMapInfo.component';
 import { StopDetailsInfoComponent } from '../StopDetailsInfo/StopDetailsInfo.component';
@@ -84,8 +83,6 @@ import { LocationInDetailShowComponent } from '../locationInDetailShow/locationI
 import { DropOffDetailShowComponent } from '../dropOffDetailShow/dropOffDetailShow.component';
 import { DriverRemarkDetailsComponent } from '../DriverRemarkDetails/DriverRemarkDetails.component';
 import { FormDialogdriverRemarkComponent } from '../driverRemark/dialogs/form-dialog/form-dialog.component';
-import { CarMovingStatusByAppComponent } from '../carMovingStatusByApp/carMovingStatusByApp.component';
-import { AppDataMissingStatusComponent } from '../appDataMissingStatus/appDataMissingStatus.component';
 import { FormDialogComponent } from '../feedBack/dialogs/form-dialog/form-dialog.component';
 import { NextDayInstructionFormDialogComponent } from '../nextDayInstruction/dialogs/form-dialog/form-dialog.component';
 import { DutyPostFormDialogComponent } from '../dutyPostPickUPCall/dialogs/form-dialog/form-dialog.component';
@@ -111,6 +108,8 @@ import { isAllotedBooking } from '../shared/messaging-validation.util';
 import { ReservationUpsellService } from '../reservationUpsell/reservationUpsell.service';
 import { UpsellFlowDialogComponent } from '../reservationUpsell/dialogs/upsell-flow-dialog/upsell-flow-dialog.component';
 import { CancelUpsellDialogComponent } from '../reservationUpsell/dialogs/cancel-upsell-dialog/cancel-upsell-dialog.component';
+import { UpsellDeclineLogDialogComponent } from '../reservationUpsell/dialogs/upsell-decline-log-dialog/upsell-decline-log-dialog.component';
+import { UpsellHistoryDialogComponent } from '../reservationUpsell/dialogs/upsell-history-dialog/upsell-history-dialog.component';
 import { ReservationUpsellStatus } from '../reservationUpsell/reservationUpsell.model';
 
 @Component({
@@ -129,6 +128,9 @@ export class ControlPanelDialogeComponent {
   reservationID: any;
   index: number;
   totalData = 0;
+  isCountLoading = false;
+  private headerSearchGeneration = 0;
+  private headerCountSub?: Subscription;
   recordsPerPage = 50;
   isLoading = true;
   currentPage = 1;
@@ -168,14 +170,7 @@ export class ControlPanelDialogeComponent {
   public advanceTableRLT: ReservationLocationTransferLogModel | null;
   ShowAllLocation: any;
 
-  dataSourceForAppDataMissingStatus: AppDataMissingStatusModel[] | null;
   status: string;
-  currentLocationLatitude: string;
-  currentLocationLongitude: string;
-  currentAddress: any;
-  locationBeforeTwoMinutesLatitude: string;
-  locationBeforeTwoMinutesLongitude: string;
-  locationBeforeTwoMinutesAddress: any;
 
   @Output() newDataAddedEvent = new EventEmitter<boolean>();
   @Input() newDataAddedEvents = new EventEmitter<boolean>();
@@ -193,6 +188,7 @@ export class ControlPanelDialogeComponent {
   verifyDutyStatusAndCacellationStatus: any;
 
   ReservationStatus:any;
+  showReactivateReservationOption = false;
 
   /** Display line under KAM button; keyed by customerID */
   kamSummaryByCustomerId: Record<number, string> = {};
@@ -227,7 +223,6 @@ export class ControlPanelDialogeComponent {
     public incidenceService: IncidenceService,
     public passengerDetailsService: PassengerDetailsService,
     public reservationLocationTransferLogService: ReservationLocationTransferLogService,
-    public appDataMissingStatusService: AppDataMissingStatusService,
     public interstateTaxEntryService: InterstateTaxEntryService,
     public passToSupplierService: PassToSupplierService,
     public dutyPostPickUPCallService: DutyPostPickUPCallService,
@@ -265,7 +260,11 @@ export class ControlPanelDialogeComponent {
         this.IsPostPickUpCallAllowedToCustomerPerson =  this.reservationInfo[0].isPostPickUpCallAllowedToCustomerPerson;
 
         console.log('Fetched reservation details:', this.reservationInfo);
-        this.ReservationStatus = list[0]?.reservationStatus ?? null;
+        this.ReservationStatus =
+          list[0]?.reservationStatus ??
+          list[0]?.ReservationStatus ??
+          null;
+        this.loadReactivatePermission();
         this.prefetchKamSummaries(list);
         this.loadUpsellStatus(reservationID);
         this.ngZone.run(() => {
@@ -275,6 +274,7 @@ export class ControlPanelDialogeComponent {
       (error: HttpErrorResponse) => {
         this.reservationInfo = null;
         this.ReservationStatus = null;
+        this.showReactivateReservationOption = false;
         this.kamSummaryByCustomerId = {};
         this.kamRowsByCustomerId = {};
         this.cdr.detectChanges();
@@ -317,11 +317,14 @@ export class ControlPanelDialogeComponent {
     }
 
     const dialogRef = this.dialog.open(UpsellFlowDialogComponent, {
-      width: '760px',
+      width: '680px',
       maxWidth: '95vw',
+      autoFocus: false,
       data: {
         reservationID: this.reservationID,
-        hasActiveUpsell: !!this.upsellStatus?.hasActiveUpsell
+        hasActiveUpsell: !!this.upsellStatus?.hasActiveUpsell,
+        currentVehicleCategoryName: this.upsellStatus?.currentVehicleCategoryName || '',
+        currentContractRate: this.upsellStatus?.currentContractRate ?? null
       }
     });
     dialogRef.afterClosed().subscribe((result) => {
@@ -345,9 +348,32 @@ export class ControlPanelDialogeComponent {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.saved) {
+        // Clear green Upsold immediately; loadData refreshes true status from API.
+        if (this.upsellStatus) {
+          this.upsellStatus.hasActiveUpsell = false;
+          this.cdr.detectChanges();
+        }
         this.loadData(this.reservationID, this.index);
         this.newDataAddedEvent.emit(true);
       }
+    });
+  }
+
+  openUpsellDeclineLogDialog(): void {
+    this.dialog.open(UpsellDeclineLogDialogComponent, {
+      width: '760px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: { reservationID: this.reservationID }
+    });
+  }
+
+  openUpsellHistoryDialog(): void {
+    this.dialog.open(UpsellHistoryDialogComponent, {
+      width: '960px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: { reservationID: this.reservationID }
     });
   }
 
@@ -376,6 +402,7 @@ export class ControlPanelDialogeComponent {
   private prefetchKamSummaries(list: any[]): void {
     this.kamSummaryByCustomerId = {};
     this.kamRowsByCustomerId = {};
+    const customerIds: number[] = [];
     const seen = new Set<number>();
     for (const row of list) {
       const cid = row?.customerID;
@@ -387,13 +414,33 @@ export class ControlPanelDialogeComponent {
         continue;
       }
       seen.add(n);
+      customerIds.push(n);
       this.kamSummaryByCustomerId[n] = '…';
-      this._generalService
-        .GetCustomerKam(n)
-        .pipe(take(1))
-        .subscribe(
-          (kams: any[]) => {
-            const arr = kams == null ? [] : Array.isArray(kams) ? kams : [kams];
+    }
+    if (!customerIds.length) {
+      return;
+    }
+
+    this._generalService
+      .GetCustomerKamBatch(customerIds)
+      .pipe(take(1))
+      .subscribe(
+        (entries: any[]) => {
+          const byCustomerId = new Map<number, any[]>();
+          (entries || []).forEach((entry) => {
+            const customerId = Number(entry?.customerID ?? entry?.CustomerID);
+            if (Number.isNaN(customerId)) {
+              return;
+            }
+            const kams = entry?.kams ?? entry?.Kams;
+            byCustomerId.set(
+              customerId,
+              kams == null ? [] : Array.isArray(kams) ? kams : [kams]
+            );
+          });
+
+          for (const n of customerIds) {
+            const arr = byCustomerId.get(n) ?? [];
             this.kamRowsByCustomerId[n] = arr;
             if (!arr.length) {
               this.kamSummaryByCustomerId[n] = '—';
@@ -405,15 +452,17 @@ export class ControlPanelDialogeComponent {
                 .filter(Boolean);
               this.kamSummaryByCustomerId[n] = names.length ? names.join(', ') : '—';
             }
-            this.ngZone.run(() => this.cdr.detectChanges());
-          },
-          () => {
+          }
+          this.ngZone.run(() => this.cdr.detectChanges());
+        },
+        () => {
+          for (const n of customerIds) {
             this.kamSummaryByCustomerId[n] = '—';
             this.kamRowsByCustomerId[n] = [];
-            this.ngZone.run(() => this.cdr.detectChanges());
           }
-        );
-    }
+          this.ngZone.run(() => this.cdr.detectChanges());
+        }
+      );
   }
 
   kamSummaryText(item: any): string {
@@ -1003,6 +1052,15 @@ export class ControlPanelDialogeComponent {
       width: '500px',
       data: {
         advanceTable: item.passengerDetails
+      }
+    });
+  }
+
+  openPassengerPlacard(passengerName: string) {
+    this.dialog.open(PassengerPlacardComponent, {
+      width: '640px',
+      data: {
+        passengerName: passengerName || ''
       }
     });
   }
@@ -2446,6 +2504,8 @@ incidenceOne(item: any) {
       {
         
         width:'60%',
+        maxWidth: '920px',
+        panelClass: 'trip-feedback-dialog-panel',
         data: 
           {
              advanceTable: this.advanceTable,
@@ -2461,9 +2521,9 @@ incidenceOne(item: any) {
             driverName:driverName,
             reservationPassengerID:reservationPassengerID,
             feedbackRemark:feedbackRemark,
-            customerPersonName:item.customerPerson.customerPersonName,
+            customerPersonName: item?.passengerDetails?.[0]?.customerPersonName,
             item:item ,
-            verifyDutyStatusAndCacellationStatus:this.verifyDutyStatusAndCacellationStatus
+            verifyDutyStatusAndCacellationStatus: 'Changes allow'
           }
           
       });
@@ -2491,26 +2551,7 @@ TrackOnMapInfo(reservationID: number, item?: any) {
   const trackUrl = `https://ecopartner.ecoserp.in/?id=${encodeURIComponent(String(Math.trunc(rid)))}`;
   window.open(trackUrl, '_blank', 'noopener,noreferrer');
 }
- //---------- Car Moving Status By App Popup----------
-  CarMovingStatusByApp(item: any) 
-  {
-    this.dialog.open(CarMovingStatusByAppComponent, {
-      width: '500px',
-      data: {
-        dutySlipID: item.dutySlipID
-      }
-    });
-  }
-  //---------- Car Moving Status By App Popup----------
-  AppDataMissingStatus(item: any) 
-  {
-    this.dialog.open(AppDataMissingStatusComponent, {
-      width: '500px',
-      data: {
-        dutySlipID: item.dutySlipID
-      }
-    });
-  }
+
   /** Manual WA/SMS/Mail from CP is allowed once the booking is allotted (incl. Hard). */
   canSendSmsWhatsappMail(item: any): boolean {
     if (this.ReservationStatus === 'Cancelled') {
@@ -2649,6 +2690,8 @@ TrackOnMapInfo(reservationID: number, item?: any) {
 
   CancellReservation(item:any ,i: any)
   {
+    const cancelReservationDialogFlags = this.getCancelReservationDialogFlags(item);
+
     // if(item.allotmentType === 'Hard')
     // {
     //   Swal.fire({
@@ -2676,7 +2719,8 @@ TrackOnMapInfo(reservationID: number, item?: any) {
       this.dialog.open(FormDialogCRAComponent, {
       width: '500px',
       data: {
-        advanceTable: item
+        advanceTable: item,
+        ...cancelReservationDialogFlags
       }
     });
     }
@@ -2703,12 +2747,13 @@ TrackOnMapInfo(reservationID: number, item?: any) {
                   data: 
                     {
                       popUpTitle: 'Cancel Reservation',
-                      advanceTable: this.advanceTable,             
-                      allotmentID:this.reservationInfo[0].allotmentID,
-                      reservationID: this.reservationInfo[0].reservationID,
-                      allotmentStatus: this.reservationInfo[0].allotmentStatus,
-                      allotmentType: this.reservationInfo[0].allotmentType,  
-                        status: status        
+                      advanceTable: item,             
+                      allotmentID: item.allotmentID,
+                      reservationID: item.reservationID,
+                      allotmentStatus: item.allotmentStatus,
+                      allotmentType: item.allotmentType,  
+                        status: status,
+                        ...cancelReservationDialogFlags
                     }
                     
                 });
@@ -2746,12 +2791,12 @@ TrackOnMapInfo(reservationID: number, item?: any) {
                 data: 
                   {
                     popUpTitle: 'Cancel Reservation',
-                    advanceTable: this.advanceTable,             
-                    allotmentID:this.reservationInfo[0].allotmentID,
-                    reservationID: this.reservationInfo[0].reservationID,
-                    allotmentStatus: this.reservationInfo[0].allotmentStatus,
-                    status: '' 
-                          
+                    advanceTable: item,             
+                    allotmentID: item.allotmentID,
+                    reservationID: item.reservationID,
+                    allotmentStatus: item.allotmentStatus,
+                    status: '',
+                    ...cancelReservationDialogFlags
                   }
                   
               });
@@ -2783,6 +2828,126 @@ TrackOnMapInfo(reservationID: number, item?: any) {
     }      
   }
 
+  isCancelledReservation(item?: any): boolean {
+    const status =
+      item?.reservationStatus ??
+      item?.ReservationStatus ??
+      this.ReservationStatus;
+    return String(status || '').trim().toLowerCase() === 'cancelled';
+  }
+
+  private loadReactivatePermission(): void {
+    this.showReactivateReservationOption = false;
+    if (!this.isCancelledReservation(this.reservationInfo?.[0])) {
+      return;
+    }
+
+    const employeeId = this._generalService.getUserID();
+    if (!employeeId) {
+      this.showReactivateReservationOption =
+        this._generalService.canReactivateBackDateReservation();
+      return;
+    }
+
+    this.controlPanelDialogeService
+      .getReactivateReservationPermission(employeeId)
+      .subscribe(
+        (data) => {
+          this.showReactivateReservationOption = !!(
+            data?.canReactivate ?? data?.CanReactivate
+          );
+          this.cdr.detectChanges();
+        },
+        () => {
+          this.showReactivateReservationOption =
+            this._generalService.canReactivateBackDateReservation();
+          this.cdr.detectChanges();
+        }
+      );
+  }
+
+  reactivateCancelledReservation(item: any): void {
+    if (!this.showReactivateReservationOption) {
+      return;
+    }
+
+    const reservationID = item?.reservationID ?? this.reservationID;
+    Swal.fire({
+      title: 'Reactivate Reservation',
+      text: 'Are you sure you want to reactivate this cancelled reservation?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, reactivate',
+      cancelButtonText: 'No'
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      const userID = this._generalService.getUserID();
+      this.controlPanelDialogeService.reactivateReservation(reservationID, userID).subscribe(
+        () => {
+          Swal.fire({
+            title: '',
+            icon: 'success',
+            text: 'Reservation reactivated successfully.'
+          });
+          this._generalService.sendUpdate('ReactivateReservation:ControlPanel:Success');
+          this.loadData(this.reservationID, this.index);
+        },
+        (error) => {
+          const message =
+            error?.error?.message ??
+            'Unable to reactivate reservation. Please try again.';
+          Swal.fire({
+            title: '',
+            icon: 'warning',
+            text: message
+          });
+        }
+      );
+    });
+  }
+
+  private getCancelReservationDialogFlags(item?: any) {
+    if (this.isPastPickupDate(item) && !this._generalService.canCancelBackDateReservation()) {
+      return {
+        backDateCancellationBlocked: true,
+        backDateCancellationMessage:
+          'Past reservation cancellation is not permitted for your role.'
+      };
+    }
+
+    return {
+      backDateCancellationBlocked: false,
+      backDateCancellationMessage: ''
+    };
+  }
+
+  private resolvePickupDate(source?: any): any {
+    if (!source) {
+      return null;
+    }
+    return (
+      source?.pickup?.pickupDate ??
+      source?.pickup?.PickupDate ??
+      source?.pickupDate ??
+      source?.PickupDate ??
+      null
+    );
+  }
+
+  private isPastPickupDate(item?: any): boolean {
+    const pickupDateValue =
+      this.resolvePickupDate(item) ??
+      this.resolvePickupDate(this.reservationInfo?.[0]);
+    if (!pickupDateValue) {
+      return false;
+    }
+    const parsed = moment(pickupDateValue).startOf('day');
+    return parsed.isValid() && parsed.isBefore(moment().startOf('day'));
+  }
+
 public getInvoiceNumber(item:any ,i: any) 
  {
       this.controlPanelDialogeService.checkInvoiceNumber(item.reservationID).subscribe
@@ -2797,9 +2962,9 @@ public getInvoiceNumber(item:any ,i: any)
           else
           {
              Swal.fire({
-                  title: '',
+                  title: 'Cancellation not allowed',
                   icon: 'warning',
-                  html: `<b>Invoice is generate so reservation is not cancelled...</b>`
+                  text: 'This reservation cannot be cancelled because an active invoice has already been generated.'
                   })
                  return;
           }
@@ -2816,12 +2981,27 @@ public getInvoiceNumber(item:any ,i: any)
       ...(this.filterForm?.getRawValue() ?? {}),
       showAllLocation: this.getEffectiveShowAllLocation(this.filterForm?.get('showAllLocation')?.value)
     };
+    const searchGeneration = ++this.headerSearchGeneration;
+    if (this.headerCountSub) {
+      this.headerCountSub.unsubscribe();
+      this.headerCountSub = undefined;
+    }
+    const bookingLookup = this.isBookingNumberLookup(requestPayload);
+    if (!bookingLookup) {
+      this.isCountLoading = true;
+    }
     this._controlPanelDesignService.getReservationHeaderDetails(status,requestPayload,currentPage,pageSize,this.sortBy,this.orderBy).subscribe(
       (data: ControlPanelHeaderData) => {
+          if (searchGeneration !== this.headerSearchGeneration) {
+            return;
+          }
           if (data != null) 
           {
             this.reservationHeaderInfo = data.reservationHeaderDetails;
-            this.totalData = data.totalRecords;
+            if (data.totalRecords != null) {
+              this.totalData = data.totalRecords;
+              this.isCountLoading = false;
+            }
 
             if (rowIndex !== undefined)
             {
@@ -2836,12 +3016,46 @@ public getInvoiceNumber(item:any ,i: any)
           {
             this.reservationHeaderInfo = null;
             this.totalData = 0;
+            this.isCountLoading = false;
           }
         },
         (error: HttpErrorResponse) => {
+          if (searchGeneration !== this.headerSearchGeneration) {
+            return;
+          }
           this.reservationHeaderInfo = null;
+          this.isCountLoading = false;
         }
       );
+
+    if (!bookingLookup) {
+      this.headerCountSub = this._controlPanelDesignService
+        .getReservationHeaderCount(status, requestPayload)
+        .subscribe(
+          (countData: { totalRecords: number }) => {
+            if (searchGeneration !== this.headerSearchGeneration) {
+              return;
+            }
+            this.totalData = countData?.totalRecords ?? 0;
+            this.isCountLoading = false;
+          },
+          () => {
+            if (searchGeneration !== this.headerSearchGeneration) {
+              return;
+            }
+            this.isCountLoading = false;
+          }
+        );
+    }
+  }
+
+  private isBookingNumberLookup(filters: Partial<Filters>): boolean {
+    const reservationId = filters?.reservationID;
+    if (reservationId != null && reservationId !== '' && Number(reservationId) !== 0) {
+      return true;
+    }
+    const resId = filters?.resID;
+    return resId != null && String(resId).trim() !== '';
   }
   
 
@@ -2855,7 +3069,6 @@ public getInvoiceNumber(item:any ,i: any)
         allotmentStatus: [this._filters.allotmentStatus],
         billingStatus: [this._filters.billingStatus],
         delays: [this._filters.delays],
-        security: [this._filters.security],
         disputes: [this._filters.disputes],
         reservationType: [this._filters.reservationType],
         guestType: [this._filters.guestType],
@@ -2939,11 +3152,15 @@ public getInvoiceNumber(item:any ,i: any)
           maxWidth: '96vw',
           data:
           {
-            // Pass reservation-table Location Out Time explicitly (not DutySlip.locationOutTime).
+            // Pass reservation-table Location Out Date/Time explicitly (not DutySlip fields).
             advanceTable: {
               ...item,
+              reservationLocationOutDate:
+                item?.reservationLocationOutDate ?? item?.ReservationLocationOutDate ?? item?.locationOutDate ?? null,
               reservationLocationOutTime:
                 item?.reservationLocationOutTime ?? item?.ReservationLocationOutTime ?? null,
+              locationOutDate:
+                item?.reservationLocationOutDate ?? item?.ReservationLocationOutDate ?? item?.locationOutDate ?? null,
               locationOutTime:
                 item?.reservationLocationOutTime ?? item?.ReservationLocationOutTime ?? item?.locationOutTime ?? null
             },

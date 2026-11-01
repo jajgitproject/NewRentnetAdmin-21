@@ -42,8 +42,8 @@ export class Document {
        this.availableToInventory = document.availableToInventory || '';
        this.mandatoryForInventorySoftRegistration = document.mandatoryForInventorySoftRegistration || '';
        this.mandatoryForInventoryRegistrationCompletion = document.mandatoryForInventoryRegistrationCompletion || '';
-       this.startDate=new Date();
-       this.endDate=new Date();
+       this.startDate = document.startDate ?? null;
+       this.endDate = document.endDate ?? null;
     }
   }
   

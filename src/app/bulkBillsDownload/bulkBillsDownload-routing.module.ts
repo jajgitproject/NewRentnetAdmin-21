@@ -9,13 +9,6 @@ const routes: Routes = [
     component: BulkBillsDownloadComponent,
     data: {
       requiredPageKey: 'Bulk Bills Download',
-      alternatePageKeys: [
-        'bulkBillsDownload',
-        'invoiceHome',
-        'Invoice Home',
-        'controlPanelDesign',
-        'Control Panel',
-      ],
     },
   },
 ];

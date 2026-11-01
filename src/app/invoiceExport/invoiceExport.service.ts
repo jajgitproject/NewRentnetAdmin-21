@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { GeneralService } from '../general/general.service';
 import {
   InvoiceExportRow,
+  DriverAppVersionSummaryRow,
   GeneralLineItemInvoiceGapRow,
   GeneralLinkedDutyGapRow,
   VerifiedGfbNotCalculatedCounts,
@@ -49,6 +50,10 @@ export class InvoiceExportService {
       `${this.API_URL}/generalLinkedDutyGap`,
       { params }
     );
+  }
+
+  getDriverAppVersionSummary(): Observable<DriverAppVersionSummaryRow[]> {
+    return this.httpClient.get<DriverAppVersionSummaryRow[]>(`${this.API_URL}/driverAppVersionSummary`);
   }
 
   getVerifiedGfbNotCalculatedCounts(

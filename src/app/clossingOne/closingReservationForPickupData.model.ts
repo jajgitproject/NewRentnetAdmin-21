@@ -65,6 +65,7 @@ export class ClosingReservationForPickupDataModel {
   reservationCreatedOn: Date;
 
   isTimeNotConfirmed: boolean;
+  roundOffTime: boolean;
 
   constructor(closingReservationForPickupDataModel) {
     this.reservationID = closingReservationForPickupDataModel.reservationID || '';
@@ -132,6 +133,10 @@ export class ClosingReservationForPickupDataModel {
     this.reservationCreatedOn = closingReservationForPickupDataModel.reservationCreatedOn  || '';
 
     this.isTimeNotConfirmed = closingReservationForPickupDataModel.isTimeNotConfirmed || '';
+    this.roundOffTime =
+      closingReservationForPickupDataModel.roundOffTime ??
+      closingReservationForPickupDataModel.RoundOffTime ??
+      true;
   }
 }
 

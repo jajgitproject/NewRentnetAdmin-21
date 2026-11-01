@@ -19,44 +19,30 @@
                         <mat-label>New Vendor</mat-label>
                         <input required type="text" matInput formControlName="newRecordName" [matAutocomplete]="auto1">
                         <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="OnVendorSelect($event.option.value)" panelWidth="custom-autocomplete-panel">
-                          <mat-option *ngFor="let option of filteredVendorOptions | async" 
-                            [value]="option.supplierName" (click)="getVendorID(option.supplierID)">
-                          {{option.supplierName}}
+                          <mat-option *ngFor="let option of filteredVendorOptions | async"
+                            [value]="formatSupplierDisplay(option)" (click)="getVendorID(option.supplierID, option.supplierName)">
+                          {{formatSupplierDisplay(option)}}
                           </mat-option>
                         </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('newRecordName').hasError('required')">
+                          Please select a Vendor
+                        </mat-error>
                         <mat-error *ngIf="advanceTableForm.get('newRecordName').hasError('vendorNameInvalid')">
-                          Please Select Valid Vendor
+                          Please select a valid Vendor
                         </mat-error>
                     </mat-form-field>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
-                        <mat-label>Inventory</mat-label>
-                        <input required type="text" matInput formControlName="inventory" [matAutocomplete]="auto2">
-                        <mat-autocomplete #auto2="matAutocomplete" (optionSelected)="OnInventorySelect($event.option.value)" panelWidth="custom-autocomplete-panel">
-                          <mat-option *ngFor="let option of filteredInventoryOptions | async" 
-                            [value]="option.inventory" (click)="getInventoryID(option.inventoryID)">
-                          {{option.inventory}}
-                          </mat-option>
-                        </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['inventory'].hasError('inventoryNameInvalid')">
-                          Please Select Valid Inventory
-                        </mat-error>
-                    </mat-form-field>
-                </div>
-            </div>
-
 
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button *ngIf="saveDisabled" color="primary" (click)="Post()">Select</button>
+                        <button mat-raised-button *ngIf="saveDisabled" color="primary"
+                            [disabled]="!advanceTableForm.valid" (click)="Post()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
                     </div>
                 </div>
             </div>
         </form>
     </div>
+</div>

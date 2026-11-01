@@ -10,6 +10,8 @@ EmployeeDropDown {
    mobile:string;
    email:string;
    name:string;
+   activationStatus: string;
+   employmentStatus: string;
    customerPersonName:string;
    passengerID: number;
    employeeOfficeID:string;
@@ -33,6 +35,8 @@ EmployeeDropDown {
        this.employeeLastName = employeeDropDown.employeeLastName || '';
        this.email = employeeDropDown.email || '';
        this.mobile = employeeDropDown.mobile || '';
+       this.activationStatus = employeeDropDown.activationStatus || '';
+       this.employmentStatus = employeeDropDown.employmentStatus || '';
        this.customerPersonName = employeeDropDown.customerPersonName || '';
         this.oldCustomerkamEmployee = employeeDropDown.oldCustomerkamEmployee || '';
          this.oldKAMID = employeeDropDown.oldKAMID || '';

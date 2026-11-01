@@ -6,6 +6,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuditTrailComponent } from './auditTrail.component';
 import { AuditTrailRoutingModule } from './auditTrail-routing.module';
 import { AuditTrailService } from './auditTrail.service';
+import { AuditChangeDetailsDialogComponent } from './dialogs/change-details-dialog.component';
+import { AuditNlpQuestionsDialogComponent } from './dialogs/nlp-questions-dialog.component';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -18,6 +20,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { MatTableModule } from '@angular/material/table';
 
@@ -41,7 +44,10 @@ import { MatTableModule } from '@angular/material/table';
     MatAutocompleteModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatTableModule
+    MatTableModule,
+    MatDialogModule,
+    AuditChangeDetailsDialogComponent,
+    AuditNlpQuestionsDialogComponent
   ],
   providers: [AuditTrailService]
 })

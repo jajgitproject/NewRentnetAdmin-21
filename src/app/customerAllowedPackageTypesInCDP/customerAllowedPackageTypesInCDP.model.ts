@@ -5,6 +5,7 @@ export class CustomerAllowedPackageTypesInCDP {
   customerGroupID: number;
   packageTypeID: number;
   packageType: string;
+  customerGivenNameToPackageType: string;
    activationStatus:boolean;
    userID:number;
   constructor(customerAllowedPackageTypesInCDP) {
@@ -13,6 +14,7 @@ export class CustomerAllowedPackageTypesInCDP {
        this.customerGroupID = customerAllowedPackageTypesInCDP.customerGroupID || '';
        this.packageTypeID = customerAllowedPackageTypesInCDP.packageTypeID || '';
        this.packageType = customerAllowedPackageTypesInCDP.packageType || '';
+       this.customerGivenNameToPackageType = customerAllowedPackageTypesInCDP.customerGivenNameToPackageType || customerAllowedPackageTypesInCDP.packageType || '';
        this.activationStatus = customerAllowedPackageTypesInCDP.activationStatus || '';
     }
   }

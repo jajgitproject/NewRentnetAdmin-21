@@ -25,6 +25,7 @@ export class OrganizationalEntity {
   organizationalEntityEndDateString:string;
   organizationalEntityCINNo:string;
   organizationalEntityPrefix:string;
+  preFixForEcommerce:string;
   organizationalEntityGSTN:string;
   organizationalEntityOwnership:string;
   organizationalEntitySupplierID:number;
@@ -44,6 +45,9 @@ export class OrganizationalEntity {
   organizationalEntityBranchType:string;
   userID:number;
   oldRentNetService_Location:string;
+  defaultCDPLocation:boolean;
+  isECommerceBranch:boolean;
+  dynamicBranchCode:string;
 
   constructor(organizationalEntity) {
     {
@@ -67,6 +71,7 @@ export class OrganizationalEntity {
        this.organizationalEntityEndDateString = organizationalEntity.organizationalEntityEndDateString || '';
        this.organizationalEntityCINNo = organizationalEntity.organizationalEntityCINNo || '';
        this.organizationalEntityPrefix = organizationalEntity.organizationalEntityPrefix || '';
+       this.preFixForEcommerce = organizationalEntity.preFixForEcommerce || '';
        this.organizationalEntityGSTN = organizationalEntity.organizationalEntityGSTN || '';
        this.organizationalEntityOwnership = organizationalEntity.organizationalEntityOwnership || '';
        this.organizationalEntityAddressString = organizationalEntity.organizationalEntityAddressString || '';
@@ -78,6 +83,9 @@ export class OrganizationalEntity {
        this.organizationalEntityStartDate=new Date();
        //this.organizationalEntityEndDate=new Date();
        this.oldRentNetService_Location=organizationalEntity.oldRentNetService_Location || '';
+       this.defaultCDPLocation=organizationalEntity.defaultCDPLocation === true;
+       this.isECommerceBranch=organizationalEntity.isECommerceBranch === true;
+       this.dynamicBranchCode = organizationalEntity.dynamicBranchCode || '';
     }
   }
   

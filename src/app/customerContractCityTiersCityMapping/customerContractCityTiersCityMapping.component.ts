@@ -321,7 +321,7 @@ if (encryptedCustomerContractCityTiersID && encryptedCustomerContractCityTier &&
                this.refresh();
                this.showNotification(
                 'snackbar-danger',
-                'Duplicate Value Found.....!!!',
+                'This city is already active in this city tier.',
                 'bottom',
                 'center'
               );

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { ReservationService } from './reservation.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
@@ -8,8 +8,8 @@ import { MatSort } from '@angular/material/sort';
 import { ModelForReservation, Reservation, ReservationStatusLog, SameReservationModel } from './reservation.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription } from 'rxjs';
-import { map, startWith, switchMap, catchError } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subject, Subscription, throwError } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -38,6 +38,8 @@ import { FormDialogComponent } from '../viewKAM/dialogs/form-dialog/form-dialog.
 import { ViewKAM } from '../viewKAM/viewKAM.model';
 import { GoogleAddressDropDown } from './googleAddressDropDown.model';
 import { SavedAddressComponent } from './dialogs/saved-address/saved-address.component';
+import { KamPickupAddressHistoryDialogComponent } from './dialogs/kam-pickup-address-history-dialog/kam-pickup-address-history-dialog.component';
+import { SoftCappingBypassDialogComponent } from './dialogs/soft-capping-bypass-dialog/soft-capping-bypass-dialog.component';
 import moment from 'moment';
 import { ReservationCustomerDetails } from '../general/reservationCustomerDetailsDropDown.model';
 import { CustomerReservationFields } from './customerReservationField.model';
@@ -73,7 +75,7 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./reservation.component.sass'],
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
-export class ReservationComponent implements OnInit {
+export class ReservationComponent implements OnInit, OnDestroy {
   @Input() ReservationID:any;
   @Input() action:any;
   @Input() fromForm:any;
@@ -82,6 +84,24 @@ export class ReservationComponent implements OnInit {
   @Input() allotmentType:any = '';
   @Input() IsKAMRole:boolean;
   @Input() LocationOutDate:string | null = null;
+  @Input() testBookingMode = false;
+  @Input() testBookingBusy = false;
+  @Input() testBookingCanSave = false;
+  @Output() testBookingSave = new EventEmitter<void>();
+  @Output() testBookingSaved = new EventEmitter<any>();
+  @Output() testBookingClearImei = new EventEmitter<void>();
+  @Output() testBookingClear = new EventEmitter<void>();
+  /** KAM pickup correction dialog: show only pickup address controls and save via edit API. */
+  @Input() addressCorrectionMode = false;
+  @Input() useEmbeddedReservationContext = false;
+  @Input() hideAddressCorrectionSummaryPanel = false;
+  @Input() embeddedReservationGroupID: any;
+  @Input() embeddedCustomerGroupID: any;
+  @Input() embeddedCustomerID: any;
+  @Input() embeddedCustomerName: any;
+  @Input() embeddedCustomerGroup: any;
+  @Output() addressCorrectionReady = new EventEmitter<void>();
+  @Output() addressCorrectionSaved = new EventEmitter<void>();
   advanceTableFormEdit: FormGroup;
   advanceTable:Reservation;
   dataForReservationList:ModelForReservation | null;
@@ -282,6 +302,7 @@ advanceTableIN: InternalNoteDetails | null;
       gSTForBilling:[''],
       customerConfigurationInvoicingID:[],
       isTimeNotConfirmed:[''],
+      isAddressCorrectionRequiredByKAM:[false],
       tripTo:[''],
       tripType:['']
   })
@@ -366,6 +387,11 @@ advanceTableIN: InternalNoteDetails | null;
   pickupDate: any;
   bookingCount: any;
   cap: any;
+  softCappingBypassPayload: {
+    softCappingByPassReason: string;
+    softCappingByPassDetails: string;
+    softCappingByPassApproverID: number;
+  } | null = null;
   dataSourceCSF:CustomerSpecificDetails[];
   dynamicForm: FormGroup;
   primaryPassengerID: string;
@@ -403,18 +429,27 @@ canCreateReservation: boolean;
   @ViewChild(MatMenuTrigger)
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
+  isPickupCorrectionView(): boolean {
+    return this.addressCorrectionMode && this.useEmbeddedReservationContext;
+  }
+
   ngOnInit() { 
     this.LocationOutDate = this.LocationOutDate?.trim() ? this.LocationOutDate : null;
     this.applyStaticRequiredValidators();
+    if (this.isPickupCorrectionView()) {
+      this.buttonDisabled = false;
+      this.initPickupCorrectionEmbedded();
+      return;
+    }
      this.canCreateReservation =
     localStorage.getItem('canCreateReservation') === 'true';
+    this.rememberAuditReservationId();
     // Enhanced status checking - allow changes for new duplicated bookings
     if(this.status && this.status !== 'Changes allow' && !this.isEditingAllowed()) {
       this.buttonDisabled = true;
     } else {
       this.buttonDisabled = false;
     }
-    debugger;
     if(this.fromForm !=='newForm')
     {
       this.route.queryParams.subscribe(paramsData =>{
@@ -453,6 +488,7 @@ canCreateReservation: boolean;
 
       if (encryptedReservationID) {
         this.ReservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
+        this.rememberAuditReservationId(this.ReservationID);
       }
 
       if (encryptedCustomerGroupID) {
@@ -473,14 +509,12 @@ canCreateReservation: boolean;
       if (this.shouldUseEditPrefill()) {
         this.action = 'edit';
       }
+        this.refreshReservationCustomerAlerts();
             });
           }   
           this.advanceTableForm.controls["customerType"].disable(); 
         this.advanceTableForm.controls["customerCustomerGroup"].disable();
         this.getReservationGSTData();
-        this.getStopReservationReason(this.customerID);
-        this.getReservationAlertForCustomer(this.customerID);
-        this.getAlerMessagetForCustomer(this.customerID);  
         this.InitReservationInvoiceGSTDetails( this.customerID);
         this.InitResrvationGSTForCityID(this.customerID,this.cityID);
         this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
@@ -537,6 +571,7 @@ canCreateReservation: boolean;
     const encryptedReservationID = paramsData.reservationID;
     this.reservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
     this.ReservationID = this.reservationID;
+    this.rememberAuditReservationId(this.ReservationID);
 
     const encryptedTransferedLocationID = paramsData.transferedLocationID;
     this.transferedLocationID = this._generalService.decrypt(decodeURIComponent(encryptedTransferedLocationID));
@@ -661,7 +696,18 @@ onTNCChange(checked: any)
 
   InitPaymentMode() 
   {
-    this._generalService.GetModeOfPaymentByContract(this.contractID).subscribe(
+    const customerID =
+      this.advanceTableForm.getRawValue()?.customerID ||
+      this.advanceTableForm.value?.customerID ||
+      this.customerID ||
+      (this.advanceTable && this.advanceTable.customerID);
+
+    const mopRequest =
+      customerID && this.contractID
+        ? this._generalService.GetModeOfPaymentByCustomerAndContract(customerID, this.contractID)
+        : this._generalService.GetModeOfPaymentByContract(this.contractID);
+
+    mopRequest.subscribe(
       data => {
         this.PaymentModeList = data;
         const control = this.advanceTableForm.controls['modeOfPayment'];
@@ -730,6 +776,9 @@ onTNCChange(checked: any)
 
   CustomerSpecificFieldsloadData()
     {
+      if (this.testBookingMode) {
+        return;
+      }
       const reservationID = this.getCurrentReservationID();
       if (!reservationID) { return; }
       this.newFormService.GetCustomerSpecificFields(reservationID).subscribe(
@@ -759,7 +808,9 @@ onTNCChange(checked: any)
     // access so ngOnInit doesn't throw and abort the rest of the init chain
     // (which previously left contractID / customerID / customerGroupID unset
     // and produced a cascade of 400s to `.../undefined` URLs).
-    const customerID = this.advanceTableForm.value.customerID
+    const customerID = this.advanceTableForm.getRawValue()?.customerID
+      || this.advanceTableForm.value.customerID
+      || this.customerID
       || (this.advanceTable && this.advanceTable.customerID);
 
     if (!customerID) {
@@ -777,9 +828,16 @@ onTNCChange(checked: any)
         // read it, which is what produces NG0100 in dev mode.
         setTimeout(() => {
           const incomingFields = this.toArray<CustomerReservationFields>(data);
+          if (this.testBookingMode && this.toArray(this.CustomerExtraFieldList).length > 0) {
+            return;
+          }
+          const preservedValues: Record<string, unknown> = {};
           const previousDynamicKeys = [...this.arr2];
           previousDynamicKeys.forEach((key) => {
             if (this.advanceTableForm.contains(key)) {
+              if (this.testBookingMode) {
+                preservedValues[key] = this.advanceTableForm.controls[key].value;
+              }
               this.advanceTableForm.removeControl(key);
             }
           });
@@ -793,18 +851,25 @@ onTNCChange(checked: any)
 
             const isMandatory = ele.isMandatory ? [Validators.required] : [];
             const existingControl = this.advanceTableForm.controls[ele.fieldName];
+            const preserved = preservedValues[ele.fieldName];
             if (existingControl) {
               existingControl.setValidators(isMandatory);
+              if (preserved !== undefined && preserved !== null && preserved !== '') {
+                existingControl.setValue(preserved, { emitEvent: false });
+              }
               existingControl.updateValueAndValidity({ emitEvent: false });
             } else {
-              this.advanceTableForm.addControl(ele.fieldName, new FormControl('', isMandatory));
+              this.advanceTableForm.addControl(
+                ele.fieldName,
+                new FormControl(preserved ?? '', isMandatory)
+              );
             }
           });
           this.CustomerExtraFieldList = incomingFields;
 
           // Prefill saved CSF whenever a reservation is open — not only when
           // action === 'edit' (some entry paths omit action but still pass reservationID).
-          if (this.getCurrentReservationID()) {
+          if (this.getCurrentReservationID() && !this.testBookingMode) {
             this.CustomerSpecificFieldsloadData();
           }
 
@@ -862,7 +927,7 @@ private buildCustomerSpecificFieldsPayload(reservationIDOverride?: number): {
   const reservationID = Number(
     reservationIDOverride
       ?? this.getCurrentReservationID()
-      ?? this.advanceTableForm?.value?.reservationID
+      ?? this.advanceTableForm?.getRawValue()?.reservationID
   );
   if (!reservationID || Number.isNaN(reservationID)) {
     return null;
@@ -936,6 +1001,11 @@ private buildReservationSaveBody(
     body.projectCode = Array.isArray(body.projectCode) ? body.projectCode : [];
     body.fieldValue = Array.isArray(body.fieldValue) ? body.fieldValue : [];
     body.customerSpecificFields = body.customerSpecificFields || null;
+    if (this.softCappingBypassPayload) {
+      body.softCappingByPassReason = this.softCappingBypassPayload.softCappingByPassReason;
+      body.softCappingByPassDetails = this.softCappingBypassPayload.softCappingByPassDetails;
+      body.softCappingByPassApproverID = this.softCappingBypassPayload.softCappingByPassApproverID;
+    }
     return body;
   }
 
@@ -946,6 +1016,11 @@ private buildReservationSaveBody(
   body.customerSpecificFields = csfPayload.customerSpecificFields;
   if (!body.reservationID) {
     body.reservationID = csfPayload.reservationID;
+  }
+  if (this.softCappingBypassPayload) {
+    body.softCappingByPassReason = this.softCappingBypassPayload.softCappingByPassReason;
+    body.softCappingByPassDetails = this.softCappingBypassPayload.softCappingByPassDetails;
+    body.softCappingByPassApproverID = this.softCappingBypassPayload.softCappingByPassApproverID;
   }
   return body;
 }
@@ -1131,6 +1206,7 @@ toArray<T>(value: any): T[] {
        
         this.customerID=this.advanceTable.customerID;
         this.customerGroupID=this.advanceTable.customerGroupID;
+        this.refreshReservationCustomerAlerts();
         this.InitProjectCode();
         this.InitBooker();
         this.InitPassenger();
@@ -1195,6 +1271,7 @@ toArray<T>(value: any): T[] {
         this.advanceTableForm.patchValue({reservationSourceID:normalizedReservationSourceID});
         this.advanceTableForm.patchValue({reservationSource:normalizedReservationSource});
         this.advanceTableForm.patchValue({reservationSourceDetail:normalizedReservationSourceDetail});
+        this.applyLockedReservationSource();
         this.advanceTableForm.patchValue({referenceNumber:this.advanceTable.referenceNumber});
         this.advanceTableForm.patchValue({reservationStatus:normalizedReservationStatus});
         this.advanceTableForm.patchValue({modeOfPaymentID:this.advanceTable.modeOfPaymentID});
@@ -1208,6 +1285,9 @@ toArray<T>(value: any): T[] {
         {
           this.advanceTableForm.get('isTimeNotConfirmed')?.setValue(false);
         }
+        this.advanceTableForm.patchValue({
+          isAddressCorrectionRequiredByKAM: this.advanceTable?.isAddressCorrectionRequiredByKAM === true
+        });
         //this.advanceTableForm.patchValue({isTimeNotConfirmed:this.advanceTable.isTimeNotConfirmed});    
         this.ImagePath=this.normalizeAttachmentPath(this.advanceTable.attachment);
         this.advanceTableForm.patchValue({attachment:this.ImagePath});
@@ -1236,15 +1316,155 @@ toArray<T>(value: any): T[] {
        
       }
        this.isLoadingdata = false;
+       if (this.isPickupCorrectionView()) {
+         this.finishPickupCorrectionInit();
+       }
     },
     (error: HttpErrorResponse) => { 
       this.reservationDataSource = null;
       this.isLoadingdata = false;
+      if (this.isPickupCorrectionView()) {
+        this.addressCorrectionReady.emit();
+      }
     }
       
     );
   }
 
+  private initPickupCorrectionEmbedded(): void {
+    this.action = this.action || 'edit';
+    this.fromForm = 'embeddedKamPickup';
+    if (this.embeddedCustomerID) {
+      this.customerID = this.embeddedCustomerID;
+    }
+    if (this.embeddedCustomerName) {
+      this.customerName = this.embeddedCustomerName;
+    }
+    if (this.embeddedCustomerGroupID) {
+      this.customerGroupID = this.embeddedCustomerGroupID;
+    }
+    if (this.embeddedCustomerGroup) {
+      this.customerGroup = this.embeddedCustomerGroup;
+    }
+    if (this.embeddedReservationGroupID) {
+      this.reservationGroupID = this.embeddedReservationGroupID;
+    }
+    const customerGroupLabel =
+      this.embeddedCustomerName && this.embeddedCustomerGroup
+        ? `${this.embeddedCustomerName} - ${this.embeddedCustomerGroup}`
+        : '';
+    this.advanceTableForm.patchValue({
+      reservationID: this.ReservationID,
+      reservationGroupID: this.embeddedReservationGroupID ?? null,
+      customerID: this.embeddedCustomerID ?? null,
+      customerGroupID: this.embeddedCustomerGroupID ?? null,
+      customerCustomerGroup: customerGroupLabel,
+    });
+    if (this.ReservationID) {
+      this.rememberAuditReservationId(this.ReservationID);
+      this.loadData();
+    } else {
+      this.addressCorrectionReady.emit();
+    }
+  }
+
+  private finishPickupCorrectionInit(): void {
+    this.InitGoogleAddress();
+    this.addressCorrectionReady.emit();
+  }
+
+  private validatePickupCorrectionOnly(): boolean {
+    const form = this.reservationFormValue();
+    if (this.isEmptyText(form.pickupAddress)) {
+      Swal.fire({
+        title: '',
+        text: 'Please Select Pickup Address.',
+        icon: 'warning',
+      });
+      return false;
+    }
+    if (!this.isValidLatLong(form.pickupAddressLatLong)) {
+      Swal.fire({
+        title: '',
+        text: 'Pickup Geo Location is mandatory. Please select a valid address from the list so latitude and longitude are set.',
+        icon: 'warning',
+      });
+      return false;
+    }
+    if (this.isEmptyText(form.pickupAddressDetails)) {
+      Swal.fire({
+        title: '',
+        text: 'Pickup Address Details i.e Street/Flat No./Flight No./Train No. is mandatory.',
+        icon: 'warning',
+      });
+      return false;
+    }
+    const pickupControl = this.advanceTableForm.get('pickupAddress');
+    if (pickupControl?.hasError('invalidPickupAddress')) {
+      Swal.fire({
+        title: '',
+        text: 'Please select an address from suggestions',
+        icon: 'warning',
+      });
+      return false;
+    }
+    return true;
+  }
+
+  confirmPickupCorrectionSave(): void {
+    if (this.buttonDisabled) {
+      return;
+    }
+    if (!this.validatePickupCorrectionOnly()) {
+      this.advanceTableForm.markAllAsTouched();
+      return;
+    }
+    this.savePickupCorrectionAddress();
+  }
+
+  private savePickupCorrectionAddress(): void {
+    const form = this.reservationFormValue();
+    const reservationID = Number(this.ReservationID ?? form.reservationID);
+    if (!reservationID || Number.isNaN(reservationID)) {
+      this.showNotification(
+        'snackbar-danger',
+        'Reservation is required.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+    this.reservationService.updatePickupAddressOnly({
+      reservationID,
+      reservationStopAddress: form.pickupAddress,
+      reservationStopAddressDetails: form.pickupAddressDetails,
+      reservationStopAddressLatLong: form.pickupAddressLatLong,
+      isKamAddressCorrection: true,
+    }).subscribe({
+      next: () => {
+        this.showNotification(
+          'snackbar-success',
+          'Pickup address updated.',
+          'bottom',
+          'center'
+        );
+        this.addressCorrectionSaved.emit();
+      },
+      error: (error) => {
+        const message =
+          error?.error?.message
+          ?? (typeof error?.error === 'string' ? error.error : null)
+          ?? error?.message
+          ?? 'Operation Failed.....!!!';
+        this.showNotification(
+          'snackbar-danger',
+          message,
+          'bottom',
+          'center'
+        );
+      },
+    });
+  }
 
   getErrorMessage() 
   {
@@ -1255,30 +1475,25 @@ toArray<T>(value: any): T[] {
       : '';
   }
 
-  InitGoogleAddress(){
-    this._generalService.getGoogleAddress().subscribe(
-      data=>
-      {
-        this.GoogleAddressList=data;
-        this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterGA(value || ''))
-        ); 
-      });
-      
-  }
-
-  private _filterGA(value: string): any {
-    const filterValue = value.toLowerCase();
-    if(filterValue.length===0)
-    {
-      return []
-    }
-    return this.GoogleAddressList.filter(
-      customer => 
-      {
-        return customer.geoSearchString.toLowerCase().includes(filterValue);
-      }
+  InitGoogleAddress() {
+    this.filteredGoogleAddressOptions = this.advanceTableForm.controls['pickupAddress'].valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (typeof value === 'string' ? value : '').trim();
+        if (!term) {
+          this.GoogleAddressList = [];
+          return of([]);
+        }
+        return this._generalService.searchGoogleAddress(term).pipe(
+          catchError(() => of([])),
+          map((data) => {
+            this.GoogleAddressList = data ?? [];
+            return this.GoogleAddressList;
+          })
+        );
+      })
     );
   }
 
@@ -1288,12 +1503,28 @@ toArray<T>(value: any): T[] {
     );
   
     if (selectedPGL) {
+      this.advanceTableForm.patchValue({ pickupAddress: selectedPGL.geoSearchString });
       this.OnPickupGeoLocationClick(selectedPGL);
     }
   }
 
+  private googlePlaceDisplayText(address: any): string {
+    const fromPac = address?.rentnetDisplayText?.trim();
+    if (fromPac) {
+      return fromPac;
+    }
+    const formatted = address?.formatted_address?.trim();
+    if (formatted) {
+      return formatted;
+    }
+    return address?.name?.trim() || '';
+  }
+
   OnPickupGeoLocationClick(option:any)
   {
+    if (option?.geoSearchString) {
+      this.advanceTableForm.patchValue({ pickupAddress: option.geoSearchString });
+    }
     let pickupGeoLocation=option.geoLocation;
     var value = pickupGeoLocation.replace(
       '(',
@@ -1318,6 +1549,9 @@ toArray<T>(value: any): T[] {
 
   OnDropOffGeoLocationClick(option:any)
   {
+    if (option?.geoSearchString) {
+      this.advanceTableForm.patchValue({ dropOffAddress: option.geoSearchString });
+    }
     let dropOffGeoLocation=option.geoLocation;
     var value = dropOffGeoLocation.replace(
       '(',
@@ -1355,10 +1589,11 @@ toArray<T>(value: any): T[] {
     };
   }
 
-  public handleAddressChange(address: any) {    
-    this.pickupAddress = address.formatted_address;
-    //this.pickupAddress = address.name;
-    this.advanceTableForm.patchValue({ pickupAddress: this.pickupAddress });
+  public handleAddressChange(address: any) {
+    const placeTitle = this.googlePlaceDisplayText(address);
+    this.pickupAddress = placeTitle;
+    this.formattedAddress = address.formatted_address;
+    this.advanceTableForm.patchValue({ pickupAddress: placeTitle });
     this.advanceTableForm.patchValue({pickupAddressLatLong:address.geometry.location.lat()
       +
        ',' +
@@ -1383,7 +1618,7 @@ toArray<T>(value: any): T[] {
     this.googlePlacesForm.patchValue({geoPointID:-1});
     this.googlePlacesForm.patchValue({latitude:address.geometry.location.lat()});
     this.googlePlacesForm.patchValue({longitude:address.geometry.location.lng()}); 
-    this.googlePlacesForm.patchValue({geoSearchString:this.pickupAddress});
+    this.googlePlacesForm.patchValue({geoSearchString: placeTitle});
     this.googlePlacesForm.patchValue({geoPointName:'Google Address'});
     this.googlePlacesForm.patchValue({googlePlacesID:address.place_id});
     this.googlePlacesForm.patchValue({activationStatus:true});
@@ -1430,10 +1665,10 @@ toArray<T>(value: any): T[] {
     };
   }
   public handleAddressChangeDropOff(address: any) {
-    //this.formattedAddress = address.formatted_address;
-    this.dropOffAddress = address.formatted_address;
-    //this.dropOffAddress = address.name;
-    this.advanceTableForm.patchValue({ dropOffAddress: this.dropOffAddress });
+    const placeTitle = this.googlePlaceDisplayText(address);
+    this.dropOffAddress = placeTitle;
+    this.formattedAddress = address.formatted_address;
+    this.advanceTableForm.patchValue({ dropOffAddress: placeTitle });
     this.advanceTableForm.patchValue({dropOffAddressLatLong:address.geometry.location.lat()
       +
        ',' +
@@ -1457,7 +1692,7 @@ toArray<T>(value: any): T[] {
     this.googlePlacesForm.patchValue({geoPointID:-1});
     this.googlePlacesForm.patchValue({latitude:address.geometry.location.lat()});
     this.googlePlacesForm.patchValue({longitude:address.geometry.location.lng()}); 
-    this.googlePlacesForm.patchValue({geoSearchString:this.pickupAddress});
+    this.googlePlacesForm.patchValue({geoSearchString: placeTitle});
     this.googlePlacesForm.patchValue({geoPointName:'Google Address'});
     this.googlePlacesForm.patchValue({googlePlacesID:address.place_id});
     this.googlePlacesForm.patchValue({activationStatus:true});
@@ -1494,29 +1729,25 @@ toArray<T>(value: any): T[] {
   //}
 
    //------------DropOff Google Address -----------------
-   InitDropOffGoogleAddress(){
-    this._generalService.getGoogleAddress().subscribe(
-      data=>
-      {
-        this.DropOffGoogleAddressList=data;
-        this.filteredDropOffGoogleAddressOptions = this.advanceTableForm.controls['dropOffAddress'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterDropoffGA(value || ''))
-        ); 
-      });
-  }
-
-  private _filterDropoffGA(value: string): any {
-    const filterValue = value.toLowerCase();
-    if(filterValue.length===0)
-    {
-      return []
-    }
-    return this.DropOffGoogleAddressList.filter(
-      customer => 
-      {
-        return customer.geoSearchString.toLowerCase().includes(filterValue);
-      }
+  InitDropOffGoogleAddress() {
+    this.filteredDropOffGoogleAddressOptions = this.advanceTableForm.controls['dropOffAddress'].valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        const term = (typeof value === 'string' ? value : '').trim();
+        if (!term) {
+          this.DropOffGoogleAddressList = [];
+          return of([]);
+        }
+        return this._generalService.searchGoogleAddress(term).pipe(
+          catchError(() => of([])),
+          map((data) => {
+            this.DropOffGoogleAddressList = data ?? [];
+            return this.DropOffGoogleAddressList;
+          })
+        );
+      })
     );
   }
   
@@ -1526,6 +1757,7 @@ toArray<T>(value: any): T[] {
     );
   
     if (selectedDGL) {
+      this.advanceTableForm.patchValue({ dropOffAddress: selectedDGL.geoSearchString });
       this.OnDropOffGeoLocationClick(selectedDGL);
     }
   }
@@ -1653,21 +1885,64 @@ toArray<T>(value: any): T[] {
     this.InitPassenger();
     this.InitProjectCode();
     this.InitCompanyForCustomer();
-    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
+    this.refreshReservationCustomerAlerts();
+  }
+
+  private resolveCustomerIdForAlerts(): any {
+    const id =
+      this.advanceTableForm?.getRawValue()?.customerID ||
+      this.advanceTableForm?.value?.customerID ||
+      this.customerID ||
+      (this.advanceTable && this.advanceTable.customerID);
+    if (id === null || id === undefined || id === '') {
+      return null;
+    }
+    return id;
+  }
+
+  private getReservationCheckDate(): string {
+    const pickupFromForm = this.advanceTableForm?.value?.pickupDate;
+    if (pickupFromForm) {
+      const pickupMoment = moment(pickupFromForm);
+      if (pickupMoment.isValid()) {
+        return pickupMoment.format('YYYY-MM-DD');
+      }
+    }
+    if (this.pickupDate) {
+      const labelMoment = moment(this.pickupDate, ['DD/MM/YYYY', 'DD/MM/yyyy'], true);
+      if (labelMoment.isValid()) {
+        return labelMoment.format('YYYY-MM-DD');
+      }
+    }
+    const fromToDate = this.FromToDate || '';
+    if (fromToDate.trim() !== '') {
+      return moment(fromToDate).format('YYYY-MM-DD');
+    }
+    return moment().format('YYYY-MM-DD');
+  }
+
+  refreshReservationCustomerAlerts(): void {
+    const customerID = this.resolveCustomerIdForAlerts();
+    if (!customerID) {
+      this.ReasonMessageShow = false;
+      this.ReservationAlertShow = false;
+      this.CustomerAlertMessageShow = false;
+      return;
+    }
+    this.getStopReservationReason(customerID);
+    this.getReservationAlertForCustomer(customerID);
+    this.getAlerMessagetForCustomer(customerID);
   }
 
   getStopReservationReason(customerID)
   {
-    let FromToDate = this.FromToDate || ''; // Ensure FromToDate is not undefined
-    if (FromToDate.trim() !== '') 
-    {
-      FromToDate = moment(FromToDate).format('YYYY-MM-DD');
-    } 
-    else 
-    {
-      FromToDate = moment().format('YYYY-MM-DD');// If empty, set it to today's date
+    if (!customerID) {
+      this.ReasonMessageShow = false;
+      return;
     }
-    this.rervationGroupService.getReason(customerID,FromToDate).subscribe(
+    const FromToDate = this.getReservationCheckDate();
+    this.rervationGroupService.getReason(customerID, FromToDate).subscribe(
       (data: string[]) =>
       {
         if (data && data.length > 0) 
@@ -1679,22 +1954,23 @@ toArray<T>(value: any): T[] {
         {
           this.ReasonMessageShow = false;
         }      
+      },
+      (error: HttpErrorResponse) => {
+        if (error?.status === 204) {
+          this.ReasonMessageShow = false;
+        }
       }
     );
   }
 
   getReservationAlertForCustomer(customerID)
   {
-    let FromToDate = this.FromToDate || ''; // Ensure FromToDate is not undefined
-    if (FromToDate.trim() !== '') 
-    {
-      FromToDate = moment(FromToDate).format('YYYY-MM-DD');
-    } 
-    else 
-    {
-      FromToDate = moment().format('YYYY-MM-DD');// If empty, set it to today's date
+    if (!customerID) {
+      this.ReservationAlertShow = false;
+      return;
     }
-    this.rervationGroupService.getReservationAlertForCustomer(customerID,FromToDate).subscribe(
+    const FromToDate = this.getReservationCheckDate();
+    this.rervationGroupService.getReservationAlertForCustomer(customerID, FromToDate).subscribe(
       (data: string[]) =>
       {
         if (data && data.length > 0) 
@@ -1706,22 +1982,23 @@ toArray<T>(value: any): T[] {
         {
           this.ReservationAlertShow = false;
         }      
+      },
+      (error: HttpErrorResponse) => {
+        if (error?.status === 204) {
+          this.ReservationAlertShow = false;
+        }
       }
     );
   }
 
   getAlerMessagetForCustomer(customerID)
   {
-    let FromToDate = this.FromToDate || ''; // Ensure FromToDate is not undefined
-    if (FromToDate.trim() !== '') 
-    {
-      FromToDate = moment(FromToDate).format('YYYY-MM-DD');
-    } 
-    else 
-    {
-      FromToDate = moment().format('YYYY-MM-DD');// If empty, set it to today's date
+    if (!customerID) {
+      this.CustomerAlertMessageShow = false;
+      return;
     }
-    this.rervationGroupService.getAlerMessagetForCustomer(customerID,FromToDate).subscribe(
+    const FromToDate = this.getReservationCheckDate();
+    this.rervationGroupService.getAlerMessagetForCustomer(customerID, FromToDate).subscribe(
       (data: string[]) =>
       {
         if (data && data.length > 0) 
@@ -1733,6 +2010,11 @@ toArray<T>(value: any): T[] {
         {
           this.CustomerAlertMessageShow = false;
         }      
+      },
+      (error: HttpErrorResponse) => {
+        if (error?.status === 204) {
+          this.CustomerAlertMessageShow = false;
+        }
       }
     );
   }
@@ -2134,7 +2416,7 @@ toArray<T>(value: any): T[] {
     this.pickupCitySet(this.cityID,this.packageType);
     //this.InitReservationInvoiceGSTDetails( this.customerID);
     //this.InitResrvationGSTForCityID(this.customerID,this.cityID);
-    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
     // Recalculate drop-off time in case the user picked the city last; the
     // guard inside getETRDropOffTime skips the API call until every required
     // input is populated, so this is safe to call unconditionally.
@@ -2478,17 +2760,24 @@ toArray<T>(value: any): T[] {
     );
   
     if (selectedCar) {
-      this.getVehicleID(selectedCar.vehicleID,selectedCar.vehicleCategoryID);
+      this.getVehicleID(selectedCar.vehicleID, selectedCar.vehicleCategoryID, selectedCar.vehicle);
     }
   }
 
-  getVehicleID(vehicleID: any,vehicleCategoryID:any) {
-    this.vehicleID=vehicleID;
-    this.vehicleCategoryID=vehicleCategoryID;
-    this.advanceTableForm.patchValue({vehicleID:this.vehicleID});
-    this.advanceTableForm.patchValue({vehicleCategoryID:this.vehicleCategoryID});
+  getVehicleID(vehicleID: any, vehicleCategoryID: any, vehicleName?: string) {
+    this.vehicleID = vehicleID;
+    this.vehicleCategoryID = vehicleCategoryID;
+    const resolvedVehicleName =
+      vehicleName
+      ?? this.toArray(this.VehicleList).find((v: any) => String(v?.vehicleID) === String(vehicleID))?.vehicle
+      ?? '';
+    this.advanceTableForm.patchValue({
+      vehicleID: this.vehicleID,
+      vehicleCategoryID: this.vehicleCategoryID,
+      vehicle: resolvedVehicleName || this.advanceTableForm.get('vehicle')?.value,
+    });
     this.getETRDropOffTime();
-    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+    this.GetReservationCapping(this.customerGroupID, this.customerID, this.pickupDate, this.cityID, this.packageTypeID, this.vehicleID);
   }
 
   //------------ Type -----------------
@@ -2610,7 +2899,7 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
     this.InitPackage();
     this.ETRDropoffDateSet(packageType);
     this.changeDropOffDate(packageType);
-    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+    this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
   }
   //----------DropOFFDate-------------
 
@@ -2981,6 +3270,43 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
 
    //------------ ReservationSource -----------------
+   private readonly lockedReservationSources = [
+     'CDP',
+     'B2B Customer App',
+     'B2B App',
+     'B2C APP',
+     'B2C App'
+   ];
+
+   get isLockedReservationSource(): boolean {
+     return this.isReservationSourceLockedValue(
+       this.advanceTableForm?.getRawValue()?.reservationSource
+         ?? this.advanceTable?.reservationSource,
+       this.advanceTableForm?.getRawValue()?.reservationSourceID
+         ?? this.advanceTable?.reservationSourceID
+     );
+   }
+
+   private isReservationSourceLockedValue(source: unknown, sourceId: unknown): boolean {
+     const name = String(source ?? '').trim().toLowerCase();
+     if (this.lockedReservationSources.some(item => item.toLowerCase() === name)) {
+       return true;
+     }
+     return String(sourceId ?? '') === '26';
+   }
+
+   private applyLockedReservationSource(): void {
+     const control = this.advanceTableForm?.get('reservationSource');
+     if (!control) {
+       return;
+     }
+     if (this.isLockedReservationSource) {
+       control.disable({ emitEvent: false });
+     } else {
+       control.enable({ emitEvent: false });
+     }
+   }
+
    InitReservationSource(){
     this._generalService.GetReservationSource().subscribe(
       data=>
@@ -2989,7 +3315,8 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
         this.filteredReservationSourceOptions = this.advanceTableForm.controls['reservationSource'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterReservationSource(value || ''))
-        ); 
+        );
+        this.applyLockedReservationSource();
       });
   }
 
@@ -3004,6 +3331,9 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
   
   onRSSelected(selectedRSName: string) {
+    if (this.isLockedReservationSource) {
+      return;
+    }
     const selectedRS = this.ReservationSourceList.find(
       data => data.reservationSource === selectedRSName
     );
@@ -3014,6 +3344,9 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
 
   getReservationSourceID(reservationSourceID: any) {
+    if (this.isLockedReservationSource) {
+      return;
+    }
     this.reservationSourceID=reservationSourceID;
     this.advanceTableForm.patchValue({reservationSourceID:this.reservationSourceID});
   }
@@ -3115,12 +3448,65 @@ private isEmptyValue(value: unknown): boolean {
   return this.isEmptyId(value);
 }
 
+private isValidLatLong(value: unknown): boolean {
+  const text = String(value ?? '').trim().replace(/[()]/g, '');
+  if (!text) {
+    return false;
+  }
+  const parts = text.split(',').map((part) => part.trim());
+  if (parts.length < 2) {
+    return false;
+  }
+  const lat = Number(parts[0]);
+  const lng = Number(parts[1]);
+  return Number.isFinite(lat) && Number.isFinite(lng)
+    && lat >= -90 && lat <= 90
+    && lng >= -180 && lng <= 180;
+}
+
+private normalizeSavedAddressLatLong(raw: unknown): string | null {
+  const text = String(raw ?? '').trim();
+  if (!text) {
+    return null;
+  }
+
+  if (text.includes(',') && !text.toUpperCase().includes('POINT')) {
+    const parts = text.split(',').map((part) => part.trim());
+    if (parts.length >= 2) {
+      const normalized = `${parts[0]},${parts[1]}`;
+      if (this.isValidLatLong(normalized)) {
+        return normalized;
+      }
+    }
+  }
+
+  const cleaned = text.replace(/[()]/g, '').trim();
+  const pointParts = cleaned.split(/\s+/).filter(Boolean);
+  if (pointParts.length >= 3 && pointParts[0].toUpperCase() === 'POINT') {
+    const lng = pointParts[1];
+    const lat = pointParts[2];
+    const normalized = `${lat},${lng}`;
+    if (this.isValidLatLong(normalized)) {
+      return normalized;
+    }
+  }
+
+  return null;
+}
+
 private isGstForBillingUnset(value: unknown): boolean {
   const text = String(value ?? '').trim();
   return text === '' || text.toLowerCase() === '--select--';
 }
 
 public validateReservationForm(): boolean {
+  if (this.isPickupCorrectionView()) {
+    const isValid = this.validatePickupCorrectionOnly();
+    if (!isValid) {
+      this.advanceTableForm.markAllAsTouched();
+    }
+    return isValid;
+  }
   const isValid = this.CustomerDetails()
     && this.PickupDetails()
     && this.OtherDetails()
@@ -3246,10 +3632,18 @@ public PickupDetails(): boolean {
     });
     return false;
   }
+  if (!this.isValidLatLong(form.pickupAddressLatLong)) {
+    Swal.fire({
+      title: '',
+      text: 'Pickup Geo Location is mandatory. Please select a valid address from the list so latitude and longitude are set.',
+      icon: 'warning',
+    });
+    return false;
+  }
   if (this.isEmptyText(form.pickupAddressDetails)) {
     Swal.fire({
       title: '',
-      text: 'Please Select Pickup Address Details.',
+      text: 'Pickup Address Details i.e Street/Flat No./Flight No./Train No. is mandatory.',
       icon: 'warning',
     });
     return false;
@@ -3354,7 +3748,7 @@ public validateCustomerSpecificFields(): boolean {
 }
   navigateToControlPanel(reservationID?: number) {
     const queryParams = reservationID
-      ? { reservationID: encodeURIComponent(this._generalService.encrypt(String(reservationID))) }
+      ? { reservationID: this._generalService.encrypt(String(reservationID)) }
       : undefined;
     this.router.navigate(['/controlPanelDesign'], { queryParams });
     Swal.close();
@@ -3364,12 +3758,13 @@ public validateCustomerSpecificFields(): boolean {
   {
     const csfPayload = this.buildCustomerSpecificFieldsPayload();
     this.applyCustomerSpecificFieldsToForm(csfPayload);
+    const raw = this.advanceTableForm.getRawValue();
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
-    if(!this.advanceTableForm.value.dropOffPriorityOrder)
+    if(!raw.dropOffPriorityOrder)
         {
           this.advanceTableForm.patchValue({dropOffPriorityOrder:0});
         }
-    if(this.advanceTableForm.value.customerConfigurationInvoicingID !== 0)
+    if(raw.customerConfigurationInvoicingID !== 0)
     {
       this.advanceTableForm.patchValue({customerConfigurationInvoicingID:this.customerConfigurationInvoicingID});
     }
@@ -3381,7 +3776,10 @@ public validateCustomerSpecificFields(): boolean {
     this.reservationService.update(saveBody)  
     .pipe(
       switchMap((response) =>
-        this.persistCustomerSpecificFields(response?.reservationID).pipe(map(() => response))
+        this.persistCustomerSpecificFields(response?.reservationID).pipe(
+          map(() => response),
+          catchError((err) => this.testBookingMode ? of(response) : throwError(() => err))
+        )
       )
     )
     .subscribe(
@@ -3394,6 +3792,12 @@ public validateCustomerSpecificFields(): boolean {
         'center'
       );
       this.reservationNo=response.reservationID
+      if (this.testBookingMode) {
+        this.testBookingSaved.emit(this.reservationNo);
+        this.resolveSoftCapSaveHooks();
+        return;
+      }
+      this.resolveSoftCapSaveHooks();
       Swal.fire({
         title: '',
         text: 'Reservation - '+ this.reservationNo+' updated. You can add further details from booking details section.',
@@ -3431,6 +3835,7 @@ public validateCustomerSpecificFields(): boolean {
     },
     error =>
     {
+      this.rejectSoftCapSaveHooks(error);
       // The API now reports partial saves (e.g. stops/passenger rows rolled
       // back) as a structured error - show its message when available.
       this.showNotification(
@@ -3488,6 +3893,7 @@ public validateCustomerSpecificFields(): boolean {
       const customerGroupID = response?.customerGroupID ?? this.advanceTableForm.value.customerGroupID ?? this.customerGroupID;
 
       this.reservationNo = reservationID;
+      this.resolveSoftCapSaveHooks();
       Swal.fire({
         title: '',
         text: 'Reservation - ' + this.reservationNo + ' updated. You can add further details from booking details section.',
@@ -3513,6 +3919,7 @@ public validateCustomerSpecificFields(): boolean {
     },
     error =>
     {
+      this.rejectSoftCapSaveHooks(error);
       this.showNotification(
         'snackbar-danger',
         error?.error?.message || 'Operation Failed.....!!!',
@@ -3847,6 +4254,7 @@ public validateCustomerSpecificFields(): boolean {
               advanceTable: this.customerDetailData,
               action: 'add',
               forCP:'CP',
+              reservationID: this.getCurrentReservationID(),
               // forCP:'368807',
               CustomerGroupID:this.customerDetailData.customerGroupID,
               CustomerGroupName:this.customerDetailData.customerGroup
@@ -3871,6 +4279,7 @@ public validateCustomerSpecificFields(): boolean {
             advanceTable: this.customerDetailData,
             action: 'add',
             forCP:'CP',
+            reservationID: this.getCurrentReservationID(),
             CustomerGroupID:this.customerDetailData.customerGroupID,
             CustomerGroupName:this.customerDetailData.customerGroup
           }
@@ -3893,6 +4302,7 @@ public validateCustomerSpecificFields(): boolean {
    
     if(this.action==='edit')
     {
+      this.rememberAuditReservationId();
       let customerGroup=this.advanceTableForm.controls['customerCustomerGroup'].value.split('-')[1];
       this.customerDetailData={customerGroup:customerGroup,customerGroupID:this.advanceTableForm.value.customerGroupID, customerID:this.customerID,customerName:this.customerName}
       if(this.customerDetailData)
@@ -3903,6 +4313,7 @@ public validateCustomerSpecificFields(): boolean {
             {
               advanceTable: this.selectedPassengerData,
               action: 'edit',
+              reservationID: this.getCurrentReservationID(),
               CustomerGroupID:this.customerDetailData.customerGroupID,
               CustomerGroupName:this.customerDetailData.customerGroup
             }
@@ -3939,6 +4350,7 @@ public validateCustomerSpecificFields(): boolean {
         advanceTable: this.customerDetailData,
         action: 'add',
         forCP: 'CB',
+        reservationID: this.getCurrentReservationID(),
         CustomerGroupID: this.customerDetailData.customerGroupID,
         CustomerGroupName: this.customerDetailData.customerGroup
       }
@@ -4044,7 +4456,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID || this.advanceTableForm.value.primaryPassengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '760px',
+            maxWidth: '96vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4057,14 +4472,7 @@ public validateCustomerSpecificFields(): boolean {
             // received data from dialog-component
             if(res!==undefined)
             {
-            this.advanceTableForm.patchValue({dropOffAddress:res.data.addressStringForMap});
-            this.advanceTableForm.patchValue({dropOffAddressDetails:res.data.address});
-            this.advanceTableForm.patchValue({dropOffCity:res.data.city});
-            this.advanceTableForm.patchValue({dropOffCityID:res.data.cityID});
-            this.advanceTableForm.controls["dropOffSpotType"].setValue('');
-            this.advanceTableForm.controls["dropOffSpotTypeID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpotID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpot"].setValue('');
+            this.patchDropOffAddress(res);
             }
           })
         }
@@ -4074,7 +4482,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '760px',
+            maxWidth: '96vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4087,19 +4498,41 @@ public validateCustomerSpecificFields(): boolean {
             // received data from dialog-component
             if(res!==undefined)
             {
-            this.advanceTableForm.patchValue({dropOffAddress:res.data.addressStringForMap});
-            this.advanceTableForm.patchValue({dropOffAddressDetails:res.data.address});
-            this.advanceTableForm.patchValue({dropOffCity:res.data.city});
-            this.advanceTableForm.patchValue({dropOffCityID:res.data.cityID});
-            this.advanceTableForm.controls["dropOffSpotType"].setValue('');
-            this.advanceTableForm.controls["dropOffSpotTypeID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpotID"].setValue(0);
-            this.advanceTableForm.controls["dropOffSpot"].setValue('');
+            this.patchDropOffAddress(res);
             }
           })
         }
     }
   }
+  getReservationIdForHistory(): number {
+    const fromForm = this.advanceTableForm?.getRawValue?.()?.reservationID;
+    const fromRoute = this.ReservationID;
+    const id = fromForm || fromRoute;
+    const parsed = Number(id);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+  }
+
+  openKamPickupAddressCorrectionHistory(): void {
+    const reservationID = this.getReservationIdForHistory();
+    if (!reservationID) {
+      this.showNotification(
+        'snackbar-warning',
+        'Save the reservation first to view pickup address correction history.',
+        'bottom',
+        'center'
+      );
+      return;
+    }
+
+    this.dialog.open(KamPickupAddressHistoryDialogComponent, {
+      width: '760px',
+      maxWidth: '96vw',
+      autoFocus: false,
+      panelClass: ['kam-pickup-address-history-dialog-panel', 'dbe-dialog-centered'],
+      data: { reservationID }
+    });
+  }
+
   savedAddress()
   {
     if(this.action==='edit')
@@ -4108,7 +4541,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID || this.advanceTableForm.value.primaryPassengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '760px',
+            maxWidth: '96vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4135,7 +4571,7 @@ public validateCustomerSpecificFields(): boolean {
               cancelButtonText: 'No, cancel'
             }).then(result => {
               if (result.isConfirmed) {
-                this.advanceTableForm.patchValue({pickupAddress:res.data.addressStringForMap});
+                this.patchPickupAddress(res);
               }
             });
           } else {
@@ -4159,7 +4595,10 @@ public validateCustomerSpecificFields(): boolean {
       if(this.passengerID){
         const dialogRef = this.dialog.open(SavedAddressComponent, 
           {
-            width:'60%',
+            width: '760px',
+            maxWidth: '96vw',
+            panelClass: 'saved-address-dialog-panel',
+            autoFocus: false,
             data: 
               {
                 // advanceTable: this.advanceTable,
@@ -4185,7 +4624,7 @@ public validateCustomerSpecificFields(): boolean {
               cancelButtonText: 'No, cancel'
             }).then(result => {
               if (result.isConfirmed) {
-                this.advanceTableForm.patchValue({pickupAddress:res.data.addressStringForMap});
+                this.patchPickupAddress(res);
               }
             });
           } else {
@@ -4207,17 +4646,60 @@ public validateCustomerSpecificFields(): boolean {
     }
     
   }
+private buildSavedAddressDetails(data: any): string {
+  if (!data) {
+    return '';
+  }
+  const parts: string[] = [];
+  if (data.address) {
+    parts.push(data.address);
+  }
+  const landmark = data.landmark || data.landMark;
+  if (landmark) {
+    parts.push(landmark);
+  }
+  if (data.city) {
+    parts.push(data.city);
+  }
+  if (data.state) {
+    parts.push(data.state);
+  }
+  if (data.country) {
+    parts.push(data.country);
+  }
+  return parts.join(', ');
+}
+
 private patchPickupAddress(res: any) {
+  const data = res?.data;
+  const pickupAddressLatLong = this.normalizeSavedAddressLatLong(data?.latLong);
   this.advanceTableForm.patchValue({
-    pickupAddress: res.data.addressStringForMap,
-    pickupAddressDetails: res.data.address,
-    pickupCity: res.data.city,
-    pickupCityID: res.data.cityID
+    pickupAddress: data?.addressStringForMap,
+    pickupAddressDetails: this.buildSavedAddressDetails(data),
+    pickupCity: data?.city,
+    pickupCityID: data?.cityID,
+    pickupAddressLatLong: pickupAddressLatLong
   });
   this.advanceTableForm.controls['pickupSpotType'].setValue('');
   this.advanceTableForm.controls['pickupSpotTypeID'].setValue(0);
   this.advanceTableForm.controls['pickupSpotID'].setValue(0);
   this.advanceTableForm.controls['pickupSpot'].setValue('');
+}
+
+private patchDropOffAddress(res: any) {
+  const data = res?.data;
+  const dropOffAddressLatLong = this.normalizeSavedAddressLatLong(data?.latLong);
+  this.advanceTableForm.patchValue({
+    dropOffAddress: data?.addressStringForMap,
+    dropOffAddressDetails: this.buildSavedAddressDetails(data),
+    dropOffCity: data?.city,
+    dropOffCityID: data?.cityID,
+    dropOffAddressLatLong: dropOffAddressLatLong
+  });
+  this.advanceTableForm.controls['dropOffSpotType'].setValue('');
+  this.advanceTableForm.controls['dropOffSpotTypeID'].setValue(0);
+  this.advanceTableForm.controls['dropOffSpotID'].setValue(0);
+  this.advanceTableForm.controls['dropOffSpot'].setValue('');
 }
   onPickupDateChangeAndLocationTimeSet(event: any) 
   {
@@ -4440,6 +4922,8 @@ private patchPickupAddress(res: any) {
   onPickupDateChange(event: any) {
     var date = event.split('/');
     var endDate = date[2] + '-' + date[1] + '-' + date[0];
+    this.pickupDate = event;
+    this.refreshReservationCustomerAlerts();
     // if (this.action === 'edit') {
     //   this._generalService.GetContractIDBasedOnDate(this.advanceTable.customerID, endDate).subscribe(
     //     data => {
@@ -4704,25 +5188,561 @@ private patchPickupAddress(res: any) {
     }
   }
 
+  public saveFromTestPage(): void {
+    this.buttonDisabled = false;
+    this.confirmAdd();
+  }
+
+  public showTestBookingSavePopup(extraText?: string): void {
+    const suffix = extraText ? ' ' + extraText : '';
+    Swal.fire({
+      title: '',
+      text: 'Reservation - ' + this.reservationNo + ' updated.' + suffix,
+      icon: 'warning',
+      showConfirmButton: true,
+      showCancelButton: false,
+      showDenyButton: false,
+      confirmButtonText: 'OK',
+    });
+  }
+
+  public applyTestBookingDefaults(): Promise<string | null> {
+    if (!this.testBookingMode) {
+      return Promise.resolve('Test booking mode is not active.');
+    }
+    return this.runTestBookingDefaults();
+  }
+
+  private async runTestBookingDefaults(): Promise<string | null> {
+    const missing: string[] = [];
+    try {
+      await this.waitUntil(
+        () => !!(this.customerID || this.advanceTableForm?.getRawValue()?.customerID),
+        20000
+      );
+    } catch {
+      return 'Customer was not loaded on the booking form.';
+    }
+
+    const formStart = this.advanceTableForm.getRawValue();
+    const customerID = formStart.customerID || this.customerID;
+    const customerGroupID = formStart.customerGroupID || this.customerGroupID;
+    this.advanceTableForm.patchValue({
+      customerID,
+      customerGroupID,
+      ticketNumber: '111111111111',
+      tripType: 'Local',
+    });
+
+    try {
+      await this.waitUntil(() => this.toArray(this.CustomerTypeList).length > 0, 8000);
+    } catch {
+      try {
+        this.CustomerTypeList = this.toArray(
+          await this.toPromise(this._generalService.getCustomerType())
+        );
+      } catch { /* handled below */ }
+    }
+    const corporateType = this.findByTestName(this.CustomerTypeList, 'Corporate', ['customerType']);
+    if (!corporateType) {
+      missing.push('Customer Type "Corporate"');
+    } else {
+      this.customerTypeID = corporateType.customerTypeID;
+      this.customerType = corporateType.customerType;
+      this.advanceTableForm.controls['customerTypeID']?.setValue(
+        corporateType.customerTypeID,
+        { emitEvent: false }
+      );
+      this.advanceTableForm.controls['customerType']?.setValue(
+        corporateType.customerType,
+        { emitEvent: false }
+      );
+    }
+
+    const today = moment().startOf('day').toDate();
+    const pickupDateLabel = moment(today).format('DD/MM/YYYY');
+    const pickupTime = moment().seconds(0).milliseconds(0).toDate();
+    this.pickupDate = pickupDateLabel;
+    this.advanceTableForm.patchValue({
+      pickupDate: today,
+      pickupTime,
+    });
+    this.GetIntervalMin();
+
+    const contractDate = moment(today).format('YYYY-MM-DD');
+    let contractID: any = null;
+    try {
+      contractID = await this.toPromise(
+        this._generalService.GetContractIDBasedOnDate(customerID, contractDate)
+      );
+    } catch {
+      return 'Could not load a contract for JAJ Technologies on today\'s date.';
+    }
+    if (!contractID) {
+      this.noReservationMessage = true;
+      return 'There is no contract on this date for JAJ Technologies.';
+    }
+    if (Array.isArray(contractID)) {
+      contractID = contractID[0];
+    }
+    if (contractID && typeof contractID === 'object') {
+      contractID = contractID.contractID || contractID.customerContractID || contractID.id || null;
+    }
+    if (!contractID) {
+      this.noReservationMessage = true;
+      return 'There is no contract on this date for JAJ Technologies.';
+    }
+    this.contractID = contractID;
+    this.noReservationMessage = false;
+
+    this.InitPackageType();
+    try {
+      await this.waitUntil(() => this.toArray(this.PackageTypeList).length > 0, 20000);
+    } catch {
+      return 'Could not load duty types for the contract.';
+    }
+
+    const dutyType = this.findByTestName(this.PackageTypeList, 'Local Rate', ['packageType']);
+    if (!dutyType) {
+      missing.push('Duty Type "Local Rate"');
+    } else {
+      this.advanceTableForm.patchValue({
+        packageTypeID: dutyType.packageTypeID,
+        packageType: dutyType.packageType,
+      });
+      this.getPackageTypeID(dutyType.packageTypeID, dutyType.packageType);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.PackageList).length > 0, 20000);
+    } catch {
+      if (!dutyType) {
+        return missing.join(', ') + ' was not found.';
+      }
+      return 'Could not load packages for the selected duty type.';
+    }
+
+    const pkg = this.findByTestName(this.PackageList, '4 Hrs 40 Kms', ['package'])
+      || this.findByTestName(this.PackageList, '4/40', ['package']);
+    if (!pkg) {
+      missing.push('Package "4 Hrs 40 Kms"');
+    } else {
+      this.advanceTableForm.patchValue({ package: pkg.package });
+      this.getPackageID(pkg.packageID);
+    }
+
+    const rateTypeForLists = this.resolveTestBookingRateType();
+    this.InitCity(rateTypeForLists);
+    this.InitDropOffCity(rateTypeForLists);
+    this.InitVehicle(rateTypeForLists);
+    this.InitPaymentMode();
+
+    try {
+      await this.waitUntil(() => this.toArray(this.VehicleList).length > 0, 20000);
+    } catch {
+      missing.push('Vehicle list');
+    }
+    const vehicle = this.findByTestName(this.VehicleList, 'Maruti Dzire', ['vehicle', 'vehicleName']);
+    if (!vehicle) {
+      missing.push('Vehicle "Maruti Dzire"');
+    } else {
+      this.advanceTableForm.patchValue({ vehicle: vehicle.vehicle });
+      this.getVehicleID(vehicle.vehicleID, vehicle.vehicleCategoryID);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.CityList).length > 0, 20000);
+    } catch {
+      missing.push('Pickup city list');
+    }
+    if (this.toArray(this.CityList).length > 0) {
+      const city = this.toArray(this.CityList)[0];
+      this.advanceTableForm.patchValue({ pickupCity: city.geoPointName });
+      this.getCityID(city.geoPointID);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.PaymentModeList).length > 0, 20000);
+    } catch {
+      missing.push('Payment mode list');
+    }
+    const payment = this.findByTestName(this.PaymentModeList, 'BTC', ['modeOfPayment']);
+    if (!payment) {
+      missing.push('Payment "BTC"');
+    } else {
+      this.advanceTableForm.patchValue({ modeOfPayment: payment.modeOfPayment });
+      this.getPaymentModeID(payment.modeOfPaymentID);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.ServiceLocationList).length > 0, 15000);
+    } catch {
+      this.InitServiceLocation();
+      try {
+        await this.waitUntil(() => this.toArray(this.ServiceLocationList).length > 0, 15000);
+      } catch { /* reported below */ }
+    }
+    let headOffice = this.findByTestName(
+      this.ServiceLocationList,
+      'Head Office',
+      ['organizationalEntityName']
+    );
+    if (!headOffice) {
+      this.InitServiceLocation();
+      try {
+        await this.waitUntil(() =>
+          !!this.findByTestName(this.ServiceLocationList, 'Head Office', ['organizationalEntityName']),
+          15000
+        );
+      } catch { /* reported below */ }
+      headOffice = this.findByTestName(
+        this.ServiceLocationList,
+        'Head Office',
+        ['organizationalEntityName']
+      );
+    }
+    if (!headOffice) {
+      missing.push('Service Location "Head Office"');
+    } else {
+      this.advanceTableForm.patchValue({ serviceLocation: headOffice.organizationalEntityName });
+      this.getServiceLocationIDBasedOnCity(headOffice.organizationalEntityID);
+    }
+
+    await this.applyTestBookingBookerAndGuest(customerID, customerGroupID, missing);
+
+    const raw = this.advanceTableForm.getRawValue();
+    if (!raw.tripType) {
+      this.advanceTableForm.patchValue({ tripType: 'Local' });
+    }
+    if (!raw.reservationSource) {
+      this.advanceTableForm.patchValue({ reservationSourceID: 20, reservationSource: 'Email' });
+    }
+
+    this.locationTimeSet(pickupTime);
+    await this.applyTestBookingRefAndRequestNumbers(missing);
+    this.disableTestBookingFields();
+
+    if (missing.length) {
+      return 'Could not find: ' + missing.join(', ') + '. Save is blocked until these exist.';
+    }
+    return null;
+  }
+
+  private async applyTestBookingBookerAndGuest(customerID: any, customerGroupID: any, missing: string[]): Promise<void> {
+    try {
+      await this.waitUntil(() => this.toArray(this.BookerList).length > 0, 12000);
+    } catch { /* try prefix lookup */ }
+    let booker = this.findByTestName(this.BookerList, 'Mayank Mishra', ['customerPersonName']);
+    if (!booker && customerID) {
+      try {
+        const prefixList = this.toArray(await this.toPromise(
+          this._generalService.getCustomerPersonPrefix(customerID, 'Mayank')
+        ));
+        booker = this.findByTestName(prefixList, 'Mayank Mishra', ['customerPersonName']);
+        if (booker) {
+          this.BookerList = [...(this.BookerList || []), booker];
+          this.advanceTableForm.controls['booker'].setValidators([
+            Validators.required,
+            this.primaryBookerValidator(this.BookerList),
+          ]);
+          this.advanceTableForm.controls['booker'].updateValueAndValidity({ emitEvent: false });
+        }
+      } catch { /* keep missing */ }
+    }
+    if (!booker) {
+      missing.push('Booker "Mayank Mishra"');
+    } else {
+      const bookerLabel = [
+        booker.customerPersonName,
+        booker.gender,
+        booker.importance,
+        booker.phone,
+        booker.customerDepartment,
+        booker.customerDesignation,
+        booker.customerName,
+      ].join('-');
+      this.advanceTableForm.patchValue({ booker: bookerLabel });
+      this.getBookerID(booker.customerPersonID);
+    }
+
+    try {
+      await this.waitUntil(() => this.toArray(this.PassengerList).length > 0, 12000);
+    } catch { /* try prefix lookup */ }
+    let guest = this.findByTestName(this.PassengerList, 'Anand Awasthy', ['customerPersonName']);
+    if (!guest && customerID) {
+      try {
+        const prefixList = this.toArray(await this.toPromise(
+          this._generalService.getCustomerPersonPrefix(customerID, 'Anand')
+        ));
+        guest = this.findByTestName(prefixList, 'Anand Awasthy', ['customerPersonName']);
+        if (guest) {
+          this.PassengerList = [...(this.PassengerList || []), guest];
+          this.advanceTableForm.controls['passenger'].setValidators([
+            Validators.required,
+            this.PassengerValidator(this.PassengerList),
+          ]);
+          this.advanceTableForm.controls['passenger'].updateValueAndValidity({ emitEvent: false });
+        }
+      } catch { /* keep missing */ }
+    }
+    if (!guest) {
+      missing.push('Guest "Anand Awasthy"');
+    } else {
+      this.advanceTableForm.patchValue({ passenger: this.buildPassengerDisplay(guest) });
+      this.getPassengerID(guest.customerPersonID, guest.customerPersonName);
+    }
+  }
+
+  private async applyTestBookingRefAndRequestNumbers(missing: string[]): Promise<void> {
+    const value = '1234';
+    this.advanceTableForm.controls['referenceNumber']?.setValue(value, { emitEvent: false });
+
+    const customerID = this.advanceTableForm.getRawValue()?.customerID || this.customerID;
+    await this.ensureTestBookingCustomerFields(customerID);
+
+    const fields = this.toArray(this.CustomerExtraFieldList);
+    const refField = this.findTestBookingCsfField(fields, ['refno', 'referencenumber'], true);
+    const requestField = this.findTestBookingCsfField(fields, ['requestno', 'requestnumber'], false);
+
+    if (refField?.fieldName) {
+      this.setTestBookingCsfValue(refField.fieldName, value);
+    } else {
+      missing.push('Ref No');
+    }
+
+    if (requestField?.fieldName) {
+      this.setTestBookingCsfValue(requestField.fieldName, value);
+    } else {
+      missing.push('Request No');
+    }
+
+    this.getFieldValues();
+  }
+
+  private async ensureTestBookingCustomerFields(customerID: any): Promise<void> {
+    const controlsReady = () => {
+      const fields = this.toArray(this.CustomerExtraFieldList);
+      return fields.length > 0 && fields.every((field) =>
+        !!this.resolveCustomerFieldControlKey(field?.fieldName)
+      );
+    };
+
+    if (controlsReady()) {
+      return;
+    }
+
+    if (customerID) {
+      try {
+        const data = await this.toPromise(
+          this._generalService.GetCustomerRentNetFieldsBasedOnCustomerID(customerID)
+        );
+        this.applyTestBookingCustomerFieldControls(this.toArray(data));
+      } catch {
+        this.InitProjectCode();
+      }
+    } else {
+      this.InitProjectCode();
+    }
+
+    try {
+      await this.waitUntil(controlsReady, 15000);
+    } catch { /* missing fields reported by caller */ }
+  }
+
+  private applyTestBookingCustomerFieldControls(incomingFields: any[]): void {
+    incomingFields.forEach((ele) => {
+      const fieldName = String(ele?.fieldName ?? '').trim();
+      if (!fieldName) {
+        return;
+      }
+      const isMandatory = ele.isMandatory ? [Validators.required] : [];
+      const existingControl = this.advanceTableForm.controls[fieldName];
+      if (existingControl) {
+        existingControl.setValidators(isMandatory);
+        existingControl.updateValueAndValidity({ emitEvent: false });
+      } else {
+        this.advanceTableForm.addControl(fieldName, new FormControl('', isMandatory));
+      }
+      if (!this.arr1.includes(ele.customerReservationFieldID)) {
+        this.arr1.push(ele.customerReservationFieldID);
+      }
+      if (!this.arr2.includes(fieldName)) {
+        this.arr2.push(fieldName);
+      }
+    });
+    this.CustomerExtraFieldList = incomingFields;
+    this.advanceTableForm.patchValue({
+      customerReservationFieldID: this.arr1,
+      fieldName: this.arr2,
+    });
+  }
+
+  private findTestBookingCsfField(fields: any[], compactNeedles: string[], excludeRequest: boolean): any {
+    return fields.find((field) => {
+      const compact = String(field?.fieldName ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!compact) {
+        return false;
+      }
+      if (excludeRequest && compact.includes('request')) {
+        return false;
+      }
+      return compactNeedles.some((needle) => compact === needle || compact.includes(needle));
+    }) || null;
+  }
+
+  private setTestBookingCsfValue(fieldName: string, value: string): void {
+    this.setCustomerFieldValue(fieldName, value);
+    const controlKey = this.resolveCustomerFieldControlKey(fieldName);
+    const control = controlKey ? this.advanceTableForm.controls[controlKey] : this.advanceTableForm.get(fieldName);
+    if (control) {
+      control.setValue(value, { emitEvent: false });
+      if (!control.disabled) {
+        control.disable({ emitEvent: false });
+      }
+    }
+  }
+
+  private resolveTestBookingRateType(): string {
+    const packageType = String(this.packageType || this.advanceTableForm?.getRawValue()?.packageType || '').trim();
+    if (/rate$/i.test(packageType)) {
+      return packageType;
+    }
+    return 'Local Rate';
+  }
+
+  private disableTestBookingFields(): void {
+    [
+      'customerCustomerGroup',
+      'customerType',
+      'packageType',
+      'package',
+      'passenger',
+      'booker',
+      'pickupDate',
+      'ticketNumber',
+      'vehicle',
+      'modeOfPayment',
+      'referenceNumber',
+    ].forEach((name) => {
+      const control = this.advanceTableForm?.get(name);
+      if (control && !control.disabled) {
+        control.disable({ emitEvent: false });
+      }
+    });
+  }
+
+  private findByTestName(list: any[], wanted: string, keys: string[], preferExact = false): any {
+    const rows = this.toArray(list);
+    if (!wanted || !rows.length) {
+      return null;
+    }
+    const wantedNorm = this.normalizeTestLabel(wanted);
+    const read = (row: any) => keys.map((key) => String(row?.[key] ?? '')).join(' ');
+    const exact = rows.find((row) => this.normalizeTestLabel(read(row)) === wantedNorm);
+    if (exact) {
+      return exact;
+    }
+    if (preferExact) {
+      const exactWord = rows.find((row) => this.normalizeTestLabel(read(row)) === wantedNorm);
+      if (exactWord) {
+        return exactWord;
+      }
+    }
+    return rows.find((row) => {
+      const actual = this.normalizeTestLabel(read(row));
+      return actual.includes(wantedNorm) || wantedNorm.includes(actual);
+    }) || null;
+  }
+
+  private normalizeTestLabel(value: any): string {
+    return String(value ?? '').trim().toLowerCase().replace(/\s+/g, '');
+  }
+
+  private toPromise<T>(obs: Observable<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      obs.subscribe({
+        next: (value) => resolve(value),
+        error: (err) => reject(err),
+      });
+    });
+  }
+
+  /** Resolves/rejects when save finishes after soft-capping bypass dialog Continue. */
+  private softCapSaveHooks: { resolve: () => void; reject: (err: any) => void } | null = null;
+
+  private resolveSoftCapSaveHooks(): void {
+    const hooks = this.softCapSaveHooks;
+    this.softCapSaveHooks = null;
+    hooks?.resolve();
+  }
+
+  private rejectSoftCapSaveHooks(err: any): void {
+    const hooks = this.softCapSaveHooks;
+    this.softCapSaveHooks = null;
+    hooks?.reject(err);
+  }
+
+  private saveReservationAfterSoftCappingBypass(payload: {
+    softCappingByPassReason: string;
+    softCappingByPassDetails: string;
+    softCappingByPassApproverID: number;
+  }): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.applySoftCappingBypassPayload(payload);
+      this.softCapSaveHooks = { resolve, reject };
+      try {
+        if (this.action === 'edit') {
+          this.PutForReservationEdit();
+        } else {
+          this.CheckValidationForSameReservation();
+        }
+      } catch (err) {
+        this.rejectSoftCapSaveHooks(err);
+      }
+    });
+  }
+
+  private waitUntil(check: () => boolean, timeoutMs = 15000, intervalMs = 200): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const started = Date.now();
+      const tick = () => {
+        if (check()) {
+          resolve();
+          return;
+        }
+        if (Date.now() - started > timeoutMs) {
+          reject(new Error('timeout'));
+          return;
+        }
+        setTimeout(tick, intervalMs);
+      };
+      tick();
+    });
+  }
+
   public confirmAdd(): void 
   {
-    if (this.buttonDisabled) {
+    if (this.buttonDisabled && !this.testBookingMode) {
       return;
     }
     // Sync CSF arrays from live controls before validation/save.
     this.applyCustomerSpecificFieldsToForm(this.buildCustomerSpecificFieldsPayload());
     if (!this.validateReservationForm()) {
       return;
-    }    
-    if (this.action === 'edit') 
-    {
-      this.PutForReservationEdit();
-    } 
-    else 
-    {
-      this.CheckValidationForSameReservation();
-      //this.Put();
     }
+    this.checkReservationCappingForSave().then((gate) => {
+      if (gate === 'abort' || gate === 'done') {
+        return;
+      }
+      if (this.action === 'edit') 
+      {
+        this.PutForReservationEdit();
+      } 
+      else 
+      {
+        this.CheckValidationForSameReservation();
+      }
+    });
   }
 
   InitCompanyForCustomer()
@@ -5025,7 +6045,7 @@ ShowDataForStops()
     this.onPickupDateChangeAndLocationTimeSet(value);
   }
   this.pickupDate = value;
-  this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+  this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
 }
 
 private isValidPickupDateInput(value: string): boolean {
@@ -5086,6 +6106,7 @@ private canThisRoleCreateBackDateBooking(): boolean {
           this.customerGroupID=this.dataForReservationList.customerGroupID;
           this.customerGroup=this.dataForReservationList.customerGroup;
           this.customerID=this.dataForReservationList.customerID;
+          this.refreshReservationCustomerAlerts();
           this.customer=this.dataForReservationList.customerName;
           this.customerTypeID=this.dataForReservationList.customerTypeID;
           this.customerType=this.dataForReservationList.customerType;
@@ -5113,7 +6134,7 @@ private canThisRoleCreateBackDateBooking(): boolean {
           this.GetIsGSTMandatoryWithResrvation(this.customerGroupID);
           this.InitReservationInvoiceGSTDetails( this.customerID);
           this.InitCustomerCustomerGroup();
-          this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleCategoryID);
+          this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
           this.getETRDropOffTime();
         },
       (error: HttpErrorResponse) => {
@@ -5125,8 +6146,24 @@ private canThisRoleCreateBackDateBooking(): boolean {
   private getCurrentReservationID(): any {
     return this.ReservationID
       || this.reservationID
-      || this.advanceTableForm?.value?.reservationID
+      || this.advanceTableForm?.getRawValue()?.reservationID
       || this.advanceTable?.reservationID;
+  }
+
+  private rememberAuditReservationId(id?: any): void {
+    const reservationId = id ?? this.getCurrentReservationID();
+    if (!reservationId) {
+      return;
+    }
+    try {
+      sessionStorage.setItem('audit_reservationId', String(reservationId));
+    } catch {}
+  }
+
+  ngOnDestroy(): void {
+    try {
+      sessionStorage.removeItem('audit_reservationId');
+    } catch {}
   }
 
   private shouldUseEditPrefill(): boolean {
@@ -5147,45 +6184,308 @@ private canThisRoleCreateBackDateBooking(): boolean {
   }
 
   //---------- Reservation Capping ----------
-  public GetReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleCategoryID)
+  private getCustomerGroupDisplayName(): string {
+    if (this.customerGroup) {
+      return this.customerGroup;
+    }
+    const customerCustomerGroup = this.advanceTableForm?.get('customerCustomerGroup')?.value;
+    if (customerCustomerGroup && typeof customerCustomerGroup === 'string') {
+      const separatorIndex = customerCustomerGroup.indexOf('-');
+      if (separatorIndex >= 0) {
+        return customerCustomerGroup.substring(separatorIndex + 1).trim();
+      }
+      return customerCustomerGroup.trim();
+    }
+    return '';
+  }
+
+  private clearVehicleAfterCappingBlock(): void {
+    this.vehicleID = null;
+    this.vehicleCategoryID = null;
+    this.advanceTableForm.patchValue({
+      vehicle: '',
+      vehicleID: '',
+      vehicleCategoryID: '',
+    }, { emitEvent: false });
+  }
+
+  private getVehicleDisplayName(vehicleId?: any): string {
+    const fromForm = String(this.advanceTableForm?.get('vehicle')?.value ?? '').trim();
+    if (fromForm) {
+      return fromForm;
+    }
+    const id = vehicleId ?? this.vehicleID ?? this.advanceTableForm?.get('vehicleID')?.value;
+    if (id != null && id !== '') {
+      const match = this.toArray(this.VehicleList).find((v: any) => String(v?.vehicleID) === String(id));
+      if (match?.vehicle) {
+        return String(match.vehicle).trim();
+      }
+    }
+    return String(this.advanceTable?.vehicle ?? '').trim();
+  }
+
+  /** Contract dropdown label is often "Vehicle -- Category -- Category"; message needs vehicle name only. */
+  private getVehicleNameOnly(vehicleId?: any): string {
+    const label = this.getVehicleDisplayName(vehicleId);
+    if (!label) {
+      return '';
+    }
+    const parts = label.split(/\s+--\s+/);
+    return parts[0].trim();
+  }
+
+  private buildReservationCappingLimitMessage(bookingCount: number, cap: number, vehicleId?: any): string {
+    const customerGroup = this.getCustomerGroupDisplayName();
+    const car = this.getVehicleNameOnly(vehicleId);
+    const city = this.advanceTableForm?.get('pickupCity')?.value || '';
+    const dutyType = this.advanceTableForm?.get('packageType')?.value || '';
+    const rawDate = this.pickupDate ?? this.advanceTableForm?.get('pickupDate')?.value;
+    let dateDisplay = '';
+    if (rawDate) {
+      const formatted = moment(rawDate, ['DD/MM/YYYY', moment.ISO_8601], true);
+      dateDisplay = formatted.isValid() ? formatted.format('DD/MM/YYYY') : String(rawDate);
+    }
+    return [
+      'Booking limit reached.',
+      '',
+      `Customer Group: ${customerGroup}`,
+      `Car: ${car}`,
+      `City: ${city}`,
+      `Duty Type: ${dutyType}`,
+      `Date: ${dateDisplay}`,
+      `Booked: ${bookingCount} of ${cap}`,
+      '',
+      'This booking cannot be made. Choose another Date, Car or Duty Type, or ask an admin to raise the limit.',
+    ].join('\n');
+  }
+
+  private formatPickupDateForCappingApi(pickupDate: any): string | null {
+    const parsed = this.parseFlexibleDate(pickupDate);
+    return parsed ? parsed.format('YYYY-MM-DD') : null;
+  }
+
+  private getReservationCappingRequestParams(): {
+    customerGroupID: any;
+    customerID: any;
+    cityID: any;
+    packageTypeID: any;
+    vehicleID: any;
+    pickupDate: any;
+  } | null {
+    const raw = this.advanceTableForm.getRawValue();
+    const customerGroupID = this.customerGroupID || raw.customerGroupID;
+    const customerID = this.customerID || raw.customerID;
+    const cityID = this.cityID || raw.pickupCityID;
+    const packageTypeID = this.packageTypeID || raw.packageTypeID;
+    const vehicleID = this.vehicleID || raw.vehicleID;
+    const pickupDate = this.pickupDate ?? raw.pickupDate;
+    if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleID) {
+      return null;
+    }
+    return { customerGroupID, customerID, cityID, packageTypeID, vehicleID, pickupDate };
+  }
+
+  private showReservationCappingLimitSwal(bookingCount: number, cap: number, vehicleID: any): void {
+    const cappingMessage = this.buildReservationCappingLimitMessage(bookingCount, cap, vehicleID);
+    Swal.fire({
+      title: '',
+      html: `<div style="text-align:left;white-space:pre-line;">${cappingMessage.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`,
+      icon: 'warning',
+    });
+  }
+
+  /** @returns true when save / selection may proceed; false when hard capping blocks the booking. */
+  private handleReservationCappingResponse(data: any, vehicleID: any, clearVehicleOnBlock: boolean): boolean {
+    if (!data) {
+      return true;
+    }
+    this.bookingCount = data.bookingCount;
+    this.cap = data.cap;
+    if (this.cap === 0) {
+      Swal.fire({
+        title: '',
+        text: `No cars can be provided for ${this.customer} on the selected date (capping is zero).`,
+        icon: 'warning',
+      });
+      if (clearVehicleOnBlock) {
+        this.clearVehicleAfterCappingBlock();
+      }
+      return false;
+    }
+    if (this.cap != null && this.cap > 0 && this.bookingCount >= this.cap) {
+      this.showReservationCappingLimitSwal(this.bookingCount, this.cap, vehicleID);
+      if (clearVehicleOnBlock) {
+        this.clearVehicleAfterCappingBlock();
+      }
+      return false;
+    }
+    return true;
+  }
+
+  private getProjectedSoftBookingCount(data: any): number {
+    const existing = data?.bookingCount ?? data?.BookingCount ?? 0;
+    return Number(existing) + 1;
+  }
+
+  private isSoftCappingLimitCrossed(data: any): boolean {
+    if (!data) {
+      return false;
+    }
+    const cap = data.cap ?? data.Cap;
+    if (cap == null || cap <= 0) {
+      return false;
+    }
+    return this.getProjectedSoftBookingCount(data) > cap;
+  }
+
+  private buildSoftCappingCrossedMessage(data: any, vehicleId?: any): string {
+    const customerGroup = this.getCustomerGroupDisplayName();
+    const car = this.getVehicleNameOnly(vehicleId);
+    const city = this.advanceTableForm?.get('pickupCity')?.value || '';
+    const packageType = this.advanceTableForm?.get('packageType')?.value || '';
+    const rawDate = this.pickupDate ?? this.advanceTableForm?.get('pickupDate')?.value;
+    let dateDisplay = '';
+    if (rawDate) {
+      const formatted = moment(rawDate, ['DD/MM/YYYY', moment.ISO_8601], true);
+      dateDisplay = formatted.isValid() ? formatted.format('DD/MM/YYYY') : String(rawDate);
+    }
+    const projected = this.getProjectedSoftBookingCount(data);
+    const cap = data?.cap ?? data?.Cap ?? '';
+    return `Booking limit crossed for Customer Group: ${customerGroup}, Car: ${car}, City: ${city}, Package Type: ${packageType} on ${dateDisplay}. This will be booking ${projected} against a daily limit of ${cap}. You can continue with a reason and approver.`;
+  }
+
+  private fetchSoftCappingData(): Promise<any | null> {
+    const params = this.getReservationCappingRequestParams();
+    if (!params) {
+      return Promise.resolve(null);
+    }
+    const pickupDateApi = this.formatPickupDateForCappingApi(params.pickupDate);
+    if (!pickupDateApi) {
+      return Promise.resolve(null);
+    }
+    return this.toPromise(
+      this.reservationService.getSoftReservationCapping(
+        params.customerGroupID,
+        params.customerID,
+        pickupDateApi,
+        params.cityID,
+        params.packageTypeID,
+        params.vehicleID
+      )
+    ).catch(() => null);
+  }
+
+  private runSoftCappingInfoCheck(vehicleID: any): void {
+    this.fetchSoftCappingData().then((data) => {
+      if (!this.isSoftCappingLimitCrossed(data)) {
+        return;
+      }
+      const message = this.buildSoftCappingCrossedMessage(data, vehicleID);
+      Swal.fire({
+        title: '',
+        html: `<div style="text-align:left;white-space:pre-line;">${message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`,
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+    });
+  }
+
+  private applySoftCappingBypassPayload(result: {
+    softCappingByPassReason: string;
+    softCappingByPassDetails: string;
+    softCappingByPassApproverID: number;
+  }): void {
+    this.softCappingBypassPayload = result;
+  }
+
+  private promptSoftCappingBypass(data: any, vehicleID: any): Promise<'proceed' | 'abort' | 'done'> {
+    const projected = this.getProjectedSoftBookingCount(data);
+    const cap = data?.cap ?? data?.Cap ?? 0;
+    const dialogRef = this.dialog.open(SoftCappingBypassDialogComponent, {
+      width: '520px',
+      maxWidth: '92vw',
+      panelClass: 'soft-capping-bypass-dialog-panel',
+      disableClose: true,
+      autoFocus: false,
+      data: {
+        summaryMessage: this.buildSoftCappingCrossedMessage(data, vehicleID),
+        bookingCount: projected,
+        cap,
+        onSaveAfterBypass: (payload) => this.saveReservationAfterSoftCappingBypass(payload),
+      },
+    });
+    return this.toPromise(dialogRef.afterClosed()).then((result) => {
+      if (!result) {
+        this.showNotification(
+          'snackbar-info',
+          'Save cancelled. Update the booking and click Save again when ready.',
+          'bottom',
+          'center'
+        );
+        return 'abort';
+      }
+      if (result.savedFromDialog) {
+        return 'done';
+      }
+      this.applySoftCappingBypassPayload(result);
+      return 'proceed';
+    });
+  }
+
+  private checkSoftCappingForSave(): Promise<'proceed' | 'abort' | 'done'> {
+    const params = this.getReservationCappingRequestParams();
+    return this.fetchSoftCappingData().then((data) => {
+      if (!this.isSoftCappingLimitCrossed(data)) {
+        this.softCappingBypassPayload = null;
+        return 'proceed';
+      }
+      return this.promptSoftCappingBypass(data, params?.vehicleID);
+    });
+  }
+
+  private checkReservationCappingForSave(): Promise<'proceed' | 'abort' | 'done'> {
+    const params = this.getReservationCappingRequestParams();
+    if (!params) {
+      return Promise.resolve('proceed');
+    }
+    const pickupDateApi = this.formatPickupDateForCappingApi(params.pickupDate);
+    if (!pickupDateApi) {
+      return Promise.resolve('proceed');
+    }
+    return this.toPromise(
+      this.reservationService.getReservationCapping(
+        params.customerGroupID,
+        params.customerID,
+        pickupDateApi,
+        params.cityID,
+        params.packageTypeID,
+        params.vehicleID
+      )
+    )
+      .then((data) => {
+        const hardPassed = this.handleReservationCappingResponse(data, params.vehicleID, false);
+        if (!hardPassed) {
+          return 'abort';
+        }
+        return this.checkSoftCappingForSave();
+      })
+      .catch(() => 'proceed');
+  }
+
+  public GetReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleID)
   {
     // All 6 params are path segments; any missing value produces URLs like
     // /CheckReservationCapping/4616/9/Invalid%20date/undefined/... and 400s.
-    if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleCategoryID) {
+    if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleID) {
       return;
     }
-    const formattedDate = moment(pickupDate, "DD/MM/YYYY");
-    if (!formattedDate.isValid()) { return; }
-    pickupDate = formattedDate.format("YYYY-MM-DD");
-    this.reservationService.getReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleCategoryID).subscribe(
+    const pickupDateApi = this.formatPickupDateForCappingApi(pickupDate);
+    if (!pickupDateApi) { return; }
+    this.reservationService.getReservationCapping(customerGroupID,customerID,pickupDateApi,cityID,packageTypeID,vehicleID).subscribe(
       (data: any) =>   
       {
-        if (data) 
-        {
-          this.bookingCount = data.bookingCount;
-          this.cap = data.cap;
-          if((this.bookingCount >= this.cap) && (this.bookingCount != 0) && (this.cap != null && this.cap != 0)) 
-          {
-            Swal.fire({
-              title: '',
-              text: `The maximum booking limit ${this.bookingCount} for ${this.customer} is exhausted.`,
-              icon: 'warning',
-            });
-            return false;
-          }
-          return true;
-          // if((this.bookingCount > this.cap) && (this.bookingCount != 0) && (this.cap != null && this.cap != 0))
-          // {
-          //   this.CapMessageShow = true;
-          //   this.CapMessage = "You have exceeded your booking limit.";
-          // }
-          // else
-          // {
-          //   this.CapMessageShow = false;
-          // }
-        }
-        else 
-        {
+        if (this.handleReservationCappingResponse(data, vehicleID, true)) {
+          this.runSoftCappingInfoCheck(vehicleID);
         }
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
@@ -5551,53 +6851,77 @@ private isEditingAllowed(): boolean {
   //---------- Check Validation For Same Reservation ----------
   CheckValidationForSameReservation() 
   {
-    //alert(this.advanceTableForm.value.pickupTime)
-    const pickupDate = new Date(this.advanceTableForm.value.pickupDate);
-    const pickupTime = this.advanceTableForm.value.pickupTime ? this.datePipe.transform(this.advanceTableForm.value.pickupTime, 'HH:mm') : null;
-    //const pickupTime = (new Date(this.advanceTableForm.value.pickupTime)) || null;
-   // const pickupTime = (this.advanceTableForm.value.pickupTime) ? (new Date(this.advanceTableForm.value.pickupTime)) : null;
-    this.reservationService.CheckValidationForSameReservation(this.customerID, this.passengerID, this.cityID, pickupDate, pickupTime).subscribe(
-    data => 
-    {
-      if (data?.result === true) 
-      {
-        Swal.fire({
-          title: 'Confirmation',
-          html: `
-              <div style="text-align:left">
-                There is already a reservation with same details.<br>
-                <b>Customer : </b> ${this.customer}<br>
-                <b>Passenger : </b> ${this.passengerName}<br>
-                <b>City : </b> ${this.advanceTableForm.value.pickupCity}<br>
-                <b>PickUp Date : </b> ${this.datePipe.transform(pickupDate,'dd-MMM-yyyy')}<br>
-                <b>PickUp Time : </b> ${pickupTime}<br>
-                Do you really want to make this booking?
-              </div>
-            `,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes',
-            cancelButtonText: 'No'
-          }).then((result) => {
-            if (result.isConfirmed) 
-            {
-              this.Put();
-            }
-          });
+    const raw = this.advanceTableForm.getRawValue();
+    const pickupDateSource = raw.pickupDate;
+    const pickupTimeSource = raw.pickupTime;
+    const pickupDate = pickupDateSource ? new Date(pickupDateSource) : null;
+    let pickupTime = null;
+    try {
+      pickupTime = pickupTimeSource ? this.datePipe.transform(pickupTimeSource, 'HH:mm') : null;
+    } catch {
+      pickupTime = null;
+    }
+    const customerID = this.customerID || raw.customerID;
+    const passengerID = this.passengerID || raw.primaryPassengerID;
+    const cityID = this.cityID || raw.pickupCityID;
+    const pickupCity = raw.pickupCity;
+    const customerLabel = this.customer || this.customerName || raw.customerCustomerGroup || '';
 
-      } 
-      else 
-      {
-        this.Put();
-      }
-    },
-    () => 
-    {
-      // The duplicate check is only advisory. Previously a failure here silently
-      // dropped the save, leaving the pre-created reservation without its
-      // stops/passenger rows. Proceed with the save instead.
+    if (!pickupDate || Number.isNaN(pickupDate.getTime()) || !customerID || !passengerID || !cityID) {
       this.Put();
-    });  
+      return;
+    }
+
+    try {
+      this.reservationService.CheckValidationForSameReservation(customerID, passengerID, cityID, pickupDate, pickupTime).subscribe(
+      data => 
+      {
+        if (data?.result === true) 
+        {
+          Swal.fire({
+            title: 'Confirmation',
+            html: `
+                <div style="text-align:left">
+                  There is already a reservation with same details.<br>
+                  <b>Customer : </b> ${customerLabel}<br>
+                  <b>Passenger : </b> ${this.passengerName}<br>
+                  <b>City : </b> ${pickupCity}<br>
+                  <b>PickUp Date : </b> ${this.datePipe.transform(pickupDate,'dd-MMM-yyyy')}<br>
+                  <b>PickUp Time : </b> ${pickupTime}<br>
+                  Do you really want to make this booking?
+                </div>
+              `,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Yes',
+              cancelButtonText: 'No'
+            }).then((result) => {
+              if (result.isConfirmed) 
+              {
+                this.Put();
+              }
+              else
+              {
+                this.rejectSoftCapSaveHooks(new Error('Save cancelled at duplicate booking confirmation.'));
+              }
+            });
+
+        } 
+        else 
+        {
+          this.Put();
+        }
+      },
+      () => 
+      {
+        // The duplicate check is only advisory. Previously a failure here silently
+        // dropped the save, leaving the pre-created reservation without its
+        // stops/passenger rows. Proceed with the save instead.
+        this.Put();
+      });
+    } catch {
+      this.Put();
+    }
   }
 
 }

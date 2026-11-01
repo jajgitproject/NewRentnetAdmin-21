@@ -94,6 +94,35 @@ const routes: Routes = [
           )
       },
 
+       {
+        path: 'rejectedQCDriverPhoto',
+        loadChildren: () =>
+          import('./rejectedQCDriverPhoto/rejectedQCDriverPhoto.module').then(
+            (m) => m.RejectedQCDriverPhotoModule
+          ),
+        data: {
+          requiredPageKey: 'Rejected QC Driver Photo',
+          alternatePageKeys: ['rejectedQCDriverPhoto', 'Rejected QC Driver Photo'],
+        },
+      },
+
+      {
+        path: 'integrationLogDetail',
+        loadChildren: () =>
+          import('./integrationLogDetail/integrationLogDetail.module').then(
+            (m) => m.IntegrationLogDetailModule
+          )
+      },
+
+      {
+        path: 'integrationHealth',
+        loadChildren: () =>
+          import('./integrationHealth/integrationHealth.module').then(
+            (m) => m.IntegrationHealthModule
+          ),
+        data: { skipRolePageGuard: true }
+      },
+
       {
         path: 'driverComplianceDashboard',
         loadChildren: () =>
@@ -144,6 +173,70 @@ const routes: Routes = [
             (m) => m.DynamicsMis20Module
           )
       },
+      {
+        path: 'sendDataToMyf',
+        loadChildren: () =>
+          import('./sendDataToMyf/sendDataToMyf.module').then(
+            (m) => m.SendDataToMyfModule
+          ),
+        data: {
+          requiredPageKey: 'Send Data To MYF',
+          alternatePageKeys: ['sendDataToMyf', 'Send Data To MYF'],
+        },
+      },
+      {
+        path: 'sendVendorClosingData',
+        loadChildren: () =>
+          import('./sendVendorClosingData/sendVendorClosingData.module').then(
+            (m) => m.SendVendorClosingDataModule
+          ),
+        data: {
+          requiredPageKey: 'Send Vendor Closing Data',
+          alternatePageKeys: ['sendVendorClosingData', 'Send Vendor Closing Data'],
+        },
+      },
+      {
+        path: 'sendDataToDynamics',
+        loadChildren: () =>
+          import('./sendDataToDynamics/sendDataToDynamics.module').then(
+            (m) => m.SendDataToDynamicsModule
+          ),
+        data: {
+          requiredPageKey: 'Send Data To Dynamics',
+          alternatePageKeys: [
+            'sendDataToDynamics',
+            'Send Invoice to Dynamics',
+            'Send Invoices To Dynamics'
+          ],
+        },
+      },
+      {
+        path: 'sendCreditNotesToDynamics',
+        loadChildren: () =>
+          import('./sendCreditNotesToDynamics/sendCreditNotesToDynamics.module').then(
+            (m) => m.SendCreditNotesToDynamicsModule
+          ),
+        data: {
+          requiredPageKey: 'Send Credit Notes To Dynamics',
+          alternatePageKeys: [
+            'sendCreditNotesToDynamics',
+            'Send Credit Notes To Dynamics',
+            'DynamicsCreditNote',
+            'Dynamics Credit Note'
+          ],
+        },
+      },
+      {
+        path: 'dynamicsSyncBatch',
+        loadChildren: () =>
+          import('./dynamicsSyncBatch/dynamicsSyncBatch.module').then(
+            (m) => m.DynamicsSyncBatchModule
+          ),
+        data: {
+          requiredPageKey: 'DynamicsSyncBatch',
+          alternatePageKeys: ['dynamicsSyncBatch', 'Dynamics Sync Batch'],
+        },
+      },
 
       {
         path: 'dutyState',
@@ -182,6 +275,14 @@ const routes: Routes = [
         loadChildren: () =>
           import('./changePassenger/changePassenger.module').then(
             (m) => m.ChangePassengerModule
+          )
+      },
+
+      {
+        path: 'changeModeOfPayment',
+        loadChildren: () =>
+          import('./changeModeOfPayment/changeModeOfPayment.module').then(
+            (m) => m.ChangeModeOfPaymentModule
           )
       },
 
@@ -475,6 +576,54 @@ const routes: Routes = [
       },
 
       {
+        path: 'bulkGfb',
+        loadChildren: () =>
+          import('./bulkGfb/bulkGfb.module').then(
+            (m) => m.BulkGfbModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk GFB',
+          alternatePageKeys: ['bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
+        path: 'markReadyForBulkBilling',
+        loadChildren: () =>
+          import('./markReadyForBulkBilling/markReadyForBulkBilling.module').then(
+            (m) => m.MarkReadyForBulkBillingModule
+          ),
+        data: {
+          requiredPageKey: 'Mark Ready For Bulk Billing',
+          alternatePageKeys: ['markReadyForBulkBilling', 'bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
+        path: 'bulkInvoice',
+        loadChildren: () =>
+          import('./bulkInvoice/bulkInvoice.module').then(
+            (m) => m.BulkInvoiceModule
+          ),
+        data: {
+          requiredPageKey: 'Bulk Invoice',
+          alternatePageKeys: ['bulkInvoice', 'bulkGfb', 'closingOne', 'Closing', 'generateEInvoice', 'Generate E - Invoice'],
+        },
+      },
+
+      {
+        path: 'gtrackRunningDetails',
+        loadChildren: () =>
+          import('./gtrackRunningDetails/gtrackRunningDetails.module').then(
+            (m) => m.GtrackRunningDetailsModule
+          ),
+        data: {
+          requiredPageKey: 'Gtrack Running Details',
+          alternatePageKeys: ['gtrackRunningDetails', 'bulkInvoice', 'Closing', 'closingOne'],
+        },
+      },
+
+      {
         path: 'dynamicEInvoice',
         loadChildren: () =>
           import('./dynamicEInvoice/dynamicEInvoice.module').then(
@@ -549,6 +698,23 @@ const routes: Routes = [
           import('./inventoryDocument/inventoryDocument.module').then(
             (m) => m.InventoryDocumentModule
           )
+      },
+      {
+        path: 'vehicleCompliance',
+        loadChildren: () =>
+          import('./vehicleCompliance/vehicleCompliance.module').then(
+            (m) => m.VehicleComplianceModule
+          ),
+        data: {
+          requiredPageKey: 'inventoryDocument',
+          alternatePageKeys: [
+            'vehicleCompliance',
+            'Vehicle Compliance',
+            'inventoryDocument',
+            'Inventory Document',
+            'inventory',
+          ],
+        },
       },
       
       {
@@ -960,6 +1126,13 @@ const routes: Routes = [
     )
 },
 {
+  path: 'customerPaymentMapping',
+    loadChildren: () =>
+      import('./customerPaymentMapping/customerPaymentMapping.module').then(
+        (m) => m.CustomerPaymentMappingModule
+      ),
+  },
+  {
   path: 'contractPaymentMapping',
   loadChildren: () =>
     import('./contractPaymentMapping/contractPaymentMapping.module').then(
@@ -1167,27 +1340,13 @@ const routes: Routes = [
             (m) => m.PasswordResetModule
           )
       },
- {
+      {
         path: 'auditTrail',
         loadChildren: () =>
           import('./auditTrail/auditTrail.module').then(
             (m) => m.AuditTrailModule
           )
         },
-      {
-        path: 'applicationAuditLog',
-        loadChildren: () =>
-          import('./applicationAuditLog/applicationAuditLog.module').then(
-            (m) => m.ApplicationAuditLogModule
-          )
-      },
-      {
-        path: 'applicationAuditSettings',
-        loadChildren: () =>
-          import('./applicationAuditSettings/applicationAuditSettings.module').then(
-            (m) => m.ApplicationAuditSettingsModule
-          )
-      },
       {
         path: 'reservationGroup',
         loadChildren: () =>
@@ -1488,6 +1647,13 @@ const routes: Routes = [
         loadChildren: () =>
           import('./controlPanelTemp/controlPanelTemp.module').then(
             (m) => m.ControlPanelTempModule
+          )
+      },
+      {
+        path: 'upsellDeclineReason',
+        loadChildren: () =>
+          import('./upsellDeclineReason/upsellDeclineReason.module').then(
+            (m) => m.UpsellDeclineReasonModule
           )
       },
 
@@ -2309,6 +2475,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'maxGarageInOutKMMinutes',
+        loadChildren: () =>
+          import('./maxGarageInOutKMMinutes/maxGarageInOutKMMinutes.module').then(
+            (m) => m.MaxGarageInOutKMMinutesModule
+          )
+      },
+
+      {
         path: 'customerPerson',
         loadChildren: () =>
           import('./customerPerson/customerPerson.module').then(
@@ -2403,6 +2577,16 @@ const routes: Routes = [
         loadChildren: () =>
           import('./role/role.module').then((m) => m.RoleModule)
       },
+
+      {
+        path: 'ticket',
+        loadChildren: () =>
+          import('./ticket/ticket.module').then((m) => m.TicketModule)
+      },
+      { path: 'raiseTicket', redirectTo: '/ticket/raise', pathMatch: 'full' },
+      { path: 'ticketDashboard', redirectTo: '/ticket/dashboard', pathMatch: 'full' },
+      { path: 'ticketPerformance', redirectTo: '/ticket/performance', pathMatch: 'full' },
+      { path: 'ticketMasters', redirectTo: '/ticket/masters', pathMatch: 'full' },
 
       {
         path: 'rolePageMapping/:RoleID/:Role',
@@ -2657,6 +2841,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'customerGroupDSEmails',
+        loadChildren: () =>
+          import('./customerGroupDSEmails/customerGroupDSEmails.module').then(
+            (m) => m.CustomerGroupDSEmailsModule
+          )
+      },
+
+      {
         path: 'cardType',
         loadChildren: () =>
           import('./cardType/cardType.module').then(
@@ -2759,6 +2951,13 @@ const routes: Routes = [
         loadChildren: () =>
           import('./customerGrowthPerson/customerGrowthPerson.module').then(
             (m) => m.CustomerGrowthPersonModule
+          )
+      },
+      {
+        path: 'customerCityHigherExtraKMorHR',
+        loadChildren: () =>
+          import('./customerCityHigherExtraKMorHR/customerCityHigherExtraKMorHR.module').then(
+            (m) => m.CustomerCityHigherExtraKMorHRModule
           )
       },
       {
@@ -2946,6 +3145,20 @@ const routes: Routes = [
             (m) => m.LocationGroupModule
           )
       },
+      {
+        path: 'locationCityMapping',
+        loadChildren: () =>
+          import('./locationCityMapping/locationCityMapping.module').then(
+            (m) => m.LocationCityMappingModule
+          )
+      },
+      {
+        path: 'locationCityMappingDetails',
+        loadChildren: () =>
+          import('./locationCityMappingDetails/locationCityMappingDetails.module').then(
+            (m) => m.LocationCityMappingDetailsModule
+          )
+      },
 
       {
         path: 'messageType',
@@ -3036,18 +3249,11 @@ const routes: Routes = [
           ),
         data: {
           requiredPageKey: 'Bulk Bills Download',
-          alternatePageKeys: [
-            'bulkBillsDownload',
-            'invoiceHome',
-            'Invoice Home',
-            'controlPanelDesign',
-            'Control Panel',
-          ],
         },
       },
 
       {
-        path: 'invoiceExport',
+        path: 'Forensic',
         loadChildren: () =>
           import('./invoiceExport/invoiceExport.module').then(
             (m) => m.InvoiceExportModule
@@ -3060,6 +3266,20 @@ const routes: Routes = [
           import('./appBillingReceipt/appBillingReceipt.module').then(
             (m) => m.AppBillingReceiptModule
           )
+      },
+
+      {
+        path: 'testBooking',
+        loadChildren: () =>
+          import('./testBooking/testBooking.module').then(
+            (m) => m.TestBookingModule
+          )
+      },
+
+      {
+        path: 'invoiceExport',
+        redirectTo: 'Forensic',
+        pathMatch: 'full'
       },
 
       {
@@ -3475,6 +3695,14 @@ const routes: Routes = [
           )
       },
 
+
+      {
+        path: 'customerMeeting',
+        loadChildren: () =>
+          import('./customerMeeting/customerMeeting.module').then(
+            (m) => m.CustomerMeetingModule
+          )
+      },
       {
         path: 'integrationLog',
         loadChildren: () =>
@@ -3574,6 +3802,32 @@ const routes: Routes = [
           import('./incidenceMIS/incidenceMIS.module').then(
             (m) => m.IncidenceMISModule
           )
+      },
+
+      {
+        path: 'qcMisCst',
+        loadChildren: () =>
+          import('./qcMisCst/qcMisCst.module').then(
+            (m) => m.QcMisCSTModule
+          ),
+        data: {
+          requiredPageKey: 'QC MIS (CST)',
+          alternatePageKeys: ['qcMisCst', 'QC MIS (CST)', 'QCMIS(CST)'],
+          skipRolePageGuard: true
+        }
+      },
+
+      {
+        path: 'postPickupCallMis',
+        loadChildren: () =>
+          import('./postPickupCallMis/postPickupCallMis.module').then(
+            (m) => m.PostPickupCallMisModule
+          ),
+        data: {
+          requiredPageKey: 'Post Pickup Call MIS',
+          alternatePageKeys: ['postPickupCallMis', 'Post Pickup Call MIS'],
+          skipRolePageGuard: true
+        }
       },
 
       {
@@ -3809,6 +4063,38 @@ const routes: Routes = [
         loadChildren: () =>
           import('./bookingRequest/bookingRequest.module').then(
             (m) => m.BookingRequestModule
+          )
+      },
+
+      {
+        path: 'cdpBookingRequest',
+        loadChildren: () =>
+          import('./cdpBookingRequest/cdpBookingRequest.module').then(
+            (m) => m.CdpBookingRequestModule
+          )
+      },
+
+      {
+        path: 'kamAddressCorrection',
+        loadChildren: () =>
+          import('./kamAddressCorrection/kamAddressCorrection.module').then(
+            (m) => m.KamAddressCorrectionModule
+          )
+      },
+
+      {
+        path: 'migrationBookingRequest',
+        loadChildren: () =>
+          import('./migrationBookingRequest/migrationBookingRequest.module').then(
+            (m) => m.MigrationBookingRequestModule
+          )
+      },
+
+      {
+        path: 'migrationBookingConfiguration',
+        loadChildren: () =>
+          import('./migrationBookingConfiguration/migrationBookingConfiguration.module').then(
+            (m) => m.MigrationBookingConfigurationModule
           )
       },
 

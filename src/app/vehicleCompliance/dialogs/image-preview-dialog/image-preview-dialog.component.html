@@ -1,0 +1,26 @@
+<div class="vc-image-preview-header">
+  <div class="vc-image-preview-title">{{ dialogTitle }}</div>
+  <button mat-icon-button type="button" (click)="dialogRef.close()" aria-label="Close">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="vc-image-preview-content">
+  <app-static-image
+    *ngIf="imageUrl && !isPdf && !previewFailed"
+    [src]="imageUrl"
+    maxWidth="100%"
+    maxHeight="75vh"
+    [alt]="dialogTitle"
+    cssClass="vc-image-preview-img"
+    (failed)="previewFailed = true"></app-static-image>
+  <div *ngIf="previewFailed && !isPdf" class="vc-image-preview-unavailable">
+    <mat-icon>image_not_supported</mat-icon>
+    <p>Image could not be loaded.</p>
+    <a *ngIf="imageUrl" [href]="imageUrl" target="_blank" rel="noopener">Try opening in new tab</a>
+  </div>
+  <div *ngIf="isPdf" class="vc-image-preview-pdf">
+    <mat-icon>picture_as_pdf</mat-icon>
+    <a [href]="imageUrl" target="_blank" rel="noopener">Open PDF in new tab</a>
+  </div>
+</mat-dialog-content>

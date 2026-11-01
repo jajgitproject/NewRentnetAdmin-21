@@ -15,6 +15,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -30,6 +31,7 @@ import { AppDutyMISRoutingModule } from './appDutyMIS-routing.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { StaticImageComponent } from '../shared/static-image/static-image.component';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 
 @NgModule({
   declarations: [
@@ -62,8 +64,10 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
     MyUploadModule,
-    StaticImageComponent
+    StaticImageComponent,
+    StoredMisExportsComponent
   ],
   providers: [AppDutyMISService]
 })

@@ -8,6 +8,7 @@ export class CustomerGroup {
    cancelBookingBeforeMinutes:number;
    activationStatus: boolean;
    isGSTMandatoryWithReservation:boolean;
+   sendDutySlipAfterDSVerification:boolean;
    updatedBy:number;
    userID:number;
    updateDateTime: Date;
@@ -21,6 +22,7 @@ export class CustomerGroup {
        this.cancelBookingBeforeMinutes = customerGroup.cancelBookingBeforeMinutes || '';
        this.activationStatus = customerGroup.activationStatus || '';
        this.isGSTMandatoryWithReservation = customerGroup.isGSTMandatoryWithReservation || '';
+       this.sendDutySlipAfterDSVerification = customerGroup.sendDutySlipAfterDSVerification === true;
        this.updatedBy=customerGroup.updatedBy || 10;
        this.updateDateTime = customerGroup.updateDateTime;
     }

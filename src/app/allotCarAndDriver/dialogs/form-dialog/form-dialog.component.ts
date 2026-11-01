@@ -21,6 +21,11 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { environment } from 'src/environments/environment';
+import {
+  extractComplianceFromAllotmentResponse,
+  showCarDriverCompliancePopup
+} from '../../compliance-popup';
 
 
 @Component({
@@ -92,7 +97,6 @@ allotmentType: any;
 
     // Set the defaults
     if (this.action === 'add' || this.action === 'update') {
-      debugger
       this.advanceTableDIA = data.advanceTable;
       this.dialogTitle = 'Allot Car And Driver';
       this.allotmentType =data.allotmentType
@@ -140,8 +144,10 @@ allotmentType: any;
   
 
   ngOnInit(): void {
-    this.InitDriver();
-    this.InitVehicle();
+    if (this.data.Text !== 'AllotCarDriver') {
+      this.InitDriver();
+      this.InitVehicle();
+    }
     if (this.data.Text === 'AllotCarDriver') {
       this.advanceTableForm.controls["driverName"].disable();
       this.advanceTableForm.controls["vehicleName"].disable();
@@ -159,6 +165,20 @@ allotmentType: any;
     if (this.data.Text === 'opencarWithDriver') {
       this.advanceTableForm.controls["vehicleName"].disable();
     }
+  }
+
+  private markAllotmentPerf(label: string): void {
+    if (!environment.production) {
+      console.info(`[AllotmentPerf] ${label}`);
+    }
+  }
+
+  private onAllotSubmitSuccess(closeMessage: string): void {
+    this.markAllotmentPerf('allotment_submit_done');
+    this.showNotification('snackbar-success', closeMessage, 'bottom', 'center');
+    this.isSubmitting = false;
+    this.saveDisabled = true;
+    this.dialogRef.close({ isClose: false });
   }
 
   InitDriver() {
@@ -267,17 +287,51 @@ allotmentType: any;
   submit() {
   }
 
+  private handleAllotSubmitError(error: any): void {
+    this.isSubmitting = false;
+    this.saveDisabled = true;
+    const parsedError = this.parseErrorPayload(error);
+    if (parsedError.message) {
+      this.openShowError(parsedError.message);
+    }
+    this.showNotification('snackbar-danger', parsedError.message, 'bottom', 'center');
+  }
+
   private parseErrorPayload(error: any): { status: string; message: string } {
     if (typeof error === 'string') {
-      return { status: '', message: error || 'Operation Failed...!!!' };
+      const text = error.trim();
+      if (!text || text.toLowerCase() === 'ok' || text.toLowerCase() === 'error') {
+        return { status: '', message: 'Allotment failed. Check the Network tab for the allotment API response.' };
+      }
+      return { status: '', message: text };
     }
 
     const payload = error?.error ?? error;
+    const validationMessage = this.flattenValidationErrors(payload);
     const status = String(payload?.status ?? payload?.Status ?? '').toLowerCase();
+    const rawMessage = String(payload?.message ?? payload?.Message ?? error?.statusText ?? '').trim();
     const message =
-      String(payload?.message ?? payload?.Message ?? error?.statusText ?? '').trim() || 'Operation Failed...!!!';
+      validationMessage ||
+      (!rawMessage || rawMessage.toLowerCase() === 'ok' || rawMessage.toLowerCase() === 'error'
+        ? 'Allotment failed. Check the Network tab for the allotment API response.'
+        : rawMessage);
 
     return { status, message };
+  }
+
+  private flattenValidationErrors(payload: any): string {
+    const errors = payload?.errors;
+    if (!errors || typeof errors !== 'object') {
+      return '';
+    }
+    return Object.entries(errors)
+      .map(([key, value]) => {
+        const field = String(key || '').replace(/^\$\./, '');
+        const text = Array.isArray(value) ? value.join(' ') : String(value ?? '');
+        return field ? `${field}: ${text}` : text;
+      })
+      .filter((part) => !!part.trim())
+      .join(' | ');
   }
 
   CheckData() {
@@ -301,231 +355,212 @@ allotmentType: any;
 
   }
   public Post(): void {
-    if (this.buttonDisabled) {
-      this.showNotification('snackbar-danger','Changes are not allowed. Status: ' + this.status,'bottom','center');
-      return;
-    }
-    this.saveDisabled = false;
-    this.isSubmitting=true;
-    this.CheckData();
-    if(this.action==='add')
-    {
-      this.advanceTableForm.patchValue({allotmentType:this.data.allotmentType})
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())
-      .subscribe(
-        response => {
-          this.showNotification(
-            'snackbar-success',
-            'Car And Driver Alloted...!!!',
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-          this.dialogRef.close({ isClose: false });
-        },
-        error => {
-          const parsedError = this.parseErrorPayload(error);
-          if (parsedError.message) {
-            this.openShowError(parsedError.message);
-          }
-          this.showNotification(
-            'snackbar-danger',
-            parsedError.message,
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-        }
-      )
-    }
-    else{
-      this.advanceTableForm.patchValue({allotmentID:this.data.allotmentID})
-      this.advanceTableForm.patchValue({allotmentType:this.data.allotmentType})
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())
-      .subscribe(
-        response => {
-          
-          this.showNotification(
-            'snackbar-success',
-            'Car And Driver Alloted...!!!',
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-          this.dialogRef.close({ isClose: false });
-        },
-        error => {
-          const parsedError = this.parseErrorPayload(error);
-          if (parsedError.message) {
-            this.openShowError(parsedError.message);
-          }
-          this.showNotification(
-            'snackbar-danger',
-            parsedError.message,
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-        }
-      )
-    }
-    
+    this.confirmAppBasedDriverIfNeeded(() =>
+      this.submitAllotment(this.data.allotmentType, 'Car And Driver Alloted...!!!')
+    );
   }
 
   public SoftPost(): void {
-    if (this.buttonDisabled) {
-      this.showNotification('snackbar-danger','Changes are not allowed. Status: ' + this.status,'bottom','center');
-      return;
-    }
-    this.saveDisabled = false;
-    this.isSubmitting=true;
-    this.CheckData();
-    if(this.action==='add')
-    {
-      this.advanceTableForm.patchValue({allotmentType:'Soft'})
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())
-      .subscribe(
-        response => {
-          this.showNotification(
-            'snackbar-success',
-            'Car And Driver Alloted...!!!',
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-          this.dialogRef.close({ isClose: false });
-        },
-        error => {
-          const parsedError = this.parseErrorPayload(error);
-          if (parsedError.message) {
-            this.openShowError(parsedError.message);
-          }
-          this.showNotification(
-            'snackbar-danger',
-            parsedError.message,
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-        }
-      )
-    }
-    else{
-      this.advanceTableForm.patchValue({allotmentID:this.data.allotmentID})
-      this.advanceTableForm.patchValue({allotmentType:'Soft'})
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())
-      .subscribe(
-        response => {
-          
-          this.showNotification(
-            'snackbar-success',
-            'Car And Driver Alloted...!!!',
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-          this.dialogRef.close({ isClose: false });
-        },
-        error => {
-          const parsedError = this.parseErrorPayload(error);
-          if (parsedError.message) {
-            this.openShowError(parsedError.message);
-          }
-          this.showNotification(
-            'snackbar-danger',
-            parsedError.message,
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-        }
-      )
-    }
-    
+    this.confirmAppBasedDriverIfNeeded(() =>
+      this.submitAllotment('Soft', 'Car And Driver Alloted...!!!')
+    );
   }
 
   public HardPost(): void {
+    this.confirmAppBasedDriverIfNeeded(() =>
+      this.submitAllotment('Hard', 'Car And Driver Alloted...!!! Notifications are being sent.')
+    );
+  }
+
+  private isPreferAppBasedYes(value: any): boolean {
+    if (value === true || value === 1 || value === '1') {
+      return true;
+    }
+    const text = String(value ?? '').trim().toLowerCase();
+    return text === 'yes' || text === 'true';
+  }
+
+  private getSelectedDriverAppBasedYes(): boolean {
+    const driverStatus =
+      this.advanceTableDIA?.appBasedDriver ??
+      this.advanceTableDIA?.AppBasedDriver ??
+      this.data?.driverAppBasedDriver ??
+      this.data?.driverAppBasedStatus;
+    return this.isPreferAppBasedYes(driverStatus);
+  }
+
+  private areBothCustomerAppBasedPreferencesNo(): boolean {
+    const prefs = this.data?.reservationPreferences;
+    if (prefs) {
+      return !prefs.customerPreferYes && !prefs.customerPersonPreferYes;
+    }
+    return (
+      !this.isPreferAppBasedYes(this.data?.customerPreferAppBasedDriver) &&
+      !this.isPreferAppBasedYes(this.data?.customerPersonPreferAppBasedDriver)
+    );
+  }
+
+  private shouldSkipAppBasedDriverAllotmentConfirm(): boolean {
+    if (this.data?.Text !== 'AllotCarDriver') {
+      return true;
+    }
+    if (this.getSelectedDriverAppBasedYes()) {
+      return true;
+    }
+    if (this.areBothCustomerAppBasedPreferencesNo()) {
+      return true;
+    }
+    return false;
+  }
+
+  private getAppBasedPreferenceDisplayLabels(): { customer: string; customerPerson: string } {
+    const prefs = this.data?.reservationPreferences;
+    if (prefs) {
+      return {
+        customer: prefs.customerPreferLabel ?? (prefs.customerPreferYes ? 'Yes' : 'No'),
+        customerPerson:
+          prefs.customerPersonPreferLabel ?? (prefs.customerPersonPreferYes ? 'Yes' : 'No'),
+      };
+    }
+    return {
+      customer: this.isPreferAppBasedYes(this.data?.customerPreferAppBasedDriver) ? 'Yes' : 'No',
+      customerPerson: this.isPreferAppBasedYes(this.data?.customerPersonPreferAppBasedDriver)
+        ? 'Yes'
+        : 'No',
+    };
+  }
+
+  private buildAppBasedDriverConfirmHtml(): string {
+    const labels = this.getAppBasedPreferenceDisplayLabels();
+    const escapeHtml = (value: string) =>
+      String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    const customer = escapeHtml(labels.customer);
+    const customerPerson = escapeHtml(labels.customerPerson);
+    const labelStyle =
+      'font-size:14px;line-height:1.45;color:#424242;text-align:left;white-space:nowrap;';
+    const valueStyle =
+      'font-size:14px;line-height:1.45;font-weight:600;color:#212121;margin-left:6px;white-space:nowrap;';
+    const prefRow = 'margin:0 0 10px;text-align:left;line-height:1.45;';
+    return `
+      <div class="allot-app-based-confirm" style="width:100%;box-sizing:border-box;text-align:left;">
+        <p style="${prefRow}">
+          <span style="${labelStyle}">Customer Prefers App Based Driver:</span><span style="${valueStyle}">${customer}</span>
+        </p>
+        <p style="${prefRow}margin-bottom:16px;">
+          <span style="${labelStyle}">Customer Person Prefers App Based Driver:</span><span style="${valueStyle}">${customerPerson}</span>
+        </p>
+        <div style="border-top:1px solid #e8e8e8;padding-top:14px;margin:0;">
+          <p style="margin:0 0 10px;font-size:14px;line-height:1.5;color:#424242;text-align:left;">
+            The Driver you have chosen is not App based.
+          </p>
+          <p style="margin:0;font-size:14px;line-height:1.5;font-weight:500;color:#212121;text-align:left;">
+            Do you really want to continue?
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  private alignAppBasedDriverConfirmPopup(popup: HTMLElement): void {
+    const htmlContainer = popup.querySelector('.swal2-html-container') as HTMLElement;
+    const content = popup.querySelector('.swal2-content') as HTMLElement;
+    const icon = popup.querySelector('.swal2-icon') as HTMLElement;
+    if (content) {
+      content.style.alignItems = 'flex-start';
+      content.style.justifyContent = 'flex-start';
+      content.style.width = '100%';
+      content.style.textAlign = 'left';
+    }
+    if (icon) {
+      icon.style.marginTop = '0.25em';
+      icon.style.marginBottom = '0.75em';
+    }
+    if (htmlContainer) {
+      htmlContainer.style.display = 'block';
+      htmlContainer.style.width = '100%';
+      htmlContainer.style.maxWidth = '100%';
+      htmlContainer.style.margin = '0';
+      htmlContainer.style.padding = '0 0.5em 0 0.25em';
+      htmlContainer.style.textAlign = 'left';
+      htmlContainer.style.overflow = 'visible';
+    }
+  }
+
+  private confirmAppBasedDriverIfNeeded(continueFn: () => void): void {
+    if (this.buttonDisabled || this.isSubmitting) {
+      return;
+    }
+    if (this.shouldSkipAppBasedDriverAllotmentConfirm()) {
+      continueFn();
+      return;
+    }
+    Swal.fire({
+      html: this.buildAppBasedDriverConfirmHtml(),
+      width: 500,
+      padding: '1.35em 1.5em 1.15em',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+      focusCancel: true,
+      didOpen: (popup) => this.alignAppBasedDriverConfirmPopup(popup),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        continueFn();
+      }
+    });
+  }
+
+  private submitAllotment(allotmentType: string, successMessage: string): void {
+    if (this.isSubmitting) {
+      return;
+    }
     if (this.buttonDisabled) {
       this.showNotification('snackbar-danger','Changes are not allowed. Status: ' + this.status,'bottom','center');
       return;
     }
     this.saveDisabled = false;
     this.isSubmitting=true;
+    this.markAllotmentPerf('allotment_submit_start');
     this.CheckData();
-    if(this.action==='add')
-    {
-      this.advanceTableForm.patchValue({allotmentType:'Hard'})
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())
-      .subscribe(
-        response => {
-          this.showNotification(
-            'snackbar-success',
-            'Car And Driver Alloted...!!! Notifications are being sent.',
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-          this.dialogRef.close({ isClose: false });
-        },
-        error => {
-          const parsedError = this.parseErrorPayload(error);
-          if (parsedError.message) {
-            this.openShowError(parsedError.message);
-          }
-          this.showNotification(
-            'snackbar-danger',
-            parsedError.message,
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-        }
-      )
+    this.advanceTableForm.patchValue({allotmentType});
+
+    const allotmentId = Number(this.data?.allotmentID);
+    const useUpdate = this.action === 'update' && Number.isFinite(allotmentId) && allotmentId > 0;
+    if (useUpdate) {
+      this.advanceTableForm.patchValue({allotmentID: allotmentId});
     }
-    else{
-      this.advanceTableForm.patchValue({allotmentID:this.data.allotmentID})
-      this.advanceTableForm.patchValue({allotmentType:'Hard'})
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())
-      .subscribe(
-        response => {
-          
-          this.showNotification(
-            'snackbar-success',
-            'Car And Driver Alloted...!!! Notifications are being sent.',
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
-          this.dialogRef.close({ isClose: false });
-        },
-        error => {
-          const parsedError = this.parseErrorPayload(error);
-          if (parsedError.message) {
-            this.openShowError(parsedError.message);
-          }
-          this.showNotification(
-            'snackbar-danger',
-            parsedError.message,
-            'bottom',
-            'center'
-          );
-          this.isSubmitting = false;
-          this.saveDisabled = true;
+    const request$ = useUpdate
+      ? this.advanceTableService.update(this.advanceTableForm.getRawValue())
+      : this.advanceTableService.add(this.advanceTableForm.getRawValue());
+
+    request$.subscribe(
+      (response) => {
+        const resolvedType =
+          allotmentType ||
+          this.data?.allotmentType ||
+          this.advanceTableForm?.getRawValue()?.allotmentType;
+        const isSoftOrHardAllotment =
+          resolvedType === 'Hard' || resolvedType === 'Soft';
+        const compliance = isSoftOrHardAllotment
+          ? extractComplianceFromAllotmentResponse(response)
+          : null;
+        if (compliance) {
+          showCarDriverCompliancePopup(compliance).then(() => {
+            this.onAllotSubmitSuccess(successMessage);
+          });
+          return;
         }
-      )
-    }
-    
+        this.onAllotSubmitSuccess(successMessage);
+      },
+      error => {
+        this.handleAllotSubmitError(error);
+      }
+    );
   }
 
   openShowError(message:string)

@@ -1,0 +1,85 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Raise a Ticket</h2>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>Ticket details</h2>
+          </div>
+          <div class="body">
+            <p class="m-b-20">Ticket open date is set when you save. Assigned by stays empty until a Lead assigns the ticket.</p>
+
+            <div class="alert alert-info" *ngIf="loaded && applications.length === 0">
+              Application data is created in <strong>Ticketing → Ticket Masters</strong>.
+              Add the application there, then come back to this form.
+              <div class="m-t-10" *ngIf="canMasters">
+                <a mat-raised-button color="primary" routerLink="/ticketMasters">Open Ticket Masters</a>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>Type</mat-label>
+                  <mat-select [(ngModel)]="form.ticketType">
+                    <mat-option value="Bug">Bug</mat-option>
+                    <mat-option value="New Feature">New Feature</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>Priority</mat-label>
+                  <mat-select [(ngModel)]="form.priorityName">
+                    <mat-option value="Highest - 1">Highest - 1</mat-option>
+                    <mat-option value="Medium">Medium</mat-option>
+                    <mat-option value="Low">Low</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>Application</mat-label>
+                  <mat-select [(ngModel)]="form.ticketApplicationID">
+                    <mat-option value="">Select</mat-option>
+                    <mat-option *ngFor="let app of applications" [value]="app.ticketApplicationID">{{ app.applicationName }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>Title</mat-label>
+                  <input matInput [(ngModel)]="form.title" />
+                </mat-form-field>
+              </div>
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput rows="5" [(ngModel)]="form.description"></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <button mat-raised-button color="primary" (click)="save()">Save</button>
+            <a mat-stroked-button class="m-l-10" routerLink="/ticket">Back to tickets</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

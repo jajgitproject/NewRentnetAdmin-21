@@ -244,3 +244,25 @@ export class CarsRestrictedForPassengerModel {
  }
 }
 
+export interface AllotmentHistoryRow {
+  reservationID?: number;
+  allotmentID?: number;
+  dateOfAllotment?: string | Date;
+  timeofAllotment?: string | Date;
+  allotmentBy?: string;
+  registrationNumber?: string;
+  vehicleName?: string;
+  vehicleCategoryName?: string;
+  driverName?: string;
+  driverMobile?: string;
+  supplierName?: string;
+  supplierMobile?: string;
+  driverSupplierName?: string;
+  driverSupplierMobile?: string;
+  allotmentType?: string;
+  allotmentStatus?: string;
+  dateOfCancellation?: string | Date;
+  cancellationRemark?: string;
+  cancellationBy?: string;
+}
+

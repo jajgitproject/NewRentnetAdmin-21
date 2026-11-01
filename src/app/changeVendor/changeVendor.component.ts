@@ -6,7 +6,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, of, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
@@ -31,6 +31,12 @@ import { ChangeVendorService } from './changeVendor.service';
 import { ChangeVendorFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { ChangeEntityModel } from './changeVendor.model';
 import { ChangeVendorDetailsComponent } from './dialogs/changeVendorDetails/changeVendorDetails.component';
+import { SupplierDropDown } from '../supplier/supplierDropDown.model';
+import {
+  filterSuppliersByDisplay,
+  formatSupplierDisplay,
+  supplierMatchesDisplay,
+} from '../supplier/supplier-display.util';
 import moment from 'moment';
 
 
@@ -49,6 +55,8 @@ export class ChangeVendorComponent implements OnInit {
     'actions',
     'ReservationID',
     'DutySlipID',
+    'BillingStatus',
+    'Vendor',
     'CustomerName',
     'CustomerGroup',
     'PrimaryPassenger',
@@ -118,6 +126,12 @@ export class ChangeVendorComponent implements OnInit {
   searchReservationID:string = '';
   searchDutySlipID:string = '';
 
+  SearchVendor:string = '';
+  public VendorList?:SupplierDropDown[] = [];
+  filteredVendorOptions?:Observable<SupplierDropDown[]>;
+  vendor:FormControl = new FormControl();
+  formatSupplierDisplay = formatSupplierDisplay;
+
   selectAll:boolean=false;
   selectedEntity: any[] = [];
   
@@ -139,12 +153,14 @@ export class ChangeVendorComponent implements OnInit {
     contextMenuPosition = { x: '0px', y: '0px' };
     ngOnInit() 
     {
-      this.loadData();
+      this.filteredCustomerOptions = of([]);
+      this.filteredVendorOptions = of([]);
       this.InitCustomerGroup();
       this.InitCities();
       this.InitVehicle();
       this.InitPackageType();
       this.InitPackage();
+      this.InitVendor();
     }
 
     refresh() 
@@ -157,17 +173,27 @@ export class ChangeVendorComponent implements OnInit {
       this.vehicle.setValue('');
       this.packageType.setValue('');
       this.package.setValue('');
+      this.vendor.setValue('');
       this.SearchFromDate = '';
       this.SearchToDate = '';
       this.searchReservationID = '';
-      this.searchDutySlipID = '';    
+      this.searchDutySlipID = '';
+      this.SearchVendor = '';
       this.searchTerm = '';
-      this.selectedFilter = 'search';  
-      this.loadData();
+      this.selectedFilter = 'search';
+      this.customerGroupID = null;
+      this.CustomerList = [];
+      this.filteredCustomerOptions = of([]);
+      this.VendorList = [];
+      this.filteredVendorOptions = of([]);
+      this.selectedEntity = [];
+      this.selectAll = false;
+      this.dataSource = null;
     }
 
     public SearchData() 
     {
+      this.PageNumber = 0;
       this.loadData();
     }
  
@@ -185,29 +211,81 @@ export class ChangeVendorComponent implements OnInit {
       }
     }
 
+    private buildSearchParams() {
+      let searchFromDate = this.SearchFromDate;
+      let searchToDate = this.SearchToDate;
+
+      if (searchFromDate) {
+        searchFromDate = moment(searchFromDate).format('YYYY-MM-DD');
+        this.SearchFromDate = searchFromDate;
+      } else {
+        searchFromDate = null;
+        this.SearchFromDate = '';
+      }
+
+      if (searchToDate) {
+        searchToDate = moment(searchToDate).format('YYYY-MM-DD');
+        this.SearchToDate = searchToDate;
+      } else {
+        searchToDate = null;
+        this.SearchToDate = '';
+      }
+
+      let reservationIDs = null;
+      if (this.searchReservationID && this.searchReservationID.trim() !== '') {
+        reservationIDs = this.searchReservationID.split(/[\s,]+/).filter(x => x.trim() !== '').join(',');
+      }
+
+      let dutySlipIDs = null;
+      if (this.searchDutySlipID && this.searchDutySlipID.trim() !== '') {
+        dutySlipIDs = this.searchDutySlipID.split(/[\s,]+/).filter(x => x.trim() !== '').join(',');
+      }
+
+      const packageValue = this.package.value
+        ? String(this.package.value).replace(/\//g, '-')
+        : null;
+
+      this.searchCustomerGroup = this.customerGroup.value || '';
+      this.searchCustomerName = this.customer.value || '';
+      this.SearchCity = this.city.value || '';
+      this.SearchVehicle = this.vehicle.value || '';
+      this.SearchPackageType = this.packageType.value || '';
+      this.SearchPakcage = packageValue || '';
+      this.SearchVendor = this.vendor.value || '';
+
+      return {
+        customerGroup: this.customerGroup.value || null,
+        customerName: this.customer.value || null,
+        city: this.city.value || null,
+        vehicle: this.vehicle.value || null,
+        packageType: this.packageType.value || null,
+        packageValue,
+        searchFromDate,
+        searchToDate,
+        reservationIDs,
+        dutySlipIDs,
+        vendor: this.vendor.value || null,
+      };
+    }
+
     public loadData() 
     {
-      if(this.SearchFromDate!=="")
-      {
-        this.SearchFromDate=moment(this.SearchFromDate).format('yyyy-MM-DD');
-      }
-      if(this.SearchToDate!=="")
-      {
-        this.SearchToDate=moment(this.SearchToDate).format('yyyy-MM-DD');
-      }
-      // Convert multi-ID input
-      let reservationIDs = null;
-      if (this.searchReservationID && this.searchReservationID.trim() !== "") 
-      {
-        reservationIDs = this.searchReservationID.split(/[\s,]+/).filter(x => x.trim() !== "").join(',');
-      }
-      let dutySlipIDs = null;
-      if (this.searchDutySlipID && this.searchDutySlipID.trim() !== "") 
-      {
-        dutySlipIDs = this.searchDutySlipID.split(/[\s,]+/).filter(x => x.trim() !== "").join(',');
-      }
-      let Package = this.package.value ? this.package.value.replace('/','-') : null;
-      this.changeVendorService.getTableData(this.customerGroup.value,this.customer.value,this.city.value,this.vehicle.value,this.packageType.value,encodeURIComponent(Package),this.SearchFromDate,this.SearchToDate,reservationIDs,dutySlipIDs,this.searchActivationStatus,this.PageNumber).subscribe(
+      const params = this.buildSearchParams();
+      this.changeVendorService.getTableData(
+        params.customerGroup,
+        params.customerName,
+        params.city,
+        params.vehicle,
+        params.packageType,
+        params.packageValue,
+        params.searchFromDate,
+        params.searchToDate,
+        params.reservationIDs,
+        params.dutySlipIDs,
+        this.searchActivationStatus,
+        this.PageNumber,
+        params.vendor
+      ).subscribe(
       data => 
       {
         this.dataSource = data;
@@ -228,7 +306,24 @@ export class ChangeVendorComponent implements OnInit {
         this.sortingData = 1;
         this.sortType = "Descending";
       }
-      this.changeVendorService.getTableDataSort(this.searchCustomerGroup,this.searchCustomerName,this.SearchCity,this.SearchVehicle,this.SearchPackageType,this.SearchPakcage.replace(/\//g, '-'),this.SearchFromDate,this.SearchToDate,this.searchReservationID,this.searchDutySlipID,this.searchActivationStatus, this.PageNumber, coloumName.active, this.sortType).subscribe
+      const params = this.buildSearchParams();
+      this.changeVendorService.getTableDataSort(
+        params.customerGroup,
+        params.customerName,
+        params.city,
+        params.vehicle,
+        params.packageType,
+        params.packageValue,
+        params.searchFromDate,
+        params.searchToDate,
+        params.reservationIDs,
+        params.dutySlipIDs,
+        this.searchActivationStatus,
+        this.PageNumber,
+        coloumName.active,
+        this.sortType,
+        params.vendor
+      ).subscribe
       (
         data =>   
         {
@@ -308,29 +403,70 @@ export class ChangeVendorComponent implements OnInit {
     {
       const selectedCustomerGroup = this.customerGroupList?.find(
         data => data.customerGroup === customerGroup
-      ); 
+      );
+      this.customer.setValue('');
+      this.customerGroupID = selectedCustomerGroup?.customerGroupID ?? null;
+      if (this.customerGroupID) {
+        this.InitCustomer(this.customerGroupID);
+      } else {
+        this.CustomerList = [];
+        this.filteredCustomerOptions = of([]);
+      }
     }
 
 
     //---------- Customer ----------
-    InitCustomer()
+    onKeyupCustomerName(event?: any) {
+      if (this.customerGroupID) {
+        return;
+      }
+
+      const prefix = ((event?.target?.value ?? this.customer?.value) || '').toString().trim();
+      if (prefix.length < 3) {
+        this.CustomerList = [];
+        this.filteredCustomerOptions = of([]);
+        return;
+      }
+
+      this._generalService.getCustomerForInvoice(prefix).subscribe(data => {
+        this.CustomerList = data || [];
+        this.filteredCustomerOptions = merge(of(prefix), this.customer.valueChanges).pipe(
+          map(value => this._filterCustomer((value || '').toString()))
+        );
+      });
+    }
+
+    InitCustomer(customerGroupID?: number)
     {
-      this._generalService.GetCustomersForCP(this.customerGroupID).subscribe(
+      if (!customerGroupID) {
+        this.CustomerList = [];
+        this.filteredCustomerOptions = of([]);
+        return;
+      }
+
+      this.customerGroupID = customerGroupID;
+      this._generalService.GetCustomersForCP(customerGroupID).subscribe(
       data=>
       {
-        this.CustomerList = data;
+        this.CustomerList = data || [];
         this.filteredCustomerOptions = this.customer.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCustomer(value || ''))
+          startWith(''),
+          map(value => this._filterCustomer((value || '').toString()))
         ); 
       });
     }
     private _filterCustomer(value: string): any {
       const filterValue = value.toLowerCase();
-      return this.CustomerList?.filter(
+      if (!this.customerGroupID && (!value || value.length < 3)) {
+        return [];
+      }
+      if (!value) {
+        return this.CustomerList || [];
+      }
+      return (this.CustomerList || []).filter(
         data => 
         {
-          return data.customerName.toLowerCase().includes(filterValue);
+          return data.customerName?.toLowerCase().includes(filterValue);
         }
       );
     }
@@ -458,6 +594,42 @@ export class ChangeVendorComponent implements OnInit {
       const selectedPackageName = this.PackageList?.find(
         data => data.package === PackageName
       ); 
+    }
+
+
+    //---------- Vendor (SupplierName + OldRentnetCode, same as closingOne Change Supplier) ----------
+    InitVendor() {
+      this._generalService.GetAllSuppliers().subscribe(
+        data => {
+          this.VendorList = data || [];
+          this.filteredVendorOptions = this.vendor.valueChanges.pipe(
+            startWith(''),
+            map(value => this._filterVendor((value || '').toString()))
+          );
+        },
+        () => {
+          this.VendorList = [];
+          this.filteredVendorOptions = of([]);
+        }
+      );
+    }
+
+    private _filterVendor(value: string): any {
+      if (!value || value.length < 3) {
+        return [];
+      }
+      return filterSuppliersByDisplay(this.VendorList, value);
+    }
+
+    onVendorSelected(vendorDisplay: string) {
+      const selectedVendor = this.VendorList?.find(
+        data => supplierMatchesDisplay(data, vendorDisplay)
+      );
+      if (selectedVendor) {
+        const display = formatSupplierDisplay(selectedVendor);
+        this.vendor.setValue(display);
+        this.SearchVendor = display;
+      }
     }
  
 

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Component, ElementRef, HostListener, Inject, Optional } from '@angular/core';
 import { DriverDrivingLicenseService } from '../../driverDrivingLicense.service';
 import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
@@ -55,7 +56,8 @@ export class FormDialogComponent
   public advanceTableService: DriverDrivingLicenseService,
     private fb: FormBuilder,
     private el: ElementRef,
-  public _generalService:GeneralService)
+  public _generalService:GeneralService,
+  private snackBar: MatSnackBar)
   {
         // Set the defaults
         this.action = data.action;
@@ -224,8 +226,9 @@ export class FormDialogComponent
     }
   }
   getTitles(geoPointID: any) {
-    this.issuingGeoPointID=geoPointID;
-    this.advanceTableForm.controls['issuingGeoPointID'].setValue(geoPointID);
+    this.issuingGeoPointID = geoPointID;
+    this.advanceTable.licenseIssueCityID = geoPointID;
+    this.advanceTableForm.controls['licenseIssueCityID'].setValue(geoPointID);
   }
 
   cityTypeValidator(CitiesList: any[]): ValidatorFn {
@@ -306,11 +309,47 @@ uploadedByName(){
   {
     this.dialogRef.close();
   }
+  private showApiError(error: any): void {
+    const message =
+      error?.error?.message ||
+      error?.error?.Message ||
+      error?.message ||
+      'Operation Failed';
+    this.snackBar.open(message, '', {
+      duration: 5000,
+      verticalPosition: 'bottom',
+      horizontalPosition: 'center',
+      panelClass: 'snackbar-danger'
+    });
+  }
+
+  private patchIdsBeforeSave(): boolean {
+    const raw = this.advanceTableForm.getRawValue();
+    const driverId = Number(this.data?.DriverID ?? raw.driverID);
+    const addressCityId = Number(raw.driverAddressCityID || this.addressGeoPointID);
+    const issueCityId = Number(raw.licenseIssueCityID || this.issuingGeoPointID);
+    if (!Number.isFinite(driverId) || driverId <= 0) {
+      this.showApiError({ message: 'Driver is not selected. Open this page from the Driver menu.' });
+      return false;
+    }
+    if (!Number.isFinite(addressCityId) || addressCityId <= 0 || !Number.isFinite(issueCityId) || issueCityId <= 0) {
+      this.showApiError({ message: 'Please select Address City and Issuing City from the dropdown list.' });
+      return false;
+    }
+    this.advanceTableForm.patchValue({
+      driverID: driverId,
+      driverAddressCityID: addressCityId,
+      licenseIssueCityID: issueCityId
+    });
+    return true;
+  }
+
   public Post(): void
   {
-    this.advanceTableForm.patchValue({driverAddressCityID:this.addressGeoPointID});
-    this.advanceTableForm.patchValue({licenseIssueCityID:this.issuingGeoPointID});
-    this.advanceTableForm.patchValue({driverID:this.data.DriverID});
+    if (!this.patchIdsBeforeSave()) {
+      this.saveDisabled = true;
+      return;
+    }
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -322,6 +361,7 @@ uploadedByName(){
     },
     error =>
     {
+       this.showApiError(error);
        this._generalService.sendUpdate('DriverDrivingLicenseAll:DriverDrivingLicenseView:Failure');//To Send Updates 
        this.saveDisabled = true; 
     }
@@ -330,9 +370,11 @@ uploadedByName(){
 
   public Put(): void
   {
-    this.advanceTableForm.patchValue({driverAddressCityID:this.addressGeoPointID || this.advanceTable.driverAddressCityID});
-    this.advanceTableForm.patchValue({licenseIssueCityID:this.issuingGeoPointID || this.advanceTable.licenseIssueCityID});
-    this.advanceTableForm.patchValue({driverID:this.advanceTable.driverID});
+    if (!this.patchIdsBeforeSave()) {
+      this.saveDisabled = true;
+      return;
+    }
+    this.advanceTableForm.patchValue({ driverID: Number(this.advanceTable.driverID || this.data?.DriverID) });
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
@@ -344,6 +386,7 @@ uploadedByName(){
     },
     error =>
     {
+     this.showApiError(error);
      this._generalService.sendUpdate('DriverDrivingLicenseAll:DriverDrivingLicenseView:Failure');//To Send Updates
      this.saveDisabled = true;  
     }

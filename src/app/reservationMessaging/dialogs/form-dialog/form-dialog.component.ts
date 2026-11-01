@@ -35,6 +35,7 @@ export class FormDialogComponent implements OnInit
   'status'
 ];
   dataSource: ReservationMessaging[] | null = null;
+  isLoading = true;
   
   reservationID: any;
   SearchActivationStatus :boolean=true;
@@ -154,6 +155,9 @@ export class FormDialogComponent implements OnInit
 
   public loadData() 
   {
+     this.isLoading = true;
+     this.dataSource = null;
+     this.cdr.detectChanges();
      this.reservationMessagingService.getTableData(
       this.reservationID,
       this.allotmentID,
@@ -167,12 +171,13 @@ export class FormDialogComponent implements OnInit
        data =>   
        {
          this.dataSource = Array.isArray(data) ? data : (data ? [data] : []);
-         console.log(this.dataSource);
+         this.isLoading = false;
          this.cdr.detectChanges();
        },
        
        (_error: HttpErrorResponse) => {
          this.dataSource = null;
+         this.isLoading = false;
          this.cdr.detectChanges();
        }
      );
@@ -213,6 +218,8 @@ export class FormDialogComponent implements OnInit
       this.sortingData = 1;
       this.sortType = "Descending";
     }
+    this.isLoading = true;
+    this.dataSource = null;
     this.reservationMessagingService.getTableDataSort(this.reservationID,this.allotmentID,
       this.searchMessageType,
       this.searchMessageSource,
@@ -223,10 +230,12 @@ export class FormDialogComponent implements OnInit
       data =>   
       {
         this.dataSource = Array.isArray(data) ? data : (data ? [data] : []);
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
       (_error: HttpErrorResponse) => {
         this.dataSource = null;
+        this.isLoading = false;
         this.cdr.detectChanges();
       }
     );

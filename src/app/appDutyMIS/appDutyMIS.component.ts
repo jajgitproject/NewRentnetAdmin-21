@@ -12,7 +12,8 @@ import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
-import { extractExportErrorMessage } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { MyUploadComponent } from '../myupload/myupload.component';
 // import { FormDialogComponent } from '../appDutyMIS/dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/delete-city/delete-city.component';
@@ -27,6 +28,7 @@ import moment from 'moment';
 import { VehicleCategoryDropDown } from '../general/vehicleCategoryDropDown.model';
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
+import { blankIfNa } from '../shared/blank-if-na.util';
 @Component({
   standalone: false,
   selector: 'app-appDutyMIS',
@@ -158,7 +160,6 @@ export class AppDutyMISComponent implements OnInit, OnDestroy {
 
   searchFromDate: Date | null = null;
   searchToDate: Date | null = null;
-  csvExporting = false;
   filtersCollapsed = false;
   exportJobId: string | null = null;
   exportJobStatus: any = null;
@@ -167,6 +168,8 @@ export class AppDutyMISComponent implements OnInit, OnDestroy {
   exportJobError = '';
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'appDutyMIS';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   readonly maxDateRangeDays = 15;
   readonly exportJobType = 'AppMISExport';
   private readonly pageSize = 50;
@@ -202,6 +205,7 @@ export class AppDutyMISComponent implements OnInit, OnDestroy {
     //this.loadData();
     this.SubscribeUpdateService();
     this.initDispatchLocation();
+    this.resumeExportJobIfNeeded();
   }
 
     // initdispatchLocation(){
@@ -261,11 +265,11 @@ export class AppDutyMISComponent implements OnInit, OnDestroy {
     if (this.subscriptionName) {
       this.subscriptionName.unsubscribe();
     }
-  }
+      }
 
   refresh() {
     this.setDefaultDateRange();
-    this.dispatch_Location.setValue('');
+   this.dispatch_Location.setValue('');
     this.SearchActivationStatus = true;
     this.PageNumber = 0;
     this.searchTerm = '';
@@ -372,11 +376,12 @@ shouldShowDeleteButton(item: any): boolean {
   private normalizeRow(row: any): any {
     const driverOfficialIdentityNumber =
       row.driverOfficialIdentityNumber ?? row.DriverOfficialIdentityNumber ?? null;
+    const driverName = blankIfNa(row.driverName ?? row.DriverName);
     return {
       ...row,
       driverOfficialIdentityNumber,
-      driverName: driverOfficialIdentityNumber,
-      driverDisplayName: this.formatDriverName({ driverOfficialIdentityNumber }),
+      driverName,
+      driverDisplayName: driverName,
       locationOutTimeByApp: this.formatTimeValue(row.locationOutTimeByApp ?? row.LocationOutTimeByApp),
       reportingToGuestTimeByApp: this.formatTimeValue(
         row.reportingToGuestTimeByApp ?? row.ReportingToGuestTimeByApp
@@ -387,22 +392,18 @@ shouldShowDeleteButton(item: any): boolean {
   }
 
   formatDriverName(row: any): string {
-    // Driver Name column shows Driver.DriverOfficialIdentityNumber only.
-    const code = (row?.driverOfficialIdentityNumber ?? row?.DriverOfficialIdentityNumber ?? '')
-      .toString()
-      .trim();
-    return code || 'N/A';
+    return blankIfNa(row?.driverName ?? row?.DriverName);
   }
 
   private formatTimeValue(value: any): string {
-    if (value === undefined || value === null || value === '' || value === 'N/A') {
-      return 'N/A';
+    if (value === undefined || value === null || value === '' || blankIfNa(value) === '') {
+      return '';
     }
 
     if (typeof value === 'string') {
       const trimmed = value.trim();
       if (!trimmed) {
-        return 'N/A';
+        return '';
       }
       const parsed = moment(trimmed, [moment.ISO_8601, 'HH:mm:ss', 'HH:mm:ss.SSSSSSS', 'HH:mm'], true);
       if (parsed.isValid()) {
@@ -437,12 +438,12 @@ shouldShowDeleteButton(item: any): boolean {
       }
     }
 
-    return 'N/A';
+    return '';
   }
 
   getDisplayValue(column: string, row: any): string | number {
     if (column === 'driverName') {
-      return row.driverDisplayName || this.formatDriverName(row);
+      return this.formatDriverName(row);
     }
 
     if (this.timeColumns.has(column)) {
@@ -452,18 +453,18 @@ shouldShowDeleteButton(item: any): boolean {
     const value = row[column];
 
     if (this.zeroAsNaColumns.has(column)) {
-      return value === undefined || value === null || value === 0 ? 'N/A' : value;
+      return value === undefined || value === null || value === 0 ? '' : value;
     }
 
     if (value === undefined || value === null || value === '') {
-      return 'N/A';
+      return '';
     }
 
     if (typeof value === 'object') {
-      return 'N/A';
+      return '';
     }
 
-    return value;
+    return blankIfNa(value);
   }
 
    public loadData() 
@@ -534,6 +535,7 @@ shouldShowDeleteButton(item: any): boolean {
   public SearchData()
   {
     if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
     }
 
@@ -546,12 +548,10 @@ shouldShowDeleteButton(item: any): boolean {
     this.PageNumber = 0;
     this.dataSource = null;
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
     const fromDate = this.formatDateParam(this.searchFromDate);
     const toDate = this.formatDateParam(this.searchToDate);
 
     this.exportJobRunning = true;
-    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
 
     this.appDutyMISService.startExportJob(
       fromDate,
@@ -569,18 +569,40 @@ shouldShowDeleteButton(item: any): boolean {
         }
 
         this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
         this.exportJobStatus = {
           jobId,
           jobType: startResult?.jobType ?? startResult?.JobType ?? this.exportJobType,
           status: startResult?.status ?? startResult?.Status ?? 'Pending',
           message: startResult?.message ?? startResult?.Message ?? 'Export queued'
         };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
         this.startExportPolling(jobId);
+        this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.appDutyMISService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        const message = await extractExportErrorMessage(error, 'Could not cancel export.');
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
   }
@@ -618,7 +640,7 @@ shouldShowDeleteButton(item: any): boolean {
       },
       async (error) => {
         this.exportJobDownloading = false;
-        this.showNotification('snackbar-danger', await extractExportErrorMessage(error), 'bottom', 'center');
+        this.showNotification('snackbar-danger', await extractExportErrorMessage(error, 'Export download failed.'), 'bottom', 'center');
       }
     );
   }
@@ -644,11 +666,11 @@ shouldShowDeleteButton(item: any): boolean {
   }
 
   getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) return '—';
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
   hasAdditionalFilters(): boolean {
@@ -683,12 +705,21 @@ shouldShowDeleteButton(item: any): boolean {
     this.exportPollSub = this.appDutyMISService.pollExportJob(jobId).subscribe(
       (status: any) => {
         this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
         if (current === 'failed') {
           this.exportJobRunning = false;
           this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
           this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
           this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
           return;
         }
         if (current === 'completed') {
@@ -696,11 +727,12 @@ shouldShowDeleteButton(item: any): boolean {
           const rows = status?.rowsExported ?? status?.RowsExported ?? 0;
           this.showNotification('snackbar-success', status?.message ?? `Export ready (${rows} rows). Click Download CSV.`, 'bottom', 'center');
           this.stopExportPolling();
+          this.storedExports?.refresh();
         }
       },
       async (error) => {
         this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error);
+        this.exportJobError = await extractExportErrorMessage(error, 'Export failed.');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
         this.stopExportPolling();
       }
@@ -712,6 +744,52 @@ shouldShowDeleteButton(item: any): boolean {
       this.exportPollSub.unsubscribe();
       this.exportPollSub = undefined;
     }
+  }
+
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
+    this.appDutyMISService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        this.exportJobError = '';
+        if (this.appDutyMISService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobRunning = false;
+      },
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
+    );
   }
 
   private clearExportJob() {
@@ -845,126 +923,6 @@ shouldShowDeleteButton(item: any): boolean {
         }
       }
     );
-  }
-
-  downloadCsv() {
-    if (this.csvExporting) {
-      return;
-    }
-
-    if (!this.dataSource?.length) {
-      this.showNotification('snackbar-danger', 'No data to export. Run a search first.', 'bottom', 'center');
-      return;
-    }
-
-    // Always export all rows matching filters (not just the current page of 50).
-    this.exportFullCsv();
-  }
-
-  private exportFullCsv() {
-    const fromDate = this.formatDateParam(this.searchFromDate);
-    const toDate = this.formatDateParam(this.searchToDate);
-
-    this.csvExporting = true;
-    this.showNotification('snackbar-info', 'Preparing CSV export of all matching records...', 'bottom', 'center');
-
-    this.appDutyMISService.downloadCsv(
-      fromDate,
-      toDate,
-      this.dispatch_Location.value || '',
-      this.SearchActivationStatus
-    ).subscribe(
-      async (blob: Blob) => {
-        this.csvExporting = false;
-        if (!blob || blob.size === 0) {
-          this.showNotification('snackbar-danger', 'No data available for CSV export', 'bottom', 'center');
-          return;
-        }
-
-        if (blob.type?.includes('json') || blob.type?.includes('text/plain')) {
-          const message = await this.readBlobText(blob);
-          this.showNotification('snackbar-danger', message || 'Failed to download CSV', 'bottom', 'center');
-          return;
-        }
-
-        this.triggerBlobDownload(blob, 'xls');
-        this.showNotification('snackbar-success', 'Excel downloaded successfully (all matching records)', 'bottom', 'center');
-      },
-      async (err) => {
-        this.csvExporting = false;
-        let message = 'Failed to download full export for all matching records.';
-        try {
-          if (err?.error instanceof Blob) {
-            const text = await this.readBlobText(err.error);
-            try {
-              const json = JSON.parse(text);
-              message = json.Message || json.message || message;
-            } catch {
-              if (text?.trim()) {
-                message = text.trim();
-              }
-            }
-          } else {
-            message =
-              err?.error?.Message
-              || err?.error?.message
-              || err?.message
-              || message;
-          }
-        } catch {
-          // keep default message
-        }
-        this.showNotification('snackbar-danger', message, 'bottom', 'center');
-      }
-    );
-  }
-
-  private triggerBlobDownload(blob: Blob, extension: 'csv' | 'xls' | 'xlsx' = 'xls'): void {
-    const fileUrl = window.URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = fileUrl;
-    anchor.download = `AppDutyMIS_${moment().format('YYYYMMDD_HHmmss')}.${extension}`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    window.URL.revokeObjectURL(fileUrl);
-  }
-
-  private downloadVisibleRowsCsv(): void {
-    const headers = this.displayedColumns.map((column) => this.columnTitleMap[column] || column);
-    const rows = (this.dataSource || []).map((row) =>
-      this.displayedColumns.map((column) => {
-        if (column === 'dutyDate') {
-          return row[column] ? moment(row[column]).format('DD-MM-YYYY') : 'N/A';
-        }
-        if (column === 'driverName') {
-          return this.formatDriverName(row);
-        }
-        return String(this.getDisplayValue(column, row));
-      })
-    );
-
-    const csv = [headers, ...rows]
-      .map((line) => line.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    this.triggerBlobDownload(blob, 'csv');
-    this.showNotification(
-      'snackbar-success',
-      'CSV downloaded for visible page only (not full filter result).',
-      'bottom',
-      'center'
-    );
-  }
-
-  private readBlobText(blob: Blob): Promise<string> {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => resolve('');
-      reader.readAsText(blob);
-    });
   }
 
   SortingData(coloumName:any) {

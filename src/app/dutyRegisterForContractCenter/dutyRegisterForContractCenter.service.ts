@@ -7,6 +7,7 @@ import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { S } from '@angular/cdk/keycodes';
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
+import { isExportJobReady, isExportJobRunning, pollExportJob } from '../general/export-job.helper';
 @Injectable()
 export class DutyRegisterForContractCenterService 
 {
@@ -374,67 +375,96 @@ export class DutyRegisterForContractCenterService
     return this.httpClient.post(`${this.API_URL}`, updatedCriteria);
   }
 
-  exportCsv(criteria: SearchCriteria): Observable<Blob> {
-    const toNull = (value: any) => {
-      if (value === undefined || value === null) {
-        return null;
-      }
-      const text = String(value).trim();
-      if (text === '' || text.toLowerCase() === 'null') {
-        return null;
-      }
-      return value;
-    };
+  private toNull(value: any) {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    const text = String(value).trim();
+    if (text === '' || text.toLowerCase() === 'null') {
+      return null;
+    }
+    return value;
+  }
 
-    const updatedCriteria = {
-      SearchCustomerGroup: toNull(criteria.SearchCustomerGroup),
-      SearchCustomer: toNull(criteria.SearchCustomer),
-      SearchBranch: toNull(criteria.SearchBranch),
+  private buildExportCriteria(criteria: SearchCriteria) {
+    return {
+      UserID: this.generalService.getUserID(),
+      SearchCustomerGroup: this.toNull(criteria.SearchCustomerGroup),
+      SearchCustomer: this.toNull(criteria.SearchCustomer),
+      SearchBranch: this.toNull(criteria.SearchBranch),
       SearchBranchID: criteria.SearchBranchID || 0,
-      SearchKAM: toNull(criteria.SearchKAM),
+      SearchKAM: this.toNull(criteria.SearchKAM),
       SearchKAMID: criteria.SearchKAMID || 0,
-      SearchCustomerPersonName: toNull(criteria.SearchCustomerPersonName),
-      SearchDutyType: toNull(criteria.SearchDutyType),
-      SearchFeedbackDate: toNull(criteria.SearchFeedbackDate),
+      SearchCustomerPersonName: this.toNull(criteria.SearchCustomerPersonName),
+      SearchDutyType: this.toNull(criteria.SearchDutyType),
+      SearchFeedbackDate: this.toNull(criteria.SearchFeedbackDate),
       SearchSlipReceipt: criteria.SearchSlipReceipt,
-      SearchClosureType: toNull(criteria.SearchClosureType),
-      SearchDispatchLocationName: toNull(criteria.SearchDispatchLocation),
-      SearchMOP: toNull(criteria.SearchMOP),
-      SearchSupplierType: toNull(criteria.SearchSupplierType),
-      SearchSupplierName: toNull(criteria.SearchSupplier),
-      SearchFromDate: toNull(criteria.SearchFromDate),
-      SearchToDate: toNull(criteria.SearchToDate),
-      SearchSalesPersonName: toNull(criteria.SearchSalesPersonName),
-      SearchCarSent: toNull(criteria.SearchCarSent),
-      SearchCarBook: toNull(criteria.SearchCarBook),
-      SearchCustomerType: toNull(criteria.SearchCustomerType),
-      SearchCustomerLocationName: toNull(criteria.SearchCustomerLocationName),
-      SearchBookingStatus: toNull(criteria.SearchBookingStatus),
-      SearchImportance: toNull(criteria.SearchImportance),
+      SearchClosureType: this.toNull(criteria.SearchClosureType),
+      SearchDispatchLocationName: this.toNull(criteria.SearchDispatchLocation),
+      SearchMOP: this.toNull(criteria.SearchMOP),
+      SearchSupplierType: this.toNull(criteria.SearchSupplierType),
+      SearchSupplierName: this.toNull(criteria.SearchSupplier),
+      SearchFromDate: this.toNull(criteria.SearchFromDate),
+      SearchToDate: this.toNull(criteria.SearchToDate),
+      SearchSalesPersonName: this.toNull(criteria.SearchSalesPersonName),
+      SearchCarSent: this.toNull(criteria.SearchCarSent),
+      SearchCarBook: this.toNull(criteria.SearchCarBook),
+      SearchCustomerType: this.toNull(criteria.SearchCustomerType),
+      SearchCustomerLocationName: this.toNull(criteria.SearchCustomerLocationName),
+      SearchBookingStatus: this.toNull(criteria.SearchBookingStatus),
+      SearchImportance: this.toNull(criteria.SearchImportance),
       SearchDSVerification: criteria.SearchDSVerification !== null && criteria.SearchDSVerification !== undefined ? criteria.SearchDSVerification : null,
       SearchGoodForBill: criteria.SearchGoodForBill !== null && criteria.SearchGoodForBill !== undefined ? criteria.SearchGoodForBill : null,
-      SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,                           
-      SearchDri: toNull(criteria.SearchDri),
-      SearchCarNo: toNull(criteria.SearchCarNo),
-      SearchSupplierO: toNull(criteria.SearchSupplierO),
-      SearchRes: toNull(criteria.SearchRes),
-      SearchDuty: toNull(criteria.SearchDuty),
-      SearchGuestName: toNull(criteria.SearchGuestName),
-      SearchGuestMobile: toNull(criteria.SearchGuestMobile),
-      SearchCity: toNull(criteria.SearchCity),
-      SearchCancellationDateFrom: toNull(criteria.SearchCancellationDateFrom),
-      SearchCancellationDateTo: toNull(criteria.SearchCancellationDateTo),
-      SearchBookingDateFrom: toNull(criteria.SearchBookingDateFrom),
-      SearchBookingDate: toNull(criteria.SearchBookingDate),
-      SearchChangeMOPCase: toNull(criteria.SearchChangeMOPCase),
-      SearchLocationGroup: toNull(criteria.SearchLocationGroup),
-      SearchBillFromDate: toNull(criteria.SearchBillFromDate),
-      SearchBillToDate: toNull(criteria.SearchBillToDate)
+      SearchBillStatus: criteria.SearchBillStatus !== null && criteria.SearchBillStatus !== undefined ? criteria.SearchBillStatus : null,
+      SearchDri: this.toNull(criteria.SearchDri),
+      SearchCarNo: this.toNull(criteria.SearchCarNo),
+      SearchSupplierO: this.toNull(criteria.SearchSupplierO),
+      SearchRes: this.toNull(criteria.SearchRes),
+      SearchDuty: this.toNull(criteria.SearchDuty),
+      SearchGuestName: this.toNull(criteria.SearchGuestName),
+      SearchGuestMobile: this.toNull(criteria.SearchGuestMobile),
+      SearchCity: this.toNull(criteria.SearchCity),
+      SearchCancellationDateFrom: this.toNull(criteria.SearchCancellationDateFrom),
+      SearchCancellationDateTo: this.toNull(criteria.SearchCancellationDateTo),
+      SearchBookingDateFrom: this.toNull(criteria.SearchBookingDateFrom),
+      SearchBookingDate: this.toNull(criteria.SearchBookingDate),
+      SearchChangeMOPCase: this.toNull(criteria.SearchChangeMOPCase),
+      SearchLocationGroup: this.toNull(criteria.SearchLocationGroup),
+      SearchBillFromDate: this.toNull(criteria.SearchBillFromDate),
+      SearchBillToDate: this.toNull(criteria.SearchBillToDate)
     };
-    console.log(`${this.API_URL}/ExportCsv`, updatedCriteria);
-    return this.httpClient.post(`${this.API_URL}/ExportCsv`, updatedCriteria, {
+  }
+
+  startExportJob(criteria: SearchCriteria): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/StartJob`, this.buildExportCriteria(criteria));
+  }
+
+  getExportJobStatus(jobId: string): Observable<any> {
+    return this.httpClient.get(`${this.API_URL}/ExportCsv/JobStatus/${jobId}`);
+  }
+
+  downloadExportJob(jobId: string): Observable<Blob> {
+    return this.httpClient.get(`${this.API_URL}/ExportCsv/Download/${jobId}`, {
       responseType: 'blob'
     });
+  }
+
+  cancelExportJob(jobId: string): Observable<any> {
+    return this.httpClient.post(`${this.API_URL}/ExportCsv/Cancel/${jobId}`, {}, {
+      params: { userId: String(this.generalService.getUserID() || 0) }
+    });
+  }
+
+  pollExportJob(jobId: string): Observable<any> {
+    return pollExportJob(this.httpClient, `${this.API_URL}/ExportCsv/JobStatus/${jobId}`);
+  }
+
+  isExportJobRunning(status: any): boolean {
+    return isExportJobRunning(status);
+  }
+
+  isExportJobReady(status: any): boolean {
+    return isExportJobReady(status);
   }
 
 

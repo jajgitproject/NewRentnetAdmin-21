@@ -44,6 +44,7 @@ export class CustomerPersonComponent implements OnInit {
     'isAdmin',
     'isBooker',
     'isPassenger',
+    'isDefaultForIntegrationRequest',
     'oldRentNetID',
     'status',
     'actions'

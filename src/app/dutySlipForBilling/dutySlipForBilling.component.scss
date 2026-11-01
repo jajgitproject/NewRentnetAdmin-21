@@ -1,36 +1,67 @@
-tbody, thead {
-    border: 1px solid #000;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  td, th {
-    border: 1px solid #000; 
-    padding: 8px;
-  }
-  
-  td:first-of-type {
-    border-right: none; 
-  }
+.original-billing-time {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
 
-  ::ng-deep .mat-tab-label {
-    width: 100%;
-  }
+.closing-nights-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
 
+.closing-nights-field {
+  flex: 1 1 180px;
+  min-width: 180px;
+}
 
-  .mat-expansion-panel-header-title {
-    display: block;
-    width: 100%;
-  }
-  
-  .disabled {
-    pointer-events: none;
-    color: gray;
-  }
+.active-duty-night-display {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  padding-bottom: 8px;
+}
 
-  .underlined-button {
-    text-decoration: underline;
-  }
+.active-duty-night-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 6px;
+}
+
+.active-duty-night-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+td, th {
+  border: 1px solid #000;
+  padding: 8px;
+}
+
+td:first-of-type {
+  border-right: none;
+}
+
+::ng-deep .mat-tab-label {
+  width: 100%;
+}
+
+.mat-expansion-panel-header-title {
+  display: block;
+  width: 100%;
+}
+
+.disabled {
+  pointer-events: none;
+  color: gray;
+}
+
+.underlined-button {
+  text-decoration: underline;
+}
 
 .calculate-bill-blocking-overlay {
   position: fixed;

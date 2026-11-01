@@ -4,7 +4,7 @@ import { Component, ElementRef, HostListener, Inject } from '@angular/core';
 import { CustomerPersonService } from '../../customerPerson.service';
 import { FormControl, Validators, FormGroup, FormBuilder, ValidationErrors, ValidatorFn, AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CustomerPerson } from '../../customerPerson.model';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { ErrorStateMatcher, MAT_DATE_LOCALE } from '@angular/material/core';
 import { CommonModule, formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -37,6 +37,13 @@ import { FormDialogComponentCustomerDesignation } from 'src/app/customerDesignat
 import { ConfirmPasswordValidator } from './confirm-password.validator';
 import { CountryCodeDropDown } from 'src/app/general/countryCodeDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
+
+export class ShowOnInvalidErrorStateMatcher implements ErrorStateMatcher {
+  isErrorState(control: FormControl | null): boolean {
+    return !!(control && control.invalid);
+  }
+}
+
 @Component({
   standalone: true,
   selector: 'app-customerperson-form-dialog',
@@ -58,7 +65,10 @@ import { HttpErrorResponse } from '@angular/common/http';
     MatCheckboxModule,
     MatCardModule,
   ],
-  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
+    { provide: ErrorStateMatcher, useClass: ShowOnInvalidErrorStateMatcher }
+  ]
 })
 
 export class FormDialogComponentCustomerPerson 
@@ -99,6 +109,7 @@ export class FormDialogComponentCustomerPerson
   CustomerGroupID: any;
   someAction: any;
   fromGeneralBill = false;
+  reservationID: any;
 
   /** New Passenger (CP) and Create new Booker (CB) — same compact popup from booking. */
   get isReservationQuickAdd(): boolean {
@@ -108,8 +119,8 @@ export class FormDialogComponentCustomerPerson
 
   referenceID: number;
   type: string="CustomerPerson";
-  public showPassword: boolean;
-  public showConfirmPassword: boolean;
+  public showPassword = false;
+  public showConfirmPassword = false;
   PrimaryMobile: any;
 
   private sanitizeNullableText(value: any): string {
@@ -134,7 +145,14 @@ export class FormDialogComponentCustomerPerson
         // Set the defaults
         
         this.action = data.action;
+        this.someAction = data.forCP;
         this.fromGeneralBill = data.fromGeneralBill === true;
+        this.reservationID = data.reservationID ?? data.ReservationID ?? null;
+        if (Number(this.reservationID) > 0) {
+          try {
+            sessionStorage.setItem('audit_reservationId', String(this.reservationID));
+          } catch {}
+        }
         if (this.action === 'edit') 
         {
           this.CustomerGroupID=data.CustomerGroupID;
@@ -142,6 +160,7 @@ export class FormDialogComponentCustomerPerson
           this.PrimaryMobile=data.PrimaryMobile;
           this.dialogTitle ='Customer Person for';       
           this.advanceTable = data.advanceTable;
+          this.customerID = this.advanceTable.customerID;
 
           // Fallback for list APIs that send phone instead of primaryMobile
           if (!this.advanceTable.primaryMobile && data?.advanceTable?.phone) {
@@ -155,7 +174,6 @@ export class FormDialogComponentCustomerPerson
            this.advanceTableForm = this.createContactForm();
       
           this.referenceID=this.advanceTable.customerPersonID;
-          this.loadPassword();
           this.salutation.setValue(this.advanceTable.salutation)
           this.searchDesignationBy.setValue(this.advanceTable.customerDesignation)
           // this.CustomerGroupID=data.CustomerGroupID;
@@ -201,6 +219,7 @@ export class FormDialogComponentCustomerPerson
           this.advanceTable.maskMobileNumber=false;
           this.advanceTable.isPostPickUpCallAllowed=false;
           this.advanceTable.sendSMSWhatsApp=true;
+          this.advanceTable.reservationConfirmationWhatsApp=false;
           this.advanceTable.sendEmail=true;
           this.advanceTable.preferAppBasedDriver=this.fromGeneralBill ? false : true;
           if (this.fromGeneralBill) {
@@ -225,7 +244,6 @@ export class FormDialogComponentCustomerPerson
         }
         
         this.advanceTableForm = this.createContactForm();
-        this.someAction=data.forCP
         if (this.someAction === 'CP' || this.someAction === 'CB') {
           this.CustomerGroupID = data.advanceTable.customerGroupID;
           this.CustomerGroupName = data.advanceTable.customerGroup;
@@ -256,6 +274,8 @@ export class FormDialogComponentCustomerPerson
         isContactPerson: false,
       });
     }
+    this.applyQuickAddHiddenDefaults();
+    this.updateCustomerDesignationValidators();
     this.InitCustomer();
     this.InitSalutation();
     if (!this.fromGeneralBill) {
@@ -267,28 +287,63 @@ export class FormDialogComponentCustomerPerson
       this.InitCountryISDCodes();
       this.InitCountryMobileCode();
     }
+    if (this.action === 'edit' && this.referenceID) {
+      this.loadPassword();
+    }
   }
 
   public loadPassword() {
     this.advanceTableService.getPassword(this.referenceID, this.type).subscribe(
       (data: any) => {
-        const pass = data.password;
-       
-        this.advanceTableForm.patchValue({ password: pass });
-        this.advanceTableForm.patchValue({ confirmPassword: pass });
+        const pass = this.extractLoadedPassword(data);
+        this.advanceTable.password = pass;
+        this.advanceTable.confirmPassword = pass;
+        this.advanceTableForm.patchValue(
+          { password: pass, confirmPassword: pass },
+          { emitEvent: false }
+        );
+        this.advanceTableForm.get('password')?.updateValueAndValidity();
+        this.advanceTableForm.get('confirmPassword')?.updateValueAndValidity();
       },
       (error: HttpErrorResponse) => {
-        // Handle error, for example:
         console.error('Failed to load password:', error.message);
       }
     );
   }
+
+  private extractLoadedPassword(data: any): string {
+    if (data == null) {
+      return '';
+    }
+
+    let pass = typeof data === 'string' ? data : (data.password ?? data.Password ?? '');
+    if (pass == null) {
+      return '';
+    }
+
+    pass = String(pass).trim();
+    if (pass.startsWith('"') && pass.endsWith('"')) {
+      try {
+        const parsed = JSON.parse(pass);
+        if (typeof parsed === 'string') {
+          return parsed;
+        }
+      } catch {
+        return pass.slice(1, -1);
+      }
+    }
+    return pass;
+  }
   
   InitCustomer(){
-    this._generalService.GetCustomersForCP(this.data.CustomerGroupID).subscribe
+    const customerGroupId = this.data?.CustomerGroupID ?? this.CustomerGroupID;
+    if (!customerGroupId) {
+      return;
+    }
+    this._generalService.GetCustomersForCP(customerGroupId).subscribe
     (
       data=>{
-        this.CustomerList=data;
+        this.CustomerList = this.normalizeCustomerList(data);
         this.advanceTableForm.controls['customerName'].setValidators([Validators.required,
           this.customerValidator(this.CustomerList)
         ]);
@@ -297,7 +352,11 @@ export class FormDialogComponentCustomerPerson
         this.filteredCustomerOptions = this.advanceTableForm.controls["customerName"].valueChanges.pipe(
           startWith(""),
           map(value => this._filterCustomer(value || ''))
-        ); 
+        );
+        this.advanceTableForm.controls['customerName'].valueChanges.subscribe(() => {
+          this.updatePrimaryEmailValidators();
+        });
+        this.updatePrimaryEmailValidators();
       }
     );
   }
@@ -319,28 +378,123 @@ export class FormDialogComponentCustomerPerson
     const CustomerName = this.CustomerList.find(
       data => data.customerName === selectedCustomer
     );
-    if (selectedCustomer) 
+    if (CustomerName) 
     {
       this.getCustomerID(CustomerName.customerID);
     }
+    else
+    {
+      this.updatePrimaryEmailValidators();
+    }
   }  
+
+  private normalizeCustomerList(customers: any[]): any[] {
+    return (customers || []).map((customer) => ({
+      ...customer,
+      customerID: customer.customerID ?? customer.CustomerID,
+      customerName: customer.customerName ?? customer.CustomerName,
+      isCPEmailMandatry: this.readCpEmailMandatoryFlag(customer),
+      isCPEmailIDMandatory: this.readCpEmailMandatoryFlag(customer),
+    }));
+  }
+
+  private readCpEmailMandatoryFlag(source: any): boolean | null {
+    const value = source?.isCPEmailMandatry ?? source?.IsCPEmailMandatry
+      ?? source?.isCPEmailIDMandatory ?? source?.IsCPEmailIDMandatory;
+    if (value === true || value === false) {
+      return value;
+    }
+    if (value === 1) {
+      return true;
+    }
+    if (value === 0) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+        return true;
+      }
+      if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+        return false;
+      }
+    }
+    return null;
+  }
   getCustomerID(customerID: any) 
   {
     this.customerID=customerID;
+    this.updatePrimaryEmailValidators();
+  }
+
+  private resolveSelectedCustomer(): any {
+    const id = this.customerID || this.advanceTableForm?.get('customerID')?.value;
+    if (id && this.CustomerList?.length) {
+      const byId = this.CustomerList.find((data) => this.sameCustomerId(data.customerID, id));
+      if (byId) {
+        return byId;
+      }
+    }
+    const name = this.advanceTableForm?.get('customerName')?.value;
+    if (name && this.CustomerList?.length) {
+      return this.CustomerList.find((data) => data.customerName === name);
+    }
+    return null;
+  }
+
+  private sameCustomerId(left: any, right: any): boolean {
+    const leftId = Number(left);
+    const rightId = Number(right);
+    return Number.isFinite(leftId) && Number.isFinite(rightId) && leftId > 0 && leftId === rightId;
+  }
+
+  private isCustomerCpEmailMandatory(customer?: any): boolean {
+    return this.readCpEmailMandatoryFlag(customer) === true;
+  }
+
+  private trimPrimaryEmailControl(): void {
+    const control = this.advanceTableForm?.get('primaryEmail');
+    if (!control || control.value == null) {
+      return;
+    }
+    const trimmed = String(control.value).trim();
+    if (trimmed !== control.value) {
+      control.setValue(trimmed, { emitEvent: false });
+    }
+  }
+
+  updatePrimaryEmailValidators(): void {
+    const control = this.advanceTableForm?.get('primaryEmail');
+    if (!control) {
+      return;
+    }
+    const customer = this.resolveSelectedCustomer();
+    if (this.isCustomerCpEmailMandatory(customer)) {
+      control.setValidators([Validators.required, Validators.email]);
+    } else {
+      control.setValidators([Validators.email]);
+    }
+    control.updateValueAndValidity({ emitEvent: false });
   }
 
   customerValidator(CustomerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = CustomerList?.some(group => group.customerName.toLowerCase() === value);
+      const value = (control.value || '').toString().trim();
+      if (!value) {
+        return null;
+      }
+      const match = CustomerList?.some(group => group.customerName?.toLowerCase() === value.toLowerCase());
       return match ? null : { customerInvalid: true };
     };
   }
 
   salutationValidator(SalutationList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = SalutationList.some(group => group.salutation.toLowerCase() === value);
+      const value = (control.value || '').toString().trim();
+      if (!value) {
+        return null;
+      }
+      const match = SalutationList?.some(group => group.salutation?.toLowerCase() === value.toLowerCase());
       return match ? null : { salutationInvalid: true };
     };
   }
@@ -519,6 +673,7 @@ export class FormDialogComponentCustomerPerson
     // Reset the values of the controls when Importance is changed
     this.advanceTableForm.controls['customerDesignationID'].setValue(0);
     this.advanceTableForm.controls['customerDesignation'].setValue('');
+    this.updateCustomerDesignationValidators();
   }
   
   InitCustomerDepartment(){
@@ -560,38 +715,45 @@ export class FormDialogComponentCustomerPerson
 ],
       confirmPassword:[this.advanceTable.confirmPassword],
       password:[this.advanceTable.password],
-      customerName: [this.advanceTable.customerName],
+      customerName: [this.advanceTable.customerName, [Validators.required]],
       salutationID: [this.advanceTable.salutationID],
-      salutation:[this.advanceTable.salutation],
-      customerPersonName: [this.advanceTable.customerPersonName],
-      gender: [this.advanceTable.gender],
-      importance: [this.advanceTable.importance],
+      salutation:[this.advanceTable.salutation, [Validators.required]],
+      customerPersonName: [this.advanceTable.customerPersonName, [Validators.required]],
+      gender: [this.advanceTable.gender, [Validators.required]],
+      importance: [this.advanceTable.importance, [Validators.required]],
       primaryEmail: [this.advanceTable.primaryEmail],
       billingEmail: [this.advanceTable.billingEmail],
       primaryMobile: [this.sanitizeNullableText(this.advanceTable.primaryMobile)],
       secondaryMobile1: [this.sanitizeNullableText(this.advanceTable.secondaryMobile1)],
       secondaryMobile2: [this.sanitizeNullableText(this.advanceTable.secondaryMobile2)],
-      isContactPerson: [this.advanceTable.isContactPerson],
-      isBooker: [this.advanceTable.isBooker],
-      isPassenger: [this.advanceTable.isPassenger],
-      isAdmin: [this.advanceTable.isAdmin],
-      maskMobileNumber: [this.advanceTable.maskMobileNumber],
+      isContactPerson: [this.advanceTable.isContactPerson, [Validators.required]],
+      isBooker: [this.advanceTable.isBooker, [Validators.required]],
+      isPassenger: [this.advanceTable.isPassenger, [Validators.required]],
+      isAdmin: [this.advanceTable.isAdmin, [Validators.required]],
+      maskMobileNumber: [this.advanceTable.maskMobileNumber, [Validators.required]],
       isPostPickUpCallAllowed: [this.advanceTable.isPostPickUpCallAllowed ?? false],
-      sendSMSWhatsApp: [this.advanceTable.sendSMSWhatsApp],
-      sendEmail: [this.advanceTable.sendEmail],
+      isFeedbackEmailAllowed: [
+        this.advanceTable.isFeedbackEmailAllowed === true || this.advanceTable.isFeedbackEmailAllowed === false
+          ? this.advanceTable.isFeedbackEmailAllowed
+          : ''
+      ],
+      sendSMSWhatsApp: [this.advanceTable.sendSMSWhatsApp, [Validators.required]],
+      reservationConfirmationWhatsApp: [this.advanceTable.reservationConfirmationWhatsApp === true, [Validators.required]],
+      sendEmail: [this.advanceTable.sendEmail, [Validators.required]],
       employeeCode: [this.advanceTable.employeeCode],
+      costCenter: [this.advanceTable.costCenter],
       customerDesignationID: [this.advanceTable.customerDesignationID],
       customerDesignation: [this.advanceTable.customerDesignation],
       customerDepartmentID: [this.advanceTable.customerDepartmentID],
-      preferAppBasedDriver: [this.advanceTable.preferAppBasedDriver],
-      activationStatus: [this.advanceTable.activationStatus],
-      loyalGuest: [this.advanceTable.loyalGuest],
-      isDefaultForIntegrationRequest:[this.advanceTable.isDefaultForIntegrationRequest],
-      allowLoginToCDP: [this.advanceTable.allowLoginToCDP],
-      allowLoginToCustomerApp: [this.advanceTable.allowLoginToCustomerApp],
-      countryCode:['+91'],
+      preferAppBasedDriver: [this.advanceTable.preferAppBasedDriver, [Validators.required]],
+      activationStatus: [this.advanceTable.activationStatus, [Validators.required]],
+      loyalGuest: [this.advanceTable.loyalGuest, [Validators.required]],
+      isDefaultForIntegrationRequest:[this.advanceTable.isDefaultForIntegrationRequest, [Validators.required]],
+      allowLoginToCDP: [this.advanceTable.allowLoginToCDP, [Validators.required]],
+      allowLoginToCustomerApp: [this.advanceTable.allowLoginToCustomerApp, [Validators.required]],
+      countryCode:['+91', [Validators.required]],
       countryCodes:['+91'],
-      mobileCode:['+91',],
+      mobileCode:['+91'],
     },
       {
         validator: ConfirmPasswordValidator("password", "confirmPassword")
@@ -613,6 +775,7 @@ export class FormDialogComponentCustomerPerson
   reset(): void 
   {
     this.advanceTableForm.reset();
+    this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: '' });
   }
   onNoClick()
   {
@@ -724,6 +887,19 @@ export class FormDialogComponentCustomerPerson
   // }
 
 public Post(): void {
+  this.trimPrimaryEmailControl();
+  this.updatePrimaryEmailValidators();
+  if (this.isCustomerCpEmailMandatory(this.resolveSelectedCustomer())) {
+    const email = (this.advanceTableForm.get('primaryEmail')?.value || '').toString().trim();
+    if (!email) {
+      this.advanceTableForm.get('primaryEmail')?.setErrors({ required: true });
+      this.advanceTableForm.get('primaryEmail')?.markAsTouched();
+      this.showNotification('snackbar-warning', 'Primary Email is required', 'bottom', 'center');
+      this.isSaving = false;
+      return;
+    }
+  }
+
   // Helper function to format phone numbers with country code safely
   const formatPhone = (countryCodeControl: string, phoneControl: string): string => {
     const codeValue = this.advanceTableForm.get(countryCodeControl)?.value || '';
@@ -757,6 +933,7 @@ public Post(): void {
       isAdmin: false,
       maskMobileNumber: false,
       sendSMSWhatsApp: true,
+      reservationConfirmationWhatsApp: false,
       sendEmail: true,
       preferAppBasedDriver: false,
       loyalGuest: false,
@@ -778,6 +955,7 @@ public Post(): void {
       isAdmin: false,
       maskMobileNumber: false,
       sendSMSWhatsApp: true,
+      reservationConfirmationWhatsApp: false,
       sendEmail: true,
       preferAppBasedDriver: false,
       loyalGuest: false,
@@ -796,7 +974,10 @@ public Post(): void {
   // Call service
   const payload = {
   ...this.advanceTableForm.getRawValue(),
-  oldRentNetID: this.getOldRentNetID()
+  oldRentNetID: this.getOldRentNetID(),
+  // Booking New Passenger popup: do not send welcome credentials email
+  skipWelcomeEmail: this.someAction === 'CP',
+  reservationID: Number(this.reservationID) > 0 ? Number(this.reservationID) : null
 };
   this.advanceTableService.add(payload).subscribe({
     next: (response) => {
@@ -872,7 +1053,8 @@ public Post(): void {
     this.advanceTableForm.patchValue({secondaryMobile2:secondaryMobile2});
      const payload = {
   ...this.advanceTableForm.getRawValue(),
-  oldRentNetID: this.getOldRentNetID()
+  oldRentNetID: this.getOldRentNetID(),
+  reservationID: Number(this.reservationID) > 0 ? Number(this.reservationID) : null
 };
     this.advanceTableService.update(payload)  
     .subscribe(
@@ -930,18 +1112,44 @@ public Post(): void {
   // }
   public confirmAdd(): void
    {
-    this.saveDisabled = false;
     if (this.isSaving) 
       {
         return; // Prevent multiple clicks if already saving
     }
 
-    if (this.advanceTableForm.invalid) 
-      {
-        return; // Ensure the form is valid before proceeding
+    this.trimPrimaryEmailControl();
+    this.updatePrimaryEmailValidators();
+
+    if (this.isCustomerCpEmailMandatory(this.resolveSelectedCustomer())) {
+      const email = (this.advanceTableForm.get('primaryEmail')?.value || '').toString().trim();
+      if (!email) {
+        this.advanceTableForm.get('primaryEmail')?.setErrors({ required: true });
+        this.advanceTableForm.get('primaryEmail')?.markAsTouched();
+      }
     }
 
+    if (this.advanceTableForm.invalid) 
+      {
+        this.advanceTableForm.markAllAsTouched();
+        this.saveDisabled = true;
+        this.isSaving = false;
+        const firstError = this.validationMessages[0];
+        this.showNotification(
+          'snackbar-warning',
+          firstError || 'Please fill all required fields',
+          'bottom',
+          'center'
+        );
+        return;
+    }
+
+    this.saveDisabled = false;
     this.isSaving = true; // Disable the Save button
+
+    const feedbackValue = this.advanceTableForm.get('isFeedbackEmailAllowed')?.value;
+    if (feedbackValue === '' || feedbackValue === undefined) {
+      this.advanceTableForm.patchValue({ isFeedbackEmailAllowed: null });
+    }
 
     if (this.action === 'edit') {
         this.Put();
@@ -1073,6 +1281,7 @@ public Post(): void {
           }
           if (this.advanceTableForm.get('primaryEmail')?.hasError('duplicate')) {
             this.advanceTableForm.get('primaryEmail')?.setErrors(null);
+            this.advanceTableForm.get('primaryEmail')?.updateValueAndValidity({ emitEvent: false });
           }
         }
       });
@@ -1108,6 +1317,9 @@ checkDuplicateCustomerPerson() {
           ['customerPersonName', 'primaryMobile', 'primaryEmail'].forEach(field => {
             if (this.advanceTableForm.get(field)?.hasError('duplicate')) {
               this.advanceTableForm.get(field)?.setErrors(null);
+              if (field === 'primaryEmail') {
+                this.advanceTableForm.get(field)?.updateValueAndValidity({ emitEvent: false });
+              }
             }
           });
         }
@@ -1124,6 +1336,131 @@ private getOldRentNetID(): number {
 
   return Number(value);
 }
+
+  applyQuickAddHiddenDefaults(): void {
+    if (!this.isReservationQuickAdd) {
+      return;
+    }
+
+    const isBooker = this.someAction === 'CB';
+    this.advanceTableForm.patchValue({
+      isContactPerson: false,
+      isBooker: isBooker,
+      isPassenger: !isBooker,
+      isAdmin: false,
+      sendSMSWhatsApp: true,
+      reservationConfirmationWhatsApp: false,
+      sendEmail: true,
+      preferAppBasedDriver: this.fromGeneralBill ? false : (this.advanceTableForm.value.preferAppBasedDriver ?? false),
+      isDefaultForIntegrationRequest: false,
+      activationStatus: this.advanceTableForm.value.activationStatus ?? true
+    });
+  }
+
+  updateCustomerDesignationValidators(): void {
+    const designationControl = this.advanceTableForm?.get('customerDesignation');
+    if (!designationControl) {
+      return;
+    }
+
+    if (this.advanceTableForm.value.importance === 'VIP') {
+      designationControl.setValidators([Validators.required]);
+    } else {
+      designationControl.clearValidators();
+    }
+    designationControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  get validationMessages(): string[] {
+    if (!this.advanceTableForm) {
+      return [];
+    }
+
+    const labels: Record<string, string> = {
+      customerName: 'Customer',
+      salutation: 'Salutation',
+      customerPersonName: 'Customer Person Name',
+      gender: 'Gender',
+      importance: 'Importance',
+      countryCode: 'Country Code',
+      primaryMobile: 'Primary Mobile',
+      primaryEmail: 'Primary Email',
+      isContactPerson: 'Is Contact Person',
+      isBooker: 'Is Booker',
+      isPassenger: 'Is Passenger',
+      isAdmin: 'Is Admin',
+      maskMobileNumber: 'Mask Mobile Number',
+      sendSMSWhatsApp: 'Send SMS-Whats App',
+      reservationConfirmationWhatsApp: 'Reservation Confirmation WhatsApp',
+      sendEmail: 'Send Email',
+      customerDesignation: 'Customer Designation',
+      confirmPassword: 'Confirm Password',
+      preferAppBasedDriver: 'Prefer App Based Driver',
+      loyalGuest: 'Loyal Guest',
+      isDefaultForIntegrationRequest: 'Is Default For Integration Request',
+      allowLoginToCDP: 'Allow Login To CDP',
+      allowLoginToCustomerApp: 'Allow Login To Customer App',
+      activationStatus: 'Activation Status',
+      oldRentNetID: 'Old RentNet ID'
+    };
+
+    const messages: string[] = [];
+    const seen = new Set<string>();
+
+    const hiddenQuickAddControls = [
+      'isContactPerson',
+      'isBooker',
+      'isPassenger',
+      'isAdmin',
+      'sendSMSWhatsApp',
+      'sendEmail',
+      'preferAppBasedDriver',
+      'isDefaultForIntegrationRequest',
+      'password',
+      'confirmPassword'
+    ];
+
+    Object.keys(this.advanceTableForm.controls).forEach((key) => {
+      const control = this.advanceTableForm.get(key);
+      if (!control || control.disabled || !control.errors) {
+        return;
+      }
+      if (this.isReservationQuickAdd && hiddenQuickAddControls.includes(key)) {
+        return;
+      }
+
+      const label = labels[key] || key;
+      if (control.hasError('required')) {
+        messages.push(`${label} is required`);
+      }
+      if (control.hasError('customerInvalid')) {
+        messages.push('Please select a Customer from the list');
+      }
+      if (control.hasError('salutationInvalid')) {
+        messages.push('Please select a Salutation from the list');
+      }
+      if (control.hasError('duplicate')) {
+        messages.push(`Duplicate ${label} found in this Customer Group`);
+      }
+      if (control.hasError('confirmPasswordValidator')) {
+        messages.push('Password and Confirm Password did not match');
+      }
+      if (control.hasError('pattern')) {
+        messages.push(`${label} is invalid`);
+      }
+      if (control.hasError('email')) {
+        messages.push(`${label} is not a valid email`);
+      }
+    });
+
+    return messages.filter((message) => {
+      if (seen.has(message)) {
+        return false;
+      }
+      seen.add(message);
+      return true;
+    });
+  }
 
 }
 

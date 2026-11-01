@@ -11,6 +11,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { CreditNoteMisRoutingModule } from './creditNoteMis-routing.module';
 import { CreditNoteMisComponent } from './creditNoteMis.component';
 import { CreditNoteMisService } from './creditNoteMis.service';
@@ -30,7 +31,8 @@ import { CreditNoteMisService } from './creditNoteMis.service';
     MatDatepickerModule,
     MatAutocompleteModule,
     MatExpansionModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    StoredMisExportsComponent
   ],
   providers: [CreditNoteMisService]
 })

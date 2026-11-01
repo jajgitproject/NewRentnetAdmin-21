@@ -4,3 +4,23 @@
     margin-left: 15px;
     line-height: 36px;
 }
+
+.upload-row {
+    margin-bottom: 0;
+}
+
+.upload-col {
+    max-width: 100%;
+    flex: 0 0 100%;
+    padding: 0;
+}
+
+.upload-input {
+    display: none;
+}
+
+.upload-btn {
+    background-color: darkgray;
+    border-color: darkgray;
+    white-space: nowrap;
+}

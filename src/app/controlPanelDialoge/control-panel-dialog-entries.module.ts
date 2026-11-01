@@ -9,11 +9,9 @@
  */
 import { NgModule } from '@angular/core';
 import { AllotmentStatusDetailsModule } from '../AllotmentStatusDetails/AllotmentStatusDetails.module';
-import { AppDataMissingStatusModule } from '../appDataMissingStatus/appDataMissingStatus.module';
 import { BookerInfoModule } from '../BookerInfo/BookerInfo.module';
 import { CancelAllotmentModule } from '../cancelAllotment/cancelAllotment.module';
 import { CancelReservationAndAllotmentModule } from '../cancelReservationAndAllotment/cancelReservationAndAllotment.module';
-import { CarMovingStatusByAppModule } from '../carMovingStatusByApp/carMovingStatusByApp.module';
 import { DispatchByExecutiveModule } from '../dispatchByExecutive/dispatchByExecutive.module';
 import { DriverRemarkModule } from '../driverRemark/driverRemark.module';
 import { DropOffByExecutiveModule } from '../dropOffByExecutive/dropOffByExecutive.module';
@@ -43,6 +41,7 @@ import { NextDayInstructionDetailsModule } from '../NextDayInstructionDetails/Ne
 import { NoDataDialogModule } from '../no-data-dialog/no-data-dialog.module';
 import { PackageInfoModule } from '../PackageInfo/PackageInfo.module';
 import { PassengerInfoModule } from '../PassengerInfo/PassengerInfo.module';
+import { PassengerPlacardModule } from '../PassengerPlacard/PassengerPlacard.module';
 import { PasswordModule } from '../password/password.module';
 import { PassToSupplierModule } from '../passToSupplier/passToSupplier.module';
 import { PickUpByExecutiveModule } from '../pickUpByExecutive/pickUpByExecutive.module';
@@ -69,11 +68,9 @@ import { ReservationUpsellModule } from '../reservationUpsell/reservationUpsell.
 
 const CONTROL_PANEL_DIALOG_ENTRY_IMPORTS = [
   AllotmentStatusDetailsModule,
-  AppDataMissingStatusModule,
   BookerInfoModule,
   CancelAllotmentModule,
   CancelReservationAndAllotmentModule,
-  CarMovingStatusByAppModule,
   DispatchByExecutiveModule,
   DriverRemarkModule,
   DropOffByExecutiveModule,
@@ -103,6 +100,7 @@ const CONTROL_PANEL_DIALOG_ENTRY_IMPORTS = [
   NoDataDialogModule,
   PackageInfoModule,
   PassengerInfoModule,
+  PassengerPlacardModule,
   PasswordModule,
   PassToSupplierModule,
   PickUpByExecutiveModule,

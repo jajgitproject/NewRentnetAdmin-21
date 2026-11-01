@@ -8,13 +8,14 @@ import { MatSort } from '@angular/material/sort';
 import { ZonalDutyRegisterModel, SalesPersonDropDownModel, SearchCriteria } from './zonalDutyRegister.model';
 import { DataSource } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BehaviorSubject, fromEvent, merge, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, merge, Observable, Subscription, timer } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
 import { GeneralService } from '../general/general.service';
-import { extractExportErrorMessage } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, formatMisSearchDateForApi, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, parseMisSearchDate, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { Form, FormControl } from '@angular/forms';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import moment from 'moment';
@@ -22,6 +23,7 @@ import { ModeOfPaymentDropDown } from '../modeOfPayment/modeOfPaymentDropDown.mo
 import { OrganizationalEntityDropDown } from '../organizationalEntity/organizationalEntityDropDown.model';
 import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
 import { SupplierDropDown } from '../supplier/supplierDropDown.model';
+import { filterSuppliersByDisplay, formatSupplierDisplay, normalizeSupplierDropDownList, resolveSupplierSearchTerm, supplierMatchesDisplay } from '../supplier/supplier-display.util';
 import { VehicleVehicleCategoryDropDown } from '../vehicle/vehicleVehicleCategoryDropDown.model';
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { DriverDropDown } from '../customerPersonDriverRestriction/driverDropDown.model';
@@ -42,6 +44,7 @@ import { EmployeeDropDown } from '../employee/employeeDropDown.model';
 })
 export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
  baseDisplayedColumns = [
+  'ReservationGroupID',
   'ReservationID',
   'PickupDate',
   'BookingDate',
@@ -73,6 +76,10 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   'LocationInDate',
   'LocationInTime',
   'LocationInKM',
+  'OutKmsFromZero',
+  'ReportingKmsFromZero',
+  'ReleasingKmsFromZero',
+  'InKmsFromZero',
   'G2P',
   'D2G',
   'AppP2D',
@@ -101,7 +108,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   'ReservationCreatedBy',
   'AllotmentBy',
   'SupplierID',
-  'SupplierName',
+  'SupplierName',  
   'DSClosedBy',
   'DutySlipImage',
   'ClosingDate',
@@ -177,6 +184,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   SearchBillDateFrom: string = '';
 
   SearchSupplier: FormControl = new FormControl();
+  SearchSupplierID: number = 0;
   public SupplierList?: SupplierDropDown[] = [];
   filteredSupplierOptions: Observable<SupplierDropDown[]>;  
 
@@ -211,6 +219,11 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   SearchCarNo : FormControl = new FormControl();
   public CarNoList?: VehicleDropDown[] = [];
   filteredCarNoOptions:Observable<VehicleDropDown[]>;
+
+  SearchRegnNo : FormControl = new FormControl();
+  public RegnNoList?: VehicleDropDown[] = [];
+  filteredRegnNoOptions: Observable<VehicleDropDown[]>;
+  SearchInventoryID: number = 0;
 
   SearchSupplierO : FormControl = new FormControl();
 
@@ -250,8 +263,13 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   exportJobDownloading = false;
   exportJobError = '';
   exportJobStartedAt: number | null = null;
+  exportElapsedLabel = '—';
   private exportPollSub?: Subscription;
+  private exportElapsedSub?: Subscription;
+  private readonly exportJobPageKey = 'zonalDutyRegister';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   readonly maxPickupDateRangeDays = 15;
+  formatSupplierDisplay = formatSupplierDisplay;
   readonly exportJobType = 'ZonalDutyRegisterExport';
   IsKAMRole: any;
     
@@ -289,6 +307,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     this.InitCarBooked();
     this.InitDriver();
     this.InitCarNo();
+    this.InitRegnNo();
     this.InitCustomerType();
     this.InitSalesPerson();
     this.InitGuestName();
@@ -296,6 +315,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     this.InitCities();
     this.InitBranch();
     this.InitKAM();
+    this.resumeExportJobIfNeeded();
     //this.SubscribeUpdateService();
   }
 
@@ -324,6 +344,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     this.SearchToDate = '';
     this.SearchSalesPerson.setValue('');
     this.SearchSupplier.setValue('');
+    this.SearchSupplierID = 0;
     this.SearchCarSend.setValue('');
     this.SearchCarBooked.setValue('');
     this.SearchBookingStatus.setValue('');
@@ -333,6 +354,8 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     this.SearchBillStatus.setValue(null);
     this.SearchDri.setValue('');
     this.SearchCarNo.setValue('');
+    this.SearchRegnNo.setValue('');
+    this.SearchInventoryID = 0;
     this.SearchSupplierO.setValue('');
     this.SearchCustomerType.setValue('');
     this.SearchRes = '';
@@ -403,7 +426,9 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     this.zonalDutyRegisterService.getTableData(searchCriteria,this.PageNumber,).subscribe(
       data =>   
       {
-        this.dataSource = this.applyCustomerSpecificFieldColumns(Array.isArray(data) ? data : []);
+        this.dataSource = this.applyCustomerSpecificFieldColumns(
+          this.applySegmentOdometerColumns(Array.isArray(data) ? data : [])
+        );
         console.log(this.dataSource);
       },
     (error: HttpErrorResponse) => { 
@@ -456,8 +481,9 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   public SearchData()
   {
     if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
-    }
+  }
 
     const dateRangeError = this.validatePickupDateRange();
     if (dateRangeError) {
@@ -468,35 +494,64 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     this.hasManualSearch = true;
     this.dataSource = [];
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
     const searchCriteria = this.buildSearchCriteria();
 
     this.exportJobRunning = true;
-    this.showNotification('snackbar-info', 'Export job started. CSV will be ready when processing completes.', 'bottom', 'center');
 
     this.zonalDutyRegisterService.startExportJob(searchCriteria).subscribe(
       (startResult: any) => {
-        const jobId = startResult?.jobId ?? startResult?.JobId;
-        if (!jobId) {
-          this.exportJobRunning = false;
-          this.exportJobError = 'Could not start export job.';
-          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
-          return;
-        }
+        setTimeout(() => {
+          const jobId = startResult?.jobId ?? startResult?.JobId;
+          if (!jobId) {
+            this.exportJobRunning = false;
+            this.exportJobError = 'Could not start export job.';
+            this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+            return;
+          }
 
-        this.exportJobId = jobId;
-        this.exportJobStatus = {
-          jobId,
-          jobType: startResult?.jobType ?? startResult?.JobType ?? this.exportJobType,
-          status: startResult?.status ?? startResult?.Status ?? 'Pending',
-          message: startResult?.message ?? startResult?.Message ?? 'Export queued'
-        };
-        this.startExportPolling(jobId);
+          this.exportJobId = jobId;
+          persistExportJobId(this.exportJobPageKey, jobId);
+          this.exportJobStatus = {
+            jobId,
+            jobType: startResult?.jobType ?? startResult?.JobType ?? this.exportJobType,
+            status: startResult?.status ?? startResult?.Status ?? 'Pending',
+            message: startResult?.message ?? startResult?.Message ?? 'Export queued'
+          };
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.refreshExportElapsedLabel();
+          this.startExportPolling(jobId);
+          this.showNotification('snackbar-info', exportJobAcceptedSnackbarMessage(startResult), 'bottom', 'center');
+        });
       },
       async (error) => {
-        this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error);
-        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        const message = await extractExportErrorMessage(error, 'Could not start export');
+        setTimeout(() => {
+          this.exportJobRunning = false;
+          this.exportJobError = message;
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+        });
+      }
+    );
+  }
+
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.zonalDutyRegisterService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        setTimeout(() => {
+          this.exportJobStatus = status;
+          this.exportJobRunning = false;
+          this.stopExportPolling();
+          this.refreshExportElapsedLabel();
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+        });
+      },
+      async (error) => {
+        const message = await extractExportErrorMessage(error, 'Could not cancel export.');
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
   }
@@ -528,8 +583,8 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
             }
           }
           this.showNotification('snackbar-danger', message, 'bottom', 'center');
-          return;
-        }
+              return;
+            }
 
         const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
         this.triggerCsvDownload(blob, fileName);
@@ -540,7 +595,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       },
       async (error) => {
         this.exportJobDownloading = false;
-        const message = await extractExportErrorMessage(error);
+        const message = await extractExportErrorMessage(error, 'Export download failed.');
         this.showNotification('snackbar-danger', message, 'bottom', 'center');
       }
     );
@@ -566,43 +621,74 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     return this.exportJobStatus?.rowsExported ?? this.exportJobStatus?.RowsExported ?? 0;
   }
 
-  getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) {
-      return '—';
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
+  }
+
+  private refreshExportElapsedLabel() {
+    this.exportElapsedLabel = formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
+  }
+
+  private startExportElapsedTimer() {
+    this.stopExportElapsedTimer();
+    this.refreshExportElapsedLabel();
+    this.exportElapsedSub = timer(0, 1000).subscribe(() => {
+      this.refreshExportElapsedLabel();
+    });
+  }
+
+  private stopExportElapsedTimer() {
+    if (this.exportElapsedSub) {
+      this.exportElapsedSub.unsubscribe();
+      this.exportElapsedSub = undefined;
     }
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
   }
 
   private startExportPolling(jobId: string) {
     this.stopExportPolling();
+    this.startExportElapsedTimer();
     this.exportPollSub = this.zonalDutyRegisterService.pollExportJob(jobId).subscribe(
       (status: any) => {
-        this.exportJobStatus = status;
-        const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
+        setTimeout(() => {
+          this.exportJobStatus = status;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
+          this.refreshExportElapsedLabel();
+          const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
 
-        if (current === 'failed') {
-          this.exportJobRunning = false;
-          this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
-          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
-          this.stopExportPolling();
+          if (current === 'failed') {
+            this.exportJobRunning = false;
+            this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
+            this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+            this.stopExportPolling();
+            persistExportJobId(this.exportJobPageKey, null);
           return;
         }
 
-        if (current === 'completed') {
-          this.exportJobRunning = false;
-          const rows = status?.rowsExported ?? status?.RowsExported ?? 0;
-          this.showNotification('snackbar-success', status?.message ?? `Export ready (${rows} rows). Click Download CSV.`, 'bottom', 'center');
-          this.stopExportPolling();
-        }
+          if (isExportJobCancelled(status)) {
+            this.exportJobRunning = false;
+            this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+            this.stopExportPolling();
+            persistExportJobId(this.exportJobPageKey, null);
+            return;
+          }
+
+          if (current === 'completed') {
+            this.exportJobRunning = false;
+            const rows = status?.rowsExported ?? status?.RowsExported ?? 0;
+            this.showNotification('snackbar-success', status?.message ?? `Export ready (${rows} rows). Click Download CSV.`, 'bottom', 'center');
+            this.stopExportPolling();
+            this.storedExports?.refresh();
+          }
+        });
       },
       async (error) => {
-        this.exportJobRunning = false;
-        this.exportJobError = await extractExportErrorMessage(error);
-        this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
-        this.stopExportPolling();
+        const message = await extractExportErrorMessage(error, 'Export failed.');
+        setTimeout(() => {
+          this.exportJobRunning = false;
+          this.exportJobError = message;
+          this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
+          this.stopExportPolling();
+        });
       }
     );
   }
@@ -612,6 +698,63 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       this.exportPollSub.unsubscribe();
       this.exportPollSub = undefined;
     }
+    this.stopExportElapsedTimer();
+    this.refreshExportElapsedLabel();
+  }
+
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    setTimeout(() => {
+      this.exportJobId = jobId;
+      if (!this.exportJobStatus) {
+        this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+      }
+
+      this.zonalDutyRegisterService.getExportJobStatus(jobId).subscribe(
+        (status: any) => {
+          setTimeout(() => {
+            if (!status) {
+              this.exportJobRunning = true;
+              this.startExportPolling(jobId);
+              return;
+            }
+
+            this.exportJobId = jobId;
+            this.exportJobStatus = status;
+            this.exportJobError = '';
+            if (this.zonalDutyRegisterService.isExportJobRunning(status)) {
+              this.exportJobRunning = true;
+              this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+              this.refreshExportElapsedLabel();
+              this.startExportPolling(jobId);
+              return;
+            }
+
+            this.exportJobRunning = false;
+            this.refreshExportElapsedLabel();
+          });
+        },
+        (error) => {
+          setTimeout(() => {
+            if (isExportJobNotFoundError(error)) {
+              persistExportJobId(this.exportJobPageKey, null);
+              this.exportJobId = null;
+              this.exportJobStatus = null;
+              this.exportJobRunning = false;
+              this.refreshExportElapsedLabel();
+              return;
+            }
+
+            this.exportJobRunning = true;
+            this.startExportPolling(jobId);
+          });
+        }
+      );
+    });
   }
 
   private clearExportJob() {
@@ -622,6 +765,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     this.exportJobDownloading = false;
     this.exportJobError = '';
     this.exportJobStartedAt = null;
+    this.exportElapsedLabel = '—';
   }
 
   private triggerCsvDownload(blob: Blob, preferredFileName?: string) {
@@ -680,6 +824,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       (this.SearchBillStatus?.value !== null && this.SearchBillStatus?.value !== undefined) ||
       this.isSearchValueSet(this.SearchDri?.value) ||
       this.isSearchValueSet(this.SearchCarNo?.value) ||
+      this.resolveSearchInventoryId() > 0 ||
       this.isSearchValueSet(this.SearchSupplierO?.value) ||
       this.isSearchValueSet(this.SearchRes) ||
       this.isSearchValueSet(this.SearchDuty) ||
@@ -702,30 +847,37 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   }
 
   validatePickupDateRange(): string | null {
-    if (this.isDutySlipIdSearchActive()) {
-      return null;
-    }
-
     if (!this.SearchFromDate || !this.SearchToDate) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
 
-    const fromDate = moment(this.SearchFromDate).startOf('day');
-    const toDate = moment(this.SearchToDate).startOf('day');
-    if (!fromDate.isValid() || !toDate.isValid()) {
+    const fromDate = parseMisSearchDate(this.SearchFromDate);
+    const toDate = parseMisSearchDate(this.SearchToDate);
+    if (!fromDate || !toDate) {
       return 'Please enter valid pickup dates.';
     }
     if (toDate.isBefore(fromDate)) {
       return 'Pickup To Date cannot be earlier than From Date.';
     }
-    if (!this.hasAdditionalSearchFilters()) {
-      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
-      if (inclusiveDays > this.maxPickupDateRangeDays) {
-        return `Pickup date range cannot exceed ${this.maxPickupDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
-      }
+
+    const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
+    if (inclusiveDays > this.maxPickupDateRangeDays) {
+      return `Pickup date range cannot exceed ${this.maxPickupDateRangeDays} days.`;
     }
 
     return null;
+  }
+
+  private resolveSearchInventoryId(): number {
+    const regn = String(this.SearchRegnNo?.value ?? '').trim();
+    if (!regn) {
+      this.SearchInventoryID = 0;
+      return 0;
+    }
+    const selected = this.RegnNoList?.find(item => item.vehicle === regn);
+    const inventoryId = selected ? selected.vehicleID : 0;
+    this.SearchInventoryID = inventoryId;
+    return inventoryId;
   }
 
   private buildSearchCriteria(): SearchCriteria {
@@ -740,19 +892,16 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       SearchKAMID: this.SearchKAMID,
       SearchCustomerPersonName: this.SearchCustomerPerson?.value || "",
       SearchDutyType: this.SearchDutyType?.value || "",
-      SearchFeedbackDate: this.SearchFeedbackDate !== "" ? moment(this.SearchFeedbackDate).format('MMM DD yyyy') : "",
+      SearchFeedbackDate: this.SearchFeedbackDate !== "" ? formatMisSearchDateForApi(this.SearchFeedbackDate) : "",
       SearchSlipReceipt: this.SearchSlipReceipt,
       SearchClosureType: this.SearchClosureType?.value || "",
       SearchDispatchLocation: this.SearchDispatchLocation?.value || "",
       SearchMOP: this.SearchMOP?.value || "",
       SearchSupplierType: this.SearchSupplierType?.value || "",
-      SearchSupplier: this.SearchSupplier?.value || "",
-      SearchFromDate: this.isDutySlipIdSearchActive()
-        ? ""
-        : (this.SearchFromDate !== "" ? moment(this.SearchFromDate).format('MMM DD yyyy') : ""),
-      SearchToDate: this.isDutySlipIdSearchActive()
-        ? ""
-        : (this.SearchToDate !== "" ? moment(this.SearchToDate).format('MMM DD yyyy') : ""),
+      SearchSupplier: (this.SearchSupplierID || 0) > 0 ? "" : this.resolveSupplierSearchValue(),
+      SearchSupplierID: (this.SearchSupplier?.value || '').toString().trim() ? (this.SearchSupplierID || 0) : 0,
+      SearchFromDate: formatMisSearchDateForApi(this.SearchFromDate),
+      SearchToDate: formatMisSearchDateForApi(this.SearchToDate),
       SearchSalesPersonName: this.SearchSalesPerson?.value || "",
       SearchCarSent: this.SearchCarSend?.value || "",
       SearchCarBook: this.SearchCarBooked?.value || "",
@@ -765,6 +914,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       SearchBillStatus: this.SearchBillStatus?.value,
       SearchDri: this.SearchDri?.value || "",
       SearchCarNo: this.SearchCarNo?.value || "",
+      SearchInventoryID: this.resolveSearchInventoryId(),
       SearchSupplierO: this.SearchSupplierO?.value || "",
       SearchRes: this.SearchRes || "",
       SearchDuty: this.SearchDuty || "",
@@ -772,14 +922,14 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       // SearchGuestEmail: this.SearchGuestEmail || "",
       SearchGuestMobile: this.SearchGuestMobile || "",
       SearchCity: this.SearchCity?.value || "",
-      SearchCancellationDateFrom: this.SearchCancellationDateFrom !== "" ? moment(this.SearchCancellationDateFrom).format('MMM DD yyyy') : "",
-      SearchCancellationDateTo: this.SearchCancellationDateTo !== "" ? moment(this.SearchCancellationDateTo).format('MMM DD yyyy') : "",
-      SearchBookingDateFrom: this.SearchBookingDateFrom !== "" ? moment(this.SearchBookingDateFrom).format('MMM DD yyyy') : "",
-      SearchBookingDate: this.SearchBookingDate !== "" ? moment(this.SearchBookingDate).format('MMM DD yyyy') : "",
+      SearchCancellationDateFrom: this.SearchCancellationDateFrom !== "" ? formatMisSearchDateForApi(this.SearchCancellationDateFrom) : "",
+      SearchCancellationDateTo: this.SearchCancellationDateTo !== "" ? formatMisSearchDateForApi(this.SearchCancellationDateTo) : "",
+      SearchBookingDateFrom: this.SearchBookingDateFrom !== "" ? formatMisSearchDateForApi(this.SearchBookingDateFrom) : "",
+      SearchBookingDate: this.SearchBookingDate !== "" ? formatMisSearchDateForApi(this.SearchBookingDate) : "",
       SearchChangeMOPCase: this.SearchChangeMOPCase,
       SearchLocationGroup: this.SearchLocationGroup?.value || "null",
-      SearchBillFromDate: this.SearchBillDateFrom !== "" ? moment(this.SearchBillDateFrom).format('MMM DD yyyy') : "",
-      SearchBillToDate: this.SearchBillToDate !== "" ? moment(this.SearchBillToDate).format('MMM DD yyyy') : "",
+      SearchBillFromDate: this.SearchBillDateFrom !== "" ? formatMisSearchDateForApi(this.SearchBillDateFrom) : "",
+      SearchBillToDate: this.SearchBillToDate !== "" ? formatMisSearchDateForApi(this.SearchBillToDate) : "",
     };
   }
 
@@ -800,7 +950,9 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     (
       data =>   
       {
-        this.dataSource = this.applyCustomerSpecificFieldColumns(Array.isArray(data) ? data : []);
+        this.dataSource = this.applyCustomerSpecificFieldColumns(
+          this.applySegmentOdometerColumns(Array.isArray(data) ? data : [])
+        );
       
       },
       (error: HttpErrorResponse) => { 
@@ -1120,26 +1272,36 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   //---------- Supplier Type ----------
   InitSupplier() 
   {
-    this._generalService.getSupplier().subscribe(
+    this._generalService.GetAllSuppliers().subscribe(
     data => {
-      this.SupplierList = data;
+      this.SupplierList = normalizeSupplierDropDownList(data);
+      const currentValue = (this.SearchSupplier.value || '').toString();
       this.filteredSupplierOptions = this.SearchSupplier.valueChanges.pipe(
-      startWith(""),
-      map(value => this._filterSupplier(value || ''))
+      startWith(currentValue),
+      map(value => this._filterSupplier((value || '').toString()))
       );
     });
   }
-  private _filterSupplier(value: string): any {
-    const filterValue = value.toLowerCase();
-      if (!value || value.length < 0)
-     {
-        return [];   
-      }
-      return this.SupplierList.filter(
-      data => 
-      {
-        return data.supplierName.toLowerCase().indexOf(filterValue) === 0;
-      });
+  private _filterSupplier(value: string): any[] {
+    return filterSuppliersByDisplay(this.SupplierList || [], value);
+  }
+
+  OnSupplierSelected(selectedSupplier: string) {
+    const supplier = this.SupplierList?.find(
+      data => supplierMatchesDisplay(data, selectedSupplier)
+    );
+    if (supplier) {
+      this.SearchSupplierID = supplier.supplierID;
+      this.SearchSupplier.setValue(formatSupplierDisplay(supplier), { emitEvent: false });
+    }
+  }
+
+  getSupplierID(supplierID: number) {
+    this.SearchSupplierID = supplierID;
+  }
+
+  private resolveSupplierSearchValue(): string {
+    return resolveSupplierSearchTerm(this.SupplierList || [], this.SearchSupplier?.value || '');
   }
 
   //---------- Car Send ----------
@@ -1165,7 +1327,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     return this.CarSendList.filter(
     data => 
     {
-      return data.vehicle.toLowerCase().indexOf(filterValue)===0;
+      return data.vehicle.toLowerCase().includes(filterValue);
     });
   }
 
@@ -1191,7 +1353,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     return this.CarBookedList.filter(
     data => 
     {
-      return data.vehicle.toLowerCase().indexOf(filterValue)===0;
+      return data.vehicle.toLowerCase().includes(filterValue);
     });
   }
 
@@ -1217,7 +1379,7 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     return this.DriverList.filter(
     data => 
     {
-      return data.driverName.toLowerCase().indexOf(filterValue)===0;
+      return data.driverName.toLowerCase().includes(filterValue);
     });
   }
 
@@ -1243,8 +1405,57 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     return this.CarNoList.filter(
     data => 
     {
-      return data.vehicle.toLowerCase().indexOf(filterValue)===0;
+      return data.vehicle.toLowerCase().includes(filterValue);
     });
+  }
+
+  InitRegnNo()
+  {
+    this.zonalDutyRegisterService.getRegistrationNumber().subscribe(
+    data=>
+    {
+      this.RegnNoList = data;
+      this.filteredRegnNoOptions = this.SearchRegnNo.valueChanges.pipe(
+      startWith(""),
+      map(value => {
+        const trimmed = (value || '').toString().trim();
+        if (!trimmed) {
+          this.SearchInventoryID = 0;
+        } else {
+          const selected = this.RegnNoList?.find(item => item.vehicle === value);
+          this.SearchInventoryID = selected ? selected.vehicleID : 0;
+        }
+        return this._filterRegnNo(value || '');
+      })
+      );
+    });
+  }
+  private _filterRegnNo(value: string): any {
+    const filterValue = value.toLowerCase();
+    if (!value || value.length < 0) {
+      return [];
+    }
+    return this.RegnNoList.filter(
+      data => data.vehicle.toLowerCase().includes(filterValue)
+    );
+  }
+
+  OnRegnNoSelected(selectedRegnNo: string) {
+    const trimmed = (selectedRegnNo || '').trim();
+    if (!trimmed) {
+      this.SearchInventoryID = 0;
+      return;
+    }
+
+    const selected = this.RegnNoList?.find(
+      data => data.vehicle === selectedRegnNo
+    );
+
+    if (selected) {
+      this.SearchInventoryID = selected.vehicleID;
+    } else {
+      this.SearchInventoryID = 0;
+    }
   }
 
   //---------- Customer Type ----------
@@ -1384,9 +1595,40 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
     const value = row?.customerSpecificFieldMap?.[fieldName];
     const text = value !== undefined && value !== null ? String(value).trim() : '';
     if (!text || text === '--Select--') {
-      return 'NA';
+      return '';
     }
     return text;
+  }
+
+  private applySegmentOdometerColumns(data: ZonalDutyRegisterModel[]): ZonalDutyRegisterModel[] {
+    return (Array.isArray(data) ? data : []).map(row => {
+      const actualOut = Number(row.locationOutKM) || 0;
+      const pickUp = Number(row.pickUpKM) || 0;
+      const dropOff = Number(row.dropOffKM) || 0;
+      const locationIn = Number(row.locationInKM) || 0;
+      const rowAny = row as ZonalDutyRegisterModel & Record<string, unknown>;
+      const outFromApi = row.outKmsFromZero ?? rowAny['OutKmsFromZero'];
+      const reportingFromApi = row.reportingKmsFromZero ?? rowAny['ReportingKmsFromZero'];
+      const releasingFromApi = row.releasingKmsFromZero ?? rowAny['ReleasingKmsFromZero'];
+      const inFromApi = row.inKmsFromZero ?? rowAny['InKmsFromZero'];
+      const hasApiValues =
+        outFromApi != null ||
+        reportingFromApi != null ||
+        releasingFromApi != null ||
+        inFromApi != null;
+      if (hasApiValues) {
+        row.outKmsFromZero = Number(outFromApi ?? 0);
+        row.reportingKmsFromZero = Number(reportingFromApi ?? 0);
+        row.releasingKmsFromZero = Number(releasingFromApi ?? 0);
+        row.inKmsFromZero = Number(inFromApi ?? 0);
+        return row;
+      }
+      row.outKmsFromZero = 0;
+      row.reportingKmsFromZero = Math.max(0, pickUp - actualOut);
+      row.releasingKmsFromZero = Math.max(0, dropOff - pickUp);
+      row.inKmsFromZero = Math.max(0, locationIn - dropOff);
+      return row;
+    });
   }
 
   private applyCustomerSpecificFieldColumns(data: ZonalDutyRegisterModel[]): ZonalDutyRegisterModel[] {

@@ -78,14 +78,6 @@
 
                                                     <mat-form-field class="example-full-width" appearance="outline"
                                                         floatLabel="always">
-                                                        <mat-label>Driver Official Identity Number</mat-label>
-                                                        <input type="text" matInput
-                                                            [(ngModel)]="searchDriverOfficialIdentityNumber">
-
-                                                    </mat-form-field>
-
-                                                    <mat-form-field class="example-full-width" appearance="outline"
-                                                        floatLabel="always">
                                                         <mat-label>Highest Qualification</mat-label>
                                                         <mat-select [(ngModel)]="searchhighestQualification">
                                                             <mat-option [value]="Qualification.qualification"
@@ -160,7 +152,6 @@
                                                             <option value="driver">Driver</option>
                                                             <option value="driverFatherName">Driver Father Name</option>
                                                             <option value="driverGrade">Driver Grade</option>
-                                                            <option value="identityNo">Identity No</option>
                                                             <option value="supplier">Supplier Name</option>
                                                             <option value="highestQualification">Highest Qualification
                                                             </option>
@@ -203,13 +194,32 @@
                                             <mat-icon class="col-white">refresh</mat-icon>
                                         </button>
                                         &nbsp;
-                                        <button mat-raised-button color="accent" (click)="downloadCsv()">
-                                            Download CSV
-                                        </button>
+                                        <button mat-raised-button color="accent" (click)="startExportJob()" [disabled]="isExportJobInProgress()">{{ getExportButtonLabel() }}</button>
                                         &nbsp;
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="duty-register-export-job-panel" *ngIf="exportJobId || exportJobError">
+                                <div class="panel-title">Driver Master CSV Export</div>
+                                <div class="export-job-meta" *ngIf="exportJobId">
+                                    <span>Job: {{ exportJobId }}</span>
+                                    <span class="export-job-stat">Status: {{ getExportJobStatusLabel() || '—' }}</span>
+                                    <span class="export-job-stat" *ngIf="isExportJobInProgress() || getExportRowsExported()">Rows: {{ getExportRowsExported() }}</span>
+                                    <span class="export-job-stat">Elapsed: {{ getExportElapsedTime() }}</span>
+                                </div>
+                                <mat-progress-bar *ngIf="isExportJobInProgress()" mode="indeterminate"></mat-progress-bar>
+                                <p class="export-job-message" *ngIf="getExportJobMessage()">{{ getExportJobMessage() }}</p>
+                                <div class="export-job-actions">
+                                    <button mat-raised-button color="accent" type="button" (click)="downloadExportCsv()" [disabled]="!canDownloadExport()">
+                                        {{ exportJobDownloading ? 'Downloading...' : 'Download CSV' }}
+                                    </button>
+                                    <button mat-stroked-button type="button" (click)="cancelExportJob()" [disabled]="!isExportJobInProgress()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                            <app-stored-mis-exports></app-stored-mis-exports>
 
                             <!-- <label>
                                 <input type="checkbox" [(ngModel)]="isChecked">
@@ -236,9 +246,16 @@
                             </ng-template>
 
                             <ng-template #elseBlock2>
-                                <div class="scrollable-table-container">
+                                <div class="driver-table-wrap">
+                                    <div class="driver-top-scroll" #topScroll (scroll)="syncScroll($event, 'top')">
+                                        <div class="driver-top-scroll-spacer"
+                                            [style.width.px]="tableScrollWidth"
+                                            [style.minWidth.px]="tableScrollWidth"></div>
+                                    </div>
+                                    <div class="scrollable-table-container" #bottomScroll
+                                        (scroll)="syncScroll($event, 'bottom')">
                                     <mat-table #table [dataSource]="dataSource" matSort
-                                        class="mat-cell floating-header-table" (matSortChange)="SortingData($event)">
+                                        class="mat-cell floating-header-table driver-table" (matSortChange)="SortingData($event)">
 
                                         <ng-container matColumnDef="id">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Id</mat-header-cell>
@@ -248,42 +265,28 @@
                                         <ng-container matColumnDef="driverName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Driver</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverName}}</mat-cell>
+                                                {{ row.driverName | uppercase }}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="supplierCode">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
+                                        <ng-container matColumnDef="oldRentnetCode">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Old Rentnet
                                                 Code</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{ getSupplierCode(row) }}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="driverImage">
-                                            <mat-header-cell *matHeaderCellDef
-                                                [ngClass]="'tbl-col-width-per-6'">Image</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" class="table-img tbl-col-width-per-6"
-                                                (contextmenu)="onContextMenu($event, row)">
-                                                <img style="cursor: pointer;" src="{{row.driverImage}}" /> </mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="driverOfficialIdentityNumber">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Identity
-                                                No.</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverOfficialIdentityNumber}}</mat-cell>
+                                                {{ row.oldRentnetCode != null && row.oldRentnetCode !== 0 ? row.oldRentnetCode : '' }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="supplierName">
                                             <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
                                                 Name</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.supplierName}}</mat-cell>
+                                                {{ getSupplierDisplay(row) }}</mat-cell>
                                         </ng-container>
 
-                                        <ng-container matColumnDef="hub">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Hub</mat-header-cell>
+                                        <ng-container matColumnDef="supplierType">
+                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Supplier
+                                                Type</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.hub}}</mat-cell>
+                                                {{ row.supplierType || '' }}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="location">
@@ -291,12 +294,6 @@
                                                 mat-sort-header>Location</mat-header-cell>
                                             <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                                 {{row.location}}</mat-cell>
-                                        </ng-container>
-
-                                        <ng-container matColumnDef="driverEmail">
-                                            <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
-                                            <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
-                                                {{row.driverEmail}}</mat-cell>
                                         </ng-container>
 
                                         <ng-container matColumnDef="mobile1">
@@ -321,10 +318,8 @@
                                         </ng-container>
                                         <!-- actions -->
                                         <ng-container matColumnDef="actions">
-                                            <mat-header-cell *matHeaderCellDef class="pr-0"
-                                                [ngClass]="'tbl-col-width-per-9'">Actions</mat-header-cell>
-                                            <mat-cell *matCellDef="let row; let i=index;" class="pr-0"
-                                                [ngClass]="'tbl-col-width-per-9'">
+                                            <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+                                            <mat-cell *matCellDef="let row; let i=index;">
 
                                                 <button mat-raised-button color="primary"
                                                     (contextmenu)="onContextMenu($event, row)"
@@ -339,6 +334,7 @@
                                             [style.cursor]="'pointer'" matRipple>
                                         </mat-row>
                                     </mat-table>
+                                </div>
                                 </div>
                                 <!-- Loading spinner -->
                                 <!-- <div *ngIf="exampleDatabase.isTblLoading" class="tbl-spinner">

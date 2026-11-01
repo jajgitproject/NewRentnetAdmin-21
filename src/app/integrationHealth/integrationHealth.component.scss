@@ -1,0 +1,248 @@
+:host {
+  display: block;
+}
+
+.ih-wrap {
+  padding: 8px 12px 24px;
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ih-title {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.ih-sub {
+  margin: 0 0 20px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.ih-section {
+  margin: 20px 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Grids */
+.ih-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.ih-kpi-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.ih-vendor-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.ih-vendor-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin: 12px 0 0;
+  padding: 0;
+
+  div {
+    min-width: 0;
+  }
+
+  dt {
+    margin: 0;
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+  }
+}
+
+/* Cards */
+.ih-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+  }
+}
+
+.ih-card-click {
+  cursor: pointer;
+}
+
+.ih-card-selected {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+/* KPI number */
+.ih-kpi {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* Tone classes */
+.ok   { color: #16a34a; }
+.warn { color: #d97706; }
+.err  { color: #dc2626; }
+.ih-ok   { color: #16a34a; }
+.ih-warn { color: #d97706; }
+.ih-err  { color: #dc2626; }
+
+/* Row inside vendor card */
+.ih-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* Circuit chips */
+.ih-chip {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.ih-chip-ok   { background: #dcfce7; color: #15803d; }
+.ih-chip-warn { background: #fef3c7; color: #92400e; }
+.ih-chip-err  { background: #fee2e2; color: #991b1b; }
+
+/* Filters */
+.ih-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+
+  mat-form-field {
+    flex: 1 1 180px;
+    max-width: 260px;
+  }
+}
+
+.ih-customer-field {
+  flex: 2 1 520px !important;
+  max-width: 640px !important;
+}
+
+.ih-filter-btns {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 18px;
+}
+
+/* Table */
+.ih-table-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 280px);
+  margin-top: 0;
+}
+
+.ih-table {
+  min-width: 1400px;
+  width: max-content;
+  font-size: 13px;
+}
+
+.ih-table .mat-column-error,
+.ih-table .cdk-column-error {
+  min-width: 220px;
+  max-width: 320px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.ih-table .mat-column-action,
+.ih-table .cdk-column-action,
+.ih-table .mat-mdc-table-sticky-border-elem-right {
+  min-width: 110px;
+  background: #fff;
+  z-index: 2;
+}
+
+.ih-table .mat-column-customerIntegration,
+.ih-table .cdk-column-customerIntegration {
+  min-width: 220px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.ih-status {
+  font-weight: 700;
+}
+
+.ih-empty {
+  text-align: center;
+  padding: 24px;
+  color: #9ca3af;
+}
+
+/* Driver chain */
+.ih-chain-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.ih-chain-label {
+  font-size: 13px;
+  color: #374151;
+  flex: 1;
+}
+
+.ih-chain-result {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+::ng-deep .ih-customer-auto-panel {
+  min-width: 560px !important;
+  max-width: min(720px, 92vw) !important;
+}
+
+::ng-deep .ih-customer-auto-panel .mat-mdc-option,
+::ng-deep .ih-customer-auto-panel .mat-option {
+  white-space: normal !important;
+  line-height: 1.35;
+  height: auto !important;
+  min-height: 36px;
+}

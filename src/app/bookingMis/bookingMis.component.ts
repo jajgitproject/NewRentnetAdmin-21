@@ -1,15 +1,17 @@
 // @ts-nocheck
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { provideMomentDateAdapter } from '@angular/material-moment-adapter';
 import moment from 'moment';
 import { Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './bookingMis.model';
 import { BookingMisService } from './bookingMis.service';
-import { extractExportErrorMessage } from '../general/export-job.helper';
+import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, formatMisSearchDateForApi, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
+import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.model';
 import { ModeOfPaymentDropDown } from '../modeOfPayment/modeOfPaymentDropDown.model';
@@ -20,12 +22,27 @@ import { GeoPointTypeDropDown } from '../geoPointType/geoPointTypeDropDown.model
 import { StatesDropDown } from '../organizationalEntity/stateDropDown.model';
 import { SalesPersonModel } from '../bookingBackupMIS/bookingBackupMIS.model';
 
+const BOOKING_MIS_DATE_FORMATS = {
+  parse: {
+    dateInput: 'DD-MM-YYYY',
+  },
+  display: {
+    dateInput: 'DD-MM-YYYY',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
+
 @Component({
   standalone: false,
   selector: 'app-booking-mis',
   templateUrl: './bookingMis.component.html',
   styleUrls: ['./bookingMis.component.sass'],
-  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
+    ...provideMomentDateAdapter(BOOKING_MIS_DATE_FORMATS),
+  ]
 })
 export class BookingMisComponent implements OnInit, OnDestroy {
   exportJobId: string | null = null;
@@ -35,6 +52,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
   exportJobError = '';
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
+  private readonly exportJobPageKey = 'bookingMis';
+  @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
   readonly maxPickupDateRangeDays = 15;
 
   modeOfPayment: FormControl = new FormControl();
@@ -58,6 +77,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
   searchToDate = '';
   searchCancellationFrom = '';
   searchCancellationTo = '';
+  searchBookingDateFrom = '';
+  searchBookingDateTo = '';
   geoPointTypeID: any;
 
   PaymentModeList: ModeOfPaymentDropDown[] = [];
@@ -101,6 +122,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     this.initCustomerLocation();
     this.initServiceLocation();
     this.InitPickupDetails();
+    this.resumeExportJobIfNeeded();
   }
 
   ngOnDestroy() {
@@ -129,6 +151,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     this.searchToDate = '';
     this.searchCancellationFrom = '';
     this.searchCancellationTo = '';
+    this.searchBookingDateFrom = '';
+    this.searchBookingDateTo = '';
     this.geoPointTypeID = null;
     this.PickupSpotList = [];
   }
@@ -136,7 +160,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
   buildSearchCriteria(): SearchCriteria {
     return {
       UserID: this.generalService.getUserID(),
-      ShowAllLocation: this.generalService.getShowAllLocation(),
+      ShowAllLocation: null,
       SearchModeOfPayment: this.modeOfPayment?.value || '',
       SearchServiceLocation: this.serviceLocation?.value || '',
       SearchCustomer: this.customer?.value || '',
@@ -150,6 +174,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
         this.searchCancellationFrom !== '' ? moment(this.searchCancellationFrom).format('MMM DD yyyy') : '',
       SearchCancellationTo:
         this.searchCancellationTo !== '' ? moment(this.searchCancellationTo).format('MMM DD yyyy') : '',
+      SearchBookingDateFrom: formatMisSearchDateForApi(this.searchBookingDateFrom),
+      SearchBookingDateTo: formatMisSearchDateForApi(this.searchBookingDateTo),
       SearchSalesPerson: this.salesPerson?.value || '',
       SearchDispatchStatus: this.searchDispatchStatus || '',
       SearchBookingStatus: this.searchBookingStatus || '',
@@ -164,26 +190,20 @@ export class BookingMisComponent implements OnInit, OnDestroy {
 
   SearchData() {
     if (this.exportJobRunning) {
+      this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;
     }
 
-    const dateRangeError = this.validatePickupDateRange();
+    const dateRangeError = this.validateSearchDateRanges();
     if (dateRangeError) {
       this.showNotification('snackbar-danger', dateRangeError, 'bottom', 'center');
       return;
     }
 
     this.exportJobError = '';
-    this.exportJobStartedAt = Date.now();
     const searchCriteria = this.buildSearchCriteria();
 
     this.exportJobRunning = true;
-    this.showNotification(
-      'snackbar-info',
-      'Export job started. CSV will be ready when processing completes.',
-      'bottom',
-      'center'
-    );
 
     this.bookingMisService.startExportJob(searchCriteria).subscribe(
       (startResult: any) => {
@@ -196,23 +216,24 @@ export class BookingMisComponent implements OnInit, OnDestroy {
         }
 
         this.exportJobId = jobId;
+        persistExportJobId(this.exportJobPageKey, jobId);
         this.exportJobStatus = {
           jobId,
           status: startResult?.status ?? startResult?.Status ?? 'Pending',
           message: startResult?.message ?? startResult?.Message ?? 'Export queued'
         };
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
         this.startExportPolling(jobId);
+        this.showNotification(
+          'snackbar-info',
+          exportJobAcceptedSnackbarMessage(startResult),
+          'bottom',
+          'center'
+        );
       },
       async (error) => {
         this.exportJobRunning = false;
-        const status = error?.status;
-        const fallback =
-          status === 404
-            ? 'Booking MIS export API was not found. Restart/redeploy the API with bookingMIS endpoints.'
-            : status === 0
-              ? 'Could not reach the API. Check that the backend is running.'
-              : 'Error starting export';
-        this.exportJobError = await extractExportErrorMessage(error, fallback);
+        this.exportJobError = await extractExportErrorMessage(error, 'Could not start export');
         this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
       }
     );
@@ -260,6 +281,25 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     );
   }
 
+  cancelExportJob() {
+    if (!this.exportJobId || !this.isExportJobInProgress()) {
+      return;
+    }
+
+    this.bookingMisService.cancelExportJob(this.exportJobId).subscribe(
+      (status: any) => {
+        this.exportJobStatus = status;
+        this.exportJobRunning = false;
+        this.stopExportPolling();
+        this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+      },
+      async (error) => {
+        const message = await extractExportErrorMessage(error, 'Could not cancel export.');
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
+  }
+
   canDownloadExport(): boolean {
     return (
       !!this.exportJobId &&
@@ -285,36 +325,112 @@ export class BookingMisComponent implements OnInit, OnDestroy {
   }
 
   getExportElapsedTime(): string {
-    if (!this.exportJobStartedAt) {
-      return '—';
-    }
-    const elapsedSeconds = Math.floor((Date.now() - this.exportJobStartedAt) / 1000);
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    return formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
   }
 
-  validatePickupDateRange(): string | null {
-    if (!this.searchFromDate || !this.searchToDate) {
-      return 'Pickup date range is required. Please select From and To dates.';
+  getExportSearchButtonLabel(): string {
+    return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
+  }
+
+  validateSearchDateRanges(): string | null {
+    const hasPickupFrom = this.isSearchValueSet(this.searchFromDate);
+    const hasPickupTo = this.isSearchValueSet(this.searchToDate);
+    const hasBookingFrom = this.isSearchValueSet(this.searchBookingDateFrom);
+    const hasBookingTo = this.isSearchValueSet(this.searchBookingDateTo);
+    const hasPickupRange = hasPickupFrom && hasPickupTo;
+    const hasBookingRange = hasBookingFrom && hasBookingTo;
+
+    if (hasPickupFrom !== hasPickupTo) {
+      return 'Please select both Pickup Date From and Pickup Date To.';
+    }
+    if (hasBookingFrom !== hasBookingTo) {
+      return 'Please select both Booking Date From and Booking Date To.';
+    }
+    if (!hasPickupRange && !hasBookingRange) {
+      return 'Select Pickup Date From/To, or Booking Date From/To.';
     }
 
-    const fromDate = moment(this.searchFromDate).startOf('day');
-    const toDate = moment(this.searchToDate).startOf('day');
-    if (!fromDate.isValid() || !toDate.isValid()) {
-      return 'Please enter valid pickup dates.';
+    if (hasPickupRange) {
+      const pickupError = this.validateDatePair(
+        this.searchFromDate,
+        this.searchToDate,
+        'Pickup date',
+        !hasBookingRange && !this.hasAdditionalSearchFilters()
+      );
+      if (pickupError) {
+        return pickupError;
+      }
     }
-    if (toDate.isBefore(fromDate)) {
-      return 'Pickup To Date cannot be earlier than From Date.';
-    }
-    if (!this.hasAdditionalSearchFilters()) {
-      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
-      if (inclusiveDays > this.maxPickupDateRangeDays) {
-        return `Pickup date range cannot exceed ${this.maxPickupDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
+
+    if (hasBookingRange) {
+      const bookingError = this.validateDatePair(
+        this.searchBookingDateFrom,
+        this.searchBookingDateTo,
+        'Booking date',
+        !hasPickupRange && !this.hasFiltersBesidesBookingDates()
+      );
+      if (bookingError) {
+        return bookingError;
       }
     }
 
     return null;
+  }
+
+  validatePickupDateRange(): string | null {
+    return this.validateSearchDateRanges();
+  }
+
+  validateBookingDateRange(): string | null {
+    return this.validateSearchDateRanges();
+  }
+
+  private validateDatePair(
+    fromValue: any,
+    toValue: any,
+    label: string,
+    enforceMaxRange: boolean
+  ): string | null {
+    const fromDate = moment(fromValue).startOf('day');
+    const toDate = moment(toValue).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      return `Please enter valid ${label.toLower()}s.`;
+    }
+    if (toDate.isBefore(fromDate)) {
+      return `${label} To cannot be earlier than From.`;
+    }
+    if (enforceMaxRange) {
+      const inclusiveDays = toDate.diff(fromDate, 'days') + 1;
+      if (inclusiveDays > this.maxPickupDateRangeDays) {
+        return `${label} range cannot exceed ${this.maxPickupDateRangeDays} days when no other search filters are selected. Add another filter to search a wider range.`;
+      }
+    }
+    return null;
+  }
+
+  hasFiltersBesidesBookingDates(): boolean {
+    return (
+      this.isSearchValueSet(this.modeOfPayment?.value) ||
+      this.isSearchValueSet(this.serviceLocation?.value) ||
+      this.isSearchValueSet(this.customer?.value) ||
+      this.isSearchValueSet(this.searchDutySlip) ||
+      this.isSearchValueSet(this.searchManualDS) ||
+      this.isSearchValueSet(this.searchBooking) ||
+      this.isSearchValueSet(this.city?.value) ||
+      this.isSearchValueSet(this.searchCancellationFrom) ||
+      this.isSearchValueSet(this.searchCancellationTo) ||
+      this.isSearchValueSet(this.searchFromDate) ||
+      this.isSearchValueSet(this.searchToDate) ||
+      this.isSearchValueSet(this.salesPerson?.value) ||
+      this.isSearchValueSet(this.searchDispatchStatus) ||
+      this.isSearchValueSet(this.searchBookingStatus) ||
+      this.isSearchValueSet(this.customerLocation?.value) ||
+      this.isSearchValueSet(this.guestName?.value) ||
+      this.isSearchValueSet(this.pickupDetail?.value) ||
+      this.isSearchValueSet(this.pickupSubDetail?.value) ||
+      this.isSearchValueSet(this.customerGroup?.value) ||
+      this.isSearchValueSet(this.bookerName?.value)
+    );
   }
 
   hasAdditionalSearchFilters(): boolean {
@@ -328,6 +444,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
       this.isSearchValueSet(this.city?.value) ||
       this.isSearchValueSet(this.searchCancellationFrom) ||
       this.isSearchValueSet(this.searchCancellationTo) ||
+      this.isSearchValueSet(this.searchBookingDateFrom) ||
+      this.isSearchValueSet(this.searchBookingDateTo) ||
       this.isSearchValueSet(this.salesPerson?.value) ||
       this.isSearchValueSet(this.searchDispatchStatus) ||
       this.isSearchValueSet(this.searchBookingStatus) ||
@@ -353,6 +471,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     this.exportPollSub = this.bookingMisService.pollExportJob(jobId).subscribe(
       (status: any) => {
         this.exportJobStatus = status;
+        this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, status);
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
 
         if (current === 'failed') {
@@ -360,6 +479,15 @@ export class BookingMisComponent implements OnInit, OnDestroy {
           this.exportJobError = status?.message ?? status?.Message ?? 'Export failed.';
           this.showNotification('snackbar-danger', this.exportJobError, 'bottom', 'center');
           this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
+          return;
+        }
+
+        if (isExportJobCancelled(status)) {
+          this.exportJobRunning = false;
+          this.showNotification('snackbar-info', status?.message ?? status?.Message ?? 'Export cancelled.', 'bottom', 'center');
+          this.stopExportPolling();
+          persistExportJobId(this.exportJobPageKey, null);
           return;
         }
 
@@ -373,6 +501,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
             'center'
           );
           this.stopExportPolling();
+          this.storedExports?.refresh();
         }
       },
       async (error) => {
@@ -389,6 +518,52 @@ export class BookingMisComponent implements OnInit, OnDestroy {
       this.exportPollSub.unsubscribe();
       this.exportPollSub = undefined;
     }
+  }
+
+  private resumeExportJobIfNeeded() {
+    const jobId = loadPersistedExportJobId(this.exportJobPageKey);
+    if (!jobId) {
+      return;
+    }
+
+    this.exportJobId = jobId;
+    if (!this.exportJobStatus) {
+      this.exportJobStatus = { status: 'Pending', message: 'Checking export status...' };
+    }
+
+    this.bookingMisService.getExportJobStatus(jobId).subscribe(
+      (status: any) => {
+        if (!status) {
+          this.exportJobRunning = true;
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobId = jobId;
+        this.exportJobStatus = status;
+        this.exportJobError = '';
+        if (this.bookingMisService.isExportJobRunning(status)) {
+          this.exportJobRunning = true;
+          this.exportJobStartedAt = markExportDumpStarted(this.exportJobStartedAt, this.exportJobStatus);
+          this.startExportPolling(jobId);
+          return;
+        }
+
+        this.exportJobRunning = false;
+      },
+      (error) => {
+        if (isExportJobNotFoundError(error)) {
+          persistExportJobId(this.exportJobPageKey, null);
+          this.exportJobId = null;
+          this.exportJobStatus = null;
+          this.exportJobRunning = false;
+          return;
+        }
+
+        this.exportJobRunning = true;
+        this.startExportPolling(jobId);
+      }
+    );
   }
 
   private clearExportJob() {

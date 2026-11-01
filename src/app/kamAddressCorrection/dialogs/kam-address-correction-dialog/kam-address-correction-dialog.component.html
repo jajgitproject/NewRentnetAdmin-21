@@ -1,0 +1,147 @@
+<div class="addContainer kam-ac-dialog">
+  <div class="modalHeader kam-ac-header">
+    <div class="kam-ac-header-row">
+      <span class="font-weight-bold font-17 kam-ac-title">Pickup Address Correction</span>
+      <span class="kam-ac-meta">
+        Booking {{ bookingLabel }}<span class="kam-ac-meta-sep">·</span>{{ row?.customerName || 'N/A' }}
+      </span>
+    </div>
+    <button mat-icon-button type="button" class="modal-close-button" (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content class="kam-ac-body">
+    <mat-card class="example-card kam-ac-card">
+      <mat-card-content>
+        <div class="kam-ac-loading" *ngIf="loadingDetails">
+          <mat-progress-spinner mode="indeterminate" diameter="28" strokeWidth="3"></mat-progress-spinner>
+          <span>Loading…</span>
+        </div>
+
+        <p *ngIf="detailsError && !loadingDetails" class="kam-ac-alert">{{ detailsError }}</p>
+
+        <div class="kam-ac-grid" *ngIf="!loadingDetails && bookingDetails">
+          <div class="kam-ac-field">
+            <label>Booking No.</label>
+            <div>{{ bookingLabel }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Status</label>
+            <div>{{ field(bookingDetails.reservationStatus) }}</div>
+          </div>
+          <div class="kam-ac-field kam-ac-field--wide">
+            <label>Customer</label>
+            <div>{{ displayCustomer() }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Booker</label>
+            <div>{{ field(bookingDetails.primaryBooker) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Passenger</label>
+            <div>{{ field(bookingDetails.primaryPassenger) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Pickup Date / Time</label>
+            <div>{{ formatDateTime(bookingDetails.pickupDate, bookingDetails.pickupTime) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Duty Type</label>
+            <div>{{ field(bookingDetails.packageType) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Package</label>
+            <div>{{ field(bookingDetails.package) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Pickup City</label>
+            <div>{{ field(bookingDetails.pickupCity) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Car</label>
+            <div>{{ field(bookingDetails.vehicle) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Trip Type</label>
+            <div>{{ field(bookingDetails.tripType) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Service Location</label>
+            <div>{{ field(bookingDetails.serviceLocation) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Pickup Spot</label>
+            <div>{{ field(bookingDetails.pickupSpot) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Drop Off City</label>
+            <div>{{ field(bookingDetails.dropOffCity) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Drop Off Date / Time</label>
+            <div>{{ formatDateTime(bookingDetails.dropOffDate, bookingDetails.dropOffTime) }}</div>
+          </div>
+          <div class="kam-ac-field kam-ac-field--wide kam-ac-field--emphasis">
+            <label>Pickup Geo Location</label>
+            <div>{{ field(bookingDetails.pickupAddress) }}</div>
+          </div>
+          <div class="kam-ac-field kam-ac-field--wide kam-ac-field--emphasis">
+            <label>Pickup Address Details</label>
+            <div>{{ field(bookingDetails.pickupAddressDetails) }}</div>
+          </div>
+          <div class="kam-ac-field kam-ac-field--wide">
+            <label>Drop Off Geo Location</label>
+            <div>{{ field(bookingDetails.dropOffAddress) }}</div>
+          </div>
+          <div class="kam-ac-field kam-ac-field--wide">
+            <label>Drop Off Address Details</label>
+            <div>{{ field(bookingDetails.dropOffAddressDetails) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Ticket Number</label>
+            <div>{{ field(bookingDetails.ticketNumber) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Reservation Source</label>
+            <div>{{ field(bookingDetails.reservationSource) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Mode Of Payment</label>
+            <div>{{ field(bookingDetails.modeOfPayment) }}</div>
+          </div>
+          <div class="kam-ac-field">
+            <label>Reference Number</label>
+            <div>{{ field(bookingDetails.referenceNumber) }}</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="example-card kam-ac-card" *ngIf="row?.reservationID">
+      <mat-card-content>
+        <div class="kam-ac-loading" *ngIf="pickupFormLoading">
+          <mat-progress-spinner mode="indeterminate" diameter="28" strokeWidth="3"></mat-progress-spinner>
+          <span>Loading pickup fields…</span>
+        </div>
+        <div class="kam-ac-pickup-form" [class.kam-ac-pickup-form--busy]="pickupFormLoading">
+          <app-reservation
+            [addressCorrectionMode]="true"
+            [useEmbeddedReservationContext]="true"
+            [hideAddressCorrectionSummaryPanel]="true"
+            [action]="'edit'"
+            [ReservationID]="row.reservationID"
+            [embeddedReservationGroupID]="row.reservationGroupID"
+            [embeddedCustomerGroupID]="row.customerGroupID"
+            [embeddedCustomerID]="row.customerID"
+            [embeddedCustomerName]="row.customerName"
+            [embeddedCustomerGroup]="row.customerGroup"
+            [IsKAMRole]="IsKAMRole"
+            (addressCorrectionReady)="onPickupFormReady()"
+            (addressCorrectionSaved)="onCorrectionSaved()">
+          </app-reservation>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

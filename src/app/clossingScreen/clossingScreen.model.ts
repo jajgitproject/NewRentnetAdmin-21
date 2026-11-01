@@ -820,6 +820,14 @@ export class ClosingDataModel {
   totalFuelSurchargeOnExtraKM:number;
   totalFuelSurchargeOnExtraHours:number;
   totalFuelSurchargeOnPackageRate:number;
+  maximumGarageToPickupKMs:number;
+  maximumGarageToPickupMinutes:number;
+  maximumDropoffToGarageKMs:number;
+  maximumDropoffToGarageMinutes:number;
+  invoiceDutyTotalRunningKM:number;
+  invoiceDutyTotalRunningHours:number;
+  invoiceDutyTotalRunningMinutes:number;
+  invoiceDutyTotalRunningSeconds:number;
 
 
   constructor(closingDataModel) {
@@ -851,6 +859,14 @@ export class ClosingDataModel {
       this.totalFuelSurchargeOnExtraKM = closingDataModel.totalFuelSurchargeOnExtraKM ?? null;
       this.totalFuelSurchargeOnExtraHours = closingDataModel.totalFuelSurchargeOnExtraHours ?? null;
       this.totalFuelSurchargeOnPackageRate = closingDataModel.totalFuelSurchargeOnPackageRate ?? null;
+      this.maximumGarageToPickupKMs = closingDataModel.maximumGarageToPickupKMs ?? null;
+      this.maximumGarageToPickupMinutes = closingDataModel.maximumGarageToPickupMinutes ?? null;
+      this.maximumDropoffToGarageKMs = closingDataModel.maximumDropoffToGarageKMs ?? null;
+      this.maximumDropoffToGarageMinutes = closingDataModel.maximumDropoffToGarageMinutes ?? null;
+      this.invoiceDutyTotalRunningKM = closingDataModel.invoiceDutyTotalRunningKM ?? null;
+      this.invoiceDutyTotalRunningHours = closingDataModel.invoiceDutyTotalRunningHours ?? null;
+      this.invoiceDutyTotalRunningMinutes = closingDataModel.invoiceDutyTotalRunningMinutes ?? null;
+      this.invoiceDutyTotalRunningSeconds = closingDataModel.invoiceDutyTotalRunningSeconds ?? null;
     }
   }
 }

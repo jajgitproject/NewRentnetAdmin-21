@@ -58,6 +58,9 @@
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2">
           <b>City:</b> <br/>{{CityName}}
         </div>
+        <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12 mb-2">
+          <b>Pickup Address:</b> <br/>{{PickupAddress || 'N/A'}}
+        </div>
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
           <b>Mode of Payment:</b> <br/>{{closingDataAdvanceTable?.modeOfPayment || 'N/A'}}
         </div>
@@ -93,6 +96,15 @@
         <div class="col-xl-2 col-lg-4 col-md-12 col-sm-12 mb-2" *ngIf="closingDataAdvanceTable">
           <b>Driver Mobile:</b> <br/>{{closingDataAdvanceTable?.driverMobile || 'N/A'}}
         </div>
+        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2"
+          *ngIf="closingDataAdvanceTable?.maximumGarageToPickupKMs != null">
+          <b>Max Garage KM / Minutes (Contract):</b><br/>
+          G2P: {{closingDataAdvanceTable.maximumGarageToPickupKMs}} km,
+          {{closingDataAdvanceTable.maximumGarageToPickupMinutes}} min
+          &nbsp;|&nbsp;
+          D2G: {{closingDataAdvanceTable.maximumDropoffToGarageKMs}} km,
+          {{closingDataAdvanceTable.maximumDropoffToGarageMinutes}} min
+        </div>
      </div>
     </div>
 
@@ -102,11 +114,21 @@
       <app-dutySlipForBilling #dutySlipForBilling [advanceTableClosingOne]="advanceTableClosingOne"
         [disputeAdvanceTable]="disputeAdvanceTable" [RegistrationNumber]="RegistrationNumber" [InvoiceID]="invoiceID"
         [DSClosing]="DSClosing" [IRN]="IRN" [hasActiveEInvoice]="hasActiveEInvoice"
+        [hasActiveInvoice]="hasActiveInvoice"
         [canThisRoleDoGoodForBillingOnClosingScreen]="canThisRoleDoGoodForBillingOnClosingScreen"
         [canThisRoleViewDummyInvoice]="canThisRoleViewDummyInvoice"
         [canEditDSAfterGoodForBilling]="hasDsEditPermission"
         [canEditAutoBilling]="hasAutoBillingEditPermission"
         [hasAppBillingReceipt]="hasAppBillingReceipt"
+        [dutyBillingSummary]="dutyBillingSummary"
+        [activeDutyNightNumberOnNights]="activeDutyNightNumberOnNights"
+        [isMyfAggregator]="isMyfAggregator"
+        [isMoveInSync]="isMoveInSync"
+        [customerContractHasMaxG2GConfig]="closingDataAdvanceTable?.maximumGarageToPickupKMs != null"
+        [invoiceDutyMaxTotalRunningKM]="closingDataAdvanceTable?.invoiceDutyTotalRunningKM"
+        [invoiceDutyMaxTotalRunningHours]="closingDataAdvanceTable?.invoiceDutyTotalRunningHours"
+        [invoiceDutyMaxTotalRunningMinutes]="closingDataAdvanceTable?.invoiceDutyTotalRunningMinutes"
+        [invoiceDutyMaxTotalRunningSeconds]="closingDataAdvanceTable?.invoiceDutyTotalRunningSeconds"
         (dataSaved)="onDataSaved()"
         (dutyStatusChanged)="onDutyStatusChanged($event)"></app-dutySlipForBilling>
     </div>
@@ -143,7 +165,10 @@
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <p style="font-size: 12px;"></p>
           <h5>
-            <a (click)="openDisputes()" style="cursor: pointer;color: #007bff;">Dispute</a>
+            <a (click)="openDisputes()"
+              [class.closing-entry-disabled]="isDutySlipEditBlocked"
+              [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
+              [style.color]="isDutySlipEditBlocked ? '#6c757d' : '#007bff'">Dispute</a>
             <a href="javascript:void(0);" (click)="showAndScrollOpenDisputes()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
@@ -188,6 +213,14 @@
               [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
               [style.color]="isDutySlipEditBlocked ? '#6c757d' : '#007bff'">Customer Duty State</a>
             <a href="javascript:void(0);" (click)="showAndScrollDutyStateCustomer()">&nbsp;- <b>View</b></a>
+          </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="openDutyNight()"
+              style="cursor: pointer; color: #007bff;">Duty Night</a>
+            <a href="javascript:void(0);" (click)="showAndScrollDutyNight()">&nbsp;- <b>View</b></a>
           </h5>
         </div>
 
@@ -252,8 +285,21 @@
 
         <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
           <h5>
-            <a (click)="ChangeSupplierForInventory()" style="cursor: pointer;color: #007bff;">Change Supplier</a>
+            <a (click)="ChangeSupplierForInventory()"
+              [class.closing-entry-disabled]="isDutySlipEditBlocked"
+              [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
+              [style.color]="isDutySlipEditBlocked ? '#6c757d' : '#007bff'">Change Supplier</a>
           </h5>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <h5>
+            <a (click)="sendDutySlipOnEmail()"
+              [class.closing-entry-disabled]="!DutySlipID || sendingDutySlipEmail"
+              [style.cursor]="(!DutySlipID || sendingDutySlipEmail) ? 'not-allowed' : 'pointer'"
+              [style.color]="(!DutySlipID || sendingDutySlipEmail) ? '#6c757d' : '#007bff'">DS on Email</a>
+          </h5>
+          <img *ngIf="sendingDutySlipEmail" src="assets/images/loader4.gif" width="30" alt="">
         </div>
 
       </div>
@@ -364,6 +410,11 @@
       <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
         <button mat-flat-button style="width: 150px;text-align: center;" color="primary" (click)="LoadLTR()"
           [type]="submit" [disabled]="isDutySlipEditBlocked">Add LTR Details</button>
+      </div>
+
+      <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="isMyfAggregator">
+        <button mat-flat-button style="width: 180px;text-align: center;" color="primary" (click)="sendMyfLatLon()"
+          [disabled]="sendingMyfLatLon">Send MYF Lat Lon</button>
       </div>
     </div>
   </div>
@@ -571,6 +622,38 @@
     </mat-accordion>
   </div>
 
+  <!-- Duty Night -->
+  <div class="card" *ngIf="showHideDutyNight" id="dutyNight">
+    <div class="header bg-cyan">
+      <h2>Duty Night
+        <ul class="header-dropdown m-r-10">
+          <li>
+            <a style="color:#fff;padding:15px;position: relative;" href="javascript:void(0);"
+              (click)="scrollToLinkButton()">Go To Menu</a>
+          </li>
+        </ul>
+      </h2>
+    </div>
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="panelExpanded">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div>
+          <app-dutyNight [advanceTableDutyNight]="advanceTableDutyNight"
+            [dutySlipID]="DutySlipID"
+            [embeddedInClosing]="true"
+            [verifyDutyStatusAndCacellationStatus]="verifyDutyStatusAndCacellationStatus"
+            [isDutyNightEditBlocked]="isDutyNightEditBlocked"
+            [isDutyNightEntryBlocked]="isDutyNightEntryBlocked"
+            [dutyNightEntryBlockedMessage]="dutyNightEntryBlockedMessage"
+            (sectionDataChanged)="onDutyNightSectionChanged()"></app-dutyNight>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
   <!-- Duty State Card Customer -->
   <div class="card" *ngIf="showHideDutyStateCustomer" id="dutyStateCustomer">
     <div class="header bg-cyan">
@@ -641,7 +724,10 @@
   <div class="card" *ngIf="advanceTableSP" id="salesPerson">
     <div class="header bg-cyan">
       <h2>Sales Person -
-        <i><a (click)="addSalesPerson()" style="cursor: pointer;">Add More</a></i>
+        <i><a (click)="addSalesPerson()"
+          [class.closing-entry-disabled]="isDutySlipEditBlocked"
+          [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
+          [style.color]="isDutySlipEditBlocked ? '#6c757d' : 'inherit'">Add More</a></i>
       </h2>
       <ul class="header-dropdown m-r-10">
         <li>
@@ -909,7 +995,10 @@
   <div class="card" id="customerSpecificFields">
     <div class="header bg-cyan">
       <h2>Customer Specific Details - 
-        <i><a (click)="openCustomerSpecificField()" style="cursor: pointer;">Edit </a></i>
+        <i><a (click)="openCustomerSpecificField()"
+          [class.closing-entry-disabled]="isDutySlipEditBlocked"
+          [style.cursor]="isDutySlipEditBlocked ? 'not-allowed' : 'pointer'"
+          [style.color]="isDutySlipEditBlocked ? '#6c757d' : 'inherit'">Edit </a></i>
       </h2>
       <ul class="header-dropdown m-r-10">
         <li>

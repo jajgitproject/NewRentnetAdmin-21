@@ -6,6 +6,7 @@ export class CustomerDropDown {
    customerName: string;
    customerIdentityNumber: string;
    tallyCustomerID: number;
+   isCPEmailMandatry: boolean;
 
   constructor(customerDropDown) {
     {
@@ -13,6 +14,10 @@ export class CustomerDropDown {
        this.customerName = customerDropDown.customerName || '';
        this.customerIdentityNumber = customerDropDown.customerIdentityNumber || '';
        this.tallyCustomerID = customerDropDown.tallyCustomerID || 0;
+       const cpEmailMandatory = customerDropDown.isCPEmailMandatry ?? customerDropDown.isCPEmailIDMandatory;
+       this.isCPEmailMandatry = cpEmailMandatory === true || cpEmailMandatory === false
+         ? cpEmailMandatory
+         : null;
     }
   }
   

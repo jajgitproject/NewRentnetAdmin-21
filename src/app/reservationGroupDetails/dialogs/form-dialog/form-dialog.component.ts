@@ -7,7 +7,7 @@ import { ReservationGroup } from '../../reservationGroupDetails.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { CustomerTypeDropDown } from 'src/app/customerType/customerTypeDropDown.model';
 import { CustomerCustomerGroupDropDown } from 'src/app/customer/customerCustomerGroupDropDown.model';
 import { map, startWith } from 'rxjs/operators';
@@ -15,6 +15,7 @@ import { CustomerPersonDropDown } from 'src/app/customerPerson/customerPersonDro
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { FormDialogCustomerShortComponent } from 'src/app/customerShort/dialogs/form-dialog/form-dialog.component';
+import { FormDialogComponent as IndividualCustomerComponent } from 'src/app/individualCustomer/dialogs/form-dialog/form-dialog.component';
 import { FormDialogComponentCustomerPerson } from 'src/app/customerPerson/dialogs/form-dialog/form-dialog.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerAlertMessageDetailsComponent } from 'src/app/customerAlertMessageDetails/customerAlertMessageDetails.component';
@@ -26,6 +27,7 @@ import { ReservationGroupService } from 'src/app/reservationGroup/reservationGro
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CustomerGroupDropDown } from 'src/app/customerGroup/customerGroupDropDown.model';
 import Swal from 'sweetalert2';
+import { CustomerBlockingService } from 'src/app/customerBlocking/customerBlocking.service';
 
 @Component({
   standalone: false,
@@ -88,6 +90,7 @@ export class FormDialogComponent implements OnInit {
   FromToDate: string;
   ReasonMessageShow: boolean = false;
   Reason: any;
+  reservationBlocked: boolean = false;
   saveDisabled: boolean = true;
   isBookerAllowedToBeCreatedFromReservation = false;
 
@@ -110,6 +113,7 @@ export class FormDialogComponent implements OnInit {
     public router: Router,
       private snackBar: MatSnackBar,
     public reservationGroupService: ReservationGroupService,
+    public customerBlockingService: CustomerBlockingService,
     public _generalService: GeneralService) {
     // Set the defaults
     this.action = data.action;
@@ -150,6 +154,63 @@ export class FormDialogComponent implements OnInit {
       this.InitCustomerCustomerGroup();
 
     })
+  }
+
+  openIndividualCustomer(): void {
+    const dialogRef = this.dialog.open(IndividualCustomerComponent, {
+      data: {
+        advanceTable: null,
+        action: 'add'
+      },
+      width: '1400px',
+      maxWidth: '96vw',
+      panelClass: 'customer-page-form-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe((saved) => {
+      if (saved) {
+        this.refreshCustomerDropdown();
+      }
+    });
+  }
+
+  private refreshCustomerDropdown(): void {
+    this.InitCustomerCustomerG();
+
+    const customerGroupID = this.advanceTableForm.value.customerGroupID;
+
+    if (customerGroupID && this.IsKAMRole) {
+      this.InitCustomerCGForRGByKAM(customerGroupID);
+    } else if (customerGroupID && !this.IsKAMRole) {
+      this.InitCustomerCG(customerGroupID);
+    } else if (!customerGroupID && this.IsKAMRole) {
+      this.InitCustomerForRGByKAM();
+    } else {
+      this.InitCustomerRD();
+    }
+  }
+
+  private syncCustomerGroupValidation(customerGroupID?: number, customerGroup?: string): void {
+    if (customerGroupID && customerGroup) {
+      const normalizedGroup = customerGroup.toString().trim();
+      const exists = (this.CustomerGroupList || []).some(
+        group =>
+          group.customerGroupID === customerGroupID ||
+          (group.customerGroup || '').toLowerCase() === normalizedGroup.toLowerCase()
+      );
+
+      if (!exists) {
+        this.CustomerGroupList = [
+          ...(this.CustomerGroupList || []),
+          { customerGroupID, customerGroup: normalizedGroup }
+        ];
+      }
+    }
+
+    this.advanceTableForm.controls['customerGroup'].setValidators([
+      this.customerGroupValidator(this.CustomerGroupList || [])
+    ]);
+    this.advanceTableForm.controls['customerGroup'].updateValueAndValidity({ emitEvent: false });
   }
 
   /** Customer context for quick-add booker dialog (requires customer selected first). */
@@ -199,6 +260,28 @@ export class FormDialogComponent implements OnInit {
     this.applyBookerCreateAllowedFromCustomerRow(row);
   }
 
+  formatCustomerOption(customer: CustomerCustomerGroupDropDown): string {
+    return `${customer.customerName || ''}##${customer.tallyCustomerID || ''}##${customer.stateName || ''}##${customer.customerIdentityNumber || ''}##${customer.contactNo || ''}`;
+  }
+
+  private customerMatchesSearch(customer: CustomerCustomerGroupDropDown, filterValue: string): boolean {
+    const fields = [
+      customer.customerName,
+      customer.tallyCustomerID,
+      customer.stateName,
+      customer.customerIdentityNumber,
+      customer.contactNo
+    ];
+
+    return fields.some(field => (field || '').toString().toLowerCase().includes(filterValue));
+  }
+
+  private findCustomerByOptionValue(selectedCustomerName: string): CustomerCustomerGroupDropDown | undefined {
+    return this.CustomerCustomerGroupList?.find(
+      data => this.formatCustomerOption(data) === selectedCustomerName
+    );
+  }
+
   /** Opens compact customer-person popup; save sets IsBooker = Yes (same as booking Create new Booker). */
   createNewBooker(): void {
     if (!this.isBookerAllowedToBeCreatedFromReservation) {
@@ -215,6 +298,7 @@ export class FormDialogComponent implements OnInit {
         advanceTable: customerDetailData,
         action: 'add',
         forCP: 'CB',
+        reservationID: this.reservationID,
         CustomerGroupID: customerDetailData.customerGroupID,
         CustomerGroupName: customerDetailData.customerGroup,
       },
@@ -508,10 +592,25 @@ export class FormDialogComponent implements OnInit {
   InitCustomerCustomerG() {
     this._generalService.GetCustomersGroups().subscribe(
       data => {
-        this.CustomerGroupList = data;
+        this.CustomerGroupList = data || [];
+        const currentGroupID = this.advanceTableForm.value.customerGroupID;
+        const currentGroup = this.advanceTableForm.value.customerGroup;
+        if (currentGroupID && currentGroup) {
+          const exists = this.CustomerGroupList.some(
+            group =>
+              group.customerGroupID === currentGroupID ||
+              (group.customerGroup || '').toLowerCase() === currentGroup.toLowerCase()
+          );
+          if (!exists) {
+            this.CustomerGroupList = [
+              ...this.CustomerGroupList,
+              { customerGroupID: currentGroupID, customerGroup: currentGroup }
+            ];
+          }
+        }
          this.advanceTableForm.controls['customerGroup'].setValidators([this.customerGroupValidator(this.CustomerGroupList)
         ]);
-        //this.advanceTableForm.controls['customerGroup'].updateValueAndValidity();
+        this.advanceTableForm.controls['customerGroup'].updateValueAndValidity({ emitEvent: false });
         this.filteredCustomerGroupOptions = this.advanceTableForm.controls['customerGroup'].valueChanges.pipe(
           startWith(""),
           map(value => this._filterCCGroup(value || ''))
@@ -550,6 +649,7 @@ export class FormDialogComponent implements OnInit {
     this.customerGroupID = customerGroupID;
     this.customerGroup = customerGroup;
     this.advanceTableForm.patchValue({ customerGroupID: this.customerGroupID });
+    this.advanceTableForm.patchValue({ customerGroup: this.customerGroup });
     if(this.customerGroupID && this.IsKAMRole === true)
     {
       this.InitCustomerCGForRGByKAM(this.customerGroupID);
@@ -580,23 +680,15 @@ export class FormDialogComponent implements OnInit {
 private _filterCCG(value: string): any[] {
   const filterValue = (value || '').toString().trim().toLowerCase();
 
-  return this.CustomerCustomerGroupList?.filter(customer => {
-    const name  = (customer.customerName || '').toString().toLowerCase();
-    const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
-    const state = (customer.stateName || '').toString().toLowerCase();
-    const identity = (customer.customerIdentityNumber || '').toString().toLowerCase();
-
-    // Return true if typed value matches name OR tally OR state OR identity
-    return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue) || identity.includes(filterValue);
-  }) || [];
+  return this.CustomerCustomerGroupList?.filter(customer =>
+    this.customerMatchesSearch(customer, filterValue)
+  ) || [];
 }
 
 
 
   onCustomerSelected(selectedCustomerName: string) {
-    const selectedCustomer = this.CustomerCustomerGroupList.find(
-     data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName + '##' + (data.customerIdentityNumber || '') === selectedCustomerName
-    );
+    const selectedCustomer = this.findCustomerByOptionValue(selectedCustomerName);
 
     if (selectedCustomer) {
       this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
@@ -623,6 +715,7 @@ private _filterCCG(value: string): any[] {
     this.customerAlert(this.customerID, this.customerDetailData)
     this.InitBooker();
     this.getStopReservationReason(this.customerID);
+    this.syncCustomerGroupValidation(this.customerGroupID, this.customerGroup);
   }
 
    InitCustomerRD() {
@@ -646,23 +739,15 @@ private _filterRD(value: string): any[] {
    if (!value || value.length < 3) {
     return [];   
   }
-  return this.CustomerCustomerGroupList?.filter(customer => {
-    const name  = (customer.customerName || '').toString().toLowerCase();
-    const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
-    const state = (customer.stateName || '').toString().toLowerCase();
-    const identity = (customer.customerIdentityNumber || '').toString().toLowerCase();
-
-    // Return true if typed value matches name OR tally OR state OR identity
-    return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue) || identity.includes(filterValue);
-  }) || [];
+  return this.CustomerCustomerGroupList?.filter(customer =>
+    this.customerMatchesSearch(customer, filterValue)
+  ) || [];
 }
 
 
 
   onCustomerRDSelected(selectedCustomerName: string) {
-    const selectedCustomer = this.CustomerCustomerGroupList.find(
-     data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName + '##' + (data.customerIdentityNumber || '') === selectedCustomerName
-    );
+    const selectedCustomer = this.findCustomerByOptionValue(selectedCustomerName);
 
     if (selectedCustomer) {
       this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
@@ -689,27 +774,48 @@ private _filterRD(value: string): any[] {
     this.customerAlert(this.customerID, this.customerDetailData)
     this.InitBooker();
     this.getStopReservationReason(this.customerID);
+    this.syncCustomerGroupValidation(this.customerGroupID, this.customerGroup);
+  }
+
+  private getReservationCheckDate(): string {
+    let fromToDate = this.FromToDate || '';
+    if (fromToDate.trim() !== '') {
+      return moment(fromToDate).format('YYYY-MM-DD');
+    }
+    return moment().format('YYYY-MM-DD');
   }
 
   getStopReservationReason(CustomerID) {
-    let FromToDate = this.FromToDate || ''; // Ensure FromToDate is not undefined
-    if (FromToDate.trim() !== '') {
-      FromToDate = moment(FromToDate).format('YYYY-MM-DD');
-    }
-    else {
-      FromToDate = moment().format('YYYY-MM-DD');// If empty, set it to today's date
-    }
-    this.reservationGroupService.getReason(CustomerID, FromToDate).subscribe(
-      (data: string[]) => {
-        if (data && data.length > 0) {
-          this.ReasonMessageShow = true;
-          this.Reason = data.join(', ');
-        }
-        else {
-          this.ReasonMessageShow = false;
-        }
+    const reservationDate = this.getReservationCheckDate();
+    forkJoin({
+      stopReservation: this.reservationGroupService.getReason(CustomerID, reservationDate),
+      customerBlocking: this.customerBlockingService.checkCustomerBlockingForReservation(
+        CustomerID,
+        reservationDate
+      ),
+    }).subscribe(({ stopReservation, customerBlocking }) => {
+      const reasons: string[] = [];
+      if (stopReservation?.length) {
+        reasons.push(...stopReservation);
       }
-    );
+      if (customerBlocking?.length) {
+        reasons.push(...customerBlocking);
+        Swal.fire({
+          title: 'Customer blocked',
+          html: customerBlocking.join('<br/><br/>'),
+          icon: 'warning',
+          confirmButtonText: 'OK',
+        });
+      }
+      this.reservationBlocked = !!(customerBlocking?.length);
+      if (reasons.length > 0) {
+        this.ReasonMessageShow = true;
+        this.Reason = reasons.join(', ');
+      } else {
+        this.ReasonMessageShow = false;
+        this.Reason = '';
+      }
+    });
   }
 
   getTransferLocationBasedOnCustomer(CustomerID: any) {
@@ -787,7 +893,7 @@ private _filterRD(value: string): any[] {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
       const match = CustomerCustomerGroupList.some(customer =>
-        (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID+ '##' + customer.stateName?.toLowerCase() + '##' + (customer.customerIdentityNumber || '').toString().toLowerCase()) === value
+        this.formatCustomerOption(customer).toLowerCase() === value
       );
       return match ? null : { customerInvalid: true };
     };
@@ -1110,6 +1216,15 @@ private _filterRD(value: string): any[] {
       )
   }
   public confirmAdd(): void {
+    if (this.reservationBlocked) {
+      Swal.fire({
+        title: 'Reservation not allowed',
+        text: this.Reason || 'This customer is blocked and cannot be used for a new reservation.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
     if (this.action == "edit") {
       this.Put();
     }
@@ -1325,27 +1440,23 @@ private _filterRD(value: string): any[] {
       if (!value || value.length < 3) {
         return [];   
       }
-      return this.CustomerCustomerGroupList?.filter(customer => {
-        const name  = (customer.customerName || '').toString().toLowerCase();
-        const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
-        const state = (customer.stateName || '').toString().toLowerCase();
-        const identity = (customer.customerIdentityNumber || '').toString().toLowerCase();
-
-        // Return true if typed value matches name OR tally OR state OR identity
-        return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue) || identity.includes(filterValue);
-      }) || [];
+      return this.CustomerCustomerGroupList?.filter(customer =>
+        this.customerMatchesSearch(customer, filterValue)
+      ) || [];
     }
 
     customerForRGByKAMValidator(CustomerCustomerGroupList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
         const value = control.value?.toLowerCase();
-        const match = CustomerCustomerGroupList.some(customer => (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID + '##' + customer.stateName?.toLowerCase() + '##' + (customer.customerIdentityNumber || '').toString().toLowerCase()) === value);
+        const match = CustomerCustomerGroupList.some(customer =>
+          this.formatCustomerOption(customer).toLowerCase() === value
+        );
         return match ? null : { customerRGByKAMInvalid: true };
       };
     }
 
     onCustomerRGByKAMSelected(selectedCustomerName: string) {
-      const selectedCustomer = this.CustomerCustomerGroupList.find(data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName + '##' + (data.customerIdentityNumber || '') === selectedCustomerName);
+      const selectedCustomer = this.findCustomerByOptionValue(selectedCustomerName);
       if (selectedCustomer) 
       {
         this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
@@ -1373,6 +1484,7 @@ private _filterRD(value: string): any[] {
     this.customerAlert(this.customerID, this.customerDetailData)
     this.InitBooker();
     this.getStopReservationReason(this.customerID);
+    this.syncCustomerGroupValidation(this.customerGroupID, this.customerGroup);
   }
 
 
@@ -1407,25 +1519,22 @@ private _filterRD(value: string): any[] {
   customerCGForRGByKAMValidator(CustomerCustomerGroupList: any[]): ValidatorFn {
       return (control: AbstractControl): ValidationErrors | null => {
         const value = control.value?.toLowerCase();
-        const match = CustomerCustomerGroupList.some(customer => (customer.customerName?.toLowerCase() + '##' + customer.tallyCustomerID + '##' + customer.stateName?.toLowerCase() + '##' + (customer.customerIdentityNumber || '').toString().toLowerCase()) === value);
+        const match = CustomerCustomerGroupList.some(customer =>
+          this.formatCustomerOption(customer).toLowerCase() === value
+        );
         return match ? null : { customerRGByKAMInvalid: true };
       };
     }
 
   private _filterCCGForRGByKAM(value: string): any[] {
     const filterValue = (value || '').toString().trim().toLowerCase();
-    return this.CustomerCustomerGroupList?.filter(customer => {
-      const name  = (customer.customerName || '').toString().toLowerCase();
-      const tally = (customer.tallyCustomerID || '').toString().toLowerCase();
-      const state = (customer.stateName || '').toString().toLowerCase();
-      const identity = (customer.customerIdentityNumber || '').toString().toLowerCase();
-      // Return true if typed value matches name OR tally OR state OR identity
-      return name.includes(filterValue) || tally.includes(filterValue) || state.includes(filterValue) || identity.includes(filterValue);
-    }) || [];
+    return this.CustomerCustomerGroupList?.filter(customer =>
+      this.customerMatchesSearch(customer, filterValue)
+    ) || [];
   }
 
   onCustomerCustomerGroupForRGByKAMSelected(selectedCustomerName: string) {
-    const selectedCustomer = this.CustomerCustomerGroupList.find( data => data.customerName + '##' + data.tallyCustomerID + '##' + data.stateName + '##' + (data.customerIdentityNumber || '') === selectedCustomerName);
+    const selectedCustomer = this.findCustomerByOptionValue(selectedCustomerName);
     if (selectedCustomer) 
     {
       this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
@@ -1452,6 +1561,7 @@ private _filterRD(value: string): any[] {
     this.customerAlert(this.customerID, this.customerDetailData)
     this.InitBooker();
     this.getStopReservationReason(this.customerID);
+    this.syncCustomerGroupValidation(this.customerGroupID, this.customerGroup);
   }
 
 

@@ -120,3 +120,70 @@ export async function confirmMissingGstnForBatch(
 export function extractApiErrorMessage(error: any, fallback = 'Operation Failed.....!!!'): string {
   return error?.error?.message || error?.message || error || fallback;
 }
+
+/** Parses orphan invoice number from createInvoiceSingleDuty error message or payload. */
+export function extractOrphanInvoiceNumber(message: string): string | null {
+  if (!message || typeof message !== 'string') {
+    return null;
+  }
+  const match = /orphan invoice\s+(\S+)(?:\s+dated\s+\S+)?\s+exists/i.exec(message);
+  return match ? match[1] : null;
+}
+
+/** Parses orphan invoice date (ISO yyyy-MM-dd) from API payload or message "dated dd-MMM-yyyy". */
+export function extractOrphanInvoiceDate(errorOrMessage: any): string | null {
+  const fromPayload = errorOrMessage?.error?.orphanInvoiceDate || errorOrMessage?.orphanInvoiceDate;
+  if (fromPayload && typeof fromPayload === 'string') {
+    return fromPayload;
+  }
+
+  const message =
+    typeof errorOrMessage === 'string'
+      ? errorOrMessage
+      : extractApiErrorMessage(errorOrMessage, '');
+  const match = /dated\s+(\d{2})-([A-Za-z]{3})-(\d{4})\s+exists/i.exec(message || '');
+  if (!match) {
+    return null;
+  }
+
+  const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  const monthIndex = months.indexOf(match[2].toLowerCase());
+  if (monthIndex < 0) {
+    return null;
+  }
+
+  const yyyy = match[3];
+  const mm = String(monthIndex + 1).padStart(2, '0');
+  const dd = match[1];
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/** Label for orphan messages: "Invoice No X dated dd-MMM-yyyy" (date omitted if missing). */
+export function formatOrphanInvoiceLabel(invoiceNo: string, invoiceDateIso?: string | null): string {
+  if (!invoiceNo) {
+    return '';
+  }
+  const dated = formatOrphanInvoiceDisplayDate(invoiceDateIso);
+  return dated ? `Invoice No ${invoiceNo} dated ${dated}` : `Invoice No ${invoiceNo}`;
+}
+
+export function formatOrphanInvoiceDisplayDate(invoiceDateIso?: string | null): string | null {
+  if (!invoiceDateIso) {
+    return null;
+  }
+
+  const parts = String(invoiceDateIso).split(/[-T]/);
+  if (parts.length < 3) {
+    return null;
+  }
+
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${String(day).padStart(2, '0')}-${months[month - 1]}-${year}`;
+}

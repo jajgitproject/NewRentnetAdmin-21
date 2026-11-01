@@ -53,6 +53,8 @@ export class FormDialogComponent
     {
       sacid: [this.advanceTable.sacid],
       sacNumber: [this.advanceTable.sacNumber],
+      dynamicGLcode: [this.advanceTable.dynamicGLcode, [Validators.maxLength(10)]],
+      dynamicGLName: [this.advanceTable.dynamicGLName, [Validators.maxLength(50)]],
       activationStatus: [this.advanceTable.activationStatus],
       isDefault: [this.advanceTable.isDefault],
     });
