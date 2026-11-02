@@ -1,0 +1,625 @@
+/* Match Control Panel Quick Search (controlPanelDesign.component.scss). */
+:host ::ng-deep .quick-search-panel,
+:host ::ng-deep .advance-search-panel
+  position: relative
+  z-index: 2
+
+  .row
+    margin-left: -3px !important
+    margin-right: -3px !important
+
+  .row > [class*="col-"]
+    padding-left: 3px !important
+    padding-right: 3px !important
+
+  .cp-quick-search-field.mat-mdc-form-field,
+  .cp-advance-search-field.mat-mdc-form-field
+    width: 100%
+
+  .cp-quick-search-field .mat-mdc-text-field-wrapper,
+  .cp-advance-search-field .mat-mdc-text-field-wrapper
+    background-color: transparent !important
+
+  .cp-quick-search-field .mat-mdc-form-field-focus-overlay,
+  .cp-advance-search-field .mat-mdc-form-field-focus-overlay
+    background-color: transparent !important
+
+  .cp-quick-search-field .mdc-text-field--filled:not(.mdc-text-field--disabled),
+  .cp-advance-search-field .mdc-text-field--filled:not(.mdc-text-field--disabled)
+    background-color: transparent !important
+
+  .cp-quick-search-field .mdc-text-field--filled,
+  .cp-advance-search-field .mdc-text-field--filled
+    border-top-left-radius: 0 !important
+    border-top-right-radius: 0 !important
+
+  .cp-quick-search-field .mat-mdc-form-field-subscript-wrapper,
+  .cp-advance-search-field .mat-mdc-form-field-subscript-wrapper
+    height: 0 !important
+    min-height: 0 !important
+    margin-top: 0 !important
+
+  .cp-quick-search-field.bc-person-name-field .mat-mdc-form-field-subscript-wrapper
+    height: 0 !important
+    min-height: 0 !important
+    margin-top: 0 !important
+    overflow: hidden !important
+
+  .cp-quick-search-field .mdc-floating-label,
+  .cp-quick-search-field .mat-mdc-floating-label,
+  .cp-advance-search-field .mdc-floating-label,
+  .cp-advance-search-field .mat-mdc-floating-label
+    color: #5d6d7e !important
+    font-size: 12px !important
+    font-weight: 500 !important
+    letter-spacing: 0.02em !important
+
+  .cp-quick-search-field.mat-focused:not(.mat-form-field-invalid) .mdc-floating-label,
+  .cp-quick-search-field.mat-focused:not(.mat-form-field-invalid) .mat-mdc-floating-label,
+  .cp-advance-search-field.mat-focused:not(.mat-form-field-invalid) .mdc-floating-label,
+  .cp-advance-search-field.mat-focused:not(.mat-form-field-invalid) .mat-mdc-floating-label
+    color: #3f51b5 !important
+
+  .cp-quick-search-field.mat-form-field-invalid .mdc-floating-label,
+  .cp-quick-search-field.mat-form-field-invalid .mat-mdc-floating-label,
+  .cp-advance-search-field.mat-form-field-invalid .mdc-floating-label,
+  .cp-advance-search-field.mat-form-field-invalid .mat-mdc-floating-label
+    color: #c62828 !important
+
+  .cp-quick-search-field .mat-mdc-input-element,
+  .cp-quick-search-field .mat-mdc-select-value-text,
+  .cp-advance-search-field .mat-mdc-input-element,
+  .cp-advance-search-field .mat-mdc-select-value-text
+    color: #222 !important
+    font-size: 13px !important
+    font-weight: 400 !important
+    letter-spacing: 0 !important
+
+  .cp-quick-search-field .mdc-line-ripple::before,
+  .cp-advance-search-field .mdc-line-ripple::before
+    border-bottom-color: #d7d7d7 !important
+
+  .cp-quick-search-field .mdc-line-ripple::after,
+  .cp-advance-search-field .mdc-line-ripple::after
+    border-bottom-color: #3f51b5 !important
+
+  .cp-quick-search-field .mat-mdc-select-arrow,
+  .cp-advance-search-field .mat-mdc-select-arrow
+    color: #5d6d7e !important
+
+  .cp-quick-search-field .mat-datepicker-toggle,
+  .cp-quick-search-field .mat-icon[matSuffix],
+  .cp-advance-search-field .mat-datepicker-toggle,
+  .cp-advance-search-field .mat-icon[matSuffix]
+    color: #5f6b7a !important
+
+  .row.mb-2,
+  .mb-2
+    margin-bottom: 0.45rem !important
+
+  .bc-google-checkbox
+    margin-top: 6px
+    min-height: 32px
+    display: flex
+    align-items: center
+
+  .bc-google-checkbox .mat-mdc-checkbox
+    --mdc-checkbox-label-text-size: 12px
+
+  .bc-google-checkbox .mdc-label
+    color: #5d6d7e !important
+    font-weight: 500 !important
+    letter-spacing: 0.02em !important
+
+:host ::ng-deep .booking-configuration-actions .mat-mdc-raised-button,
+:host ::ng-deep .booking-configuration-actions .mat-mdc-outlined-button,
+:host ::ng-deep .booking-configuration-actions .mat-mdc-unelevated-button
+  min-width: 88px
+  height: 34px !important
+  line-height: 34px !important
+  font-size: 13px !important
+  font-weight: 600 !important
+
+.spinner-wrap
+  padding: 24px
+  display: flex
+  justify-content: center
+
+.email-body
+  white-space: pre-wrap
+  background: #fafbfc
+  padding: 12px
+  border: 1px solid #e8ecef
+  border-radius: 6px
+  max-height: 220px
+  overflow: auto
+  font-size: 12px
+  color: #37474f
+  margin: 0
+  user-select: text
+
+.email-body-html,
+.bc-source-email .email-body
+  max-height: 420px
+
+.email-body-html
+  display: block
+  width: 100%
+  height: 420px
+  padding: 0
+  background: #fff
+  user-select: text
+
+.bc-source-email-head
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 12px
+  margin-bottom: 12px
+
+  .bc-section-title
+    margin: 0
+
+.bc-source-email-toggle
+  display: flex
+  align-items: center
+  white-space: nowrap
+
+.bc-source-email-active
+  font-weight: 700
+  text-decoration: underline
+
+.bc-attachments
+  margin-top: 10px
+
+.bc-attachments-title
+  font-size: 12px
+  font-weight: 600
+  color: #546e7a
+  margin-bottom: 6px
+
+.bc-attachment-link
+  display: block
+  text-align: left
+  margin: 0 0 4px
+  white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
+
+.bc-thread
+  margin-bottom: 12px
+
+.bc-thread-head
+  display: flex
+  justify-content: space-between
+  gap: 8px
+  font-size: 12px
+  margin-bottom: 4px
+
+.bc-thread-meta
+  font-size: 12px
+  color: #607d8b
+  margin-bottom: 2px
+
+.bc-thread-actions
+  display: flex
+  justify-content: flex-end
+  gap: 8px
+  margin-top: 8px
+
+.bc-page
+  background-color: #f4f6f8
+  min-height: calc(100vh - 80px)
+  padding: 16px
+  box-sizing: border-box
+
+.bc-layout
+  display: flex
+  flex-wrap: wrap
+  gap: 16px
+  align-items: stretch
+  height: calc(100vh - 96px)
+  min-height: 480px
+
+.bc-left-panel,
+.bc-right-panel
+  flex: 1 1 480px
+  min-width: 0
+  max-height: 100%
+  display: flex
+  flex-direction: column
+  overflow: hidden
+  background: #fff
+  border: 1px solid #e0e4e8
+  border-radius: 8px
+  padding: 0
+
+.bc-right-panel form.quick-search-panel
+  display: flex
+  flex-direction: column
+  flex: 1 1 auto
+  min-height: 0
+
+.bc-panel-header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  flex-wrap: wrap
+  gap: 8px
+  flex-shrink: 0
+  margin-bottom: 0
+  padding: 20px 20px 12px
+  border-bottom: 1px solid #eef1f4
+
+.bc-panel-body
+  flex: 1 1 auto
+  min-height: 0
+  overflow-y: auto
+  overflow-x: hidden
+  padding: 20px
+  scrollbar-gutter: stable
+
+  &::-webkit-scrollbar
+    width: 8px
+
+  &::-webkit-scrollbar-track
+    background: #f5f7f9
+
+  &::-webkit-scrollbar-thumb
+    background: #c5cdd6
+    border-radius: 4px
+
+  &::-webkit-scrollbar-thumb:hover
+    background: #90a4ae
+
+.bc-panel-title
+  font-size: 16px
+  font-weight: 600
+  color: #1a2332
+  margin: 0
+
+.bc-badge
+  display: inline-block
+  padding: 4px 12px
+  border-radius: 12px
+  font-size: 11px
+  font-weight: 600
+  letter-spacing: 0.02em
+
+.bc-badge-readonly
+  background: #e3f2fd
+  color: #1565c0
+
+.bc-badge-configure
+  background: #f3e5f5
+  color: #7b1fa2
+
+.bc-section
+  margin-bottom: 20px
+
+.bc-section-title
+  font-size: 13px
+  font-weight: 600
+  color: #37474f
+  margin: 0 0 12px 0
+
+.bc-summary-grid
+  display: grid
+  grid-template-columns: repeat(4, 1fr)
+  gap: 12px 16px
+
+  @media (max-width: 991px)
+    grid-template-columns: repeat(2, 1fr)
+
+  @media (max-width: 575px)
+    grid-template-columns: 1fr
+
+.bc-summary-item
+  .bc-label
+    display: block
+    font-size: 11px
+    font-weight: 500
+    color: #78909c
+    margin-bottom: 4px
+    text-transform: none
+
+  .bc-value
+    display: block
+    font-size: 13px
+    font-weight: 600
+    color: #263238
+    line-height: 1.4
+    word-break: break-word
+
+.bc-passenger-card
+  border: 1px solid #e8ecef
+  border-radius: 6px
+  padding: 14px 16px
+  margin-bottom: 12px
+  background: #fafbfc
+
+  &:last-child
+    margin-bottom: 0
+
+.bc-passenger-title
+  font-size: 13px
+  font-weight: 600
+  color: #1a2332
+  margin: 0 0 12px 0
+
+.bc-passenger-trip-grid
+  display: grid
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+  gap: 16px 20px
+
+  @media (max-width: 575px)
+    grid-template-columns: 1fr
+
+.bc-passenger-trip-col
+  min-width: 0
+
+.bc-passenger-trip-heading
+  font-size: 11px
+  font-weight: 600
+  color: #546e7a
+  text-transform: uppercase
+  letter-spacing: 0.04em
+  margin-bottom: 8px
+
+.bc-passenger-row
+  margin-bottom: 8px
+
+  &:last-child
+    margin-bottom: 0
+
+  .bc-label
+    font-size: 11px
+    color: #78909c
+    margin-bottom: 2px
+
+  .bc-value
+    font-size: 12px
+    color: #37474f
+    line-height: 1.45
+
+.bc-additional-grid
+  display: grid
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+  gap: 0 24px
+
+  @media (max-width: 767px)
+    grid-template-columns: 1fr
+
+.bc-additional-col
+  .bc-additional-row
+    display: flex
+    gap: 8px
+    margin-bottom: 8px
+    font-size: 12px
+
+    .bc-label
+      flex: 0 0 140px
+      color: #78909c
+      font-weight: 500
+
+    .bc-value
+      flex: 1
+      color: #37474f
+      word-break: break-word
+
+.bc-category
+  margin: 0 0 16px
+  padding: 10px 12px
+  border: 1px solid #e8ecef
+  border-radius: 6px
+  background: #fafbfc
+
+.bc-category-title
+  font-size: 13px
+  font-weight: 600
+  color: #37474f
+  margin-bottom: 8px
+
+.bc-category-group
+  display: flex
+  flex-wrap: wrap
+  gap: 12px 20px
+
+.bc-category-hint,
+.bc-category-note
+  margin: 10px 0 0
+  font-size: 12px
+  color: #607d8b
+
+.bc-multi
+  margin: 0 0 16px
+
+.bc-progress
+  margin: 0 0 10px
+  font-weight: 600
+  color: #1b5e20
+
+.bc-category-note
+  margin: 0 0 14px
+  padding: 8px 10px
+  background: #fff8e1
+  border-radius: 4px
+  color: #5d4037
+
+.bc-identify
+  margin: 0 0 16px
+
+.bc-clue-summary
+  display: flex
+  flex-wrap: wrap
+  gap: 8px
+  margin: 0 0 12px
+
+.bc-clue
+  min-width: 140px
+  padding: 8px 10px
+  background: #f4f7fb
+  border: 1px solid #e4eaf0
+  border-radius: 4px
+  font-size: 13px
+  color: #263238
+
+  span
+    display: block
+    font-size: 11px
+    color: #78909c
+    margin-bottom: 2px
+
+.bc-identify-actions
+  display: flex
+  align-items: flex-end
+  gap: 10px
+  margin-bottom: 10px
+
+  .cp-quick-search-field
+    max-width: 220px
+
+.bc-candidate-empty
+  font-size: 12px
+  color: #607d8b
+  margin: 6px 0 12px
+
+.bc-candidate-table
+  width: 100%
+  border-collapse: collapse
+  font-size: 12px
+  margin-bottom: 12px
+
+  th,
+  td
+    padding: 6px 8px
+    border-bottom: 1px solid #eceff1
+    text-align: left
+    vertical-align: middle
+
+  th
+    color: #607d8b
+    font-weight: 600
+
+  tr
+    cursor: pointer
+
+  .bc-candidate-selected
+    background: #e8eaf6
+
+  .bc-candidate-cancelled td
+    color: #c62828
+
+.link-actions-below
+  margin: 4px 0 12px
+  min-height: 18px
+  position: relative
+  z-index: 1
+
+.bc-person-name-actions
+  margin: 2px 0 8px
+  position: relative
+  z-index: 1
+
+  .link-action
+    display: inline-block
+    line-height: 1.2
+    white-space: nowrap
+
+  .bc-person-list-error
+    color: #c62828
+    font-size: 12px
+    line-height: 1.2
+    margin-top: 2px
+    white-space: nowrap
+
+.bc-people-actions
+  margin: 0 0 12px
+  min-height: 22px
+
+.link-divider
+  color: #007bff
+  margin: 0 6px
+  font-size: 12px
+
+.link-action
+  color: #007bff
+  cursor: pointer
+  font-size: 12px
+  font-style: italic
+  font-weight: 500
+  background: none
+  border: 0
+  padding: 0
+  font-family: inherit
+
+.bc-extra-passenger
+  border: 1px solid #e8ecef
+  border-radius: 6px
+  padding: 10px 12px 4px
+  margin-bottom: 12px
+  background: #fafbfc
+
+.bc-extra-passenger-head
+  display: flex
+  justify-content: space-between
+  align-items: center
+  margin-bottom: 6px
+  font-size: 12px
+  font-weight: 600
+  color: #37474f
+
+.bc-required
+  color: #c62828
+
+.bc-footer
+  flex-shrink: 0
+  margin-top: 0
+  padding: 16px 20px
+  border-top: 1px solid #eef1f4
+  display: flex
+  align-items: center
+  justify-content: flex-end
+  flex-wrap: wrap
+  gap: 10px
+  background: #fff
+
+.bc-footer .bc-save-btn
+  min-width: 200px
+
+:host ::ng-deep .bc-footer .mat-mdc-button .mat-icon,
+:host ::ng-deep .bc-footer .mat-mdc-raised-button .mat-icon,
+:host ::ng-deep .bc-footer .mat-mdc-unelevated-button .mat-icon
+  font-size: 18px
+  width: 18px
+  height: 18px
+  margin-right: 4px
+  vertical-align: middle
+
+:host ::ng-deep .bc-address-field textarea
+  min-height: 56px
+  resize: vertical
+
+:host ::ng-deep .quick-search-panel
+  .cp-quick-search-field.bc-textarea-field
+    .mat-mdc-form-field-infix
+      padding-top: 18px !important
+      padding-bottom: 8px !important
+      min-height: 56px
+
+    textarea.mat-mdc-input-element
+      margin-top: 0
+      padding-top: 0
+      line-height: 1.45
+      resize: vertical
+
+    .mdc-floating-label
+      top: 22px !important
+
+    &.mat-form-field-should-float .mdc-floating-label,
+    .mdc-text-field--label-floating .mdc-floating-label
+      transform: translateY(-106%) scale(0.75) !important
+
+  .cp-quick-search-field.mat-form-field-should-float .mdc-floating-label,
+  .cp-quick-search-field .mdc-text-field--label-floating .mdc-floating-label
+    transform: translateY(-106%) scale(0.75) !important

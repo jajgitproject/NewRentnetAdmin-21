@@ -1,0 +1,709 @@
+<section class="content">
+  <div class="spinner-wrap" *ngIf="loading">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <div class="bc-page" *ngIf="!loading">
+    <div class="bc-layout">
+
+      <div class="bc-left-panel">
+        <div class="bc-panel-header">
+          <h2 class="bc-panel-title">1. Booking Request (From Email)</h2>
+          <span class="bc-badge bc-badge-readonly">Read Only</span>
+        </div>
+
+        <div class="bc-panel-body">
+          <div class="bc-section">
+            <div class="bc-summary-grid">
+              <div class="bc-summary-item">
+                <span class="bc-label">Request No.</span>
+                <span class="bc-value">{{ displayOrDash(leftCapture.customerTravelRequestNumber || bookingId) }}</span>
+              </div>
+              <div class="bc-summary-item">
+                <span class="bc-label">Customer</span>
+                <span class="bc-value">{{ displayOrDash(leftCapture.customerName) }}</span>
+              </div>
+              <div class="bc-summary-item">
+                <span class="bc-label">City</span>
+                <span class="bc-value">{{ displayOrDash(leftCapture.pickupCity) }}</span>
+              </div>
+              <div class="bc-summary-item">
+                <span class="bc-label">Request Type</span>
+                <span class="bc-value">{{ displayOrDash(leftCapture.packageType || leftCapture.package) }}</span>
+              </div>
+              <div class="bc-summary-item">
+                <span class="bc-label">Car Type (Requested)</span>
+                <span class="bc-value">{{ displayOrDash(leftCapture.vehicle || leftCapture.vehicleCategory) }}</span>
+              </div>
+              <div class="bc-summary-item">
+                <span class="bc-label">Package (Requested)</span>
+                <span class="bc-value">{{ displayOrDash(leftCapture.package) }}</span>
+              </div>
+              <div class="bc-summary-item">
+                <span class="bc-label">Total Passengers</span>
+                <span class="bc-value">{{ passengerCount }}</span>
+              </div>
+              <div class="bc-summary-item">
+                <span class="bc-label">Received On</span>
+                <span class="bc-value">{{ receivedOnDisplay }}</span>
+              </div>
+              <div class="bc-summary-item" *ngIf="hasDisplayValue(leftCapture.paymentMode)">
+                <span class="bc-label">Mode of Payment</span>
+                <span class="bc-value">{{ displayOrDash(leftCapture.paymentMode) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bc-section">
+            <h3 class="bc-section-title">Passenger Details</h3>
+            <div class="bc-passenger-card">
+              <h4 class="bc-passenger-title">{{ displayOrDash(leftCapture.passengerName || leftCapture.bookerName) }}</h4>
+              <div class="bc-passenger-trip-grid">
+                <div class="bc-passenger-trip-col">
+                  <div class="bc-passenger-trip-heading">Pickup</div>
+                  <div class="bc-passenger-row">
+                    <div class="bc-label">Date &amp; Time</div>
+                    <div class="bc-value">{{ formatDateTime(leftCapture.pickupDate, leftCapture.pickupTime) }}</div>
+                  </div>
+                  <div class="bc-passenger-row">
+                    <div class="bc-label">Address</div>
+                    <div class="bc-value">{{ displayOrDash(leftCapture.pickupAddress) }}</div>
+                  </div>
+                  <div class="bc-passenger-row">
+                    <div class="bc-label">Landmark</div>
+                    <div class="bc-value">{{ displayOrDash(leftCapture.pickupCity) }}</div>
+                  </div>
+                </div>
+                <div class="bc-passenger-trip-col">
+                  <div class="bc-passenger-trip-heading">Drop Off</div>
+                  <div class="bc-passenger-row">
+                    <div class="bc-label">Date &amp; Time</div>
+                    <div class="bc-value">{{ formatDateTime(leftCapture.dropoffDate, leftCapture.dropoffTime) }}</div>
+                  </div>
+                  <div class="bc-passenger-row">
+                    <div class="bc-label">Address</div>
+                    <div class="bc-value">{{ displayOrDash(leftCapture.dropoffAddress) }}</div>
+                  </div>
+                  <div class="bc-passenger-row">
+                    <div class="bc-label">Landmark</div>
+                    <div class="bc-value">{{ displayOrDash(leftCapture.dropoffCity) }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bc-section" *ngIf="hasAnyAdditionalInfo">
+            <h3 class="bc-section-title">Additional Information</h3>
+            <div class="bc-additional-grid">
+              <div class="bc-additional-col">
+                <div class="bc-additional-row" *ngIf="hasDisplayValue(detail?.subject)">
+                  <span class="bc-label">Subject</span>
+                  <span class="bc-value">{{ displayOrDash(detail?.subject) }}</span>
+                </div>
+                <div class="bc-additional-row" *ngIf="hasDisplayValue(detail?.receivedUtc)">
+                  <span class="bc-label">Email date</span>
+                  <span class="bc-value">{{ formatReceivedUtc(detail?.receivedUtc) }}</span>
+                </div>
+                <div class="bc-additional-row" *ngIf="hasDisplayValue(detail?.fromAddress)">
+                  <span class="bc-label">From</span>
+                  <span class="bc-value">{{ displayOrDash(detail?.fromAddress) }}</span>
+                </div>
+                <div class="bc-additional-row" *ngIf="hasDisplayValue(leftCapture.bookerName)">
+                  <span class="bc-label">Booker</span>
+                  <span class="bc-value">{{ displayOrDash(leftCapture.bookerName) }}</span>
+                </div>
+                <div class="bc-additional-row" *ngIf="hasDisplayValue(leftCapture.bookerMobile || leftCapture.passengerMobile)">
+                  <span class="bc-label">Mobile</span>
+                  <span class="bc-value">{{ displayOrDash(leftCapture.bookerMobile || leftCapture.passengerMobile) }}</span>
+                </div>
+              </div>
+              <div class="bc-additional-col">
+                <div class="bc-additional-row" *ngIf="hasDisplayValue(leftCapture.ticketNumber)">
+                  <span class="bc-label">Ticket No.</span>
+                  <span class="bc-value">{{ displayOrDash(leftCapture.ticketNumber) }}</span>
+                </div>
+                <div class="bc-additional-row" *ngIf="hasDisplayValue(detail?.request?.requestStatus)">
+                  <span class="bc-label">Status</span>
+                  <span class="bc-value">{{ displayOrDash(detail?.request?.requestStatus) }}</span>
+                </div>
+                <div class="bc-additional-row" *ngIf="detail?.matchedHistoricalReservationId">
+                  <span class="bc-label">Old Reservation</span>
+                  <span class="bc-value">{{ detail.matchedHistoricalReservationId }}</span>
+                </div>
+                <div class="bc-additional-row" *ngIf="hasDisplayValue(leftCapture.specialRequest)">
+                  <span class="bc-label">Special Instructions</span>
+                  <span class="bc-value">{{ displayOrDash(leftCapture.specialRequest) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bc-section bc-source-email" *ngIf="hasSourceEmail">
+            <div class="bc-source-email-head">
+              <h3 class="bc-section-title">Source email</h3>
+              <div class="bc-source-email-toggle" *ngIf="hasFormattedSourceEmail">
+                <button type="button" class="link-action" [class.bc-source-email-active]="sourceEmailView === 'formatted'"
+                  (click)="setSourceEmailView('formatted')">Formatted</button>
+                <span class="link-divider">|</span>
+                <button type="button" class="link-action" [class.bc-source-email-active]="sourceEmailView === 'plain'"
+                  (click)="setSourceEmailView('plain')">Plain</button>
+              </div>
+            </div>
+            <iframe *ngIf="hasFormattedSourceEmail && sourceEmailView === 'formatted'"
+              class="email-body email-body-html" sandbox
+              [attr.srcdoc]="sourceEmailSrcdoc" title="Source email"></iframe>
+            <pre *ngIf="(sourceEmailView === 'plain' || !hasFormattedSourceEmail) && sourceEmailPlain" class="email-body">{{ sourceEmailPlain }}</pre>
+            <div class="bc-attachments" *ngIf="sourceAttachments.length">
+              <div class="bc-attachments-title">Attachments</div>
+              <button type="button" class="link-action bc-attachment-link" *ngFor="let item of sourceAttachments"
+                (click)="downloadSourceAttachment(item)">
+                {{ item.fileName || 'attachment' }}
+                <span *ngIf="item.byteLength"> ({{ formatByteLength(item.byteLength) }})</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bc-section" *ngIf="correspondence.length">
+            <h3 class="bc-section-title">Email chain</h3>
+            <div class="bc-thread" *ngFor="let item of correspondence">
+              <div class="bc-thread-head">
+                <strong>{{ item.direction === 'Outbound' ? 'Sent to booker / passenger' : 'Reply received' }}</strong>
+                <span>{{ formatReceivedUtc(item.sentUtc) }}</span>
+              </div>
+              <div class="bc-thread-meta" *ngIf="item.fromAddress">From: {{ item.fromAddress }}</div>
+              <div class="bc-thread-meta" *ngIf="item.toAddress">To: {{ item.toAddress }}</div>
+              <div class="bc-thread-meta" *ngIf="item.subject">Subject: {{ item.subject }}</div>
+              <pre class="email-body">{{ item.textBody }}</pre>
+            </div>
+          </div>
+
+          <div class="bc-section" *ngIf="showRequestDetailsForm">
+            <h3 class="bc-section-title">Request missing details</h3>
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill">
+              <mat-label>To</mat-label>
+              <input matInput [(ngModel)]="requestDetailsTo" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+            <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill">
+              <mat-label>Subject</mat-label>
+              <input matInput [(ngModel)]="requestDetailsSubject" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+            <mat-form-field class="example-full-width cp-quick-search-field bc-textarea-field" appearance="fill">
+              <mat-label>Message</mat-label>
+              <textarea matInput rows="8" [(ngModel)]="requestDetailsBody" [ngModelOptions]="{standalone: true}"></textarea>
+            </mat-form-field>
+            <div class="bc-thread-actions">
+              <button mat-stroked-button type="button" [disabled]="sendingDetails" (click)="cancelRequestDetails()">Cancel</button>
+              <button mat-raised-button color="primary" type="button" [disabled]="sendingDetails" (click)="sendRequestDetails()">
+                {{ sendingDetails ? 'Sending…' : 'Send email' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bc-right-panel">
+        <div class="bc-panel-header">
+          <h2 class="bc-panel-title">2. Eco Configuration</h2>
+          <span class="bc-badge" [class.bc-badge-configure]="canConfirm()" [class.bc-badge-readonly]="!canConfirm()">
+            {{ canConfirm() ? 'Configure & Save' : 'Locked' }}
+          </span>
+        </div>
+
+        <form class="register-form quick-search-panel" [formGroup]="advanceTableForm" (ngSubmit)="confirmAdd()">
+          <div class="bc-panel-body">
+            <div class="bc-category">
+              <div class="bc-category-title">Email category</div>
+              <mat-radio-group class="bc-category-group" [ngModel]="emailCategory" [ngModelOptions]="{standalone: true}"
+                (ngModelChange)="onEmailCategoryChange($event)" [disabled]="!canConfirm()">
+                <mat-radio-button value="NewReservation">New Reservation</mat-radio-button>
+                <mat-radio-button value="UpdateReservation">Update Reservation</mat-radio-button>
+                <mat-radio-button value="CancelReservation">Cancel Reservation</mat-radio-button>
+                <mat-radio-button value="NotRelated">Not Related to Reservation</mat-radio-button>
+              </mat-radio-group>
+              <p class="bc-category-hint" *ngIf="categoryHint">{{ categoryHint }}</p>
+            </div>
+
+            <div class="bc-multi" *ngIf="emailCategory === 'NewReservation'">
+              <p class="bc-progress" *ngIf="createdReservationCount > 0">
+                Created {{ createdReservationCount }} of {{ expectedReservationCount || createdReservationCount }} reservation(s).
+              </p>
+              <div class="row">
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+                  <mat-checkbox color="primary" formControlName="moreThanOneReservation"
+                    (change)="onMoreThanOneChange()">
+                    More Than One Reservation
+                  </mat-checkbox>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2" *ngIf="advanceTableForm.value.moreThanOneReservation">
+                  <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                    <mat-label>Number of Reservations <span class="bc-required">*</span></mat-label>
+                    <input matInput type="number" min="2" formControlName="expectedReservationCount">
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2" *ngIf="advanceTableForm.value.moreThanOneReservation">
+                  <mat-checkbox color="primary" formControlName="sameGuest">
+                    Same Guest
+                  </mat-checkbox>
+                </div>
+              </div>
+              <p class="bc-category-hint" *ngIf="multiHint">{{ multiHint }}</p>
+            </div>
+
+            <div class="bc-identify" *ngIf="emailCategory === 'UpdateReservation' || emailCategory === 'CancelReservation'">
+              <p class="bc-category-note">
+                Identify the existing reservation. Cancel and field edits are not applied yet.
+              </p>
+              <div class="bc-clue-summary">
+                <div class="bc-clue"><span>Customer</span>{{ displayOrDash(identifyClues.customer) }}</div>
+                <div class="bc-clue"><span>Pickup date</span>{{ displayOrDash(identifyClues.pickupDate) }}</div>
+                <div class="bc-clue"><span>Passenger</span>{{ displayOrDash(identifyClues.passenger) }}</div>
+              </div>
+              <div class="bc-identify-actions">
+                <mat-form-field appearance="fill" class="example-full-width cp-quick-search-field" subscriptSizing="dynamic">
+                  <mat-label>Reservation ID</mat-label>
+                  <input matInput [(ngModel)]="typedReservationId" [ngModelOptions]="{standalone: true}"
+                    (keydown.enter)="searchReservations()" />
+                </mat-form-field>
+                <button mat-stroked-button type="button" [disabled]="searchingReservations" (click)="searchReservations()">
+                  Search reservations
+                </button>
+              </div>
+              <div class="bc-candidate-empty" *ngIf="!searchingReservations && reservationCandidates.length === 0">
+                No matching reservations. Type a Reservation ID and search again, or pick one after the list appears.
+              </div>
+              <table class="bc-candidate-table" *ngIf="reservationCandidates.length > 0">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Reservation</th>
+                    <th>Customer</th>
+                    <th>Passenger</th>
+                    <th>Booker</th>
+                    <th>Pickup</th>
+                    <th>City</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of reservationCandidates"
+                    [class.bc-candidate-selected]="selectedReservationId === row.reservationID"
+                    [class.bc-candidate-cancelled]="row.isCancelled"
+                    (click)="selectReservation(row.reservationID)">
+                    <td>
+                      <mat-radio-button [checked]="selectedReservationId === row.reservationID"
+                        (click)="selectReservation(row.reservationID); $event.stopPropagation()">
+                      </mat-radio-button>
+                    </td>
+                    <td>{{ row.reservationID }}</td>
+                    <td>{{ displayOrDash(row.customerName) }}</td>
+                    <td>{{ displayOrDash(row.passengerName) }}</td>
+                    <td>{{ displayOrDash(row.bookerName) }}</td>
+                    <td>{{ candidatePickup(row) }}</td>
+                    <td>{{ displayOrDash(row.pickupCity) }}</td>
+                    <td>{{ row.isCancelled ? 'Cancelled' : displayOrDash(row.reservationStatus) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="bc-category-note" *ngIf="emailCategory === 'NotRelated'">
+              This email has no reservation flow. Save the category to close it.
+            </div>
+
+            <ng-container *ngIf="emailCategory === 'NewReservation'">
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Customer <span class="bc-required">*</span></mat-label>
+                  <input required type="text" matInput formControlName="customerName"
+                    [matAutocomplete]="autoCustomer">
+                  <mat-autocomplete #autoCustomer="matAutocomplete" (optionSelected)="onCustomerSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredCustomerOptions | async"
+                      [value]="getCustomerDisplayValue(option)">
+                      {{ getCustomerDisplayLabel(option) }}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field bc-person-name-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Booker Name <span class="bc-required">*</span></mat-label>
+                  <input required matInput formControlName="bookerName" [matAutocomplete]="autoBooker">
+                  <mat-autocomplete #autoBooker="matAutocomplete" (optionSelected)="onBookerSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredBookerOptions | async" [value]="personDisplay(option)">
+                      {{ personDisplay(option) }}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <div class="bc-person-name-actions">
+                  <button type="button" class="link-action" (click)="openNewBooker()">Add Booker</button>
+                  <div class="bc-person-list-error" *ngIf="advanceTableForm.get('bookerName')?.hasError('personInvalid')">
+                    Select a booker from the list
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Booker Mobile <span class="bc-required">*</span></mat-label>
+                  <input required matInput formControlName="bookerMobile" inputmode="numeric" maxlength="10"
+                    (input)="onPersonMobileInput('bookerMobile', $event)">
+                  <mat-error *ngIf="advanceTableForm.get('bookerMobile')?.hasError('pattern')">
+                    Enter a 10-digit mobile number
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Booker Email <span class="bc-required">*</span></mat-label>
+                  <input required matInput type="email" formControlName="bookerEmail">
+                  <mat-error *ngIf="advanceTableForm.get('bookerEmail')?.hasError('email')">
+                    Enter a valid email
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field bc-person-name-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Passenger Name <span class="bc-required">*</span></mat-label>
+                  <input required matInput formControlName="passengerName" [matAutocomplete]="autoPassenger">
+                  <mat-autocomplete #autoPassenger="matAutocomplete" (optionSelected)="onPassengerSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredPassengerOptions | async" [value]="personDisplay(option)">
+                      {{ personDisplay(option) }}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <div class="bc-person-name-actions">
+                  <button type="button" class="link-action" (click)="openNewPassenger()">Add Passenger</button>
+                  <div class="bc-person-list-error" *ngIf="advanceTableForm.get('passengerName')?.hasError('personInvalid')">
+                    Select a passenger from the list
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Passenger Mobile <span class="bc-required">*</span></mat-label>
+                  <input required matInput formControlName="passengerMobile" inputmode="numeric" maxlength="10"
+                    (input)="onPersonMobileInput('passengerMobile', $event)">
+                  <mat-error *ngIf="advanceTableForm.get('passengerMobile')?.hasError('pattern')">
+                    Enter a 10-digit mobile number
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Passenger Email <span class="bc-required">*</span></mat-label>
+                  <input required matInput type="email" formControlName="passengerEmail">
+                  <mat-error *ngIf="advanceTableForm.get('passengerEmail')?.hasError('email')">
+                    Enter a valid email
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="bc-extra-passenger" *ngFor="let row of extraPassengers.controls; let i = index" [formGroup]="extraPassengerGroup(i)">
+              <div class="bc-extra-passenger-head">
+                <span>Additional Passenger {{ i + 1 }}</span>
+                <a class="link-action" (click)="removePassenger(i)">Remove</a>
+              </div>
+              <div class="row">
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+                  <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                    <mat-label>Passenger Name <span class="bc-required">*</span></mat-label>
+                    <input required matInput formControlName="name">
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+                  <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                    <mat-label>Passenger Mobile <span class="bc-required">*</span></mat-label>
+                    <input required matInput formControlName="mobile" inputmode="numeric" maxlength="10"
+                      (input)="onExtraMobileInput(i, $event)">
+                  </mat-form-field>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2">
+                  <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                    <mat-label>Passenger Email <span class="bc-required">*</span></mat-label>
+                    <input required matInput type="email" formControlName="email">
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Duty Type <span class="bc-required">*</span></mat-label>
+                  <input required type="text" matInput formControlName="packageType"
+                    [matAutocomplete]="auto6" (keyup)="onPackageTypeChanges($event)">
+                  <mat-autocomplete #auto6="matAutocomplete" (optionSelected)="onDTSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredPackageTypeOptions | async"
+                      [value]="option.packageType"
+                      (click)="getPackageTypeID(option.packageTypeID,option.packageType)">
+                      {{option.packageType}}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+              <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Package <span class="bc-required">*</span></mat-label>
+                  <input required type="text" matInput formControlName="package"
+                    [matAutocomplete]="auto7" (keyup)="onPackageChanges($event)">
+                  <mat-autocomplete #auto7="matAutocomplete" (optionSelected)="onPackageSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredPackageOptions | async"
+                      [value]="option.package" (click)="getPackageID(option.packageID)">
+                      {{option.package}}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Car <span class="bc-required">*</span></mat-label>
+                  <input required type="text" matInput formControlName="vehicle" [matAutocomplete]="auto5">
+                  <mat-autocomplete #auto5="matAutocomplete" (optionSelected)="onCarSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredVehicleOptions | async"
+                      [value]="option.vehicle"
+                      (click)="getVehicleID(option.vehicleID, option.vehicleCategoryID, option.vehicleCategory)">
+                      {{option.vehicle}}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+              <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+                  <mat-label>Car Type <span class="bc-required">*</span></mat-label>
+                  <input matInput formControlName="carType" readonly>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Mode of Payment <span class="bc-required">*</span></mat-label>
+                  <input required type="text" matInput formControlName="modeOfPayment" [matAutocomplete]="autoMop">
+                  <mat-autocomplete #autoMop="matAutocomplete" (optionSelected)="onMopSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredPaymentModeOptions | async"
+                      [value]="option.modeOfPayment"
+                      (click)="getPaymentModeID(option.modeOfPaymentID, option.modeOfPayment)">
+                      {{option.modeOfPayment}}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>City <span class="bc-required">*</span></mat-label>
+                  <input required type="text" matInput formControlName="pickupCity"
+                    [matAutocomplete]="auto4" (keyup)="onPickupCityKeyUp($event)">
+                  <mat-autocomplete #auto4="matAutocomplete" (optionSelected)="onCitySelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredCityOptions | async"
+                      [value]="option.geoPointName" (click)="getCityID(option.geoPointID)">
+                      {{option.geoPointName}}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+              <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Service Location <span class="bc-required">*</span></mat-label>
+                  <input required type="text" matInput formControlName="serviceLocation" [matAutocomplete]="auto10">
+                  <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onSLSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredServiceLocationOptions | async"
+                      [value]="option.organizationalEntityName"
+                      (click)="getServiceLocationID(option.organizationalEntityID)">
+                      {{option.organizationalEntityName}}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Request Type <span class="bc-required">*</span></mat-label>
+                  <mat-select formControlName="requestType">
+                    <mat-option value="Airport Pickup">Airport Pickup</mat-option>
+                    <mat-option value="Airport Drop">Airport Drop</mat-option>
+                    <mat-option value="Local">Local</mat-option>
+                    <mat-option value="Outstation">Outstation</mat-option>
+                    <mat-option value="Other">Other</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Ticket No. <span class="bc-required">*</span></mat-label>
+                  <input matInput formControlName="ticketNumber" (input)="onTicketNumberInput($event)"
+                    required maxlength="15" minlength="12"
+                    pattern="[0-9]{12,15}" inputmode="numeric">
+                  <mat-error *ngIf="advanceTableForm.get('ticketNumber')?.hasError('required')">
+                    Ticket Number is required
+                  </mat-error>
+                  <mat-error *ngIf="advanceTableForm.get('ticketNumber')?.hasError('pattern')">
+                    Ticket Number must be 12 to 15 digits
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width mb-3 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Pickup Date &amp; Time <span class="bc-required">*</span></mat-label>
+                  <input matInput [owlDateTimeTrigger]="date2" [owlDateTime]="date2" formControlName="pickupDateTime" />
+                  <mat-icon matSuffix [owlDateTimeTrigger]="date2" class="date-icon disabled-icon">today</mat-icon>
+                  <owl-date-time #date2></owl-date-time>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="ifBlock; else elseBlock">
+                <mat-form-field class="example-full-width cp-quick-search-field bc-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Pickup Address <span class="bc-required">*</span></mat-label>
+                  <input required type="text" matInput formControlName="pickupAddress" [matAutocomplete]="auto20">
+                  <mat-icon matSuffix>location_on</mat-icon>
+                  <mat-autocomplete #auto20="matAutocomplete" (optionSelected)="onPGLSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredGoogleAddressOptions | async"
+                      [value]="option.geoSearchString"
+                      (click)="OnPickupGeoLocationClick(option)">
+                      {{option.geoSearchString}}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <div class="bc-google-checkbox">
+                  <mat-checkbox color="warn" formControlName="googleAddresses"
+                    (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                </div>
+              </div>
+              <ng-template #elseBlock>
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                  <mat-form-field class="example-full-width cp-quick-search-field bc-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                    <mat-label>Pickup Address <span class="bc-required">*</span></mat-label>
+                    <input matInput ngx-google-places-autocomplete [options]="options"
+                      #placesRef="ngx-places" (onAddressChange)="handleAddressChange($event)"
+                      formControlName="pickupAddress" required>
+                    <mat-icon matSuffix>location_on</mat-icon>
+                  </mat-form-field>
+                  <div class="bc-google-checkbox">
+                    <mat-checkbox color="primary" formControlName="googleAddresses"
+                      (change)="valueSwitch()">Google Addresses</mat-checkbox>
+                  </div>
+                </div>
+              </ng-template>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field bc-textarea-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+                  <mat-label>Pickup Address Details</mat-label>
+                  <textarea matInput rows="2" formControlName="pickupAddressDetails"></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width mb-3 cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Drop Date &amp; Time <span class="bc-required">*</span></mat-label>
+                  <input matInput [owlDateTimeTrigger]="date3" [owlDateTime]="date3" formControlName="dropOffDateTime" />
+                  <mat-icon matSuffix [owlDateTimeTrigger]="date3" class="date-icon disabled-icon">today</mat-icon>
+                  <owl-date-time #date3></owl-date-time>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="dropOffifBlock; else elseBlock2">
+                <mat-form-field class="example-full-width cp-quick-search-field bc-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                  <mat-label>Drop Address</mat-label>
+                  <input type="text" matInput formControlName="dropOffAddress" [matAutocomplete]="auto21">
+                  <mat-icon matSuffix>location_on</mat-icon>
+                  <mat-autocomplete #auto21="matAutocomplete" (optionSelected)="onDropGLSelected($event.option.value)">
+                    <mat-option *ngFor="let option of filteredDropOffGoogleAddressOptions | async"
+                      [value]="option.geoSearchString"
+                      (click)="OnDropOffGeoLocationClick(option)">
+                      {{option.geoSearchString}}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+                <div class="bc-google-checkbox">
+                  <mat-checkbox color="primary" formControlName="googleAdressesDropOff"
+                    (change)="dropOffControlSwitch()">Google Addresses</mat-checkbox>
+                </div>
+              </div>
+              <ng-template #elseBlock2>
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                  <mat-form-field class="example-full-width cp-quick-search-field bc-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                    <mat-label>Drop Address</mat-label>
+                    <input matInput ngx-google-places-autocomplete [options]="options"
+                      #placesRefDrop="ngx-places"
+                      (onAddressChange)="handleAddressChangeDropOff($event)"
+                      formControlName="dropOffAddress">
+                    <mat-icon matSuffix>location_on</mat-icon>
+                  </mat-form-field>
+                  <div class="bc-google-checkbox">
+                    <mat-checkbox color="primary" formControlName="googleAdressesDropOff"
+                      (change)="dropOffControlSwitch()">Google Addresses</mat-checkbox>
+                  </div>
+                </div>
+              </ng-template>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field bc-textarea-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+                  <mat-label>Drop Address Details</mat-label>
+                  <textarea matInput rows="2" formControlName="dropOffAddressDetails"></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                <mat-form-field class="example-full-width cp-quick-search-field bc-textarea-field" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+                  <mat-label>Special Instructions</mat-label>
+                  <textarea matInput rows="3" formControlName="specialInstructions"></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+            </ng-container>
+
+            <mat-progress-bar *ngIf="saving" mode="indeterminate"></mat-progress-bar>
+          </div>
+
+          <div class="bc-footer booking-configuration-actions">
+            <button mat-stroked-button type="button" [disabled]="saving" (click)="back()">Back</button>
+            <button mat-stroked-button type="button" *ngIf="canRequestDetails()"
+              [disabled]="saving || sendingDetails" (click)="openRequestDetails()">
+              Request details
+            </button>
+            <button mat-flat-button color="warn" type="button" *ngIf="canRequestDetails()"
+              [disabled]="saving" (click)="reject()">
+              <mat-icon>close</mat-icon> Reject Request
+            </button>
+            <button mat-raised-button color="primary" class="bc-save-btn" type="button"
+              *ngIf="canConfirm() && saveDisabled" [disabled]="saving || !emailCategory" (click)="confirmAdd()">
+              <mat-icon>save</mat-icon> {{ saveButtonLabel }}
+            </button>
+            <mat-spinner *ngIf="saving" diameter="30"></mat-spinner>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>

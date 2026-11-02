@@ -1258,6 +1258,14 @@ GetCitiessAl(): Observable<CityDropDown[]> {
     return this.http.get<CustomerDropDown[]>(this.BaseURL + "customer/ForDropDown");
   }
 
+  GetCustomerByID(customerID: number): Observable<any> {
+    return this.http.get<any>(this.BaseURL + 'customer/' + customerID);
+  }
+
+  GetPassengerForSBT(customerID: number): Observable<CustomerPersonDropDown[]> {
+    return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + 'CustomerPerson/getPassengerForSBT/' + customerID);
+  }
+
   GetCustomersForCPSearch(customerGroupID:number): Observable<CustomerDropDown[]>{
     return this.http.get<CustomerDropDown[]>(this.BaseURL + "customer/getCustomerForCPSearch/"+customerGroupID);
   }

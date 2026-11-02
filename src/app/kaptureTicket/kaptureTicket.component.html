@@ -1,0 +1,116 @@
+<section class="content ebr-page">
+  <div class="container-fluid">
+    <div class="ebr-header">
+      <div>
+        <ul class="ebr-breadcrumb">
+          <li>
+            <a routerLink="/dashboard/main">Home</a>
+            <span class="ebr-breadcrumb-sep">&gt;</span>
+            <a routerLink="/emailBookingRequest">Email Booking Request</a>
+            <span class="ebr-breadcrumb-sep">&gt;</span>
+            <span>Kapture</span>
+          </li>
+        </ul>
+        <h2 class="ebr-title">Kapture Tickets</h2>
+      </div>
+    </div>
+
+    <div class="ebr-filter-card">
+      <div class="ebr-filter-bar">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>From date</mat-label>
+          <input matInput [matDatepicker]="fromPicker" [(ngModel)]="SearchFromDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>To date</mat-label>
+          <input matInput [matDatepicker]="toPicker" [(ngModel)]="SearchToDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Ticket ID</mat-label>
+          <input matInput [(ngModel)]="SearchTicketId" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Customer email</mat-label>
+          <input matInput [(ngModel)]="SearchEmail" />
+        </mat-form-field>
+      </div>
+
+      <div class="ebr-filter-actions">
+        <button mat-flat-button color="primary" type="button" (click)="SearchData()">
+          <mat-icon>search</mat-icon>
+          Search
+        </button>
+        <button mat-stroked-button type="button" (click)="refresh()">
+          <mat-icon>refresh</mat-icon>
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <div class="ebr-table-card">
+      <p class="ebr-message" *ngIf="loading">Loading Kapture tickets...</p>
+      <p class="ebr-message ebr-error" *ngIf="!loading && loadError">{{ loadError }}</p>
+      <p class="ebr-message" *ngIf="!loading && !loadError && !dataSource.length">No records found.</p>
+
+      <div class="ebr-table-wrap" *ngIf="!loading && dataSource.length">
+        <table mat-table [dataSource]="dataSource">
+          <ng-container matColumnDef="kaptureTicketId">
+            <th mat-header-cell *matHeaderCellDef>Id</th>
+            <td mat-cell *matCellDef="let row">{{ row.kaptureTicketId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="ticketId">
+            <th mat-header-cell *matHeaderCellDef>Ticket</th>
+            <td mat-cell *matCellDef="let row">{{ row.ticketId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="emailSubject">
+            <th mat-header-cell *matHeaderCellDef>Subject</th>
+            <td mat-cell *matCellDef="let row">{{ row.emailSubject }}</td>
+          </ng-container>
+          <ng-container matColumnDef="customerEmail">
+            <th mat-header-cell *matHeaderCellDef>Customer email</th>
+            <td mat-cell *matCellDef="let row">{{ row.customerEmail }}</td>
+          </ng-container>
+          <ng-container matColumnDef="ticketCreatedOn">
+            <th mat-header-cell *matHeaderCellDef>Ticket created</th>
+            <td mat-cell *matCellDef="let row">{{ displayDate(row.ticketCreatedOn) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="ticketStatus">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let row">{{ row.ticketStatus }}</td>
+          </ng-container>
+          <ng-container matColumnDef="ticketSubStatus">
+            <th mat-header-cell *matHeaderCellDef>Sub status</th>
+            <td mat-cell *matCellDef="let row">{{ row.ticketSubStatus }}</td>
+          </ng-container>
+          <ng-container matColumnDef="assignedAgent">
+            <th mat-header-cell *matHeaderCellDef>Agent</th>
+            <td mat-cell *matCellDef="let row">{{ row.assignedAgent }}</td>
+          </ng-container>
+          <ng-container matColumnDef="folderCategory">
+            <th mat-header-cell *matHeaderCellDef>Folder</th>
+            <td mat-cell *matCellDef="let row">{{ row.folderCategory }}</td>
+          </ng-container>
+          <ng-container matColumnDef="createdOn">
+            <th mat-header-cell *matHeaderCellDef>Saved on</th>
+            <td mat-cell *matCellDef="let row">{{ displayDate(row.createdOn) }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <div class="ebr-pager">
+        <button mat-stroked-button type="button" (click)="previousPage()" [disabled]="pageNumber <= 1 || loading">Previous</button>
+        <span>Page {{ pageNumber }}</span>
+        <button mat-stroked-button type="button" (click)="nextPage()" [disabled]="dataSource.length < 50 || loading">Next</button>
+      </div>
+    </div>
+  </div>
+</section>

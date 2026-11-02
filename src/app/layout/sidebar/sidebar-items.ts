@@ -325,6 +325,19 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'emailBookingRequest',
+        title: 'Email Booking Request',
+        pageKey: 'Email Booking Request',
+        moduleName: 'emailBookingRequest',
+        alternateAccessPageKeys: ['emailBookingRequest', 'Email Booking Request'],
+        icon: 'fas fa-envelope-open-text',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'customerMIS',
         title: 'Customer MIS',
         moduleName: 'customerMIS',
