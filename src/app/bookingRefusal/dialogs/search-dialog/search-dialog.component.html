@@ -1,0 +1,107 @@
+<div class="addContainer booking-refusal-search-dialog">
+    <div class="modalHeader booking-refusal-search-dialog__header">
+        <div class="modal-about">
+            <div class="font-weight-bold p-t-5 font-17">Search Booking Refusal</div>
+        </div>
+        <button mat-icon-button type="button" (click)="onCancel()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div mat-dialog-content class="booking-refusal-search-dialog__content">
+        <form class="register-form booking-refusal-search-dialog__form" [formGroup]="searchForm">
+            <div class="row booking-refusal-search-dialog__fields">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        subscriptSizing="fixed">
+                        <mat-label>Customer Name</mat-label>
+                        <input type="text" matInput [formControl]="customerPicker" [matAutocomplete]="autoCustomer"
+                            autocomplete="off">
+                        <mat-autocomplete #autoCustomer="matAutocomplete" class="booking-refusal-search-autocomplete-panel"
+                            [displayWith]="displayCustomer" (optionSelected)="onCustomerSelected($event.option.value)">
+                            <mat-option *ngFor="let c of customerOptions$ | async" [value]="c">{{c.customerName}}</mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        subscriptSizing="fixed">
+                        <mat-label>City</mat-label>
+                        <input type="text" matInput [formControl]="cityPicker" [matAutocomplete]="autoCity"
+                            autocomplete="off">
+                        <mat-autocomplete #autoCity="matAutocomplete" class="booking-refusal-search-autocomplete-panel"
+                            [displayWith]="displayCity" (optionSelected)="onCitySelected($event.option.value)">
+                            <mat-option *ngFor="let city of cityOptions$ | async" [value]="city">{{city.geoPointName}}</mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        subscriptSizing="fixed">
+                        <mat-label>Duty Type</mat-label>
+                        <input type="text" matInput [formControl]="dutyTypePicker" [matAutocomplete]="autoDuty"
+                            autocomplete="off">
+                        <mat-autocomplete #autoDuty="matAutocomplete" class="booking-refusal-search-autocomplete-panel"
+                            [displayWith]="displayDutyType" (optionSelected)="onDutyTypeSelected($event.option.value)">
+                            <mat-option *ngFor="let p of dutyTypeOptions$ | async" [value]="p">{{p.packageType}}</mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        subscriptSizing="fixed">
+                        <mat-label>Car</mat-label>
+                        <input type="text" matInput [formControl]="vehiclePicker" [matAutocomplete]="autoVehicle"
+                            autocomplete="off">
+                        <mat-autocomplete #autoVehicle="matAutocomplete" class="booking-refusal-search-autocomplete-panel"
+                            [displayWith]="displayVehicle" (optionSelected)="onVehicleSelected($event.option.value)">
+                            <mat-option *ngFor="let v of vehicleOptions$ | async" [value]="v">{{v.vehicle}}</mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        subscriptSizing="fixed">
+                        <mat-label>Date</mat-label>
+                        <input matInput [matDatepicker]="pickUpDatePicker" formControlName="pickUpDate">
+                        <mat-datepicker-toggle matSuffix [for]="pickUpDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #pickUpDatePicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        subscriptSizing="fixed">
+                        <mat-label>Location</mat-label>
+                        <input type="text" matInput [formControl]="locationPicker" [matAutocomplete]="autoLocation"
+                            autocomplete="off">
+                        <mat-autocomplete #autoLocation="matAutocomplete" class="booking-refusal-search-autocomplete-panel"
+                            [displayWith]="displayLocation" (optionSelected)="onLocationSelected($event.option.value)">
+                            <mat-option *ngFor="let loc of locationOptions$ | async" [value]="loc">{{loc.organizationalEntityName}}</mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width booking-refusal-search-dialog__status-field"
+                        appearance="outline" floatLabel="always" subscriptSizing="fixed">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatusFilter"
+                            panelClass="booking-refusal-search-select-panel"
+                            disableOptionCentering>
+                            <mat-option value="active">Active</mat-option>
+                            <mat-option value="deactive">Deactive</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div mat-dialog-actions class="booking-refusal-search-dialog__actions">
+        <button mat-raised-button color="primary" type="button" (click)="onSearch()">
+            <mat-icon>search</mat-icon>
+            Search
+        </button>
+        <button mat-raised-button color="warn" type="button" (click)="onReset()">Reset</button>
+        <button mat-raised-button type="button" (click)="onCancel()">Cancel</button>
+    </div>
+</div>
