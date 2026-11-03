@@ -55,6 +55,7 @@ export class FormDialogComponent
   DriverID!: number;
   driverDocumentService: any;
   searchAddressCity: string = '';
+  private pendingDocumentId: number | null = null;
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
   public dialog: MatDialog,
@@ -64,68 +65,195 @@ export class FormDialogComponent
     private el: ElementRef,
   public _generalService:GeneralService)
   {
-    this.DriverID= data.driverID,
-    this.DriverName =data.driverName,
-        // Set the defaults
-        this.action = data.action;
-        if (this.action === 'edit') 
-        {
-        
-          this.dialogTitle ='Document Details';       
-          this.advanceTable = data.advanceTable;
-         
-          this.ImagePath=this.advanceTable.documentImage;
-          this.searchTerm.setValue(this.advanceTable.addressCity);
-          var vd=this.advanceTable.verificationDate.split(' ');
-          this.advanceTable.verificationDate=vd[0];
-          // if(this.advanceTable.verified==='true'){
-          //   this.advanceTable.verifiedData="Verified";
-          // }
-
-          // if(this.advanceTable.verified==='false'){
-          //   this.advanceTable.verifiedData="Rejected";
-          // }
-          if (this.advanceTable.verified === 'true') {
-            this.advanceTable.verifiedData = "Verified"
-          }
-          if (this.advanceTable.verified === 'false') {
-            this.advanceTable.verifiedData = "Rejected"
-            
-          }
-        this.advanceTable = data.advanceTable;
-                let documentExpiry=moment(this.advanceTable.documentExpiry).format('DD/MM/yyyy');
-                
-                  this.onBlurUpdateDateEdit(documentExpiry);
-        } else 
-        {
-          this.dialogTitle = 'Document Details';
-          this.advanceTable = new DriverDocument({});
-          this.advanceTable.activationStatus=true;
-          this.advanceTable.verifiedData='N/A';
-          this.advanceTable.verified='true';
-          this.advanceTable.verifiedBy='N/A';
-          this.advanceTable.verificationRemark='N/A';
-          this.advanceTable.verificationDate=('N/A');
-          this.uploadedByName();
-        }
-        this.advanceTableForm = this.createContactForm();
-        //this.customerPersonName=data.CustomerPersonName;
-        //this.CustomerPersonName =data.customerPersonName,
+    this.DriverID = data.driverID;
+    this.DriverName = data.driverName;
+    this.action = data.action;
+    if (this.action === 'edit') 
+    {
+      this.dialogTitle ='Document Details';       
+      this.advanceTable = data.advanceTable;
+      if (this.advanceTable?.verificationDate) {
+        const vd = String(this.advanceTable.verificationDate).split(' ');
+        this.advanceTable.verificationDate = vd[0];
+      }
+      if (this.advanceTable.verified === 'Verified' || this.advanceTable.verified === 'true') {
+        this.advanceTable.verifiedData = 'Verified';
+      }
+      if (this.advanceTable.verified === 'Rejected' || this.advanceTable.verified === 'false') {
+        this.advanceTable.verifiedData = 'Rejected';
+      }
+    }
+    else 
+    {
+      this.dialogTitle = 'Document Details';
+      this.advanceTable = new DriverDocument({});
+      this.advanceTable.activationStatus=true;
+      this.advanceTable.verifiedData='N/A';
+      this.advanceTable.verified='true';
+      this.advanceTable.verifiedBy='N/A';
+      this.advanceTable.verificationRemark='N/A';
+      this.advanceTable.verificationDate=('N/A');
+      this.uploadedByName();
+    }
+    this.advanceTableForm = this.createContactForm();
+    if (this.action === 'edit') {
+      this.loadEditRecord();
+    }
   }
+
+  private fieldValue(row: any, camel: string, pascal: string): any {
+    const value = row?.[camel] ?? row?.[pascal];
+    return value === undefined || value === null ? '' : value;
+  }
+
+  private resolveDocumentId(row: any): number | null {
+    const raw = row?.documentID ?? row?.DocumentID;
+    if (raw === undefined || raw === null || raw === '') {
+      return null;
+    }
+    const id = Number(raw);
+    return Number.isNaN(id) ? null : id;
+  }
+
+  private resolveDocumentName(row: any): string {
+    return (
+      row?.document ??
+      row?.Document ??
+      row?.documentName ??
+      row?.DocumentName ??
+      'Document'
+    ).toString();
+  }
+
+  private ensureDocumentInDropdown(row: any, documentId: number | null): void {
+    if (documentId == null) {
+      return;
+    }
+    const list = this.DocumentList ?? [];
+    const exists = list.some((item) => Number(item.documentID ?? item.DocumentID) === documentId);
+    if (exists) {
+      return;
+    }
+    this.DocumentList = [
+      ...list,
+      {
+        documentID: documentId,
+        documentName: this.resolveDocumentName(row),
+      },
+    ];
+  }
+
+  private applyDocumentSelection(row: any, documentId: number | null): void {
+    if (documentId == null) {
+      return;
+    }
+    this.ensureDocumentInDropdown(row, documentId);
+    this.advanceTableForm.patchValue({ documentID: documentId });
+  }
+
+  private bindEditFormValues(row: any): void {
+    const documentImage = this.fieldValue(row, 'documentImage', 'DocumentImage');
+    this.ImagePath = documentImage || '';
+
+    const documentExpiryRaw = this.fieldValue(row, 'documentExpiry', 'DocumentExpiry');
+    const documentStartRaw = this.fieldValue(row, 'documentStartDate', 'DocumentStartDate');
+    const documentId = this.resolveDocumentId(row);
+
+    this.advanceTable = row;
+    this.searchTerm.setValue(this.fieldValue(row, 'addressCity', 'AddressCity'));
+
+    this.advanceTableForm.patchValue({
+      driverDocumentID: this.fieldValue(row, 'driverDocumentID', 'DriverDocumentID'),
+      driverID: this.fieldValue(row, 'driverID', 'DriverID') || this.data.driverID,
+      documentNumber: this.fieldValue(row, 'documentNumber', 'DocumentNumber'),
+      documentIssuingAuthority: this.fieldValue(row, 'documentIssuingAuthority', 'DocumentIssuingAuthority'),
+      documentImage,
+      documentImageNonAvailabilityReason: this.fieldValue(row, 'documentImageNonAvailabilityReason', 'DocumentImageNonAvailabilityReason'),
+      documentExpiry: documentExpiryRaw ? moment(documentExpiryRaw).toDate() : null,
+      documentStartDate: documentStartRaw ? moment(documentStartRaw).toDate() : null,
+      activationStatus: row.activationStatus ?? row.ActivationStatus,
+      addressCityID: row.addressCityID ?? row.AddressCityID,
+      address: row.address ?? row.Address,
+      addressCity: row.addressCity ?? row.AddressCity,
+      pin: row.pin ?? row.Pin,
+      verified: row.verified ?? row.Verified,
+      verifiedBy: row.verifiedBy ?? row.VerifiedBy,
+      verificationRemark: row.verificationRemark ?? row.VerificationRemark,
+      verificationDate: row.verificationDate ?? row.VerificationDate,
+    });
+
+    if (this.DocumentList?.length) {
+      this.applyDocumentSelection(row, documentId);
+      this.pendingDocumentId = null;
+    } else {
+      this.pendingDocumentId = documentId;
+    }
+
+    this.syncReasonRequiredValidators();
+  }
+
+  private loadEditRecord(): void {
+    const id = this.fieldValue(this.advanceTable, 'driverDocumentID', 'DriverDocumentID');
+    if (!id) {
+      this.bindEditFormValues(this.advanceTable);
+      return;
+    }
+    this.advanceTableService.getById(Number(id)).subscribe(
+      (record) => {
+        if (record) {
+          this.bindEditFormValues(record);
+        } else {
+          this.bindEditFormValues(this.advanceTable);
+        }
+      },
+      () => {
+        this.bindEditFormValues(this.advanceTable);
+      }
+    );
+  }
+
   public ngOnInit(): void
   {
+    this.advanceTableForm.get('documentImage')?.valueChanges.subscribe(() => {
+      this.syncReasonRequiredValidators();
+    });
+    if (this.action !== 'edit') {
+      this.syncReasonRequiredValidators();
+    }
     this.InitCities();
     this.InitIssuingCity()
     this.intDocument();
   }
 
+  private hasUploadedDocumentImage(): boolean {
+    const image = this.advanceTableForm?.get('documentImage')?.value;
+    return typeof image === 'string' && image.trim().length > 0;
+  }
+
+  private syncReasonRequiredValidators(): void {
+    const reasonControl = this.advanceTableForm.get('documentImageNonAvailabilityReason');
+    if (!reasonControl) {
+      return;
+    }
+    if (this.hasUploadedDocumentImage()) {
+      reasonControl.clearValidators();
+    } else {
+      reasonControl.setValidators([Validators.required]);
+    }
+    reasonControl.updateValueAndValidity({ emitEvent: false });
+  }
+
   intDocument(){
-    this._generalService.getDocumentRequiredforDriver().subscribe
-    (
-      data =>   
-      {
-        this.DocumentList = data;
-        
+    this.advanceTableService.GetDocumentForDriver().subscribe(
+      (data) => {
+        this.DocumentList = (data ?? []).map((item) => ({
+          documentID: Number(item.documentID ?? item.DocumentID),
+          documentName: item.documentName ?? item.DocumentName ?? '',
+        }));
+        if (this.pendingDocumentId != null) {
+          this.applyDocumentSelection(this.advanceTable, this.pendingDocumentId);
+          this.pendingDocumentId = null;
+        }
       }
     );
   }
@@ -225,13 +353,14 @@ export class FormDialogComponent
     {
       driverDocumentID: [this.advanceTable.driverDocumentID],
       driverID: [this.advanceTable.driverID],
-      documentID: [this.advanceTable.documentID],
+      documentID: [this.resolveDocumentId(this.advanceTable), Validators.required],
       documentNumber: [this.advanceTable?.documentNumber],
       documentIssuingAuthority: [this.advanceTable?.documentIssuingAuthority],
       documentImage: [this.advanceTable?.documentImage],
       documentImageNonAvailabilityReason: [this.advanceTable?.documentImageNonAvailabilityReason],
       addressCityID: [this.advanceTable?.addressCityID],
-      documentExpiry: [this.advanceTable.documentExpiry],
+      documentStartDate: [this.advanceTable.documentStartDate],
+      documentExpiry: [this.advanceTable.documentExpiry, Validators.required],
       activationStatus: [this.advanceTable.activationStatus],
       verifiedData: [this.advanceTable.verifiedData],
       verified: [this.advanceTable.verified],
@@ -333,6 +462,10 @@ uploadedByName(){
   // }
 
   public confirmAdd(): void {
+    this.syncReasonRequiredValidators();
+    if (!this.advanceTableForm.valid) {
+      return;
+    }
     this.saveDisabled = false;
     if (this.action == "edit") {
 
@@ -360,7 +493,8 @@ uploadedByName(){
   {
     this.response = event;
     this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
-    this.advanceTableForm.patchValue({documentImage:this.ImagePath})
+    this.advanceTableForm.patchValue({documentImage:this.ImagePath});
+    this.syncReasonRequiredValidators();
   }
 
   licenceVerification()
@@ -407,6 +541,20 @@ if (validDate) {
 } else {
   this.advanceTableForm.get('documentExpiry')?.setErrors({ invalidDate: true });
 }
+}
+
+onBlurUpdateStartDate(value: string): void {
+  value = this._generalService.resetDateiflessthan12(value);
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    this.advanceTableForm.get('documentStartDate')?.setValue(formattedDate);
+  } else if (value?.trim()) {
+    this.advanceTableForm.get('documentStartDate')?.setErrors({ invalidDate: true });
+  } else {
+    this.advanceTableForm.get('documentStartDate')?.setValue(null);
+    this.advanceTableForm.get('documentStartDate')?.setErrors(null);
+  }
 }
 
 }

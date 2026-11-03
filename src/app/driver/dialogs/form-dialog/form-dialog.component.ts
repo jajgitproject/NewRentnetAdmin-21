@@ -33,6 +33,7 @@ import {  ValidationErrors, ValidatorFn } from '@angular/forms';
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import { DriverDuplicateMobileModel } from '../../driver.model';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: false,
@@ -121,7 +122,8 @@ saveDisabled:boolean = true;
     private fb: FormBuilder,
     private el: ElementRef,
 
-    public _generalService:GeneralService)
+    public _generalService:GeneralService,
+    private router: Router)
   {
         // Set the defaults
         this.action = data.action;
@@ -1146,9 +1148,14 @@ public loadPassword()
         if (this.handleDuplicateMobileResponse(response)) {
           return;
         }
+        const driverID =
+          response?.driverID ?? response?.DriverID ?? -1;
+        const driverName =
+          this.advanceTableForm.getRawValue()?.driverName ?? '';
         this.dialogRef.close();
        this._generalService.sendUpdate('DriverCreate:DriverView:Success');//To Send Updates 
-       this.saveDisabled = true; 
+       this.saveDisabled = true;
+       this.navigateToDriverCompliance(driverID, driverName);
     
     },
     error =>
@@ -1204,9 +1211,18 @@ public loadPassword()
         if (this.handleDuplicateMobileResponse(response)) {
           return;
         }
+        const driverID =
+          response?.driverID ??
+          response?.DriverID ??
+          this.advanceTableForm.getRawValue()?.driverID ??
+          this.advanceTable?.driverID ??
+          -1;
+        const driverName =
+          this.advanceTableForm.getRawValue()?.driverName ?? '';
         this.dialogRef.close();
        this._generalService.sendUpdate('DriverUpdate:DriverView:Success');//To Send Updates  
        this.saveDisabled = true;
+       this.navigateToDriverCompliance(driverID, driverName);
        
     },
     error =>
@@ -1216,6 +1232,21 @@ public loadPassword()
     }
   )
   }
+
+  private navigateToDriverCompliance(driverID: number, driverName: string): void {
+    if (!driverID || driverID <= 0) {
+      return;
+    }
+    const enc = (value: unknown) =>
+      this._generalService.encrypt(String(value ?? ''));
+    this.router.navigate(['/driverCompliance'], {
+      queryParams: {
+        DriverID: enc(driverID),
+        DriverName: enc(driverName),
+      },
+    });
+  }
+
   public confirmAdd(): void 
   {
     this.showAllValidationErrors();

@@ -418,6 +418,36 @@ form.customer-form-four-col mat-form-field {
   max-width: min(472px, calc(100vw - 80px)) !important;
 }
 
+/* Employee dropdown / autocomplete — exited employees in red (suggestions + select) */
+.mat-mdc-autocomplete-panel.employee-dropdown-autocomplete-panel .mat-mdc-option.employee-dropdown-exited,
+.mat-mdc-autocomplete-panel .mat-mdc-option.employee-dropdown-exited,
+.cdk-overlay-container .mat-mdc-select-panel.employee-dropdown-select-panel .mat-mdc-option.employee-dropdown-exited {
+  --mat-option-label-text-color: #c62828;
+  --mat-option-selected-state-label-text-color: #c62828;
+  --mat-option-active-state-label-text-color: #c62828;
+  color: #c62828 !important;
+}
+
+.mat-mdc-autocomplete-panel.employee-dropdown-autocomplete-panel .mat-mdc-option.employee-dropdown-exited .mdc-list-item__primary-text,
+.mat-mdc-autocomplete-panel .mat-mdc-option.employee-dropdown-exited .mdc-list-item__primary-text,
+.mat-mdc-autocomplete-panel .mat-mdc-option.employee-dropdown-exited .employee-dropdown-option-text,
+.cdk-overlay-container .mat-mdc-select-panel.employee-dropdown-select-panel .mat-mdc-option.employee-dropdown-exited .mdc-list-item__primary-text {
+  color: #c62828 !important;
+}
+
+.employee-dropdown-exited-selected {
+  .mat-mdc-input-element,
+  input.mat-mdc-input-element,
+  input.mat-input-element {
+    color: #c62828 !important;
+  }
+}
+
+.mat-mdc-select.employee-dropdown-exited-selected .mat-mdc-select-value-text,
+.mat-select.employee-dropdown-exited-selected .mat-select-value-text {
+  color: #c62828 !important;
+}
+
 /* Booking screen — KAM pickup address correction history */
 .cdk-overlay-container .cdk-overlay-pane.kam-pickup-address-history-dialog-panel.mat-mdc-dialog-panel {
   width: min(760px, 96vw) !important;

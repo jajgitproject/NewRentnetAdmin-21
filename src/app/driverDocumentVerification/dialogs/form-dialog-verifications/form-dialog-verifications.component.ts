@@ -53,8 +53,13 @@ export class FormDialogVerificationsComponent
     
   public _generalService:GeneralService)
   { 
-    this.DriverID= data.driverID,
-  this.DriverName =data.DriverName;
+    this.DriverID = data.driverID ?? data.DriverID;
+    this.DriverName =
+      data.DriverName ??
+      data.driverName ??
+      data.advanceTable?.driver ??
+      data.advanceTable?.Driver ??
+      '';
         // Set the defaults
           this.dialogTitle = 'Document Verification';
           this.advanceTable = data.advanceTable;

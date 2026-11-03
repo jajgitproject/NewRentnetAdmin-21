@@ -3,8 +3,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DriverDocumentComponent } from './driverDocument.component';
-import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
+import { DriverDocumentSharedModule } from './driver-document-shared.module';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -28,13 +28,11 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { LicenseVerificationComponent } from './dialogs/license-verification/license-verification.component';
-import { DriverDocumentVerificationService } from '../driverDocumentVerification/driverDocumentVerification.service';
 // import { TwoDigitDecimaNumberDirective } from './twodigitdecimalnumber.directive';
 
 @NgModule({
   declarations: [
     DriverDocumentComponent,
-    advanceTableForm,
     DeleteDialogComponent,
     LicenseVerificationComponent
   ],
@@ -44,6 +42,7 @@ import { DriverDocumentVerificationService } from '../driverDocumentVerification
     FormsModule,
     ReactiveFormsModule,
     DriverDocumentRoutingModule,
+    DriverDocumentSharedModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
@@ -64,7 +63,7 @@ import { DriverDocumentVerificationService } from '../driverDocumentVerification
     MyUploadModule,
     //TwoDigitDecimaNumberDirective
   ],
-  providers: [DriverDocumentService,DriverDocumentVerificationService]
+  providers: [DriverDocumentService]
 })
 export class DriverDocumentModule {}
 

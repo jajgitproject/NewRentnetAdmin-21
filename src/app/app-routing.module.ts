@@ -716,6 +716,23 @@ const routes: Routes = [
           ],
         },
       },
+      {
+        path: 'driverCompliance',
+        loadChildren: () =>
+          import('./driverCompliance/driverCompliance.module').then(
+            (m) => m.DriverComplianceModule
+          ),
+        data: {
+          requiredPageKey: 'driverDocument',
+          alternatePageKeys: [
+            'driverCompliance',
+            'Driver Compliance',
+            'driverDocument',
+            'Driver Document',
+            'driver',
+          ],
+        },
+      },
       
       {
         path: 'customerMIS',

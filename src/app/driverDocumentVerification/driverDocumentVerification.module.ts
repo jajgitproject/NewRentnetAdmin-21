@@ -27,15 +27,12 @@ import { DriverDocumentVerificationRoutingModule } from './driverDocumentVerific
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import { FormDialogVerificationsComponent } from './dialogs/form-dialog-verifications/form-dialog-verifications.component';
-//import { FormDialogVerificationsComponent } from './dialogs/form-dialog/form-dialog-verifications.component';
-//import { LicenseVerificationComponent } from './dialogs/license-verification/license-verification.component';
+import { DriverDocumentSharedModule } from '../driverDocument/driver-document-shared.module';
 // import { TwoDigitDecimaNumberDirective } from './twodigitdecimalnumber.directive';
 
 @NgModule({
   declarations: [
     DriverDocumentVerificationComponent,
-    FormDialogVerificationsComponent,
   ],
   imports: [
     MatAutocompleteModule,
@@ -43,6 +40,7 @@ import { FormDialogVerificationsComponent } from './dialogs/form-dialog-verifica
     FormsModule,
     ReactiveFormsModule,
     DriverDocumentVerificationRoutingModule,
+    DriverDocumentSharedModule,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,

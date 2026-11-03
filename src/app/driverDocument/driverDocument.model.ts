@@ -12,6 +12,9 @@ export class DriverDocument {
   documentImageNonAvailabilityReason:string;
   documentExpiry:Date;
   documentExpiryString:string;
+  documentStartDate:Date;
+  documentStartDateString:string;
+  document: string;
   addressCityID:number;
   address:string;
   pin:string;
@@ -35,6 +38,8 @@ export class DriverDocument {
        this.addressCityID = driverDocument.addressCityID || 0;
        this.address = driverDocument.address || '';
        this.documentExpiryString = driverDocument.documentExpiryString || '';
+       this.documentStartDateString = driverDocument.documentStartDateString || '';
+       this.document = driverDocument.document || '';
        this.pin = driverDocument.pin || '';
        this.activationStatus = driverDocument.activationStatus || '';
        this.verified = driverDocument.verified || '';
@@ -42,7 +47,8 @@ export class DriverDocument {
        this.verificationRemark = driverDocument.verificationRemark || '';
        this.verificationDate = driverDocument.verificationDate || '';
 
-       this.documentExpiry=new Date();
+       this.documentExpiry = driverDocument.documentExpiry ?? null;
+       this.documentStartDate = driverDocument.documentStartDate ?? null;
     }
   }
   

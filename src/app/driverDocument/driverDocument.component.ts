@@ -23,6 +23,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CitiesDropDown } from '../organizationalEntity/citiesDropDown.model';
 import { AllCitiesDropDown } from './allCitiesDropDown.model';
 import { FormDialogVerificationsComponent } from '../driverDocumentVerification/dialogs/form-dialog-verifications/form-dialog-verifications.component';
+import { DocumentDropDown } from '../general/documentDropDown.model';
+import moment from 'moment';
 @Component({
   standalone: false,
   selector: 'app-driverDocument',
@@ -32,11 +34,11 @@ import { FormDialogVerificationsComponent } from '../driverDocumentVerification/
 })
 export class DriverDocumentComponent implements OnInit {
   displayedColumns = [
-    'driverName',
-    'documentName',
-    'supplierName',
-    // 'documentNumber',
-    'documentVerified',
+    'Document',
+    'DocumentStartDate',
+    'DocumentExpiry',
+    'DocumentIssuingAuthority',
+    'DocumentVerified',
     'status',
     'actions'
   ];
@@ -56,6 +58,13 @@ export class DriverDocumentComponent implements OnInit {
   searchDocumentNumber: string = '';
   searchDocumentIssuingAuthority: string = '';
   searchAddress: string = '';
+  searchDocumentID: number | null = null;
+  searchDocumentStartDateFrom: Date | string = '';
+  searchDocumentStartDateTo: Date | string = '';
+  searchDocumentExpiryFrom: Date | string = '';
+  searchDocumentExpiryTo: Date | string = '';
+  searchQcStatus: string = '';
+  public DocumentList?: DocumentDropDown[] = [];
   addressCity : FormControl = new FormControl();
   documentNumber : FormControl = new FormControl();
   documentIssuingAuthority : FormControl = new FormControl();
@@ -95,26 +104,24 @@ export class DriverDocumentComponent implements OnInit {
     
     
       if (encryptedDriverID && encryptedDriverName) {
-        try {
-          const decryptedDriverID = this._generalService.decrypt(decodeURIComponent(encryptedDriverID));
-          const decryptedDriverName = this._generalService.decrypt(decodeURIComponent(encryptedDriverName));
-    
-          if (decryptedDriverID && decryptedDriverName) {
-            this.driverID = decryptedDriverID;
-            this.driverName = decryptedDriverName;
-          } else {
-            console.error("Decryption failed: Invalid data received");
-          }
-        } catch (error) {
-          console.error("Error decrypting values:", error);
-        }
+        this.driverID = this._generalService.decrypt(decodeURIComponent(encryptedDriverID));
+        this.driverName = this._generalService.decrypt(decodeURIComponent(encryptedDriverName));
+      } else {
+        this.driverID = 0;
+        this.driverName = '';
       }
-    
     });
     this.loadData();
     this.SubscribeUpdateService();
     this.InitCities();
+    this.initDocuments();
     //this.InitIssuingCity();
+  }
+
+  initDocuments() {
+    this.driverDocumentService.GetDocumentForDriver().subscribe((data) => {
+      this.DocumentList = data;
+    });
   }
 
   InitCities(){
@@ -166,6 +173,12 @@ export class DriverDocumentComponent implements OnInit {
     this.searchDocumentNumber = '';
     this.searchDocumentIssuingAuthority = '';
     this.searchAddress = '';
+    this.searchDocumentID = null;
+    this.searchDocumentStartDateFrom = '';
+    this.searchDocumentStartDateTo = '';
+    this.searchDocumentExpiryFrom = '';
+    this.searchDocumentExpiryTo = '';
+    this.searchQcStatus = '';
     this.SearchActivationStatus = true;
     this.PageNumber=0;
     this.searchTerm = '';
@@ -174,7 +187,7 @@ export class DriverDocumentComponent implements OnInit {
   }
 
   driverDocumentVerification(row)
-  { console.log(row)
+  {
     const dialogRef = this.dialog.open(FormDialogVerificationsComponent, 
     {
       data: 
@@ -192,6 +205,7 @@ export class DriverDocumentComponent implements OnInit {
 
   public SearchData()
   {
+    this.PageNumber = 0;
     this.loadData();    
   }
   addNew()
@@ -246,8 +260,19 @@ export class DriverDocumentComponent implements OnInit {
     }
   }
 
+  private formatFilterDate(value: Date | string): string {
+    if (value === '' || value == null) {
+      return '';
+    }
+    return moment(value).format('YYYY-MM-DD');
+  }
+
    public loadData() 
    {
+    const documentStartDateFromFilter = this.formatFilterDate(this.searchDocumentStartDateFrom);
+    const documentStartDateToFilter = this.formatFilterDate(this.searchDocumentStartDateTo);
+    const documentExpiryFromFilter = this.formatFilterDate(this.searchDocumentExpiryFrom);
+    const documentExpiryToFilter = this.formatFilterDate(this.searchDocumentExpiryTo);
     switch (this.selectedFilter)
     {
       case 'documentNumber':
@@ -257,21 +282,25 @@ export class DriverDocumentComponent implements OnInit {
         this.searchTerm = '';
         break;
     }
-      this.driverDocumentService.getTableData(this.driverID,this.searchAddressCity,this.searchDocumentNumber,this.searchDocumentIssuingAuthority,this.searchAddress,this.SearchActivationStatus, this.PageNumber).subscribe
+      this.driverDocumentService.getTableData(
+        this.driverID,
+        this.searchAddressCity,
+        this.searchDocumentNumber,
+        this.searchDocumentIssuingAuthority,
+        this.searchAddress,
+        this.SearchActivationStatus,
+        this.searchDocumentID != null ? String(this.searchDocumentID) : '',
+        documentStartDateFromFilter,
+        documentStartDateToFilter,
+        documentExpiryFromFilter,
+        documentExpiryToFilter,
+        this.searchQcStatus,
+        this.PageNumber
+      ).subscribe
     (
       data =>   
       {
-
         this.dataSource = data;
-        // this.dataSource.forEach((ele)=>{
-        //   if(ele.activationStatus===true){
-        //     this.activeData="Active";
-        //   }
-        //   else{
-        //     this.activeData="Deleted"
-        //   }
-        // })
-       
       },
       (error: HttpErrorResponse) => { this.dataSource = null;}
     );
@@ -435,7 +464,27 @@ export class DriverDocumentComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.driverDocumentService.getTableDataSort(this.driverID,this.searchAddressCity,this.searchDocumentNumber,this.searchDocumentIssuingAuthority,this.searchAddress,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
+    const documentStartDateFromFilter = this.formatFilterDate(this.searchDocumentStartDateFrom);
+    const documentStartDateToFilter = this.formatFilterDate(this.searchDocumentStartDateTo);
+    const documentExpiryFromFilter = this.formatFilterDate(this.searchDocumentExpiryFrom);
+    const documentExpiryToFilter = this.formatFilterDate(this.searchDocumentExpiryTo);
+    this.driverDocumentService.getTableDataSort(
+      this.driverID,
+      this.searchAddressCity,
+      this.searchDocumentNumber,
+      this.searchDocumentIssuingAuthority,
+      this.searchAddress,
+      this.SearchActivationStatus,
+      this.searchDocumentID != null ? String(this.searchDocumentID) : '',
+      documentStartDateFromFilter,
+      documentStartDateToFilter,
+      documentExpiryFromFilter,
+      documentExpiryToFilter,
+      this.searchQcStatus,
+      this.PageNumber,
+      coloumName.active,
+      this.sortType
+    ).subscribe
     (
       data =>   
       {

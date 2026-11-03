@@ -22,6 +22,15 @@ import {  ValidationErrors, ValidatorFn } from '@angular/forms';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import moment from 'moment';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntityMessage/organizationalEntityDropDown.model';
+import {
+  displayEmployeeDropdownValue,
+  filterEmployeesForAutocomplete,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+  employeeMatchesDropdownInput,
+} from 'src/app/shared/employee-dropdown-display.util';
 
 @Component({
   standalone: false,
@@ -84,6 +93,36 @@ export class FormDialogComponent
   public showConfirmPassword: boolean;
   saveDisabled: boolean = true;
   employeeAttachedToLocationID: any;
+
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayReportingManager = (value: EmployeeDropDown | string) => displayEmployeeDropdownValue(value);
+
+  isReportingManagerExited(): boolean {
+    const value = this.advanceTableForm?.get('reportingManager')?.value;
+    const employee = findEmployeeByDropdownInput(value, this.EmployeesList || []);
+    return isEmployeeExited(employee);
+  }
+
+  /** API expects reportingManager as string, not the autocomplete object. */
+  private buildSavePayload(): Record<string, unknown> {
+    const raw = { ...this.advanceTableForm.getRawValue() };
+    const rmValue = raw.reportingManager;
+    const employee = findEmployeeByDropdownInput(rmValue, this.EmployeesList || []);
+    if (employee) {
+      raw.reportingManagerID = employee.employeeID ?? this.reportingManagerID ?? raw.reportingManagerID;
+      raw.reportingManager = formatEmployeeDropdownLabel(employee);
+      this.reportingManagerID = raw.reportingManagerID;
+    } else if (isEmployeeDropdownSelection(rmValue)) {
+      raw.reportingManagerID = rmValue.employeeID ?? rmValue.EmployeeID ?? this.reportingManagerID ?? raw.reportingManagerID;
+      raw.reportingManager = formatEmployeeDropdownLabel(rmValue);
+      this.reportingManagerID = raw.reportingManagerID;
+    } else if (typeof rmValue === 'string') {
+      raw.reportingManager = rmValue;
+      raw.reportingManagerID = this.reportingManagerID ?? raw.reportingManagerID;
+    }
+    return raw;
+  }
   
   constructor(
     public dialog: MatDialog,
@@ -172,10 +211,20 @@ this.advanceTableForm.get('employmentStatus')!.valueChanges.subscribe(status => 
     if (status === 'Active' || status === 'OnHold') {
       dateControl.disable();
       dateControl.setValue(null);
+      dateControl.clearValidators();
     } else if (status === 'Exited') {
       dateControl.enable();
+      dateControl.setValidators([Validators.required]);
     }
+    dateControl.updateValueAndValidity({ emitEvent: false });
   });
+
+  const initialEmploymentStatus = this.advanceTableForm.get('employmentStatus')?.value;
+  if (initialEmploymentStatus === 'Exited') {
+    const dateControl = this.advanceTableForm.get('dateOfLeaving');
+    dateControl?.setValidators([Validators.required]);
+    dateControl?.updateValueAndValidity({ emitEvent: false });
+  }
 
   // VPN & Reason logic
   const vpnCtrl = this.advanceTableForm.get('vpn');
@@ -232,7 +281,9 @@ this.advanceTableForm.get('employmentStatus')!.valueChanges.subscribe(status => 
     (
       data=>{
         this.CountryCodeList=data;
-        this.advanceTableForm.controls['countryCodes'].setValidators([this.countryValidator(this.CountryCodeList)
+        this.advanceTableForm.controls['countryCodes'].setValidators([
+          Validators.required,
+          this.countryValidator(this.CountryCodeList)
         ]);
         this.advanceTableForm.controls['countryCodes'].updateValueAndValidity();
 
@@ -418,8 +469,8 @@ this.advanceTableForm.get('employmentStatus')!.valueChanges.subscribe(status => 
         if (this.action === 'edit' && this.advanceTable) {
       const rm = this.EmployeesList.find(e => e.employeeID === this.advanceTable.reportingManagerID);
       if (rm) {
-        const fullValue = `${rm.firstName} ${rm.lastName} ${rm.employeeOfficeID}`;
-        this.advanceTableForm.patchValue({ reportingManager: fullValue });
+        this.advanceTableForm.patchValue({ reportingManager: rm });
+        this.getTitles(rm.employeeID);
       }
     }
       });
@@ -428,28 +479,22 @@ this.advanceTableForm.get('employmentStatus')!.valueChanges.subscribe(status => 
   }
   
   
-  private _filter(value: string): any {
-    const filterValue = value.toLowerCase();
-     if (!value || value.length < 3)
-     {
-        return [];   
-      }
-    return this.EmployeesList.filter(
-      data => 
-      {
-        //return customer.firstName.toLowerCase().includes(filterValue);
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
+  private _filter(value: string | EmployeeDropDown): EmployeeDropDown[] {
+    if (isEmployeeDropdownSelection(value)) {
+      return [];
+    }
+    return filterEmployeesForAutocomplete(this.EmployeesList, String(value ?? ''));
   }
-  OnReportingManagerSelect(selectedReportingManager: string)
+  OnReportingManagerSelect(selectedReportingManager: EmployeeDropDown | string)
   {
-    const ReportingManagerName = this.EmployeesList.find(
-      data => `${data.firstName} ${data.lastName} ${data.employeeOfficeID}` === selectedReportingManager
+    const reportingManager = findEmployeeByDropdownInput(
+      selectedReportingManager,
+      this.EmployeesList || []
     );
-    if (selectedReportingManager) 
+    if (reportingManager) 
     {
-      this.getTitles(ReportingManagerName.employeeID);
+      this.getTitles(reportingManager.employeeID);
+      this.advanceTableForm.patchValue({ reportingManager: reportingManager }, { emitEvent: false });
     }
   }
   getTitles(reportingManagerID: any)
@@ -458,8 +503,18 @@ this.advanceTableForm.get('employmentStatus')!.valueChanges.subscribe(status => 
   }
 employeeValidator(EmployeesList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = EmployeesList.some(employee => (employee.firstName + ' '+ employee.lastName + ' ' + employee.employeeOfficeID).toLowerCase() === value);
+      if (!control.value) {
+        return null;
+      }
+      if (isEmployeeDropdownSelection(control.value)) {
+        const id = control.value.employeeID ?? control.value.EmployeeID;
+        const match = EmployeesList.some(
+          (employee) => String(employee.employeeID) === String(id)
+        );
+        return match ? null : { reportingManagerInvalid: true };
+      }
+      const value = String(control.value).toLowerCase();
+      const match = EmployeesList.some((employee) => employeeMatchesDropdownInput(employee, value));
       return match ? null : { reportingManagerInvalid: true };
     };
   }
@@ -660,11 +715,11 @@ checkDuplicateEmail() {
     return this.fb.group(
     {
       employeeID: [this.advanceTable.employeeID],
-      firstName: [this.advanceTable.firstName],
-      lastName: [this.advanceTable.lastName],
-      gender: [this.advanceTable.gender],
+      firstName: [this.advanceTable.firstName, Validators.required],
+      lastName: [this.advanceTable.lastName, Validators.required],
+      gender: [this.advanceTable.gender, Validators.required],
       reportingManagerID: [this.advanceTable.reportingManagerID],
-      mobile: [this.advanceTable.mobile],
+      mobile: [this.advanceTable.mobile, Validators.required],
   email: [
   this.advanceTable.email,
   [Validators.required, Validators.email]
@@ -674,9 +729,9 @@ checkDuplicateEmail() {
       roleID: [this.advanceTable.roleID],
        oldRenNetID: [
   (this.advanceTable.oldRenNetID && this.advanceTable.oldRenNetID !== 0) ? this.advanceTable.oldRenNetID : null,
-  [Validators.pattern('^[0-9]+$')]
+  [this.oldRenNetIdValidator()]
 ],
-      employeeOfficeID: [this.advanceTable.employeeOfficeID],
+      employeeOfficeID: [this.advanceTable.employeeOfficeID, Validators.required],
       // loginName: [this.advanceTable.loginName],
       // employmentType: [this.advanceTable.employmentType],
      employeeAttachedToLocationID: [this.advanceTable.employeeAttachedToLocationID],
@@ -703,7 +758,7 @@ dateOfLeaving: [
       // confirmPassword: [this.advanceTable?.confirmPassword],
       // organizationalEntityID: [this.advanceTable?.organizationalEntityID],
       // organizationalEntityName: [this.advanceTable?.organizationalEntityName],
-      packageAmount: [this.advanceTable?.packageAmount],
+      packageAmount: [this.advanceTable?.packageAmount, Validators.required],
       vpn: [this.advanceTable?.vpn],
       reason: [this.advanceTable?.reason],
 //  vpn: [this.advanceTable?.vpn ?? true],
@@ -732,9 +787,74 @@ dateOfLeaving: [
     return isValid ? null : { 'whitespace': true };
 }
 
+  /** SQL int: optional, up to 10 digits, max 2147483647. */
+  oldRenNetIdValidator(): ValidatorFn {
+    const maxInt = 2147483647;
+    return (control: AbstractControl): ValidationErrors | null => {
+      const raw = control.value;
+      if (raw === null || raw === undefined || raw === '') {
+        return null;
+      }
+      const text = String(raw).trim();
+      if (!text) {
+        return null;
+      }
+      if (!/^[0-9]+$/.test(text)) {
+        return { oldRenNetIdFormat: true };
+      }
+      if (text.length > 10) {
+        return { oldRenNetIdMaxLength: true };
+      }
+      const num = Number(text);
+      if (!Number.isFinite(num) || num > maxInt) {
+        return { oldRenNetIdMax: true };
+      }
+      return null;
+    };
+  }
+
+  onOldRenNetIdInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = (input.value || '').replace(/\D/g, '').slice(0, 10);
+    const control = this.advanceTableForm.get('oldRenNetID');
+    const next = digits === '' ? null : digits;
+    if (control && control.value !== next) {
+      control.setValue(next);
+    }
+  }
+
   submit() 
   {
-    // emppty stuff
+    this.confirmAdd();
+  }
+
+  /** Force Material to display mat-error on every invalid control. */
+  showAllValidationErrors(): void {
+    if (!this.advanceTableForm) {
+      return;
+    }
+    this.advanceTableForm.markAllAsTouched();
+    Object.keys(this.advanceTableForm.controls).forEach((key) => {
+      const control = this.advanceTableForm.get(key);
+      if (!control) {
+        return;
+      }
+      control.markAsTouched({ onlySelf: true });
+      control.markAsDirty({ onlySelf: true });
+      control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
+    this.advanceTableForm.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private scrollToFirstInvalidControl(): void {
+    setTimeout(() => {
+      const invalidControl = this.el.nativeElement.querySelector(
+        '.mat-mdc-form-field.mat-form-field-invalid, .mat-form-field.ng-invalid, .ng-invalid[formcontrolname]'
+      );
+      if (invalidControl) {
+        invalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 0);
   }
   onNoClick(): void 
   {
@@ -759,7 +879,7 @@ dateOfLeaving: [
     this.advanceTableForm?.patchValue({organizationalEntityID:this.organizationalEntityID})
     this.advanceTableForm?.patchValue({employeeAttachedToLocationID:this.employeeAttachedToLocationID})
      const payload = {
-  ...this.advanceTableForm.getRawValue(),
+  ...this.buildSavePayload(),
   dateOfLeaving: this.advanceTableForm.get('dateOfLeaving')?.value || null,
   oldRenNetID: this.getOldRentNetID()
   
@@ -795,7 +915,7 @@ dateOfLeaving: [
     this.advanceTableForm?.patchValue({reportingManagerID:this.reportingManagerID || this.advanceTable.reportingManagerID})
     this.advanceTableForm?.patchValue({employeeAttachedToLocationID:this.employeeAttachedToLocationID || this.advanceTable.employeeAttachedToLocationID})
        const payload = {
-  ...this.advanceTableForm.getRawValue(),
+  ...this.buildSavePayload(),
     dateOfLeaving: this.advanceTableForm.get('dateOfLeaving')?.value || null,
   oldRenNetID: this.getOldRentNetID()
 };
@@ -820,15 +940,19 @@ dateOfLeaving: [
   }
   public confirmAdd(): void 
   {
+    this.showAllValidationErrors();
+    if (!this.advanceTableForm.valid) {
+      this.scrollToFirstInvalidControl();
+      this.saveDisabled = true;
+      return;
+    }
+
     this.saveDisabled = false;
-       if(this.action=="edit")
-       {
-          this.Put();
-       }
-       else
-       {
-          this.Post();
-       }
+    if (this.action == 'edit') {
+      this.Put();
+    } else {
+      this.Post();
+    }
   }
   // OnEmployeeChangeGetcurrencies()
   // {
