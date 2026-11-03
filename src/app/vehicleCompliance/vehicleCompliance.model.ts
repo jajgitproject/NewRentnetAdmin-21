@@ -42,6 +42,10 @@ export class VehicleComplianceRow {
   verifiedBy: string;
   verificationRemark: string;
   verificationDate: string;
+  documentUploadDate: string;
+  documentUploadTime: string;
+  documentUploadByID: number;
+  documentUploadBy: string;
   isComplete: boolean;
   isExpiringSoon: boolean;
   isEditable: boolean;
@@ -68,6 +72,10 @@ export class VehicleComplianceRow {
     this.verifiedBy = raw.verifiedBy ?? raw.VerifiedBy ?? '';
     this.verificationRemark = raw.verificationRemark ?? raw.VerificationRemark ?? '';
     this.verificationDate = raw.verificationDate ?? raw.VerificationDate ?? '';
+    this.documentUploadDate = formatUploadDate(raw.documentUploadDate ?? raw.DocumentUploadDate);
+    this.documentUploadTime = formatUploadTime(raw.documentUploadTime ?? raw.DocumentUploadTime);
+    this.documentUploadByID = raw.documentUploadByID ?? raw.DocumentUploadByID ?? null;
+    this.documentUploadBy = raw.documentUploadBy ?? raw.DocumentUploadBy ?? '';
     this.isComplete = raw.isComplete ?? raw.IsComplete ?? false;
     this.isExpiringSoon = raw.isExpiringSoon ?? raw.IsExpiringSoon ?? false;
     this.isEditable = raw.isEditable ?? raw.IsEditable ?? true;
@@ -88,6 +96,30 @@ export class VehicleCompliancePage {
     const rows = raw.rows ?? raw.Rows ?? [];
     this.rows = rows.map((r) => new VehicleComplianceRow(r));
   }
+}
+
+function formatUploadDate(value: any): string {
+  if (value === undefined || value === null || value === '') {
+    return '';
+  }
+  const parsed = moment(
+    value,
+    [moment.ISO_8601, 'YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DD', 'DD/MM/YYYY'],
+    true
+  );
+  if (parsed.isValid()) {
+    return parsed.format('DD/MM/YYYY');
+  }
+  const text = String(value);
+  return text.includes('T') ? text.split('T')[0] : text;
+}
+
+function formatUploadTime(value: any): string {
+  if (value === undefined || value === null || value === '') {
+    return '';
+  }
+  const text = String(value);
+  return text.length >= 8 ? text.substring(0, 8) : text;
 }
 
 function parseDate(value: any): Date | null {

@@ -70,6 +70,9 @@
                                                 <span class="th-wrap-line">Issuing</span>
                                                 <span class="th-wrap-line">Authority</span>
                                             </th>
+                                            <th class="col-date">Upload Date</th>
+                                            <th class="col-time">Upload Time</th>
+                                            <th class="col-upload-by">Uploaded By</th>
                                         </tr>
                                     </thead>
                                     <tbody formArrayName="rows">
@@ -146,6 +149,21 @@
                                                 <mat-form-field appearance="outline" class="field-fit field-text">
                                                     <input matInput formControlName="documentIssuingAuthority" maxlength="50">
                                                 </mat-form-field>
+                                            </td>
+                                            <td class="cell-upload-meta">
+                                                <span *ngIf="showDocumentUploadMetadata(row)" class="upload-meta-text">
+                                                    {{ rowSnapshots[i]?.documentUploadDate || '—' }}
+                                                </span>
+                                            </td>
+                                            <td class="cell-upload-meta">
+                                                <span *ngIf="showDocumentUploadMetadata(row)" class="upload-meta-text">
+                                                    {{ rowSnapshots[i]?.documentUploadTime || '—' }}
+                                                </span>
+                                            </td>
+                                            <td class="cell-upload-meta">
+                                                <span *ngIf="showDocumentUploadMetadata(row)" class="upload-meta-text">
+                                                    {{ rowSnapshots[i]?.documentUploadBy || rowSnapshots[i]?.documentUploadByID || '—' }}
+                                                </span>
                                             </td>
                                         </tr>
                                     </tbody>

@@ -587,6 +587,29 @@ form.customer-form-four-col mat-form-field {
   flex-shrink: 0 !important;
   box-sizing: border-box;
 }
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .mat-mdc-dialog-container .mdc-dialog__surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 90vh !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog app-form-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  max-height: 90vh;
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .addContainer {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .addContainer [mat-dialog-content] {
+  flex: 1 1 auto;
+  min-height: 0;
+}
 
 /* KAM Pickup Address Correction dialog */
 .cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel.mat-mdc-dialog-panel {

@@ -25,6 +25,10 @@ interface VehicleComplianceRowDocumentSnapshot {
   documentImageNonAvailabilityReason: string;
   documentStartDate: Date | null;
   documentExpiry: Date | null;
+  documentUploadDate: string;
+  documentUploadTime: string;
+  documentUploadByID: number | null;
+  documentUploadBy: string;
 }
 
 @Component({
@@ -43,7 +47,7 @@ export class VehicleComplianceComponent implements OnInit {
   saveInProgress = false;
   imagePaths: string[] = [];
   imageBroken: boolean[] = [];
-  private rowSnapshots: VehicleComplianceRowDocumentSnapshot[] = [];
+  rowSnapshots: VehicleComplianceRowDocumentSnapshot[] = [];
   private rowLastActions: string[] = [];
 
   summaryCards: { key: string; label: string; value: number; icon: string }[] = [];
@@ -164,6 +168,13 @@ export class VehicleComplianceComponent implements OnInit {
     });
   }
 
+  showDocumentUploadMetadata(row: FormGroup): boolean {
+    return (
+      row.get('action')?.value === VehicleComplianceActions.editCurrent &&
+      !!row.get('hasApplicableRecord')?.value
+    );
+  }
+
   onActionChange(index: number): void {
     const group = this.rows.at(index) as FormGroup;
     const action = group.get('action')?.value;
@@ -211,6 +222,10 @@ export class VehicleComplianceComponent implements OnInit {
       documentImageNonAvailabilityReason: row.documentImageNonAvailabilityReason ?? '',
       documentStartDate: row.documentStartDate ?? null,
       documentExpiry: row.documentExpiry ?? null,
+      documentUploadDate: row.documentUploadDate ?? '',
+      documentUploadTime: row.documentUploadTime ?? '',
+      documentUploadByID: row.documentUploadByID ?? null,
+      documentUploadBy: row.documentUploadBy ?? '',
     };
   }
 
@@ -223,6 +238,10 @@ export class VehicleComplianceComponent implements OnInit {
       documentImageNonAvailabilityReason: '',
       documentStartDate: null,
       documentExpiry: null,
+      documentUploadDate: '',
+      documentUploadTime: '',
+      documentUploadByID: null,
+      documentUploadBy: '',
     };
   }
 

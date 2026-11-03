@@ -158,6 +158,12 @@ export class RolePageGuard implements CanActivate, CanActivateChild {
     ) {
       return true;
     }
+    if (
+      (segment === 'driverCompliance' || segment === 'driverDocument') &&
+      this.isDriverContextEncryptedDeepLink(state.url)
+    ) {
+      return true;
+    }
     return this.router.parseUrl('/dashboard');
   }
 
@@ -172,6 +178,25 @@ export class RolePageGuard implements CanActivate, CanActivateChild {
       r = r.firstChild;
     }
     return merged;
+  }
+
+  /** Driver row menu opens document/compliance tabs with encrypted DriverID / DriverName. */
+  private isDriverContextEncryptedDeepLink(url: string): boolean {
+    try {
+      const tree = this.router.parseUrl(url);
+      const q = tree.queryParams || {};
+      const driverId = String(q['DriverID'] ?? '');
+      const driverName = String(q['DriverName'] ?? '');
+      const looksLikeCipher = (v: string) => {
+        if (!v || v.length < 24) {
+          return false;
+        }
+        return v.startsWith('U2FsdGVk') || /^[A-Za-z0-9+%/_=-]+$/.test(v);
+      };
+      return looksLikeCipher(driverId) && looksLikeCipher(driverName);
+    } catch {
+      return false;
+    }
   }
 
   /** Same-app context menu opens CryptoJS ciphertext in query; Page table names may not match route keys. */

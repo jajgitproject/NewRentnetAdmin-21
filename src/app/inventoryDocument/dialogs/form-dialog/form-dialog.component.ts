@@ -72,10 +72,8 @@ export class FormDialogComponent
     {
       this.dialogTitle ='Document Details';       
       this.advanceTable = data.advanceTable;
-      if (this.advanceTable?.verificationDate) {
-        const vd = String(this.advanceTable.verificationDate).split(' ');
-        this.advanceTable.verificationDate = vd[0];
-      }
+      this.formatDocumentUploadFields(this.advanceTable);
+      this.formatVerificationFields(this.advanceTable);
       if (this.advanceTable.verified === 'Verified' || this.advanceTable.verified === 'true') {
         this.advanceTable.verifiedData = 'Verified';
       }
@@ -104,6 +102,40 @@ export class FormDialogComponent
   private fieldValue(row: any, camel: string, pascal: string): any {
     const value = row?.[camel] ?? row?.[pascal];
     return value === undefined || value === null ? '' : value;
+  }
+
+  private formatDocumentUploadFields(row: any): void {
+    if (!row) {
+      return;
+    }
+    const uploadDateRaw = this.fieldValue(row, 'documentUploadDate', 'DocumentUploadDate');
+    if (uploadDateRaw) {
+      const parsed = moment(uploadDateRaw);
+      row.documentUploadDate = parsed.isValid() ? parsed.format('DD/MM/YYYY') : String(uploadDateRaw).split('T')[0];
+    }
+    const uploadTimeRaw = this.fieldValue(row, 'documentUploadTime', 'DocumentUploadTime');
+    if (uploadTimeRaw) {
+      const timeText = String(uploadTimeRaw);
+      row.documentUploadTime = timeText.length >= 8 ? timeText.substring(0, 8) : timeText;
+    }
+    row.documentUploadByID = row.documentUploadByID ?? row.DocumentUploadByID ?? null;
+    row.documentUploadBy = this.fieldValue(row, 'documentUploadBy', 'DocumentUploadBy');
+  }
+
+  private formatVerificationFields(row: any): void {
+    if (!row) {
+      return;
+    }
+    const dateRaw = this.fieldValue(row, 'verificationDate', 'VerificationDate');
+    if (dateRaw && dateRaw !== 'N/A') {
+      const parsed = moment(dateRaw);
+      row.verificationDate = parsed.isValid() ? parsed.format('DD/MM/YYYY') : String(dateRaw).split('T')[0].split(' ')[0];
+    }
+    const verificationTimeRaw = this.fieldValue(row, 'verificationTime', 'VerificationTime');
+    if (verificationTimeRaw) {
+      const timeText = String(verificationTimeRaw);
+      row.verificationTime = timeText.length >= 8 ? timeText.substring(0, 8) : timeText;
+    }
   }
 
   private resolveDocumentId(row: any): number | null {
@@ -160,6 +192,8 @@ export class FormDialogComponent
     const documentId = this.resolveDocumentId(row);
 
     this.advanceTable = row;
+    this.formatDocumentUploadFields(this.advanceTable);
+    this.formatVerificationFields(this.advanceTable);
     this.searchTerm.setValue(this.fieldValue(row, 'addressCity', 'AddressCity'));
 
     this.advanceTableForm.patchValue({
