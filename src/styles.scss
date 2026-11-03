@@ -2389,3 +2389,22 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   margin-bottom: 12px;
 }
 
+/* Employee dropdown / autocomplete (Material 21) — shared across admin pickers */
+.employee-dropdown-exited,
+.employee-dropdown-exited-selected .mat-mdc-input-element,
+.employee-dropdown-exited-selected .mdc-text-field__input {
+  color: #c62828 !important;
+}
+
+.employee-dropdown-autocomplete-panel .mat-mdc-option.employee-dropdown-exited .employee-dropdown-option-text,
+.employee-dropdown-select-panel .mat-mdc-option.employee-dropdown-exited .employee-dropdown-option-text {
+  color: #c62828;
+}
+
+.employee-dropdown-autocomplete-panel .mat-mdc-option.employee-dropdown-exited,
+.employee-dropdown-select-panel .mat-mdc-option.employee-dropdown-exited {
+  --mat-option-label-text-color: #c62828;
+  --mat-option-active-state-label-text-color: #c62828;
+  --mat-option-selected-state-label-text-color: #c62828;
+}
+

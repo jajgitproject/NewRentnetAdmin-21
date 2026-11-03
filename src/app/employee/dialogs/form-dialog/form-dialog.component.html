@@ -65,15 +65,24 @@
                             Please select a Reporting Manager
                         </mat-error>
                     </mat-form-field> -->
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedReportingManagerExited()}">
                         <mat-label>Reporting Manager</mat-label>
                         <input required type="text" matInput formControlName="reportingManager"
                             [matAutocomplete]="auto">
-                        <mat-autocomplete #auto="matAutocomplete"
+                        <mat-autocomplete #auto="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="displayEmployeeFn"
                             (optionSelected)="OnReportingManagerSelect($event.option.value)">
                             <mat-option *ngFor="let option of filteredEmployeeOptions | async"
-                                [value]="option.firstName+ ' '+ option.lastName + ' ' + (option.employeeOfficeID)" (click)="getTitles(option.employeeID)">
-                                {{option.firstName}} {{option.lastName}} {{ option.employeeOfficeID }}
+                                [value]="option"
+                                [class.employee-dropdown-exited]="isEmployeeExited(option)"
+                                [style.--mat-option-label-text-color]="isEmployeeExited(option) ? '#c62828' : null"
+                                [style.--mat-option-active-state-label-text-color]="isEmployeeExited(option) ? '#c62828' : null"
+                                [style.--mat-option-selected-state-label-text-color]="isEmployeeExited(option) ? '#c62828' : null">
+                                <span class="employee-dropdown-option-text"
+                                    [style.color]="isEmployeeExited(option) ? '#c62828' : null">
+                                    {{ formatEmployeeDropdownLabel(option) }}
+                                </span>
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error

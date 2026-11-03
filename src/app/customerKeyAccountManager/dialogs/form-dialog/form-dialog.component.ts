@@ -16,6 +16,15 @@ import { StateDropDown } from 'src/app/state/stateDropDown.model';
 import { startWith } from 'rxjs/internal/operators/startWith';
 import { map } from 'rxjs/operators';
 import moment from 'moment';
+import {
+  displayEmployeeDropdownValue,
+  employeeMatchesDropdownInput,
+  filterEmployeesForAutocomplete,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+} from 'src/app/shared/employee-dropdown-display.util';
 
 @Component({
   standalone: false,
@@ -27,6 +36,10 @@ import moment from 'moment';
 
 export class FormDialogComponentHolder 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = (value: EmployeeDropDown | string | null) => displayEmployeeDropdownValue(value);
+
   employeeID:number;
   action: string;
   dialogTitle: string;
@@ -63,7 +76,6 @@ export class FormDialogComponentHolder
           this.dialogTitle =' Key Account Manager For ';       
           this.advanceTable = data.advanceTable;
 
-          this.searchinstructedBy.setValue(this.advanceTable.employeeName);
           this.employeesID = this.advanceTable.employeeID;
           let startDate=moment(this.advanceTable.fromDate).format('DD/MM/yyyy');
           let endDate=moment(this.advanceTable.endDate).format('DD/MM/yyyy');
@@ -92,8 +104,43 @@ export class FormDialogComponentHolder
       }
     });
     if (this.action === 'edit') {
-      this.InitEmployee();
+      this.patchEmployeeForEdit();
     }
+  }
+
+  isSelectedEmployeeExited(): boolean {
+    const value = this.advanceTableForm?.get('employeeName')?.value;
+    const emp = findEmployeeByDropdownInput(value, this.EmployeeList || []);
+    return emp ? isEmployeeExited(emp) : false;
+  }
+
+  private patchEmployeeForEdit(): void {
+    const id = this.employeesID || this.advanceTable?.employeeID;
+    if (!id) {
+      return;
+    }
+    this._generalService.getEmployeeID(id).subscribe(
+      (data) => {
+        const employee = Array.isArray(data) ? data[0] : data;
+        if (!employee) {
+          return;
+        }
+        this.EmployeeList = [employee, ...(this.EmployeeList || [])];
+        this.advanceTableForm.patchValue(
+          { employeeName: employee, employeeID: id },
+          { emitEvent: false }
+        );
+        this.advanceTableForm.controls['employeeName'].setValidators([
+          Validators.required,
+          this.employeeNameValidator(this.EmployeeList),
+        ]);
+        this.advanceTableForm.controls['employeeName'].updateValueAndValidity({ emitEvent: false });
+        this.filteredinstructedByOptionss = of(this.EmployeeList);
+      },
+      () => {
+        /* keep string label from row if lookup fails */
+      }
+    );
   }
   
   
@@ -112,10 +159,20 @@ export class FormDialogComponentHolder
   }
 
   //--------------- Employee Validator -----------
-  employeeNameValidator(EmployeeList: any[]): ValidatorFn {
+  employeeNameValidator(EmployeeList: EmployeeDropDown[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = EmployeeList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
+      const value = control.value;
+      if (isEmployeeDropdownSelection(value)) {
+        const id = value.employeeID;
+        if (id != null && Number(id) > 0) {
+          return null;
+        }
+        return { employeeNameInvalid: true };
+      }
+      if (value == null || typeof value !== 'string' || !value.trim()) {
+        return { employeeNameInvalid: true };
+      }
+      const match = (EmployeeList || []).some((employee) => employeeMatchesDropdownInput(employee, value));
       return match ? null : { employeeNameInvalid: true };
     };
   }
@@ -160,7 +217,13 @@ export class FormDialogComponentHolder
 
   InitEmployee(_event?: any)
   {
-    const Prefix = this.advanceTableForm.get('employeeName').value || '';
+    const raw = this.advanceTableForm.get('employeeName').value;
+    const Prefix =
+      typeof raw === 'string'
+        ? raw
+        : isEmployeeDropdownSelection(raw)
+          ? formatEmployeeDropdownLabel(raw)
+          : '';
     if (Prefix.length < 3)
     {
       this.EmployeeList = [];
@@ -169,42 +232,59 @@ export class FormDialogComponentHolder
       this.advanceTableForm.controls['employeeName'].updateValueAndValidity({ emitEvent: false });
       return;
     }
+    if (isEmployeeDropdownSelection(raw)) {
+      return;
+    }
     this._generalService.GetEmployeesForVehicleCategoryPrefix(Prefix).subscribe
     (
       data =>
       {
-        if ((this.advanceTableForm.get('employeeName').value || '') !== Prefix) {
+        const current = this.advanceTableForm.get('employeeName').value;
+        const currentPrefix =
+          typeof current === 'string'
+            ? current
+            : isEmployeeDropdownSelection(current)
+              ? formatEmployeeDropdownLabel(current)
+              : '';
+        if (currentPrefix !== Prefix) {
           return;
         }
         this.EmployeeList = data || [];
         this.advanceTableForm.controls['employeeName'].setValidators([Validators.required,
           this.employeeNameValidator(this.EmployeeList)]);
         this.advanceTableForm.controls['employeeName'].updateValueAndValidity({ emitEvent: false });
-        this.filteredinstructedByOptionss = of(this._filtersearchinstructed(Prefix));
+        this.filteredinstructedByOptionss = of(filterEmployeesForAutocomplete(this.EmployeeList, Prefix));
       }
     );
   }
-  private _filtersearchinstructed(value: string): any {
-    const filterValue = (value || '').toLowerCase();
-    if (!filterValue || filterValue.length < 3) {
-      return [];
-    }
-    return (this.EmployeeList || []).filter(
-      data =>
-      {
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-  }
-  OnEmployeeSelect(selectedEmployee: string)
+  OnEmployeeSelect(selectedEmployee: EmployeeDropDown)
   {
-    const EmployeeName = this.EmployeeList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedEmployee
-    );
-    if (selectedEmployee) 
-    {
-      this.getemployeeIDTitles(EmployeeName.employeeID);
+    if (!isEmployeeDropdownSelection(selectedEmployee)) {
+      return;
     }
+    this.advanceTableForm.patchValue(
+      { employeeName: selectedEmployee, employeeID: selectedEmployee.employeeID },
+      { emitEvent: false }
+    );
+    this.getemployeeIDTitles(selectedEmployee.employeeID);
+  }
+
+  private buildSavePayload(): Record<string, unknown> {
+    const raw = { ...this.advanceTableForm.getRawValue() };
+    const empValue = raw['employeeName'];
+    const employee =
+      findEmployeeByDropdownInput(empValue as EmployeeDropDown | string, this.EmployeeList || []) ||
+      (isEmployeeDropdownSelection(empValue) ? (empValue as EmployeeDropDown) : null);
+    if (employee) {
+      raw['employeeID'] = employee.employeeID;
+      raw['employeeName'] = formatEmployeeDropdownLabel(employee);
+      this.employeesID = employee.employeeID;
+    } else if (this.employeesID) {
+      raw['employeeID'] = this.employeesID;
+    }
+    raw['customerID'] = this.data.CustomerID;
+    raw['cityID'] = this.cityID;
+    return raw;
   }
   getemployeeIDTitles(employeeID: any)
   {
@@ -340,11 +420,7 @@ export class FormDialogComponentHolder
   }
   public Post(): void
   {
-    
-    this.advanceTableForm.patchValue({customerID:this.data.CustomerID});
-    this.advanceTableForm.patchValue({employeeID:this.employeesID});
-    this.advanceTableForm.patchValue({ cityID: this.cityID });
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.add(this.buildSavePayload())  
     .subscribe(
     response => 
     {
@@ -363,10 +439,14 @@ export class FormDialogComponentHolder
   }
   public Put(): void
   {
-    this.advanceTableForm.patchValue({customerID:this.data.CustomerID});
-    this.advanceTableForm.patchValue({employeeID:this.employeesID || this.advanceTable.employeeID});
-    this.advanceTableForm.patchValue({ cityID: this.cityID || this.advanceTable.cityID });
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    const payload = this.buildSavePayload();
+    if (!payload['employeeID']) {
+      payload['employeeID'] = this.employeesID || this.advanceTable.employeeID;
+    }
+    if (!payload['cityID']) {
+      payload['cityID'] = this.cityID || this.advanceTable.cityID;
+    }
+    this.advanceTableService.update(payload)  
     .subscribe(
     response => 
     {
