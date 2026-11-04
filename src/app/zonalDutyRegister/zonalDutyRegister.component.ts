@@ -847,6 +847,10 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   }
 
   validatePickupDateRange(): string | null {
+    if (this.isDutySlipIdSearchActive()) {
+      return null;
+    }
+
     if (!this.SearchFromDate || !this.SearchToDate) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
@@ -900,8 +904,8 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
       SearchSupplierType: this.SearchSupplierType?.value || "",
       SearchSupplier: (this.SearchSupplierID || 0) > 0 ? "" : this.resolveSupplierSearchValue(),
       SearchSupplierID: (this.SearchSupplier?.value || '').toString().trim() ? (this.SearchSupplierID || 0) : 0,
-      SearchFromDate: formatMisSearchDateForApi(this.SearchFromDate),
-      SearchToDate: formatMisSearchDateForApi(this.SearchToDate),
+      SearchFromDate: this.isDutySlipIdSearchActive() ? '' : formatMisSearchDateForApi(this.SearchFromDate),
+      SearchToDate: this.isDutySlipIdSearchActive() ? '' : formatMisSearchDateForApi(this.SearchToDate),
       SearchSalesPersonName: this.SearchSalesPerson?.value || "",
       SearchCarSent: this.SearchCarSend?.value || "",
       SearchCarBook: this.SearchCarBooked?.value || "",

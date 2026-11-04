@@ -332,6 +332,10 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
+  hasDutySlipIdSearch(): boolean {
+    return this.isSearchValueSet(this.searchDutySlip);
+  }
+
   validateSearchDateRanges(): string | null {
     const hasPickupFrom = this.isSearchValueSet(this.searchFromDate);
     const hasPickupTo = this.isSearchValueSet(this.searchToDate);
@@ -339,6 +343,25 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     const hasBookingTo = this.isSearchValueSet(this.searchBookingDateTo);
     const hasPickupRange = hasPickupFrom && hasPickupTo;
     const hasBookingRange = hasBookingFrom && hasBookingTo;
+    const hasDutySlipSearch = this.hasDutySlipIdSearch();
+
+    if (hasDutySlipSearch) {
+      if (hasBookingFrom !== hasBookingTo) {
+        return 'Please select both Booking Date From and Booking Date To.';
+      }
+      if (hasBookingRange) {
+        const bookingError = this.validateDatePair(
+          this.searchBookingDateFrom,
+          this.searchBookingDateTo,
+          'Booking date',
+          false
+        );
+        if (bookingError) {
+          return bookingError;
+        }
+      }
+      return null;
+    }
 
     if (hasPickupFrom !== hasPickupTo) {
       return 'Please select both Pickup Date From and Pickup Date To.';

@@ -1020,7 +1020,7 @@ export class ControlPanelDesignComponent implements OnInit {
       this.headerMessagingSub.unsubscribe();
       this.headerMessagingSub = undefined;
     }
-    const bookingLookup = this.isBookingNumberLookup(requestPayload);
+    const bookingLookup = this.isDirectIdentifierLookup(requestPayload);
     if (!bookingLookup) {
       this.isCountLoading = true;
     }
@@ -1200,6 +1200,18 @@ export class ControlPanelDesignComponent implements OnInit {
     }
     const resId = filters?.resID;
     return resId != null && String(resId).trim() !== '';
+  }
+
+  private isDirectIdentifierLookup(filters: Partial<Filters>): boolean {
+    if (this.isBookingNumberLookup(filters)) {
+      return true;
+    }
+    const dutySlipRaw = filters?.dutySlipID;
+    if (dutySlipRaw == null || String(dutySlipRaw).trim() === '') {
+      return false;
+    }
+    const dutySlipId = parseInt(String(dutySlipRaw).trim(), 10);
+    return !isNaN(dutySlipId) && dutySlipId > 0;
   }
 
   trimBookingNo()

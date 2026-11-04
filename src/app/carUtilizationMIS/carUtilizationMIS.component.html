@@ -40,9 +40,9 @@
 
           <mat-label>Pickup Date From</mat-label>
 
-          <input matInput [matDatepicker]="pickupFromPicker" [(ngModel)]="pickupDateFrom" />
+          <input matInput [matDatepicker]="pickupFromPicker" [(ngModel)]="pickupDateFrom" [required]="!hasDutySlipIdSearch()" [disabled]="hasDutySlipIdSearch()" />
 
-          <mat-datepicker-toggle matIconSuffix [for]="pickupFromPicker"></mat-datepicker-toggle>
+          <mat-datepicker-toggle matIconSuffix [for]="pickupFromPicker" [disabled]="hasDutySlipIdSearch()"></mat-datepicker-toggle>
 
           <mat-datepicker #pickupFromPicker></mat-datepicker>
 
@@ -54,9 +54,9 @@
 
           <mat-label>Pickup Date To</mat-label>
 
-          <input matInput [matDatepicker]="pickupToPicker" [(ngModel)]="pickupDateTo" />
+          <input matInput [matDatepicker]="pickupToPicker" [(ngModel)]="pickupDateTo" [required]="!hasDutySlipIdSearch()" [disabled]="hasDutySlipIdSearch()" />
 
-          <mat-datepicker-toggle matIconSuffix [for]="pickupToPicker"></mat-datepicker-toggle>
+          <mat-datepicker-toggle matIconSuffix [for]="pickupToPicker" [disabled]="hasDutySlipIdSearch()"></mat-datepicker-toggle>
 
           <mat-datepicker #pickupToPicker></mat-datepicker>
 

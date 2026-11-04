@@ -81,7 +81,20 @@ export class ControlPanelDesignService {
       filters.dutySlipID = isNaN(dutySlipId) ? 0 : dutySlipId;
     }
 
-    if (filters.fromDate != '' && filters.fromDate != null) {
+    const isDirectIdentifierSearch =
+      (filters.reservationID != null &&
+        filters.reservationID !== '' &&
+        Number(filters.reservationID) !== 0) ||
+      (filters.resID != null && String(filters.resID).trim() !== '') ||
+      (filters.dutySlipID != null && Number(filters.dutySlipID) !== 0);
+
+    if (isDirectIdentifierSearch) {
+      filters.fromDate = '';
+      filters.toDate = '';
+      filters.fromTime = '';
+      filters.toTime = '';
+      filters.reservationStatus = 'All';
+    } else if (filters.fromDate != '' && filters.fromDate != null) {
       filters.fromDate = this.datepipe.transform(
         filters.fromDate,
         'yyyy-MM-dd'
