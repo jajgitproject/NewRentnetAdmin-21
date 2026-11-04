@@ -32,6 +32,7 @@ export class Customer {
    activationStatus: boolean;
    corporateCompanyName:string;
    latLonRequired:boolean;
+   callMasking:boolean;
    locationCollectionInterval:number;
    locationUploadInterval:number;
    countryCode:string;
@@ -90,6 +91,7 @@ export class Customer {
        this.maximumAgeOfCarToBeSent = customer.maximumAgeOfCarToBeSent || 0;
        this.maximumAgeOfCarToBeSentRemark = customer.maximumAgeOfCarToBeSentRemark || '';
        this.latLonRequired = customer.latLonRequired ?? false;
+       this.callMasking = customer.callMasking === true;
        this.locationCollectionInterval = customer.locationCollectionInterval || 0;
        this.locationUploadInterval = customer.locationUploadInterval || 0;
        this.activationStatus = customer.activationStatus ?? true;

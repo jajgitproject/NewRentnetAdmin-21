@@ -14,7 +14,6 @@ import { FormDialogComponent } from 'src/app/validateOTP/dialogs/form-dialog/for
 
 import { ExpirationDateService } from 'src/app/shared/expirationDate.service';
 import { RuntimeConfigService } from 'src/app/core/service/runtime-config.service';
-import { isLoginOtpRequired } from 'src/app/core/service/login-otp-policy';
 // Login geolocation disabled (EmployeeLoginSessionSettings.RequireLoginLocation = false on API).
 
 @Component({
@@ -61,8 +60,6 @@ export class SigninComponent implements OnInit {
 
   isPasswordDeactivated: boolean = false;
   errorMessageToBeShown: string = '';
-  readonly passwordExpiredMessage =
-    'Password has expired. Please contact administrator to reset your password.';
 
   constructor(
 
@@ -207,11 +204,6 @@ export class SigninComponent implements OnInit {
           {
             this.errorMessageToBeShown = 'Please enter correct username and password';
           }
-          else if (message === this.passwordExpiredMessage)
-          {
-            this.errorMessageToBeShown = this.passwordExpiredMessage;
-            this.authService.clearLocalSession();
-          }
           else if (typeof loginDetails === 'string' && loginDetails.includes('Invalid User: User not found'))
           {
             this.errorMessageToBeShown = 'Unauthorized';
@@ -272,10 +264,6 @@ export class SigninComponent implements OnInit {
                 String(employee.CanFindFuelEntry ?? employee.canFindFuelEntry ?? false)
               );
               localStorage.setItem(
-                'canCloseIncident',
-                String(employee.CanCloseIncident ?? employee.canCloseIncident ?? false)
-              );
-              localStorage.setItem(
                 'canEditDSAfterGoodForBilling',
                 (employee.CanEditDSAfterGoodForBilling === true ||
                   employee.canEditDSAfterGoodForBilling === true ||
@@ -297,30 +285,6 @@ export class SigninComponent implements OnInit {
                   ? 'true'
                   : 'false'
               );
-              localStorage.setItem(
-                'canCancelBackDateAllotment',
-                String(
-                  employee.CanCancelBackDateAllotment ??
-                    employee.canCancelBackDateAllotment ??
-                    false
-                )
-              );
-              localStorage.setItem(
-                'canCancelBackDateReservation',
-                String(
-                  employee.CanCancelBackDateReservation ??
-                    employee.canCancelBackDateReservation ??
-                    false
-                )
-              );
-              localStorage.setItem(
-                'canReactivateBackDateReservation',
-                String(
-                  employee.CanReactivateBackDateReservation ??
-                    employee.canReactivateBackDateReservation ??
-                    false
-                )
-              );
               this.calculateDaysLeft();
             }
           } else {
@@ -338,69 +302,39 @@ export class SigninComponent implements OnInit {
 
 
 
-  private getPasswordExpirationDate(employee: any): Date | null {
-    const pwdExp =
-      employee?.PasswordExpirationDate ?? employee?.passwordExpirationDate;
-
-    if (!pwdExp) {
-      return null;
-    }
-
-    const expirationDate = new Date(pwdExp);
-    return isNaN(expirationDate.getTime()) ? null : expirationDate;
-  }
-
-  private getCalendarDaysUntilExpiration(expirationDate: Date): number {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-
-    const startOfExpiration = new Date(expirationDate);
-    startOfExpiration.setHours(0, 0, 0, 0);
-
-    const msPerDay = 1000 * 60 * 60 * 24;
-    return Math.round(
-      (startOfExpiration.getTime() - startOfToday.getTime()) / msPerDay
-    );
-  }
-
-  private isPasswordExpired(employee: any): boolean {
-    const expirationDate = this.getPasswordExpirationDate(employee);
-    if (!expirationDate) {
-      return false;
-    }
-
-    return this.getCalendarDaysUntilExpiration(expirationDate) < 0;
-  }
-
-  private blockExpiredPasswordLogin(): void {
-    this.isPasswordDeactivated = false;
-    this.authService.clearLocalSession();
-    this.error = this.passwordExpiredMessage;
-    this.errorMessageToBeShown = this.passwordExpiredMessage;
-  }
-
   public calculateDaysLeft(): void {
 
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     const employee = currentUser.employee ?? currentUser.Employee;
 
-    if (this.isPasswordExpired(employee)) {
-      this.blockExpiredPasswordLogin();
-      return;
-    }
-
     const mobile = String(employee?.Mobile ?? employee?.mobile ?? '');
 
     const typedLogin = String(this.f.email?.value ?? '');
 
-    const bypassOTPForAll =
-      employee?.BypassOTPForAll === true || employee?.bypassOTPForAll === true;
+    const OTP_BYPASS_NUMBERS = [
 
-    const canBypassOTP =
-      employee?.CanBypassOTP === true || employee?.canBypassOTP === true;
+      '9560342610',
 
-    if (!isLoginOtpRequired(bypassOTPForAll, canBypassOTP, mobile, typedLogin)) {
+      '9811051222',
+
+      '8527057487',
+
+      '9990788001',
+
+      '8273089744',
+
+      '8447685514',
+
+      '9891785921',
+      '7080004819',
+      '9721486346',
+
+    ];
+
+
+
+    if (OTP_BYPASS_NUMBERS.includes(mobile) || OTP_BYPASS_NUMBERS.includes(typedLogin)) {
 
       this.isPasswordDeactivated = false;
 
@@ -422,9 +356,15 @@ export class SigninComponent implements OnInit {
 
     }
 
-    const expirationDate = this.getPasswordExpirationDate(employee);
 
-    if (!expirationDate) {
+
+    const pwdExp =
+
+      employee?.PasswordExpirationDate ?? employee?.passwordExpirationDate;
+
+    const expirationDate = pwdExp ? new Date(pwdExp) : null;
+
+    if (!expirationDate || isNaN(expirationDate.getTime())) {
 
       this.isPasswordDeactivated = false;
 
@@ -434,7 +374,25 @@ export class SigninComponent implements OnInit {
 
     }
 
-    this.daysLeft = this.getCalendarDaysUntilExpiration(expirationDate);
+
+
+    const timeDiff = expirationDate.getTime() - Date.now();
+
+    this.daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+
+
+    if (this.daysLeft <= 0) {
+
+      this.isPasswordDeactivated = true;
+
+      this.deactivateAccount();
+
+      return;
+
+    }
+
+
 
     this.isPasswordDeactivated = false;
 

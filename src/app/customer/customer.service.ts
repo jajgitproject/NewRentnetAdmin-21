@@ -194,6 +194,7 @@ export class CustomerService
       activationStatus: toBool(raw.activationStatus, true),
       customerPriority: toBool(raw.customerPriority, false),
       latLonRequired: toBool(raw.latLonRequired, false),
+      callMasking: toBool(raw.callMasking, false),
       printRunningDetailOnDutySlip: toBool(raw.printRunningDetailOnDutySlip, false),
       showRateOnDutySlip: toBool(raw.showRateOnDutySlip, false),
       showOTPOnDutySlip: toBool(raw.showOTPOnDutySlip, false),

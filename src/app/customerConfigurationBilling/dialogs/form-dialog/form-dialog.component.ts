@@ -77,6 +77,7 @@ export class FormDialogComponent
             useDataFromAppToPrintOnDutySlip: false,
             runningDetailsSource: 'App',
             activationStatus: true,
+            triggerBillingFromApp: false,
           });
         }
         this.advanceTableForm = this.createContactForm();

@@ -913,6 +913,7 @@ getBusinessTypeID(businessTypeID: any)
       maximumAgeOfCarToBeSentRemark: [this.advanceTable.maximumAgeOfCarToBeSentRemark],
       customerCodeForAPIIntegration: [this.advanceTable.customerCodeForAPIIntegration],
       latLonRequired: [this.advanceTable.latLonRequired],
+      callMasking: [this.advanceTable.callMasking === true],
       locationCollectionInterval: [this.advanceTable.locationCollectionInterval],
       locationUploadInterval: [this.advanceTable.locationUploadInterval],
       countryCode:['+91'],

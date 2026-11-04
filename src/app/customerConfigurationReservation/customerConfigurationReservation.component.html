@@ -145,7 +145,7 @@
                                         <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
                                             {{row.allowBackDateBooking===true ? 'Yes' : 'No'}}</mat-cell>
                                     </ng-container>
-                                    
+
                                     <ng-container matColumnDef="status">
                                         <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
                                         <mat-cell *matCellDef="let row">
