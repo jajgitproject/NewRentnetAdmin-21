@@ -165,13 +165,44 @@ export class VehicleComplianceComponent implements OnInit {
       verifiedBy: [row.verifiedBy ?? ''],
       verificationRemark: [row.verificationRemark ?? ''],
       verificationDate: [row.verificationDate ?? ''],
+      verificationTime: [row.verificationTime ?? ''],
     });
   }
 
-  showDocumentUploadMetadata(row: FormGroup): boolean {
-    return (
-      row.get('action')?.value === VehicleComplianceActions.editCurrent &&
-      !!row.get('hasApplicableRecord')?.value
+  hasDocumentUploadMetadata(row: FormGroup): boolean {
+    return !!row.get('hasApplicableRecord')?.value;
+  }
+
+  documentUploadDateDisplay(index: number): string {
+    const snap = this.rowSnapshots[index];
+    return snap?.documentUploadDate?.trim() || '';
+  }
+
+  documentUploadTimeDisplay(index: number): string {
+    const snap = this.rowSnapshots[index];
+    return snap?.documentUploadTime?.trim() || '';
+  }
+
+  documentUploadByDisplay(index: number): string {
+    const snap = this.rowSnapshots[index];
+    if (!snap) {
+      return '';
+    }
+    const name = (snap.documentUploadBy || '').trim();
+    if (name) {
+      return name;
+    }
+    if (snap.documentUploadByID != null && snap.documentUploadByID > 0) {
+      return String(snap.documentUploadByID);
+    }
+    return '';
+  }
+
+  hasAnyUploadDetail(index: number): boolean {
+    return !!(
+      this.documentUploadDateDisplay(index) ||
+      this.documentUploadTimeDisplay(index) ||
+      this.documentUploadByDisplay(index)
     );
   }
 
@@ -456,6 +487,22 @@ export class VehicleComplianceComponent implements OnInit {
 
   qcStatusLabel(row: FormGroup): string {
     return this.qcStatusText(this.qcStatusKey(row));
+  }
+
+  qcVerificationTooltip(row: FormGroup): string {
+    const key = this.qcStatusKey(row);
+    if (key === 'na') {
+      return 'No applicable document';
+    }
+    const date = (row.get('verificationDate')?.value || '').toString().trim();
+    const time = (row.get('verificationTime')?.value || '').toString().trim();
+    const verifier = (row.get('verifiedBy')?.value || '').toString().trim();
+    return [
+      `Verification status: ${this.qcStatusText(key)}`,
+      `Verifier name: ${verifier || '—'}`,
+      `Date: ${date || '—'}`,
+      `Time: ${time || '—'}`,
+    ].join('\n');
   }
 
   qcStatusIcon(row: FormGroup): string {

@@ -42,6 +42,7 @@ export class VehicleComplianceRow {
   verifiedBy: string;
   verificationRemark: string;
   verificationDate: string;
+  verificationTime: string;
   documentUploadDate: string;
   documentUploadTime: string;
   documentUploadByID: number;
@@ -71,7 +72,8 @@ export class VehicleComplianceRow {
     this.verified = raw.verified ?? raw.Verified ?? '';
     this.verifiedBy = raw.verifiedBy ?? raw.VerifiedBy ?? '';
     this.verificationRemark = raw.verificationRemark ?? raw.VerificationRemark ?? '';
-    this.verificationDate = raw.verificationDate ?? raw.VerificationDate ?? '';
+    this.verificationDate = formatUploadDate(raw.verificationDate ?? raw.VerificationDate);
+    this.verificationTime = formatUploadTime(raw.verificationTime ?? raw.VerificationTime);
     this.documentUploadDate = formatUploadDate(raw.documentUploadDate ?? raw.DocumentUploadDate);
     this.documentUploadTime = formatUploadTime(raw.documentUploadTime ?? raw.DocumentUploadTime);
     this.documentUploadByID = raw.documentUploadByID ?? raw.DocumentUploadByID ?? null;

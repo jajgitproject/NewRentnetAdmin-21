@@ -12,6 +12,7 @@ export class MyUploadComponent implements OnInit {
   public progress: number;
   public message: string;
   @Input() buttonText = 'Upload File';
+  @Input() compact = false;
   @Input() accept = '';
   @Output() public onUploadFinished = new EventEmitter();
   constructor(private http: HttpClient, public _generalService:GeneralService) { }
