@@ -14,6 +14,7 @@ import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { DocumentDropDown } from 'src/app/general/documentDropDown.model';
 import { InventoryDocumentModel, InventoryDocumentVerificationModel } from '../../inventoryDocument.model';
 import { InventoryDocumentService } from '../../inventoryDocument.service';
+import moment from 'moment';
 
 @Component({
   standalone: false,
@@ -44,6 +45,7 @@ export class FormDialogInventoryVerificationsComponent
   DriverID!: number;
   InventoryID: any;
   InventoryName: any;
+  showVerificationTimestamp = false;
   constructor(
   public dialogRef: MatDialogRef<FormDialogInventoryVerificationsComponent>, 
   public dialog: MatDialog,
@@ -58,9 +60,12 @@ export class FormDialogInventoryVerificationsComponent
     this.InventoryName=data.inventoryName;
         // Set the defaults
     this.dialogTitle = 'Document Verification';
-    this.advanceTable = data.advanceTable;
+    this.advanceTable = new InventoryDocumentVerificationModel(data.advanceTable || {});
+    this.showVerificationTimestamp = this.hasStoredVerificationTimestamp(this.advanceTable);
+    if (this.showVerificationTimestamp) {
+      this.formatVerificationFields(this.advanceTable);
+    }
     this.verifiedByName();
-    this.advanceTable.verificationDate=new Date();
     if(this.advanceTable.activationStatus===true)
     {
       this.advanceTable.status="Active";
@@ -69,7 +74,42 @@ export class FormDialogInventoryVerificationsComponent
     {
       this.advanceTable.status="Deleted";
     } 
-    this.advanceTableForm = this.createContactForm(); 
+    this.advanceTableForm = this.createContactForm();
+  }
+
+  private fieldValue(row: any, camel: string, pascal: string): any {
+    const value = row?.[camel] ?? row?.[pascal];
+    return value === undefined || value === null ? '' : value;
+  }
+
+  private formatVerificationFields(row: InventoryDocumentVerificationModel): void {
+    if (!row) {
+      return;
+    }
+    const dateRaw = this.fieldValue(row, 'verificationDate', 'VerificationDate');
+    if (dateRaw) {
+      const parsed = moment(dateRaw);
+      row.verificationDate = parsed.isValid()
+        ? parsed.format('DD/MM/YYYY')
+        : String(dateRaw).split('T')[0].split(' ')[0];
+    }
+    const timeRaw = this.fieldValue(row, 'verificationTime', 'VerificationTime');
+    if (timeRaw) {
+      const timeText = String(timeRaw);
+      row.verificationTime = timeText.length >= 8 ? timeText.substring(0, 8) : timeText;
+    }
+  }
+
+  private hasStoredVerificationTimestamp(row: InventoryDocumentVerificationModel): boolean {
+    const dateRaw = this.fieldValue(row, 'verificationDate', 'VerificationDate');
+    if (!dateRaw) {
+      return false;
+    }
+    const text = String(dateRaw).trim();
+    if (!text || text.toLowerCase() === 'null' || text.toLowerCase() === 'n/a' || text.startsWith('0001')) {
+      return false;
+    }
+    return true;
   }
   
   public ngOnInit(): void
@@ -151,7 +191,8 @@ export class FormDialogInventoryVerificationsComponent
       verifiedBy: [this.advanceTable.verifiedBy],
       verifiedByID: [this.advanceTable.verifiedByID],
       verificationRemark: [this.advanceTable.verificationRemark],
-      verificationDate: [this.advanceTable.verificationDate],
+      verificationDate: [{ value: this.advanceTable.verificationDate, disabled: true }],
+      verificationTime: [{ value: this.advanceTable.verificationTime, disabled: true }],
       address: [this.advanceTable.address],
       status: [this.advanceTable.status],
       addressCity: [this.advanceTable.addressCity],

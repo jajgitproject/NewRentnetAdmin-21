@@ -128,18 +128,22 @@
 
             </div>
 
-             <div class="row">
+             <div class="row" *ngIf="showVerificationTimestamp">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Verification Date</mat-label>
-                        <input readonly matInput [matDatepicker]="verifiedDate" formControlName="verificationDate">
-                        <mat-datepicker-toggle matSuffix [for]="verifiedDate"></mat-datepicker-toggle>
-                        <mat-datepicker  disable="true"#verifiedDate></mat-datepicker>
-                        <mat-error *ngIf="advanceTableForm.get('verificationDate').hasError('required')">
-                            Verification Date is required
-                        </mat-error>
+                        <input readonly matInput formControlName="verificationDate">
                     </mat-form-field>
                 </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
+                        <mat-label>Verification Time</mat-label>
+                        <input readonly matInput formControlName="verificationTime">
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
                  <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline"  floatLabel="always">
                             <mat-label>Activation Status</mat-label>

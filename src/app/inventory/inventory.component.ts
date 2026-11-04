@@ -108,8 +108,8 @@ export class InventoryComponent implements OnInit, OnDestroy {
     { label: 'Fitness', route: '/inventoryFitness' },
     { label: 'Monthly Business Report', route: '/monthlyBusinessReport' },
     { label: 'Driver Association', route:'/driverInventoryAssociation' },
-    { label: 'Document', route:'/inventoryDocument' },
-    { label: 'Vehicle Compliance', route:'/vehicleCompliance' },
+    { label: 'Compliance History', route:'/inventoryDocument' },
+    { label: 'Compliance', route:'/vehicleCompliance' },
   ];
   
   searchTerm: any = '';
