@@ -27,6 +27,7 @@ import { CustomerPersonDetailsDropDown } from '../passengerDetails/customerPerso
 import { GeoPointTypeDropDown } from '../geoPointType/geoPointTypeDropDown.model';
 import { StatesDropDown } from '../organizationalEntity/stateDropDown.model';
 import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 
 @Component({
   standalone: false,
@@ -104,9 +105,8 @@ public PaymentModeList?:ModeOfPaymentDropDown[]=[];
    public ServiceList?:OrganizationalEntityDropDown[]=[];
    filteredCityOptions:Observable<CityDropDown[]>;
    public CityList?:CityDropDown[]=[];
-   salesPerson: FormControl = new FormControl();
-public SalesPersonList?: SalesPersonModel[] = [];
-filteredSalesPersonOptions: Observable<SalesPersonModel[]>;
+  salesPersonSearch: EmployeePrefixSearchField;
+  salesPerson: FormControl;
 
 filteredCustomerLocationOptions:Observable<OrganizationalEntityDropDown[]>;
 public CustomerLocationList?:OrganizationalEntityDropDown[]=[];
@@ -166,7 +166,10 @@ searchBookerName:string='';
     public bookingBackupMISService: BookingBackupMISService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) { }
+  ) {
+    this.salesPersonSearch = new EmployeePrefixSearchField(this._generalService);
+    this.salesPerson = this.salesPersonSearch.control;
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -180,7 +183,6 @@ searchBookerName:string='';
     this.initCustomer();
     this.InitBooker();
     this.initCity();
-    this.InitSalesPerson();
     this.InitGuestDetails();
     this.initCustomerLocation();
     this.initServiceLocation();
@@ -364,35 +366,21 @@ private _filter(value: string): any {
   }
 
 
-//---------Sales Person-----------
-InitSalesPerson()
-  {
-    this._generalService.GetSalesPersonForBookingMIS().subscribe(
-    data=>
-    {
-      this.SalesPersonList=data;
-      this.filteredSalesPersonOptions = this.salesPerson.valueChanges.pipe(
-      startWith(""),
-      map(value => this._filterSalesPerson(value || ''))
-      ) 
-    });;
+  private getSalesPersonFilter(): string {
+    if (this.salesPersonSearch.apiSearchName) {
+      return this.salesPersonSearch.apiSearchName;
+    }
+    const raw = this.salesPersonSearch.control.value;
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    return this.salesPersonSearch.formatEmployeeDropdownLabel(raw).split(' - ')[0]?.trim() || '';
   }
 
-  private _filterSalesPerson(value: string): any {
-  const filterValue = value.toLowerCase();
-  // if (!value || value.length < 3) {
-  //       return [];   
-  //     }
-  //  if(filterValue.length === 0) {
-  //     return [];
-  //   }
-    return this.SalesPersonList?.filter(
-    data => 
-    {
-      return data.salesPerson.toLowerCase().indexOf(filterValue)===0;
-    });
+  isSelectedSalesPersonExited(): boolean {
+    const raw = this.salesPersonSearch.control.value;
+    return raw && typeof raw === 'object' && this.salesPersonSearch.isEmployeeExited(raw);
   }
-
 
     //---------Booker Name-----------
 InitBooker()
@@ -520,7 +508,7 @@ const filterValue = value.toLowerCase();
     this.modeOfPayment.setValue('');
     this.customer.setValue('');
     this.customerGroup.setValue('');
-    this.salesPerson.setValue('');
+    this.salesPersonSearch.reset();
     this.bookerName.setValue('');
     this.city.setValue('');
     this.guestName.setValue('');
@@ -588,7 +576,7 @@ const filterValue = value.toLowerCase();
       this.customer.value,this.searchDutySlip,
       this.searchManualDS,this.searchBooking,
       this.city.value,this.searchFromDate,
-      this.searchToDate,this.salesPerson.value,
+      this.searchToDate,this.getSalesPersonFilter(),
       this.searchCancellationFrom,this.searchCancellationTo,
       this.searchDispatchStatus,this.searchBookingStatus,
       this.customerLocation.value,this.guestName.value,

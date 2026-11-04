@@ -23,7 +23,7 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import moment from 'moment';
-import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 @Component({
   standalone: false,
   selector: 'app-customerGrowthPerson',
@@ -65,8 +65,8 @@ export class CustomerGrowthPersonComponent implements OnInit {
   customer_ID: any;
   customer_Name: any;
 
-  SearchEmployeeName: string = '';
-  EmployeeName : FormControl = new FormControl();
+  employeeSearch: EmployeePrefixSearchField;
+  EmployeeName: FormControl;
   
   searchTerm: any = '';
   selectedFilter: string = 'search';
@@ -77,7 +77,6 @@ export class CustomerGrowthPersonComponent implements OnInit {
 
   SearchEndDate: string = '';
   endingDate : FormControl = new FormControl();
-  public EmployeeList?: EmployeeDropDown[] = [];
   SearchgrowthPersonManageCode: string= '';
   growthPersonManageCode : FormControl = new FormControl();
   SearchgrowthPersonCode: string = ''; 
@@ -89,7 +88,10 @@ export class CustomerGrowthPersonComponent implements OnInit {
     public customerGrowthPersonService: CustomerGrowthPersonService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) {}
+  ) {
+    this.employeeSearch = new EmployeePrefixSearchField(this._generalService);
+    this.EmployeeName = this.employeeSearch.control;
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -109,14 +111,12 @@ export class CustomerGrowthPersonComponent implements OnInit {
       
     });
     this.loadData();
-
-    this.InitEmployee();
     this.SubscribeUpdateService();
   }
   refresh() 
   {  
     this.SearchCustomerGrowthPerson = '';
-    this.EmployeeName.setValue('');    
+    this.employeeSearch.reset();
     this.SearchgrowthPersonCode='';
     this.SearchgrowthPersonManageCode='';
     this.SearchActivationStatus = true;
@@ -200,7 +200,7 @@ export class CustomerGrowthPersonComponent implements OnInit {
         this.searchTerm = '';
         break;
     }
-      this.customerGrowthPersonService.getTableData(this.customer_ID,this.SearchgrowthPersonCode,this.EmployeeName.value,this.SearchgrowthPersonManageCode,this.SearchActivationStatus, this.PageNumber).subscribe
+      this.customerGrowthPersonService.getTableData(this.customer_ID,this.SearchgrowthPersonCode,this.getEmployeeNameFilter(),this.SearchgrowthPersonManageCode,this.SearchActivationStatus, this.PageNumber).subscribe
     (
       data =>   
       {
@@ -354,16 +354,22 @@ export class CustomerGrowthPersonComponent implements OnInit {
       }
     );
   }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-       
-      }
-    );
+  private getEmployeeNameFilter(): string {
+    if (this.employeeSearch.apiSearchName) {
+      return this.employeeSearch.apiSearchName;
+    }
+    const raw = this.employeeSearch.control.value;
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    return this.employeeSearch.formatEmployeeDropdownLabel(raw).split(' - ')[0]?.trim() || '';
   }
+
+  isSelectedFilterEmployeeExited(): boolean {
+    const raw = this.employeeSearch.control.value;
+    return raw && typeof raw === 'object' && this.employeeSearch.isEmployeeExited(raw);
+  }
+
   SortingData(coloumName:any) {
      
     if (this.sortingData == 1) {
@@ -375,7 +381,7 @@ export class CustomerGrowthPersonComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.customerGrowthPersonService.getTableDataSort(this.customer_ID,this.SearchgrowthPersonCode,this.EmployeeName.value,this.SearchgrowthPersonManageCode,this.SearchActivationStatus, this.PageNumber, coloumName.active,this.sortType).subscribe
+    this.customerGrowthPersonService.getTableDataSort(this.customer_ID,this.SearchgrowthPersonCode,this.getEmployeeNameFilter(),this.SearchgrowthPersonManageCode,this.SearchActivationStatus, this.PageNumber, coloumName.active,this.sortType).subscribe
     (
       data =>   
       {

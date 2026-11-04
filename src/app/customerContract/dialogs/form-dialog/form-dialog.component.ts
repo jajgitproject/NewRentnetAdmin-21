@@ -12,9 +12,20 @@ import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { ModeOfPaymentDropDown } from 'src/app/modeOfPayment/modeOfPaymentDropDown.model';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntity/organizationalEntityDropDown.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import moment from 'moment';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -26,6 +37,10 @@ import moment from 'moment';
 
 export class FormDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayCreatedFn = createDisplayEmployeeFn();
+  displayApprovedFn = createDisplayEmployeeFn();
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
@@ -33,13 +48,11 @@ export class FormDialogComponent
  
   public CustomerContractList?: CustomerContractDropDown[] = [];
 
-  public EmployeeList?: EmployeeDropDown[] = [];
-  searchApprovedTerm:  FormControl = new FormControl();
-  filteredCreatedOptions: Observable<EmployeeDropDown[]>;
+  public CreatedList?: EmployeeDropDown[] = [];
+  filteredCreatedOptions: Observable<EmployeeDropDown[]> = of([]);
 
-  public EmployeesList?: EmployeeDropDown[] = [];
-  searchCreatedTerm:  FormControl = new FormControl();
-  filteredApprovedOptions: Observable<EmployeeDropDown[]>;
+  public ApprovedList?: EmployeeDropDown[] = [];
+  filteredApprovedOptions: Observable<EmployeeDropDown[]> = of([]);
   
   public CurrencyList?: CurrencyDropDown[] = [];
   searchTerm:  FormControl = new FormControl();
@@ -104,8 +117,10 @@ export class FormDialogComponent
   }
   public ngOnInit(): void
   {
-    this.InitCreatedBy();
-    this.InitApprovedBy();
+    if (this.action === 'edit') {
+      this.patchCreatedByForEdit();
+      this.patchApprovedByForEdit();
+    }
     this.InitCurrencies();
     //this.InitModeOfPayment();
     this.InitBranch();
@@ -169,94 +184,109 @@ export class FormDialogComponent
     }
   }
 
-  InitCreatedBy(){
-    this._generalService.GetEmployee().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-        this.advanceTableForm.controls['createdBy'].setValidators([Validators.required,
-          this.createdByValidator(this.EmployeeList)
-        ]);
-        this.advanceTableForm.controls['createdBy'].updateValueAndValidity();
-        this.filteredCreatedOptions = this.advanceTableForm.controls['createdBy'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCreated(value || ''))
-        );
-      }
-    );
-  }
-  private _filterCreated(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.EmployeeList.filter(
-      data => 
-      {
-        //return customer.firstName.toLowerCase().includes(filterValue);
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-  };
-  OnCreateBySelect(selectedCreatedBy: string)
-  {
-    const CreatedByName = this.EmployeeList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedCreatedBy
-    );
-    if (selectedCreatedBy) 
-    {
-      this.getCreatedID(CreatedByName.employeeID);
-    }
-  }
-  getCreatedID(employeeID: any)
-  {
-    this.createdEmployeeID=employeeID;
+  isSelectedCreatedByExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'createdBy', this.CreatedList || []);
   }
 
-  InitApprovedBy(){
-    this._generalService.GetEmployee().subscribe
-    (
-      data =>   
+  isSelectedApprovedByExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'approvedBy', this.ApprovedList || []);
+  }
+
+  private patchCreatedByForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.contractCreatedByID,
+      this.advanceTableForm,
+      'createdBy',
       {
-        this.EmployeesList = data; 
-        this.advanceTableForm.controls['approvedBy'].setValidators([Validators.required,
-          this.approvedByValidator(this.EmployeesList)
-        ]);
-        this.advanceTableForm.controls['approvedBy'].updateValueAndValidity();
-        this.filteredApprovedOptions = this.advanceTableForm.controls['approvedBy'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterApproved(value || ''))
-        );
+        getEmployeeList: () => this.CreatedList || [],
+        setEmployeeList: (list) => { this.CreatedList = list; },
+        setFilteredOptions: (options) => { this.filteredCreatedOptions = options; },
+        onEmployeeId: (id) => {
+          this.createdEmployeeID = id;
+          this.advanceTableForm.patchValue({ contractCreatedByID: id }, { emitEvent: false });
+        },
       }
     );
   }
-  private _filterApproved(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.EmployeesList.filter(
-      data => 
+
+  private patchApprovedByForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.contractApprovedByID,
+      this.advanceTableForm,
+      'approvedBy',
       {
-        //return customer.firstName.toLowerCase().includes(filterValue);
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-  };
-  OnApprovedBySelect(selectedApprovedBy: string)
-  {
-    const ApprovedByName = this.EmployeesList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedApprovedBy
+        getEmployeeList: () => this.ApprovedList || [],
+        setEmployeeList: (list) => { this.ApprovedList = list; },
+        setFilteredOptions: (options) => { this.filteredApprovedOptions = options; },
+        onEmployeeId: (id) => {
+          this.approvedEmployeeID = id;
+          this.advanceTableForm.patchValue({ contractApprovedByID: id }, { emitEvent: false });
+        },
+      }
     );
-    if (selectedApprovedBy) 
-    {
-      this.getApprovedID(ApprovedByName.employeeID);
-    }
   }
-  getApprovedID(employeeID: any) 
-  {
-    this.approvedEmployeeID=employeeID;
+
+  InitCreatedByPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'createdBy', {
+      getEmployeeList: () => this.CreatedList || [],
+      setEmployeeList: (list) => { this.CreatedList = list; },
+      setFilteredOptions: (options) => { this.filteredCreatedOptions = options; },
+    });
+  }
+
+  InitApprovedByPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'approvedBy', {
+      getEmployeeList: () => this.ApprovedList || [],
+      setEmployeeList: (list) => { this.ApprovedList = list; },
+      setFilteredOptions: (options) => { this.filteredApprovedOptions = options; },
+    });
+  }
+
+  OnCreateBySelect(selectedCreatedBy: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'createdBy',
+      selectedCreatedBy,
+      (id) => {
+        this.createdEmployeeID = id;
+        this.advanceTableForm.patchValue({ contractCreatedByID: id }, { emitEvent: false });
+      }
+    );
+  }
+
+  OnApprovedBySelect(selectedApprovedBy: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'approvedBy',
+      selectedApprovedBy,
+      (id) => {
+        this.approvedEmployeeID = id;
+        this.advanceTableForm.patchValue({ contractApprovedByID: id }, { emitEvent: false });
+      }
+    );
+  }
+
+  private prepareEmployeeFieldsForSave(raw: Record<string, unknown>): void {
+    coerceEmployeeFieldToApiString(raw, 'createdBy', this.CreatedList || []);
+    coerceEmployeeFieldToApiString(raw, 'approvedBy', this.ApprovedList || []);
+    const created = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('createdBy')?.value,
+      this.CreatedList || []
+    );
+    const approved = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('approvedBy')?.value,
+      this.ApprovedList || []
+    );
+    if (created?.employeeID) {
+      raw.contractCreatedByID = created.employeeID;
+      this.createdEmployeeID = created.employeeID;
+    }
+    if (approved?.employeeID) {
+      raw.contractApprovedByID = approved.employeeID;
+      this.approvedEmployeeID = approved.employeeID;
+    }
   }
 
   InitCurrencies() {
@@ -512,13 +542,10 @@ private _filterMode(value: string): any {
   }
   public Post(): void
   {
-    // debugger
-    this.advanceTableForm.patchValue({contractCreatedByID:this.createdEmployeeID});
-    this.advanceTableForm.patchValue({contractApprovedByID:this.approvedEmployeeID});
-    //this.advanceTableForm.patchValue({currencyForBillingID:this.currencyID});
     this.advanceTableForm.patchValue({modeOfPaymentID:this.modeOfPaymentID});
     this.advanceTableForm.patchValue({branchID:this.organizationalEntityID});
     let requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldsForSave(requestObject);
     requestObject.percentageOfChangeForFuelSurcharge = requestObject.percentageOfChangeForFuelSurcharge || 0;
     requestObject.surchargePercentageForAOrB = requestObject.surchargePercentageForAOrB || 0;
     requestObject.petrolPriceOnContract = requestObject.petrolPriceOnContract || 0;
@@ -543,12 +570,16 @@ private _filterMode(value: string): any {
   }
   public Put(): void
   {
-    this.advanceTableForm.patchValue({contractCreatedByID:this.createdEmployeeID || this.advanceTable.contractCreatedByID});
-    this.advanceTableForm.patchValue({contractApprovedByID:this.approvedEmployeeID || this.advanceTable.contractApprovedByID});
-    //this.advanceTableForm.patchValue({currencyForBillingID:this.currencyID || this.advanceTable.currencyForBillingID});
     this.advanceTableForm.patchValue({modeOfPaymentID:this.modeOfPaymentID || this.advanceTable.modeOfPaymentID});
     this.advanceTableForm.patchValue({branchID:this.organizationalEntityID || this.advanceTable.branchID});
     let requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldsForSave(requestObject);
+    if (!requestObject.contractCreatedByID) {
+      requestObject.contractCreatedByID = this.createdEmployeeID || this.advanceTable.contractCreatedByID;
+    }
+    if (!requestObject.contractApprovedByID) {
+      requestObject.contractApprovedByID = this.approvedEmployeeID || this.advanceTable.contractApprovedByID;
+    }
     requestObject.percentageOfChangeForFuelSurcharge = requestObject.percentageOfChangeForFuelSurcharge || 0;
     requestObject.surchargePercentageForAOrB = requestObject.surchargePercentageForAOrB || 0;
     requestObject.petrolPriceOnContract = requestObject.petrolPriceOnContract || 0;

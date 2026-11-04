@@ -20,6 +20,8 @@ import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 @Component({
   standalone: false,
   selector: 'app-customerAlertMessage',
@@ -43,7 +45,8 @@ export class CustomerAlertMessageComponent implements OnInit {
   customerAlertMessageID: number;
   advanceTable: CustomerAlertMessage | null;
   SearchCustomerAlertMessageType: FormControl = new FormControl();
-  SearchEmployeeName: FormControl = new FormControl();
+  employeeSearch: EmployeePrefixSearchField;
+  SearchEmployeeName: FormControl;
   SearchCustomerAlertMessage:string = '';
   SearchActivationStatus : boolean=true;
   PageNumber: number = 0;
@@ -69,7 +72,10 @@ export class CustomerAlertMessageComponent implements OnInit {
     public customerAlertMessageService: CustomerAlertMessageService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) {}
+  ) {
+    this.employeeSearch = new EmployeePrefixSearchField(this._generalService);
+    this.SearchEmployeeName = this.employeeSearch.control;
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -97,7 +103,7 @@ export class CustomerAlertMessageComponent implements OnInit {
   {
     this.SearchCustomerAlertMessage = '';
     this.SearchCustomerAlertMessageType.setValue('');
-    this.SearchEmployeeName.setValue('');
+    this.employeeSearch.reset();
     this.SearchActivationStatus = true;
     this.PageNumber=0;
     this.searchTerm = '';
@@ -178,6 +184,23 @@ shouldShowDeleteButton(item: any): boolean {
     this.PageNumber = 0;
     this.loadData();
   }
+
+  private getEmployeeNameFilter(): string {
+    if (this.employeeSearch.apiSearchName) {
+      return this.employeeSearch.apiSearchName;
+    }
+    const raw = this.employeeSearch.control.value;
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    return this.employeeSearch.formatEmployeeDropdownLabel(raw).split(' - ')[0]?.trim() || '';
+  }
+
+  isSelectedFilterEmployeeExited(): boolean {
+    const raw = this.employeeSearch.control.value;
+    return raw && typeof raw === 'object' && this.employeeSearch.isEmployeeExited(raw);
+  }
+
    public loadData() 
    {
     switch (this.selectedFilter)
@@ -195,7 +218,7 @@ shouldShowDeleteButton(item: any): boolean {
         this.searchTerm = '';
         break;
     }
-      this.customerAlertMessageService.getTableData(this.customer_ID,this.CustomerName,this.SearchEmployeeName.value,this.SearchCustomerAlertMessageType.value,this.SearchCustomerAlertMessage,this.SearchActivationStatus, this.PageNumber).subscribe
+      this.customerAlertMessageService.getTableData(this.customer_ID,this.CustomerName,this.getEmployeeNameFilter(),this.SearchCustomerAlertMessageType.value,this.SearchCustomerAlertMessage,this.SearchActivationStatus, this.PageNumber).subscribe
       (
         data =>   
         {
@@ -367,7 +390,7 @@ shouldShowDeleteButton(item: any): boolean {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.customerAlertMessageService.getTableDataSort(this.customer_ID,this.customer_Name,this.SearchEmployeeName.value,this.SearchCustomerAlertMessageType.value,this.SearchCustomerAlertMessage,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
+    this.customerAlertMessageService.getTableDataSort(this.customer_ID,this.customer_Name,this.getEmployeeNameFilter(),this.SearchCustomerAlertMessageType.value,this.SearchCustomerAlertMessage,this.SearchActivationStatus, this.PageNumber,coloumName.active,this.sortType).subscribe
     (
       data =>   
       {

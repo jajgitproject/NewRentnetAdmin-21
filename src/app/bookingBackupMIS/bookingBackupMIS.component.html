@@ -275,16 +275,24 @@
                                                                 <div class="col mb-2"
                                                                     style="flex: 0 0 20%; max-width: 20%;">
                                                                     <mat-form-field class="example-full-width"
-                                                                        appearance="outline" floatLabel="always">
+                                                                        appearance="outline" floatLabel="always"
+                                                                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedSalesPersonExited()}">
                                                                         <mat-label>Sales Person</mat-label>
                                                                         <input type="text" matInput
-                                                                            [formControl]="salesPerson"
-                                                                            [matAutocomplete]="auto7">
-                                                                        <mat-autocomplete #auto7="matAutocomplete">
+                                                                            [formControl]="salesPersonSearch.control"
+                                                                            [matAutocomplete]="auto7"
+                                                                            (keyup)="salesPersonSearch.onKeyup()">
+                                                                        <mat-autocomplete #auto7="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                                                                            [displayWith]="salesPersonSearch.displayEmployeeFn"
+                                                                            (optionSelected)="salesPersonSearch.onSelected($event.option.value)">
                                                                             <mat-option
-                                                                                *ngFor="let option of filteredSalesPersonOptions | async"
-                                                                                [value]="option.salesPerson">
-                                                                                {{option.salesPerson}}
+                                                                                *ngFor="let option of salesPersonSearch.filteredOptions | async"
+                                                                                [value]="option"
+                                                                                [class.employee-dropdown-exited]="salesPersonSearch.isEmployeeExited(option)">
+                                                                                <span class="employee-dropdown-option-text"
+                                                                                    [class.employee-dropdown-option-text-exited]="salesPersonSearch.isEmployeeExited(option)">
+                                                                                    {{ salesPersonSearch.formatEmployeeDropdownLabel(option) }}
+                                                                                </span>
                                                                             </mat-option>
                                                                         </mat-autocomplete>
                                                                     </mat-form-field>

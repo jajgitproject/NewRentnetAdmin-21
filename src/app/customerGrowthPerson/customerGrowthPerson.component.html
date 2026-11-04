@@ -40,26 +40,23 @@
                                                     </button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                                                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedFilterEmployeeExited()}">
                                                         <mat-label>Employee</mat-label>
-                                                        <mat-select 
-                                                         
-                                                        [formControl]="employee" [(ngModel)]="SearchEmployeeName">
-                                                            <mat-option [value]="Employee.employeeName"
-                                                                *ngFor="let Employee of EmployeeList">{{Employee.firstName +' '+
-                                                                Employee.lastName}}</mat-option>
-                                                        </mat-select>
-                                                       
-                                                    </mat-form-field> -->
-                                                    <!-- <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                                                        <mat-label>Employee</mat-label>
-                                                        <mat-select  [formControl]="next"
-                                                        [(ngModel)]="SearchEmployeeName">
-                                                        <mat-option [value]="Employee.employeeName"
-                                                        *ngFor="let Employee of EmployeeList">{{Employee.firstName +' '+
-                                                        Employee.lastName}}</mat-option>
-                                                        </mat-select>
-                                                    </mat-form-field> -->
+                                                        <input type="text" matInput [formControl]="employeeSearch.control"
+                                                            [matAutocomplete]="autoEmployeeFilter" (keyup)="employeeSearch.onKeyup()">
+                                                        <mat-autocomplete #autoEmployeeFilter="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                                                            [displayWith]="employeeSearch.displayEmployeeFn"
+                                                            (optionSelected)="employeeSearch.onSelected($event.option.value)">
+                                                            <mat-option *ngFor="let option of employeeSearch.filteredOptions | async" [value]="option"
+                                                                [class.employee-dropdown-exited]="employeeSearch.isEmployeeExited(option)">
+                                                                <span class="employee-dropdown-option-text"
+                                                                    [class.employee-dropdown-option-text-exited]="employeeSearch.isEmployeeExited(option)">
+                                                                    {{ employeeSearch.formatEmployeeDropdownLabel(option) }}
+                                                                </span>
+                                                            </mat-option>
+                                                        </mat-autocomplete>
+                                                    </mat-form-field>
                                                   <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                                                     <mat-label>Growth Person Code</mat-label>
                                                     <input type="text" matInput 
