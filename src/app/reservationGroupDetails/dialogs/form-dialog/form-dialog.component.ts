@@ -1427,7 +1427,7 @@ private _filterRD(value: string): any[] {
           {
             Swal.fire({
               title: '',
-              text: 'You are not KAM for this customer.',
+              text: 'You logged in as Key Account Manager, but you are not registered to any customer.',
               icon: 'info',
               confirmButtonText: 'OK'
             });
@@ -1508,7 +1508,7 @@ private _filterRD(value: string): any[] {
       {
         Swal.fire({
           title: '',
-          text: 'You are not KAM for this customer.',
+          text: 'You logged in as Key Account Manager, but you are not registered to any customer.',
           icon: 'info',
           confirmButtonText: 'OK'
         });
