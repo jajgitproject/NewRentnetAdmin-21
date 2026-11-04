@@ -25,6 +25,10 @@ interface VehicleComplianceRowDocumentSnapshot {
   documentImageNonAvailabilityReason: string;
   documentStartDate: Date | null;
   documentExpiry: Date | null;
+}
+
+/** Upload metadata is display-only; never passed to form patchValue (action changes must not clear it). */
+interface VehicleComplianceRowUploadMeta {
   documentUploadDate: string;
   documentUploadTime: string;
   documentUploadByID: number | null;
@@ -48,6 +52,7 @@ export class VehicleComplianceComponent implements OnInit {
   imagePaths: string[] = [];
   imageBroken: boolean[] = [];
   rowSnapshots: VehicleComplianceRowDocumentSnapshot[] = [];
+  rowUploadMeta: VehicleComplianceRowUploadMeta[] = [];
   private rowLastActions: string[] = [];
 
   summaryCards: { key: string; label: string; value: number; icon: string }[] = [];
@@ -91,6 +96,7 @@ export class VehicleComplianceComponent implements OnInit {
         this.summary = null;
         this.rows.clear();
         this.rowSnapshots = [];
+        this.rowUploadMeta = [];
         this.showNotification('snackbar-danger', 'Failed to load vehicle compliance.', 'bottom', 'center');
       }
     );
@@ -104,9 +110,11 @@ export class VehicleComplianceComponent implements OnInit {
     this.imagePaths = [];
     this.imageBroken = [];
     this.rowSnapshots = [];
+    this.rowUploadMeta = [];
     this.rowLastActions = [];
     page.rows.forEach((row, index) => {
       this.rowSnapshots.push(this.snapshotFromRow(row));
+      this.rowUploadMeta.push(this.uploadMetaFromRow(row));
       this.rowLastActions.push(VehicleComplianceActions.doNotAddInfo);
       this.rows.push(this.createRowGroup(row));
       this.imagePaths[index] = row.documentImage || '';
@@ -174,26 +182,26 @@ export class VehicleComplianceComponent implements OnInit {
   }
 
   documentUploadDateDisplay(index: number): string {
-    const snap = this.rowSnapshots[index];
-    return snap?.documentUploadDate?.trim() || '';
+    const meta = this.rowUploadMeta[index];
+    return meta?.documentUploadDate?.trim() || '';
   }
 
   documentUploadTimeDisplay(index: number): string {
-    const snap = this.rowSnapshots[index];
-    return snap?.documentUploadTime?.trim() || '';
+    const meta = this.rowUploadMeta[index];
+    return meta?.documentUploadTime?.trim() || '';
   }
 
   documentUploadByDisplay(index: number): string {
-    const snap = this.rowSnapshots[index];
-    if (!snap) {
+    const meta = this.rowUploadMeta[index];
+    if (!meta) {
       return '';
     }
-    const name = (snap.documentUploadBy || '').trim();
+    const name = (meta.documentUploadBy || '').trim();
     if (name) {
       return name;
     }
-    if (snap.documentUploadByID != null && snap.documentUploadByID > 0) {
-      return String(snap.documentUploadByID);
+    if (meta.documentUploadByID != null && meta.documentUploadByID > 0) {
+      return String(meta.documentUploadByID);
     }
     return '';
   }
@@ -253,6 +261,11 @@ export class VehicleComplianceComponent implements OnInit {
       documentImageNonAvailabilityReason: row.documentImageNonAvailabilityReason ?? '',
       documentStartDate: row.documentStartDate ?? null,
       documentExpiry: row.documentExpiry ?? null,
+    };
+  }
+
+  private uploadMetaFromRow(row: any): VehicleComplianceRowUploadMeta {
+    return {
       documentUploadDate: row.documentUploadDate ?? '',
       documentUploadTime: row.documentUploadTime ?? '',
       documentUploadByID: row.documentUploadByID ?? null,
@@ -269,10 +282,20 @@ export class VehicleComplianceComponent implements OnInit {
       documentImageNonAvailabilityReason: '',
       documentStartDate: null,
       documentExpiry: null,
-      documentUploadDate: '',
-      documentUploadTime: '',
-      documentUploadByID: null,
-      documentUploadBy: '',
+    };
+  }
+
+  private formPatchFromSnapshot(
+    patch: VehicleComplianceRowDocumentSnapshot
+  ): Record<string, unknown> {
+    return {
+      inventoryDocumentID: patch.inventoryDocumentID,
+      documentNumber: patch.documentNumber,
+      documentIssuingAuthority: patch.documentIssuingAuthority,
+      documentImage: patch.documentImage,
+      documentImageNonAvailabilityReason: patch.documentImageNonAvailabilityReason,
+      documentStartDate: patch.documentStartDate,
+      documentExpiry: patch.documentExpiry,
     };
   }
 
@@ -322,7 +345,7 @@ export class VehicleComplianceComponent implements OnInit {
     patch: VehicleComplianceRowDocumentSnapshot
   ): void {
     const group = this.rows.at(index) as FormGroup;
-    group.patchValue(patch, { emitEvent: false });
+    group.patchValue(this.formPatchFromSnapshot(patch), { emitEvent: false });
     this.imagePaths[index] = patch.documentImage || '';
     this.imageBroken[index] = false;
   }

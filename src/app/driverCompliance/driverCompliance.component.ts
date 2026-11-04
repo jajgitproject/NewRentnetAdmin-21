@@ -27,11 +27,19 @@ interface DriverComplianceRowDocumentSnapshot {
   documentExpiry: Date | null;
 }
 
+/** Upload metadata is display-only; never passed to form patchValue (action changes must not clear it). */
+interface DriverComplianceRowUploadMeta {
+  documentUploadDate: string;
+  documentUploadTime: string;
+  documentUploadByID: number | null;
+  documentUploadBy: string;
+}
+
 @Component({
   standalone: false,
   selector: 'app-driver-compliance',
-  templateUrl: './driverCompliance.component.html',
-  styleUrls: ['./driverCompliance.component.sass'],
+  templateUrl: './DriverCompliance.component.html',
+  styleUrls: ['./DriverCompliance.component.sass'],
 })
 export class DriverComplianceComponent implements OnInit {
   driverID: number;
@@ -43,7 +51,8 @@ export class DriverComplianceComponent implements OnInit {
   saveInProgress = false;
   imagePaths: string[] = [];
   imageBroken: boolean[] = [];
-  private rowSnapshots: DriverComplianceRowDocumentSnapshot[] = [];
+  rowSnapshots: DriverComplianceRowDocumentSnapshot[] = [];
+  rowUploadMeta: DriverComplianceRowUploadMeta[] = [];
   private rowLastActions: string[] = [];
 
   summaryCards: { key: string; label: string; value: number; icon: string }[] = [];
@@ -51,7 +60,7 @@ export class DriverComplianceComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
-    private driverComplianceService: DriverComplianceService,
+    private DriverComplianceService: DriverComplianceService,
     private driverDocumentService: DriverDocumentService,
     private generalService: GeneralService,
     private snackBar: MatSnackBar,
@@ -63,7 +72,7 @@ export class DriverComplianceComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       const encryptedDriverID = params.DriverID;
-      const encryptedDriverName = params.DriverName;
+      const encryptedDriverName = params.DriverName ?? params.RegNo;
       this.driverID = Number(this.generalService.decrypt(decodeURIComponent(encryptedDriverID)));
       this.driverName = this.generalService.decrypt(decodeURIComponent(encryptedDriverName));
       this.loadPage();
@@ -78,7 +87,7 @@ export class DriverComplianceComponent implements OnInit {
     if (!this.driverID) {
       return;
     }
-    this.driverComplianceService.getPage(this.driverID).subscribe(
+    this.DriverComplianceService.getPage(this.driverID).subscribe(
       (data) => {
         this.bindPage(new DriverCompliancePage(data));
       },
@@ -87,7 +96,8 @@ export class DriverComplianceComponent implements OnInit {
         this.summary = null;
         this.rows.clear();
         this.rowSnapshots = [];
-        this.showNotification('snackbar-danger', 'Failed to load vehicle compliance.', 'bottom', 'center');
+        this.rowUploadMeta = [];
+        this.showNotification('snackbar-danger', 'Failed to load Driver Compliance.', 'bottom', 'center');
       }
     );
   }
@@ -100,9 +110,11 @@ export class DriverComplianceComponent implements OnInit {
     this.imagePaths = [];
     this.imageBroken = [];
     this.rowSnapshots = [];
+    this.rowUploadMeta = [];
     this.rowLastActions = [];
     page.rows.forEach((row, index) => {
       this.rowSnapshots.push(this.snapshotFromRow(row));
+      this.rowUploadMeta.push(this.uploadMetaFromRow(row));
       this.rowLastActions.push(DriverComplianceActions.doNotAddInfo);
       this.rows.push(this.createRowGroup(row));
       this.imagePaths[index] = row.documentImage || '';
@@ -161,7 +173,45 @@ export class DriverComplianceComponent implements OnInit {
       verifiedBy: [row.verifiedBy ?? ''],
       verificationRemark: [row.verificationRemark ?? ''],
       verificationDate: [row.verificationDate ?? ''],
+      verificationTime: [row.verificationTime ?? ''],
     });
+  }
+
+  hasDocumentUploadMetadata(row: FormGroup): boolean {
+    return !!row.get('hasApplicableRecord')?.value;
+  }
+
+  documentUploadDateDisplay(index: number): string {
+    const meta = this.rowUploadMeta[index];
+    return meta?.documentUploadDate?.trim() || '';
+  }
+
+  documentUploadTimeDisplay(index: number): string {
+    const meta = this.rowUploadMeta[index];
+    return meta?.documentUploadTime?.trim() || '';
+  }
+
+  documentUploadByDisplay(index: number): string {
+    const meta = this.rowUploadMeta[index];
+    if (!meta) {
+      return '';
+    }
+    const name = (meta.documentUploadBy || '').trim();
+    if (name) {
+      return name;
+    }
+    if (meta.documentUploadByID != null && meta.documentUploadByID > 0) {
+      return String(meta.documentUploadByID);
+    }
+    return '';
+  }
+
+  hasAnyUploadDetail(index: number): boolean {
+    return !!(
+      this.documentUploadDateDisplay(index) ||
+      this.documentUploadTimeDisplay(index) ||
+      this.documentUploadByDisplay(index)
+    );
   }
 
   onActionChange(index: number): void {
@@ -214,6 +264,15 @@ export class DriverComplianceComponent implements OnInit {
     };
   }
 
+  private uploadMetaFromRow(row: any): DriverComplianceRowUploadMeta {
+    return {
+      documentUploadDate: row.documentUploadDate ?? '',
+      documentUploadTime: row.documentUploadTime ?? '',
+      documentUploadByID: row.documentUploadByID ?? null,
+      documentUploadBy: row.documentUploadBy ?? '',
+    };
+  }
+
   private getEmptyAddPatch(): DriverComplianceRowDocumentSnapshot {
     return {
       driverDocumentID: -1,
@@ -223,6 +282,20 @@ export class DriverComplianceComponent implements OnInit {
       documentImageNonAvailabilityReason: '',
       documentStartDate: null,
       documentExpiry: null,
+    };
+  }
+
+  private formPatchFromSnapshot(
+    patch: DriverComplianceRowDocumentSnapshot
+  ): Record<string, unknown> {
+    return {
+      driverDocumentID: patch.driverDocumentID,
+      documentNumber: patch.documentNumber,
+      documentIssuingAuthority: patch.documentIssuingAuthority,
+      documentImage: patch.documentImage,
+      documentImageNonAvailabilityReason: patch.documentImageNonAvailabilityReason,
+      documentStartDate: patch.documentStartDate,
+      documentExpiry: patch.documentExpiry,
     };
   }
 
@@ -272,7 +345,7 @@ export class DriverComplianceComponent implements OnInit {
     patch: DriverComplianceRowDocumentSnapshot
   ): void {
     const group = this.rows.at(index) as FormGroup;
-    group.patchValue(patch, { emitEvent: false });
+    group.patchValue(this.formPatchFromSnapshot(patch), { emitEvent: false });
     this.imagePaths[index] = patch.documentImage || '';
     this.imageBroken[index] = false;
   }
@@ -411,7 +484,7 @@ export class DriverComplianceComponent implements OnInit {
     }
 
     this.saveInProgress = true;
-    this.driverComplianceService.saveBulk(this.driverID, payloadRows).subscribe(
+    this.DriverComplianceService.saveBulk(this.driverID, payloadRows).subscribe(
       (response) => {
         this.saveInProgress = false;
         const pageData = response?.page ?? response?.Page;
@@ -437,6 +510,22 @@ export class DriverComplianceComponent implements OnInit {
 
   qcStatusLabel(row: FormGroup): string {
     return this.qcStatusText(this.qcStatusKey(row));
+  }
+
+  qcVerificationTooltip(row: FormGroup): string {
+    const key = this.qcStatusKey(row);
+    if (key === 'na') {
+      return 'No applicable document';
+    }
+    const date = (row.get('verificationDate')?.value || '').toString().trim();
+    const time = (row.get('verificationTime')?.value || '').toString().trim();
+    const verifier = (row.get('verifiedBy')?.value || '').toString().trim();
+    return [
+      `Verification status: ${this.qcStatusText(key)}`,
+      `Verifier name: ${verifier || '—'}`,
+      `Date: ${date || '—'}`,
+      `Time: ${time || '—'}`,
+    ].join('\n');
   }
 
   qcStatusIcon(row: FormGroup): string {
