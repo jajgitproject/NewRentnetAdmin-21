@@ -37,6 +37,11 @@ import {
 
 export class FormDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
+  displayApprovedEmployeeFn = createDisplayEmployeeFn();
+
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
