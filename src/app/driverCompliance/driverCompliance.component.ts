@@ -13,7 +13,7 @@ import {
   DriverComplianceSummary,
 } from './driverCompliance.model';
 import { DriverComplianceImagePreviewDialogComponent } from './dialogs/image-preview-dialog/image-preview-dialog.component';
-import { FormDialogVerificationsComponent } from '../driverDocumentVerification/dialogs/form-dialog-verifications/form-dialog-verifications.component';
+import { FormDialogDriverVerificationsComponent } from '../driverDocument/dialogs/verification/verification.component';
 import { DriverDocumentService } from '../driverDocument/driverDocument.service';
 
 /** Server-loaded document field values restored on Edit / NA (when a record exists). */
@@ -235,14 +235,13 @@ export class DriverComplianceComponent implements OnInit {
 
     this.driverDocumentService.getById(driverDocumentID).subscribe(
       (row) => {
-        const dialogRef = this.dialog.open(FormDialogVerificationsComponent, {
+        const dialogRef = this.dialog.open(FormDialogDriverVerificationsComponent, {
           width: '900px',
           maxWidth: '95vw',
           data: {
             advanceTable: row,
             driverID: this.driverID,
-            DriverID: this.driverID,
-            DriverName: this.driverName,
+            driverName: this.driverName,
           },
         });
         dialogRef.afterClosed().subscribe(() => this.loadPage());

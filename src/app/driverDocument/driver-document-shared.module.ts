@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormDialogComponent as advanceTableForm } from './dialogs/form-dialog/form-dialog.component';
-import { FormDialogVerificationsComponent } from '../driverDocumentVerification/dialogs/form-dialog-verifications/form-dialog-verifications.component';
+import { FormDialogDriverVerificationsComponent } from './dialogs/verification/verification.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -20,11 +20,10 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { DriverDocumentService } from './driverDocument.service';
-import { DriverDocumentVerificationService } from '../driverDocumentVerification/driverDocumentVerification.service';
 
-/** Dialogs opened from driver document (and related features) with full Material + modal styles. */
+/** Dialogs shared with other feature modules (e.g. driver compliance) without pulling routing. */
 @NgModule({
-  declarations: [advanceTableForm, FormDialogVerificationsComponent],
+  declarations: [advanceTableForm, FormDialogDriverVerificationsComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -45,7 +44,7 @@ import { DriverDocumentVerificationService } from '../driverDocumentVerification
     MatAutocompleteModule,
     MyUploadModule,
   ],
-  providers: [DriverDocumentService, DriverDocumentVerificationService],
-  exports: [advanceTableForm, FormDialogVerificationsComponent],
+  providers: [DriverDocumentService],
+  exports: [advanceTableForm, FormDialogDriverVerificationsComponent],
 })
 export class DriverDocumentSharedModule {}
