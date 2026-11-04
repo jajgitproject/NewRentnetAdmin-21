@@ -25,6 +25,7 @@ import {
   isEmployeeDropdownSelection,
   isEmployeeExited,
 } from 'src/app/shared/employee-dropdown-display.util';
+import { finalizeCustomerEmployeeSavePayload } from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -45,7 +46,7 @@ export class FormDialogComponentHolder
   dialogTitle: string;
   advanceTableForm: FormGroup;
   public EmployeeList?: EmployeeDropDown[] = [];
-  filteredinstructedByOptionss: Observable<EmployeeDropDown[]>;
+  filteredinstructedByOptionss: Observable<EmployeeDropDown[]> = of([]);
   filteredCityOptions: Observable<CityDropDown[]>;
   public CityLists?: CityDropDown[] = [];
   searchinstructedBy: FormControl = new FormControl();
@@ -169,7 +170,10 @@ export class FormDialogComponentHolder
         }
         return { employeeNameInvalid: true };
       }
-      if (value == null || typeof value !== 'string' || !value.trim()) {
+      if (value == null || (typeof value === 'string' && !value.trim())) {
+        return null;
+      }
+      if (typeof value !== 'string') {
         return { employeeNameInvalid: true };
       }
       const match = (EmployeeList || []).some((employee) => employeeMatchesDropdownInput(employee, value));
@@ -235,7 +239,7 @@ export class FormDialogComponentHolder
     if (isEmployeeDropdownSelection(raw)) {
       return;
     }
-    this._generalService.GetEmployeesForVehicleCategoryPrefix(Prefix).subscribe
+    this._generalService.searchEmployeesByPrefix(Prefix).subscribe
     (
       data =>
       {
@@ -271,20 +275,21 @@ export class FormDialogComponentHolder
 
   private buildSavePayload(): Record<string, unknown> {
     const raw = { ...this.advanceTableForm.getRawValue() };
-    const empValue = raw['employeeName'];
-    const employee =
-      findEmployeeByDropdownInput(empValue as EmployeeDropDown | string, this.EmployeeList || []) ||
-      (isEmployeeDropdownSelection(empValue) ? (empValue as EmployeeDropDown) : null);
-    if (employee) {
-      raw['employeeID'] = employee.employeeID;
-      raw['employeeName'] = formatEmployeeDropdownLabel(employee);
-      this.employeesID = employee.employeeID;
-    } else if (this.employeesID) {
-      raw['employeeID'] = this.employeesID;
+    const payload = finalizeCustomerEmployeeSavePayload(raw, {
+      employeeField: 'employeeName',
+      employeeList: this.EmployeeList || [],
+      employeesID: this.employeesID,
+      customerID: this.data.CustomerID,
+      advanceTable: this.advanceTable,
+      primaryKeyField: 'customerKeyAccountManagerID',
+      primaryKeyAliases: ['customerKeyAccountManagerid', 'id'],
+    });
+    if (this.cityID) {
+      payload['cityID'] = this.cityID;
+    } else if (this.advanceTable?.cityID) {
+      payload['cityID'] = this.advanceTable.cityID;
     }
-    raw['customerID'] = this.data.CustomerID;
-    raw['cityID'] = this.cityID;
-    return raw;
+    return payload;
   }
   getemployeeIDTitles(employeeID: any)
   {

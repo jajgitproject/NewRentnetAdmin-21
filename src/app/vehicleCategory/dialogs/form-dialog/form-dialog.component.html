@@ -113,21 +113,29 @@
                 </div> -->
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                  
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedInstructedByExited()}">
                         <mat-label>Instructed By ID</mat-label>
-                        <input type="text" matInput formControlName="employee" [matAutocomplete]="auto6">
-                        <mat-autocomplete #auto6="matAutocomplete" (optionSelected)="onEmployeeSelected($event.option.value)">
-                          <mat-option *ngFor="let option of filteredinstructedByOptionss | async" 
-                          [value]="option.firstName +' '+option.lastName" (click)="getemployeeIDTitles(option.employeeID)">
-                            {{option.firstName +' '+ option.lastName}}
+                        <input required type="text" matInput formControlName="employee" [matAutocomplete]="auto6">
+                        <mat-autocomplete #auto6="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="displayEmployeeFn"
+                            (optionSelected)="onEmployeeSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredinstructedByOptionss | async"
+                            [value]="option"
+                            [class.employee-dropdown-exited]="isEmployeeExited(option)"
+                            [style.--mat-option-label-text-color]="isEmployeeExited(option) ? '#c62828' : null"
+                            [style.--mat-option-active-state-label-text-color]="isEmployeeExited(option) ? '#c62828' : null"
+                            [style.--mat-option-selected-state-label-text-color]="isEmployeeExited(option) ? '#c62828' : null">
+                            <span class="employee-dropdown-option-text"
+                              [style.color]="isEmployeeExited(option) ? '#c62828' : null">
+                              {{ formatEmployeeDropdownLabel(option) }}
+                            </span>
                           </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['employee'].hasError('employeeTypeInvalid')">
                             Please select a Instructed By ID
                         </mat-error>
                       </mat-form-field>
-                
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">

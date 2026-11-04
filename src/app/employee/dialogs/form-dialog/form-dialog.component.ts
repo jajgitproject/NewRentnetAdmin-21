@@ -110,55 +110,44 @@ export class FormDialogComponent
   {
         // Set the defaults
         this.action = data.action;
- if (this.action === 'edit') 
-        {
-          //this.dialogTitle ='Edit Employee';
-          this.dialogTitle ='Employee';    
-          this.advanceTable = data.advanceTable;
-  //          const rm = this.EmployeesList.find(e => e.employeeID === this.advanceTable.reportingManagerID);
-  // if (rm) {
-  //   const fullValue = `${rm.firstName} ${rm.lastName} ${rm.employeeOfficeID}`;
-  //   this.advanceTableForm.patchValue({ reportingManager: fullValue });
-  // }
-          this.searchSupplier.setValue(this.advanceTable.supplierName);
-          this.referenceID=this.advanceTable?.employeeID;
-          this.searchRole.setValue(this.advanceTable.role);
-          this.searchEmployee.setValue(this.advanceTable.reportingManager);
-           this.advanceTableForm?.patchValue({
-    employmentStatus: this.advanceTable.employmentStatus || 'Active',
-    dateOfLeaving: this.advanceTable.dateOfLeaving
-      ? new Date(this.advanceTable.dateOfLeaving)
-      : null
-  });
+        this.dialogTitle = 'Employee';
 
-          this.loadPassword();
-          if (this.advanceTable.mobile) {
-            const mobileParts = this.advanceTable.mobile.split('-');
-            const countryCodes = '+'+''+mobileParts[0];
-            this.advanceTable.countryCodes=countryCodes;
-            const mobile1 = mobileParts[1];
-            this.advanceTable.mobile=mobile1;
-             if (this.advanceTable.dateOfLeaving) {
-               const dateOfLeaving = moment(this.advanceTable.dateOfLeaving).format('DD/MM/YYYY');
-               if (moment(dateOfLeaving, 'DD/MM/YYYY', true).isValid()) {
-                 this.onBlurUpdatedateOfLeavingEdit(dateOfLeaving);
-               }
-             }
-        }
-      }
- else 
-        {
-          //this.dialogTitle = 'Create Employee';
-          this.dialogTitle = 'Employee';
+        if (this.action === 'edit') {
+          this.advanceTable = data.advanceTable;
+          this.referenceID = this.advanceTable?.employeeID;
+          this.normalizeAdvanceTableMobileForForm();
+        } else {
           this.advanceTable = new Employee({});
-          this.advanceTableForm = this.createContactForm();
-          this.advanceTable.activationStatus=true;
-          this.advanceTable.vpn=true;
+          this.advanceTable.activationStatus = true;
+          this.advanceTable.vpn = true;
           this.advanceTable.employeeOf = 'Eco';
         }
-        this.advanceTableForm = this.createContactForm();
-        this.lastSaved=data.lastid;
 
+        this.advanceTableForm = this.createContactForm();
+        this.lastSaved = data.lastid;
+
+        if (this.action === 'edit') {
+          this.searchSupplier.setValue(this.advanceTable.supplierName);
+          this.searchRole.setValue(this.advanceTable.role);
+          this.searchEmployee.setValue(this.advanceTable.reportingManager);
+          this.loadPassword();
+          if (this.advanceTable.dateOfLeaving) {
+            const dateOfLeaving = moment(this.advanceTable.dateOfLeaving).format('DD/MM/YYYY');
+            if (moment(dateOfLeaving, 'DD/MM/YYYY', true).isValid()) {
+              this.onBlurUpdatedateOfLeavingEdit(dateOfLeaving);
+            }
+          }
+        }
+  }
+
+  /** Split API mobile (country-local) into form fields before createContactForm(). */
+  private normalizeAdvanceTableMobileForForm(): void {
+    if (!this.advanceTable?.mobile || !String(this.advanceTable.mobile).includes('-')) {
+      return;
+    }
+    const mobileParts = String(this.advanceTable.mobile).split('-');
+    this.advanceTable.countryCodes = '+' + mobileParts[0];
+    this.advanceTable.mobile = mobileParts.slice(1).join('-');
   }
 
   public ngOnInit(): void
@@ -1043,18 +1032,18 @@ onBlurUpdatedateOfLeavingEdit(value: string): void {
   if (!value || !String(value).trim()) {
     return;
   }
+  if (!this.advanceTableForm) {
+    return;
+  }
   const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
   if (validDate) {
     const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
-    if (this.action === 'edit') {
-      this.advanceTable.dateOfLeaving = formattedDate;
-    } else {
-      this.advanceTableForm.get('dateOfLeaving')?.setValue(formattedDate);
-    }
+    this.advanceTable.dateOfLeaving = formattedDate;
+    this.advanceTableForm.get('dateOfLeaving')?.setValue(formattedDate);
     this.advanceTableForm.get('dateOfLeaving')?.setErrors(null);
     this.advanceTableForm.get('dateOfLeaving')?.updateValueAndValidity({ emitEvent: false });
   } else {
-    this.advanceTableForm?.get('dateOfLeaving')?.setErrors({ invalidDate: true });
+    this.advanceTableForm.get('dateOfLeaving')?.setErrors({ invalidDate: true });
   }
 }
 

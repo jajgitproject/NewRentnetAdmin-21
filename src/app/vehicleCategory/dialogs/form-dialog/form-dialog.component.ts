@@ -12,6 +12,15 @@ import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { map, startWith } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import {
+  displayEmployeeDropdownValue,
+  employeeMatchesDropdownInput,
+  filterEmployeesForAutocomplete,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+} from 'src/app/shared/employee-dropdown-display.util';
 
 @Component({
   standalone: false,
@@ -23,6 +32,10 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 export class FormDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = (value: EmployeeDropDown | string | null) => displayEmployeeDropdownValue(value);
+
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
@@ -57,13 +70,13 @@ export class FormDialogComponent
           //this.dialogTitle ='Edit Vehicle Category';
           this.dialogTitle ='Vehicle Category';
           this.advanceTable = data.advanceTable;
+          this.employeesID = this.advanceTable.instructedByID;
           this.ImagePath=this.advanceTable.vehicleCategoryImage;
           this.ImagePath1=this.advanceTable.supportingDoc;
           this.searchVehicleCategory.setValue(this.advanceTable.previousCategory);
           this.searchVehicleCategorys.setValue(this.advanceTable.nextCategory);
           this.searchCreatedBy.setValue(this.advanceTable.createdBy);
-          // this.searchinstructedBy.setValue(this.advanceTable.instructedBy);
-          this.searchinstructedBy.setValue(this.advanceTable.employee);
+          this.searchinstructedBy.setValue(this.advanceTable.employee || this.advanceTable.instructedBy);
         } else 
         {
           //this.dialogTitle = 'Create Vehicle Category';
@@ -265,68 +278,160 @@ export class FormDialogComponent
     this.employeeID=employeeID;
   }
 
+  isSelectedInstructedByExited(): boolean {
+    const value = this.advanceTableForm?.get('employee')?.value;
+    const emp = findEmployeeByDropdownInput(value, this.EmployeeList || []);
+    if (emp && isEmployeeExited(emp)) {
+      return true;
+    }
+    if (typeof value === 'string' && value.trim()) {
+      return /\s-\s*Exited\s-/i.test(value);
+    }
+    return false;
+  }
+
   InitEmployees(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe(
+    this._generalService.GetEmployee().subscribe(
       data=>
       {
-        this.EmployeeList=data;
+        this.EmployeeList = data || [];
         this.advanceTableForm.controls['employee'].setValidators([Validators.required,
           this.employeeValidator(this.EmployeeList)
         ]);
         this.advanceTableForm.controls['employee'].updateValueAndValidity();
-        this.filteredinstructedByOptionss = this.advanceTableForm.controls["employee"].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        ); 
+        this.filteredinstructedByOptionss = this.advanceTableForm.controls['employee'].valueChanges.pipe(
+          startWith(this.advanceTableForm.controls['employee'].value ?? ''),
+          map((value) => {
+            const term =
+              typeof value === 'string'
+                ? value
+                : isEmployeeDropdownSelection(value)
+                  ? formatEmployeeDropdownLabel(value)
+                  : '';
+            return filterEmployeesForAutocomplete(this.EmployeeList || [], term);
+          })
+        );
+        if (this.action === 'edit') {
+          this.patchInstructedByEmployeeForEdit();
+        }
       });
   }
-  
-  private _filtersearchinstructed(value: string): any {
-  const filterValue = value.toLowerCase();
 
-  // Only start filtering after typing 3 characters
-  if (filterValue.length < 3) {
-    return [];
-  }
-
-  return this.EmployeeList.filter(data => {
-    const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-    return fullName.includes(filterValue);
-  });
-}
-
-  // private _filtersearchinstructed(value: string): any {
-  //   const filterValue = value.toLowerCase();
-  //   return this.EmployeeList.filter(
-  //     data => 
-  //     {
-  //       const fullName=`${data.firstName} ${data.lastName}`.toLowerCase();
-  //       return fullName.toLowerCase().includes(filterValue);
-  //     }
-  //   );
-  // }
-  onEmployeeSelected(selectedEmployee: string) {
-    const selectedValue = this.EmployeeList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedEmployee
-    );
-  
-    if (selectedEmployee) {
-      this.getemployeeIDTitles(selectedValue.employeeID);
+  private patchInstructedByEmployeeForEdit(): void {
+    const id = this.employeesID || this.advanceTable?.instructedByID;
+    if (id) {
+      const fromList = (this.EmployeeList || []).find((e) => e.employeeID === id);
+      if (fromList) {
+        this.advanceTableForm.patchValue(
+          { employee: fromList, instructedByID: id },
+          { emitEvent: false }
+        );
+        this.employeesID = id;
+        return;
+      }
+      this._generalService.getEmployeeID(id).subscribe(
+        (data) => {
+          const employee = Array.isArray(data) ? data[0] : data;
+          if (!employee) {
+            return;
+          }
+          this.EmployeeList = [employee, ...(this.EmployeeList || [])];
+          this.advanceTableForm.patchValue(
+            { employee, instructedByID: id },
+            { emitEvent: false }
+          );
+          this.employeesID = id;
+          this.advanceTableForm.controls['employee'].setValidators([
+            Validators.required,
+            this.employeeValidator(this.EmployeeList),
+          ]);
+          this.advanceTableForm.controls['employee'].updateValueAndValidity({ emitEvent: false });
+        },
+        () => { /* keep string label from row if lookup fails */ }
+      );
+      return;
+    }
+    const label = this.advanceTable?.employee || this.advanceTable?.instructedBy;
+    if (label) {
+      const found = findEmployeeByDropdownInput(label, this.EmployeeList || []);
+      if (found) {
+        this.advanceTableForm.patchValue(
+          { employee: found, instructedByID: found.employeeID },
+          { emitEvent: false }
+        );
+        this.employeesID = found.employeeID;
+      }
     }
   }
-  
-  getemployeeIDTitles(employeeID: any) {
-    
-    this.employeesID=employeeID;
-    this.advanceTableForm.patchValue({instructedByID:this.employeesID})
+
+  onEmployeeSelected(selectedEmployee: EmployeeDropDown) {
+    if (!isEmployeeDropdownSelection(selectedEmployee)) {
+      return;
+    }
+    this.advanceTableForm.patchValue(
+      { employee: selectedEmployee, instructedByID: selectedEmployee.employeeID },
+      { emitEvent: false }
+    );
+    this.employeesID = selectedEmployee.employeeID;
   }
 
-  employeeValidator(EmployeesList: any[]): ValidatorFn {
+  getemployeeIDTitles(employeeID: any) {
+    this.employeesID = employeeID;
+    this.advanceTableForm.patchValue({ instructedByID: this.employeesID });
+  }
+
+  employeeValidator(EmployeesList: EmployeeDropDown[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = EmployeesList.some(employee => (employee.firstName + ' '+ employee.lastName).toLowerCase() === value);
-      return match ? null : { employeeTypeInvalid: true };
+      const value = control.value;
+      const instructedById =
+        control.parent?.get('instructedByID')?.value ?? this.employeesID ?? null;
+
+      if (isEmployeeDropdownSelection(value)) {
+        const id = value.employeeID;
+        if (id != null && Number(id) > 0) {
+          return null;
+        }
+        return { employeeTypeInvalid: true };
+      }
+      if (value == null || typeof value !== 'string' || !value.trim()) {
+        if (instructedById != null && Number(instructedById) > 0) {
+          return null;
+        }
+        return { employeeTypeInvalid: true };
+      }
+      const match = (EmployeesList || []).some((employee) =>
+        employeeMatchesDropdownInput(employee, value)
+      );
+      if (match) {
+        return null;
+      }
+      if (instructedById != null && Number(instructedById) > 0) {
+        return null;
+      }
+      return { employeeTypeInvalid: true };
     };
+  }
+
+  private buildSavePayload(): Record<string, unknown> {
+    const raw = { ...this.advanceTableForm.getRawValue() };
+    const empValue = raw['employee'];
+    const employee =
+      findEmployeeByDropdownInput(empValue as EmployeeDropDown | string, this.EmployeeList || []) ||
+      (isEmployeeDropdownSelection(empValue) ? (empValue as EmployeeDropDown) : null);
+    if (employee) {
+      const label = formatEmployeeDropdownLabel(employee);
+      raw['instructedByID'] = employee.employeeID;
+      raw['employee'] = label;
+      raw['instructedBy'] = label;
+      this.employeesID = employee.employeeID;
+    } else if (this.employeesID || raw['instructedByID']) {
+      raw['instructedByID'] = this.employeesID || raw['instructedByID'];
+      if (typeof empValue === 'string' && empValue.trim()) {
+        raw['employee'] = empValue;
+        raw['instructedBy'] = empValue;
+      }
+    }
+    return raw;
   }
 
   // InitEmployee(){
@@ -355,7 +460,7 @@ export class FormDialogComponent
       createdByID :[this.advanceTable.createdByID],
       instructedByID :[this.advanceTable.instructedByID],
       supportingDoc :[this.advanceTable.supportingDoc],
-      employee :[this.advanceTable.instructedBy],
+      employee :[this.advanceTable.employee || this.advanceTable.instructedBy],
       description :[this.advanceTable.description],
     });
   }
@@ -380,7 +485,7 @@ export class FormDialogComponent
   }
   public Post(): void {
     this.isLoading = true; // Show spinner
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())
+    this.advanceTableService.add(this.buildSavePayload())
       .subscribe(
         response => {
           this.isLoading = false; // Hide spinner
@@ -396,7 +501,7 @@ export class FormDialogComponent
 
   public Put(): void {
     this.isLoading = true; // Show spinner
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())
+    this.advanceTableService.update(this.buildSavePayload())
       .subscribe(
         response => {
           this.isLoading = false; // Hide spinner

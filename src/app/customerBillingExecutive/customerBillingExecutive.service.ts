@@ -71,13 +71,23 @@ export class CustomerBillingExecutiveService
     advanceTable.customerBillingExecutiveID=-1;
    
     advanceTable.fromDateString=this.generalService.getTimeApplicable(advanceTable.fromDate);
-    advanceTable.toDateString=this.generalService.getTimeApplicableTO(advanceTable.toDate);
+    if (advanceTable.toDate) {
+      advanceTable.toDateString=this.generalService.getTimeApplicableTO(advanceTable.toDate);
+    } else {
+      advanceTable.toDate = null;
+      advanceTable.toDateString = null;
+    }
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
   update(advanceTable: CustomerBillingExecutive)
   {
     advanceTable.fromDateString=this.generalService.getTimeApplicable(advanceTable.fromDate);
-    advanceTable.toDateString=this.generalService.getTimeApplicableTO(advanceTable.toDate);
+    if (advanceTable.toDate) {
+      advanceTable.toDateString=this.generalService.getTimeApplicableTO(advanceTable.toDate);
+    } else {
+      advanceTable.toDate = null;
+      advanceTable.toDateString = null;
+    }
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
   delete(customerBillingExecutiveid: number):  Observable<any> 

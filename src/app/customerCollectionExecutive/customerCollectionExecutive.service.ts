@@ -64,20 +64,29 @@ export class CustomerCollectionExecutiveService
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerCollectionExecutive  + '/' + SearchEmployeeName + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 
-  add(advanceTable: CustomerCollectionExecutive) 
+  add(advanceTable: CustomerCollectionExecutive | Record<string, unknown>) 
   {
-     debugger
-    advanceTable.customerCollectionExecutiveID=-1;
-    advanceTable.userID=this.generalService.getUserID();
-    advanceTable.fromDateString=this.generalService.getTimeApplicable(advanceTable.fromDate);
-    if(advanceTable.toDate === null ){
-     advanceTable.toDateString=null;
+    const src = advanceTable as Record<string, unknown>;
+    const body: Record<string, unknown> = { ...src };
+    body.customerCollectionExecutiveID = -1;
+    body.userID = this.generalService.getUserID();
+    body.customerID = Number(src['customerID'] ?? src['CustomerID'] ?? 0);
+    body.employeeID = Number(src['employeeID'] ?? src['EmployeeID'] ?? 0);
+    if (body.activationStatus === '' || body.activationStatus == null) {
+      body.activationStatus = true;
     }
-    else{
-       advanceTable.toDateString=this.generalService.getTimeApplicableTO(advanceTable.toDate);
+    const fromDate = src['fromDate'] as Date;
+    body.fromDate = fromDate;
+    body.fromDateString = this.generalService.getTimeApplicable(fromDate);
+    const toDate = src['toDate'] as Date | null | undefined;
+    if (toDate) {
+      body.toDate = toDate;
+      body.toDateString = this.generalService.getTimeApplicableTO(toDate);
+    } else {
+      body.toDate = null;
+      body.toDateString = null;
     }
-   
-    return this.httpClient.post<any>(this.API_URL , advanceTable);
+    return this.httpClient.post<any>(this.API_URL , body);
   }
   update(advanceTable: CustomerCollectionExecutive)
   {

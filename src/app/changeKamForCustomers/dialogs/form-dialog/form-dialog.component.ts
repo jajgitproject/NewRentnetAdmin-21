@@ -8,15 +8,27 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 //import { EmployeeDropDown } from 'src/app/general/IEmployees';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { CityDropDown } from 'src/app/city/cityDropDown.model';
 import { StateDropDown } from 'src/app/state/stateDropDown.model';
-import { startWith } from 'rxjs/internal/operators/startWith';
-import { map } from 'rxjs/operators';
 import moment from 'moment';
 import Swal from 'sweetalert2';
+import {
+  createDisplayEmployeeFn,
+  employeeNameControlValidator,
+  filterPreloadedEmployeesForControl,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  finalizeChangeKamSavePayload,
+  employeeStubFromIdAndDisplayName,
+  normalizeChangeKamGridRowForEdit,
+  normalizeKamChangeRow,
+  onEmployeeAutocompleteSelected,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 
 @Component({
@@ -29,14 +41,18 @@ import Swal from 'sweetalert2';
 
 export class FormDialogComponentHolder 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
+
   employeeID:number;
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
   public EmployeeList?: EmployeeDropDown[] = [];
   public kamList? : EmployeeDropDown[] = [];
-  filteredinstructedByOptionss: Observable<EmployeeDropDown[]>;
-  filteredinstructedByOptions: Observable<EmployeeDropDown[]>;
+  filteredinstructedByOptionss: Observable<EmployeeDropDown[]> = of([]);
+  filteredinstructedByOptions: Observable<EmployeeDropDown[]> = of([]);
   filteredCityOptions: Observable<CityDropDown[]>;
   public CityLists?: CityDropDown[] = [];
   searchinstructedBy: FormControl = new FormControl();
@@ -67,11 +83,19 @@ export class FormDialogComponentHolder
         if (this.action === 'edit') 
         {
           this.dialogTitle =' Change Kam For Customers';       
-          this.advanceTable = data.advanceTable;
-          let startDate=moment(this.advanceTable.newKAMActivationFromDate).format('DD/MM/yyyy');
-          let newKAMActivationToDate=moment(this.advanceTable.newKAMActivationToDate).format('DD/MM/yyyy');
-          this.onBlurFromDateEdit(startDate);
-          this.onBlurEndDateEdit(newKAMActivationToDate);
+          this.advanceTable = normalizeChangeKamGridRowForEdit(data.advanceTable) as ChangeKamForCustomers;
+          if (this.advanceTable.newKAMActivationFromDate) {
+            const startDate = moment(this.advanceTable.newKAMActivationFromDate).format('DD/MM/yyyy');
+            if (moment(startDate, 'DD/MM/YYYY', true).isValid()) {
+              this.onBlurFromDateEdit(startDate);
+            }
+          }
+          if (this.advanceTable.newKAMActivationToDate) {
+            const newKAMActivationToDate = moment(this.advanceTable.newKAMActivationToDate).format('DD/MM/yyyy');
+            if (moment(newKAMActivationToDate, 'DD/MM/YYYY', true).isValid()) {
+              this.onBlurEndDateEdit(newKAMActivationToDate);
+            }
+          }
         } else 
         {
           this.dialogTitle = 'Change Kam For Customers ';
@@ -87,9 +111,63 @@ export class FormDialogComponentHolder
   
   public ngOnInit(): void
   {
-    this.InitEmployee();
-   this.InitCustomerkamNewEmployee(); 
+    this.filteredinstructedByOptionss = of([]);
+    this.filteredinstructedByOptions = of([]);
+    this.loadOldKamList();
+  }
 
+  isSelectedOldKamExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'oldCustomerkamEmployee', this.kamList || []);
+  }
+
+  isSelectedNewKamExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'newCustomerkamEmployee', this.EmployeeList || []);
+  }
+
+  private loadOldKamList(): void {
+    this._generalService.GetCustomerChangesKam().subscribe((data) => {
+      this.kamList = (data || []).map((row) => normalizeKamChangeRow(row as Record<string, unknown>));
+      this.advanceTableForm.controls['oldCustomerkamEmployee'].setValidators([
+        Validators.required,
+        employeeNameControlValidator(() => this.kamList || []),
+      ]);
+      this.advanceTableForm.controls['oldCustomerkamEmployee'].updateValueAndValidity({ emitEvent: false });
+      if (this.action === 'edit') {
+        this.patchEditEmployeeFields();
+      }
+    });
+  }
+
+  private patchEditEmployeeFields(): void {
+    const oldId = Number(this.advanceTable.oldKAMID ?? 0);
+    const newId = Number(this.advanceTable.newKAMID ?? 0);
+    const oldName = String(this.advanceTable.oldCustomerkamEmployee ?? '');
+    const newName = String(this.advanceTable.newCustomerkamEmployee ?? '');
+    const oldEmp =
+      (this.kamList || []).find((e) => e.employeeID === oldId) ??
+      employeeStubFromIdAndDisplayName(oldId, oldName);
+    const newEmp = employeeStubFromIdAndDisplayName(newId, newName);
+    if (!this.EmployeeList?.some((e) => e.employeeID === newEmp.employeeID)) {
+      this.EmployeeList = [...(this.EmployeeList || []), newEmp];
+    }
+    this.oldKAMID = oldEmp.employeeID;
+    this.newKAMID = newEmp.employeeID;
+    this.advanceTableForm.patchValue(
+      {
+        oldCustomerkamEmployee: oldEmp,
+        newCustomerkamEmployee: newEmp,
+        oldKAMID: oldEmp.employeeID,
+        newKAMID: newEmp.employeeID,
+        customerKeyAccountManagerID: this.advanceTable.customerKeyAccountManagerID,
+        newKAMActivationFromDate: this.advanceTable.newKAMActivationFromDate,
+      },
+      { emitEvent: false }
+    );
+    this.advanceTableForm.controls['newCustomerkamEmployee'].setValidators([
+      Validators.required,
+      employeeNameControlValidator(() => this.EmployeeList || []),
+    ]);
+    this.advanceTableForm.controls['newCustomerkamEmployee'].updateValueAndValidity({ emitEvent: false });
   }
   
   
@@ -107,23 +185,6 @@ export class FormDialogComponentHolder
       : '';
   }
 
-  //--------------- Employee Validator -----------
-  employeeNameValidator(EmployeeList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = EmployeeList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
-      return match ? null : { employeeNameInvalid: true };
-    };
-  }
-  
-    customerKamEmployeeNameValidator(KamList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = KamList.some(employee => (employee.employeeFirstName + ' ' + employee.employeeLastName).toLowerCase() === value);
-      return match ? null : { customerKamNameInvalid: true };
-    };
-  }
- 
   cityNameValidator(CityLists: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
@@ -132,114 +193,56 @@ export class FormDialogComponentHolder
     };
   }
 
-  InitEmployee()
-  {
+  InitOldKamEmployee(_event?: unknown): void {
+    filterPreloadedEmployeesForControl(
+      this.advanceTableForm,
+      'oldCustomerkamEmployee',
+      this.kamList || [],
+      (options) => { this.filteredinstructedByOptionss = options; }
+    );
+  }
 
-    this._generalService.GetCustomerChangesKam().subscribe
-    (
-      data =>   
-      {
-        this.kamList = data;
-        this.advanceTableForm.controls['oldCustomerkamEmployee'].setValidators([Validators.required,
-          this.customerKamEmployeeNameValidator(this.kamList)]);
-        this.advanceTableForm.controls['oldCustomerkamEmployee'].updateValueAndValidity(); 
-        this.filteredinstructedByOptionss = this.advanceTableForm.controls['oldCustomerkamEmployee'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        );
+  InitNewKamEmployee(_event?: unknown): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'newCustomerkamEmployee', {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredinstructedByOptions = options; },
+    });
+  }
+
+  OnOldKamSelected(selectedEmployee: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'oldCustomerkamEmployee',
+      selectedEmployee,
+      (id) => {
+        this.oldKAMID = id;
+        this.advanceTableForm.patchValue({ oldKAMID: id }, { emitEvent: false });
       }
     );
   }
-  private _filtersearchinstructed(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.kamList.filter(
-      data => 
-      {
-        //return customer.firstName.toLowerCase().indexOf(filterValue)===0;
-        const fullName = `${data.employeeFirstName} ${data.employeeLastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-  }
-  OnEmployeeSelect(selectedEmployee: string, type: string)
-  {
-    const KamName = this.kamList.find(
-      data => `${data.employeeFirstName} ${data.employeeLastName}` === selectedEmployee
-    );
-    if (selectedEmployee && type === 'oldKam') 
-    {
-      this.getemployeeIDTitles(KamName?.employeeID);
-    }
-    else if (selectedEmployee && type === 'newKam') {
-      this.getkamemployeeIDTitles(KamName?.employeeID);
-    }
-  }
-  getemployeeIDTitles(oldKAMID: any)
-  {
-    this.oldKAMID=oldKAMID;
-         this.advanceTableForm.patchValue({oldKAMID: this.oldKAMID});
 
-  }
-
-
-///newkamcustomer//
-
-
-  InitCustomerkamNewEmployee()
-  {
-
-    this._generalService.GetEmployees().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data;
-        this.advanceTableForm.controls['newCustomerkamEmployee'].setValidators([Validators.required,
-          this.employeeNameValidator(this.EmployeeList)]);
-        this.advanceTableForm.controls['newCustomerkamEmployee'].updateValueAndValidity(); 
-        this.filteredinstructedByOptions = this.advanceTableForm.controls['newCustomerkamEmployee'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchKam(value || ''))
-        );
+  OnNewKamSelected(selectedEmployee: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'newCustomerkamEmployee',
+      selectedEmployee,
+      (id) => {
+        this.newKAMID = id;
+        this.advanceTableForm.patchValue({ newKAMID: id }, { emitEvent: false });
       }
     );
   }
-  private _filtersearchKam(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.EmployeeList.filter(
-      data => 
-      {
-        //return customer.firstName.toLowerCase().indexOf(filterValue)===0;
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-  }
-  OnKamEmployeeSelect(selectedEmployee: string, type: string)
-  {
-    const EmployeeName = this.EmployeeList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedEmployee
-    );
-    if (selectedEmployee && type === 'newKam') 
-    {
-      this.getkamemployeeIDTitles(EmployeeName.employeeID);
-    }
-  }
-  // getkamemployeeIDTitles(employeeID: any)
-  // {
-  //   this.employeeID=employeeID;
-  //        this.advanceTableForm.patchValue({newKAMID: this.employeeID});
 
-  // }
-  getkamemployeeIDTitles(employeeID: any)
-{
-  this.employeeID = employeeID;
-
- this.advanceTableForm.patchValue({ newKAMID: this.employeeID });
-}
+  private buildSavePayload(): Record<string, unknown> {
+    const raw = { ...this.advanceTableForm.getRawValue() };
+    return finalizeChangeKamSavePayload(raw, {
+      kamList: this.kamList || [],
+      employeeList: this.EmployeeList || [],
+      oldKAMID: this.oldKAMID,
+      newKAMID: this.newKAMID,
+    });
+  }
 
   createContactForm(): FormGroup 
   {
@@ -248,10 +251,10 @@ export class FormDialogComponentHolder
       customerKeyAccountManagerID: [this.advanceTable.customerKeyAccountManagerID],
       newKAMActivationFromDate: [this.advanceTable.newKAMActivationFromDate,[Validators.required, this._generalService.dateValidator()]],
       // newKAMActivationToDate: [this.advanceTable.newKAMActivationToDate],
-      oldCustomerkamEmployee:[this.advanceTable.oldCustomerkamEmployee],
-       newCustomerkamEmployee:[this.advanceTable.newCustomerkamEmployee],
+      oldCustomerkamEmployee:[this.advanceTable.oldCustomerkamEmployee, [Validators.required]],
+       newCustomerkamEmployee:[this.advanceTable.newCustomerkamEmployee, [Validators.required]],
         oldKAMID: [this.advanceTable.oldKAMID],
-        newKAMID: [this.advanceTable.employeeID],
+        newKAMID: [this.advanceTable.newKAMID],
       newKAMActivationStatus: [this.advanceTable.newKAMActivationStatus],
     });
   }
@@ -366,9 +369,7 @@ export class FormDialogComponentHolder
   }
   public Post(): void
   {
-    
-
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.add(this.buildSavePayload())  
     .subscribe(
     response => 
     {
@@ -387,7 +388,7 @@ export class FormDialogComponentHolder
   }
   public Put(): void
   {
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    this.advanceTableService.update(this.buildSavePayload())  
     .subscribe(
     response => 
     {

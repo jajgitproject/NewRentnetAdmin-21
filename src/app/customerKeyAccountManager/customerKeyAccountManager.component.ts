@@ -23,7 +23,7 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import moment from 'moment';
-import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 @Component({
   standalone: false,
   selector: 'app-customerKeyAccountManager',
@@ -74,7 +74,7 @@ export class CustomerKeyAccountManagerComponent implements OnInit {
 
   SearchEndDate: string = '';
   endingDate : FormControl = new FormControl();
-  public EmployeeList?: EmployeeDropDown[] = [];
+  employeeSearch: EmployeePrefixSearchField;
   searchTerm: any = '';
   selectedFilter: string = 'search';
   filterSelected:boolean = true;
@@ -93,7 +93,9 @@ export class CustomerKeyAccountManagerComponent implements OnInit {
     public customerKeyAccountManagerService: CustomerKeyAccountManagerService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) {}
+  ) {
+    this.employeeSearch = new EmployeePrefixSearchField(this._generalService);
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -113,13 +115,13 @@ export class CustomerKeyAccountManagerComponent implements OnInit {
      
     });
     this.loadData();
-    this.InitEmployee();
     this.SubscribeUpdateService();
   }
   refresh() {
      
     this.SearchCustomerKeyAccountManager = '';
     this.SearchEmployeeName='';
+    this.employeeSearch.reset();
     this.SearchStartDate='';
     this.SearchEndDate='';
     this.SearchActivationStatus = true;
@@ -157,8 +159,8 @@ export class CustomerKeyAccountManagerComponent implements OnInit {
   }
   public SearchData()
   {
+    this.SearchEmployeeName = this.employeeSearch.apiSearchName || '';
     this.loadData();
-    //this.SearchCustomerKeyAccountManager='';
   }
   
   deleteItem(row)
@@ -368,16 +370,6 @@ export class CustomerKeyAccountManagerComponent implements OnInit {
             }
           }
         }
-      }
-    );
-  }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-       
       }
     );
   }

@@ -45,17 +45,19 @@
                             (optionSelected)="OnEmployeeSelect($event.option.value)">
                           <mat-option *ngFor="let option of filteredinstructedByOptionss | async"
                             [value]="option"
-                            [class.employee-dropdown-exited]="isEmployeeExited(option)"
-                            [style.--mat-option-label-text-color]="isEmployeeExited(option) ? '#c62828' : null"
-                            [style.--mat-option-active-state-label-text-color]="isEmployeeExited(option) ? '#c62828' : null"
-                            [style.--mat-option-selected-state-label-text-color]="isEmployeeExited(option) ? '#c62828' : null">
+                            [class.employee-dropdown-exited]="isEmployeeExited(option)">
                             <span class="employee-dropdown-option-text"
-                              [style.color]="isEmployeeExited(option) ? '#c62828' : null">
+                              [class.employee-dropdown-option-text-exited]="isEmployeeExited(option)">
                               {{ formatEmployeeDropdownLabel(option) }}
                             </span>
                           </mat-option>
                         </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['employeeName'].hasError('employeeNameInvalid')">
+                        <mat-error
+                            *ngIf="advanceTableForm.controls['employeeName'].hasError('required') && advanceTableForm.controls['employeeName'].touched">
+                            Employee is required
+                        </mat-error>
+                        <mat-error
+                            *ngIf="advanceTableForm.controls['employeeName'].hasError('employeeNameInvalid') && advanceTableForm.controls['employeeName'].touched">
                             Please select a Employee
                         </mat-error>
                       </mat-form-field>

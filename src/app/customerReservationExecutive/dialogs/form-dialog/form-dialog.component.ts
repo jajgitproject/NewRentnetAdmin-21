@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject, Input } from '@angular/core';
+import { Component, Inject, Input, Optional } from '@angular/core';
 import { CustomerReservationExecutiveService } from '../../customerReservationExecutive.service';
 import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
 import { CustomerReservationExecutive } from '../../customerReservationExecutive.model';
@@ -11,13 +11,24 @@ import { GeneralService } from '../../../general/general.service';
 import { OrganizationalEntityDropDown } from 'src/app/general/organizationalEntityDropDown.model';
 import { DepartmentDropDown } from 'src/app/general/departmentDropDown.model';
 import { DesignationDropDown } from 'src/app/general/designationDropDown.model';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { VehicleDropDown } from 'src/app/vehicle/vehicleDropDown.model';
 import { CityDropDown } from 'src/app/city/cityDropDown.model';
 import { StateDropDown } from 'src/app/state/stateDropDown.model';
-import { map, startWith } from 'rxjs/operators';
+import {
+  createDisplayEmployeeFn,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  finalizeCustomerEmployeeSavePayload,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+  readCustomerIdFromBrowserUrl,
+  resolveCustomerIdFromQueryValue,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -29,12 +40,16 @@ import { map, startWith } from 'rxjs/operators';
 
 export class FormDialogComponentHolder 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
+
   employeeID:number;
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
   public EmployeeList?: EmployeeDropDown[] = [];
-  filteredinstructedByOptionss: Observable<EmployeeDropDown[]>;
+  filteredinstructedByOptionss: Observable<EmployeeDropDown[]> = of([]);
   searchinstructedBy: FormControl = new FormControl();
   public CityList?: CityDropDown[] = [];
   public StatesList?: StateDropDown[] = [];
@@ -59,7 +74,7 @@ export class FormDialogComponentHolder
         {
           this.dialogTitle =' Reservation Executive For ';       
           this.advanceTable = data.advanceTable;
-          this.searchinstructedBy.setValue(this.advanceTable.employeeName)
+          this.employeesID = this.advanceTable.employeeID;
         } else 
         {
           this.dialogTitle = ' Reservation Executive For ';
@@ -70,11 +85,40 @@ export class FormDialogComponentHolder
         this.advanceTableForm = this.createContactForm();    
         this.customerName=data.CustomerName;
         this.CustomerID=data.CustomerID;
-       
+        const customerId = this.getResolvedCustomerId();
+        if (customerId > 0) {
+          this.advanceTableForm.patchValue({ customerID: customerId }, { emitEvent: false });
+          this.CustomerID = customerId;
+        }
   }
   public ngOnInit(): void
   {
-   this.InitEmployee(); 
+    this.filteredinstructedByOptionss = of([]);
+    if (this.action === 'edit') {
+      this.patchEmployeeForEdit();
+    }
+  }
+
+  isSelectedEmployeeExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'employeeName', this.EmployeeList || []);
+  }
+
+  private patchEmployeeForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.employeesID || this.advanceTable?.employeeID,
+      this.advanceTableForm,
+      'employeeName',
+      {
+        getEmployeeList: () => this.EmployeeList || [],
+        setEmployeeList: (list) => { this.EmployeeList = list; },
+        setFilteredOptions: (options) => { this.filteredinstructedByOptionss = options; },
+        onEmployeeId: (id) => {
+          this.employeesID = id;
+          this.advanceTableForm.patchValue({ employeeID: id }, { emitEvent: false });
+        },
+      }
+    );
   }
   formControl = new FormControl('', 
   [
@@ -89,34 +133,111 @@ export class FormDialogComponentHolder
       ? 'Not a valid email'
       : '';
   }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-        this.filteredinstructedByOptionss = this.advanceTableForm.controls['employeeName'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        ); 
-       
+  InitEmployee(_event?: unknown): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'employeeName', {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredinstructedByOptionss = options; },
+    });
+  }
+
+  OnEmployeeSelect(selectedEmployee: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'employeeName',
+      selectedEmployee,
+      (id) => {
+        this.employeesID = id;
+        this.advanceTableForm.patchValue({ employeeID: id }, { emitEvent: false });
       }
     );
   }
-  private _filtersearchinstructed(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.EmployeeList.filter(
-      customer => 
-      {
-        return customer.firstName.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
-  }
-  
+
   getemployeeIDTitles(employeeID: any) {
-     
-    this.employeesID=employeeID;
+    this.employeesID = employeeID;
   }
+
+  private getResolvedCustomerId(): number {
+    const candidates = [
+      readCustomerIdFromBrowserUrl(),
+      this.data?.routeCustomerID,
+      this.data?.CustomerID,
+      this.data?.customerID,
+      this.CustomerID,
+      this.advanceTable?.customerID,
+      this.advanceTableForm?.get('customerID')?.value,
+    ];
+    for (const candidate of candidates) {
+      const id = resolveCustomerIdFromQueryValue(this._generalService, candidate);
+      if (id > 0) {
+        return id;
+      }
+    }
+    return 0;
+  }
+
+  private buildSavePayload(): Record<string, unknown> {
+    const raw = { ...this.advanceTableForm.getRawValue() };
+    const customerId = this.getResolvedCustomerId();
+    if (customerId > 0) {
+      raw['customerID'] = customerId;
+    }
+    const payload = finalizeCustomerEmployeeSavePayload(raw, {
+      employeeField: 'employeeName',
+      employeeList: this.EmployeeList || [],
+      employeesID: this.employeesID,
+      customerID: customerId,
+      advanceTable: this.advanceTable,
+      primaryKeyField: 'customerReservationExecutiveID',
+      primaryKeyAliases: ['customerReservationExecutiveid', 'id'],
+    });
+    if (customerId > 0) {
+      payload['customerID'] = customerId;
+    }
+    return payload;
+  }
+
+  private validateSavePayload(payload: Record<string, unknown>): boolean {
+    const customerId = Number(payload['customerID'] ?? 0);
+    if (!Number.isFinite(customerId) || customerId <= 0) {
+      this.showNotification(
+        'snackbar-danger',
+        'Customer is missing. Open Reservation Executive from the customer menu.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    if (!payload['employeeID'] || Number(payload['employeeID']) <= 0) {
+      this.showNotification(
+        'snackbar-danger',
+        'Please select an employee from the dropdown list.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    if (!payload['fromDate']) {
+      this.showNotification(
+        'snackbar-danger',
+        'From Date is required.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    if (!payload['toDate']) {
+      this.showNotification(
+        'snackbar-danger',
+        'End Date is required.',
+        'bottom',
+        'center'
+      );
+      return false;
+    }
+    return true;
+  }
+
   createContactForm(): FormGroup 
   {
     return this.fb.group(
@@ -124,9 +245,9 @@ export class FormDialogComponentHolder
       customerReservationExecutiveID: [this.advanceTable.customerReservationExecutiveID],
       customerID: [this.advanceTable.customerID],
       employeeID: [this.advanceTable.employeeID,],
-      employeeName: [this.advanceTable.employeeName],
-      fromDate: [this.advanceTable.fromDate,],
-      toDate: [this.advanceTable.toDate],
+      employeeName: [this.advanceTable.employeeName, [Validators.required]],
+      fromDate: [this.advanceTable.fromDate, [Validators.required]],
+      toDate: [this.advanceTable.toDate, [Validators.required]],
       activationStatus: [this.advanceTable.activationStatus],
     });
   }
@@ -150,10 +271,11 @@ export class FormDialogComponentHolder
   }
   public Post(): void
   {
-    
-    this.advanceTableForm.patchValue({customerID:this.data.CustomerID});
-    this.advanceTableForm.patchValue({employeeID:this.employeesID});
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    const payload = this.buildSavePayload();
+    if (!this.validateSavePayload(payload)) {
+      return;
+    }
+    this.advanceTableService.add(payload as CustomerReservationExecutive)
     .subscribe(
     response => 
     {
@@ -170,9 +292,19 @@ export class FormDialogComponentHolder
   }
   public Put(): void
   {
-    this.advanceTableForm.patchValue({customerID:this.data.CustomerID});
-    this.advanceTableForm.patchValue({employeeID:this.employeesID || this.advanceTable.employeeID});
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    const payload = this.buildSavePayload();
+    if (!payload['employeeID']) {
+      payload['employeeID'] = this.employeesID || this.advanceTable.employeeID;
+    }
+    if (!payload['customerReservationExecutiveID']) {
+      payload['customerReservationExecutiveID'] =
+        this.advanceTable.customerReservationExecutiveID ??
+        this.advanceTable.customerReservationExecutiveid;
+    }
+    if (!this.validateSavePayload(payload)) {
+      return;
+    }
+    this.advanceTableService.update(payload as CustomerReservationExecutive)
     .subscribe(
     response => 
     {

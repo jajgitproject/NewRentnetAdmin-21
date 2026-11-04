@@ -23,7 +23,7 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import moment from 'moment';
-import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 @Component({
   standalone: false,
   selector: 'app-customerSalesManager',
@@ -76,7 +76,7 @@ export class CustomerSalesManagerComponent implements OnInit {
 
   SearchEndDate: string = '';
   endingDate : FormControl = new FormControl();
-  public EmployeeList?: EmployeeDropDown[] = [];
+  employeeSearch: EmployeePrefixSearchField;
   constructor(
     public route:ActivatedRoute,
     public httpClient: HttpClient,
@@ -85,7 +85,9 @@ export class CustomerSalesManagerComponent implements OnInit {
     public customerSalesManagerService: CustomerSalesManagerService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) {}
+  ) {
+    this.employeeSearch = new EmployeePrefixSearchField(this._generalService);
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -105,12 +107,12 @@ export class CustomerSalesManagerComponent implements OnInit {
      
     });
     this.loadData();
-    this.InitEmployee();
     this.SubscribeUpdateService();
   }
   refresh() {
     this.SearchCustomerSalesManager = '';
     this.SearchEmployeeName='';
+    this.employeeSearch.reset();
     this.SearchStartDate='';
     this.SearchEndDate='';
     this.SearchActivationStatus = true;
@@ -154,8 +156,8 @@ export class CustomerSalesManagerComponent implements OnInit {
   }
   public SearchData()
   {
+    this.SearchEmployeeName = this.employeeSearch.apiSearchName || '';
     this.loadData();
-    //this.SearchCustomerSalesManager='';
   }
   
   deleteItem(row)
@@ -348,16 +350,6 @@ export class CustomerSalesManagerComponent implements OnInit {
             }
           }
         }
-      }
-    );
-  }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-       
       }
     );
   }
