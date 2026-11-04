@@ -171,8 +171,7 @@ export class ChangeKamForCustomersComponent implements OnInit {
   deleteItem(row)
   {
 
-    this.changeKamForCustomersID =
-      row.customerKeyAccountManagerID ?? row.keyAccountManagerUpdateID ?? row.changeKamForCustomersID;
+    this.changeKamForCustomersID = this.changeKamForCustomersService.getRecordId(row);
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row

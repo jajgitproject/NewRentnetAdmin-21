@@ -84,14 +84,21 @@ export class FormDialogComponentHolder
         {
           this.dialogTitle =' Change Kam For Customers';       
           this.advanceTable = normalizeChangeKamGridRowForEdit(data.advanceTable) as ChangeKamForCustomers;
+          this.coerceStartDateOnAdvanceTable();
+          if (
+            this.advanceTable.newKAMActivationStatus === '' ||
+            this.advanceTable.newKAMActivationStatus == null
+          ) {
+            this.advanceTable.newKAMActivationStatus = true;
+          }
           if (this.advanceTable.newKAMActivationFromDate) {
-            const startDate = moment(this.advanceTable.newKAMActivationFromDate).format('DD/MM/yyyy');
+            const startDate = moment(this.advanceTable.newKAMActivationFromDate).format('DD/MM/YYYY');
             if (moment(startDate, 'DD/MM/YYYY', true).isValid()) {
               this.onBlurFromDateEdit(startDate);
             }
           }
           if (this.advanceTable.newKAMActivationToDate) {
-            const newKAMActivationToDate = moment(this.advanceTable.newKAMActivationToDate).format('DD/MM/yyyy');
+            const newKAMActivationToDate = moment(this.advanceTable.newKAMActivationToDate).format('DD/MM/YYYY');
             if (moment(newKAMActivationToDate, 'DD/MM/YYYY', true).isValid()) {
               this.onBlurEndDateEdit(newKAMActivationToDate);
             }
@@ -138,6 +145,23 @@ export class FormDialogComponentHolder
     });
   }
 
+  private coerceStartDateOnAdvanceTable(): void {
+    const raw =
+      this.advanceTable.newKAMActivationFromDate ??
+      (this.advanceTable as unknown as Record<string, unknown>)['startDate'];
+    if (raw == null || raw === '') {
+      return;
+    }
+    if (raw instanceof Date && !isNaN(raw.getTime())) {
+      this.advanceTable.newKAMActivationFromDate = raw;
+      return;
+    }
+    const parsed = new Date(raw as string);
+    if (!isNaN(parsed.getTime())) {
+      this.advanceTable.newKAMActivationFromDate = parsed;
+    }
+  }
+
   private patchEditEmployeeFields(): void {
     const oldId = Number(this.advanceTable.oldKAMID ?? 0);
     const newId = Number(this.advanceTable.newKAMID ?? 0);
@@ -152,14 +176,22 @@ export class FormDialogComponentHolder
     }
     this.oldKAMID = oldEmp.employeeID;
     this.newKAMID = newEmp.employeeID;
+    const recordId = this.advanceTableService.getRecordId(
+      this.advanceTable as unknown as Record<string, unknown>
+    );
     this.advanceTableForm.patchValue(
       {
         oldCustomerkamEmployee: oldEmp,
         newCustomerkamEmployee: newEmp,
         oldKAMID: oldEmp.employeeID,
         newKAMID: newEmp.employeeID,
-        customerKeyAccountManagerID: this.advanceTable.customerKeyAccountManagerID,
+        customerKeyAccountManagerID: recordId || this.advanceTable.customerKeyAccountManagerID,
         newKAMActivationFromDate: this.advanceTable.newKAMActivationFromDate,
+        newKAMActivationStatus:
+          this.advanceTable.newKAMActivationStatus === '' ||
+          this.advanceTable.newKAMActivationStatus == null
+            ? true
+            : this.advanceTable.newKAMActivationStatus,
       },
       { emitEvent: false }
     );
@@ -236,12 +268,18 @@ export class FormDialogComponentHolder
 
   private buildSavePayload(): Record<string, unknown> {
     const raw = { ...this.advanceTableForm.getRawValue() };
-    return finalizeChangeKamSavePayload(raw, {
+    const payload = finalizeChangeKamSavePayload(raw, {
       kamList: this.kamList || [],
       employeeList: this.EmployeeList || [],
       oldKAMID: this.oldKAMID,
       newKAMID: this.newKAMID,
     });
+    if (this.action === 'edit' && Number(payload['customerKeyAccountManagerID']) <= 0) {
+      payload['customerKeyAccountManagerID'] = this.advanceTableService.getRecordId(
+        this.advanceTable as unknown as Record<string, unknown>
+      );
+    }
+    return payload;
   }
 
   createContactForm(): FormGroup 
@@ -279,14 +317,8 @@ export class FormDialogComponentHolder
     if (validDate) 
     {
       const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
-      if(this.action==='edit')
-      {
-        this.advanceTable.newKAMActivationFromDate=formattedDate
-      }
-      else
-      {
-        this.advanceTableForm.get('newKAMActivationFromDate')?.setValue(formattedDate);
-      }  
+      this.advanceTable.newKAMActivationFromDate = formattedDate;
+      this.advanceTableForm?.get('newKAMActivationFromDate')?.setValue(formattedDate);
     } 
     else 
     {
@@ -388,7 +420,15 @@ export class FormDialogComponentHolder
   }
   public Put(): void
   {
-    this.advanceTableService.update(this.buildSavePayload())  
+    const payload = this.buildSavePayload();
+    if (Number(this.oldKAMID) > 0) {
+      payload['oldKAMID'] = Number(this.oldKAMID);
+    }
+    if (Number(this.newKAMID) > 0) {
+      payload['newKAMID'] = Number(this.newKAMID);
+    }
+    const fallback = this.advanceTable as unknown as Record<string, unknown>;
+    this.advanceTableService.update(payload, fallback)
     .subscribe(
     response => 
     {

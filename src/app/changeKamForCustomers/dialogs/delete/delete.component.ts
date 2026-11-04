@@ -3,7 +3,6 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { ChangeKamForCustomersService } from '../../changeKamForCustomers.service';
 import { GeneralService } from '../../../general/general.service';
-import { resolveChangeKamRecordId } from 'src/app/shared/customer-employee-autocomplete';
 @Component({
   standalone: false,
   selector: 'app-delete',
@@ -27,15 +26,22 @@ export class DeleteDialogComponent
   }
   confirmDelete()
   {
-    
-    this.advanceTableService.delete(this.data.changeKamForCustomersID)  
+    const recordId = this.advanceTableService.getRecordId(this.data);
+    if (recordId <= 0) {
+      this._generalService.sendUpdate('ChangeKamForCustomersAll:ChangeKamForCustomersView:Failure');
+      this.dialogRef.close();
+      return;
+    }
+    this.advanceTableService.delete(recordId)
     .subscribe(
     data => 
     {
+       this.dialogRef.close();
        this._generalService.sendUpdate('ChangeKamForCustomersDelete:ChangeKamForCustomersView:Success');//To Send Updates   
     },
     error =>
     {
+      this.dialogRef.close();
       this._generalService.sendUpdate('ChangeKamForCustomersAll:ChangeKamForCustomersView:Failure');//To Send Updates  
     }
     )
