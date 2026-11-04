@@ -262,16 +262,51 @@ export class FormDialogComponent
     });
   }
 
+  private parseSaveResponse(response: any): { duplicate: boolean; failed: boolean; message: string } {
+    let body = response;
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch {
+        body = { activationStatus: body };
+      }
+    }
+    const status = (body?.activationStatus ?? body?.ActivationStatus ?? '').toString();
+    if (status.includes('Duplicate')) {
+      return { duplicate: true, failed: false, message: status };
+    }
+    if (status && !status.toLowerCase().startsWith('success') && status !== 'true') {
+      return { duplicate: false, failed: true, message: status.replace(/^\+/, '').trim() };
+    }
+    if (body?.customerID > 0 || body?.CustomerID > 0) {
+      return { duplicate: false, failed: false, message: '' };
+    }
+    if (status.toLowerCase().startsWith('success')) {
+      return { duplicate: false, failed: false, message: '' };
+    }
+    return { duplicate: false, failed: false, message: '' };
+  }
+
   public Post(): void
   {
     const raw = this.advanceTableForm.getRawValue();
+    if (!raw.employeeID && this.employeeID) {
+      raw.employeeID = this.employeeID;
+    }
+    if (!raw.salesManagerID && this.salesManagerID) {
+      raw.salesManagerID = this.salesManagerID;
+    }
+    if (!raw.corporateCompanyID && this.corporateCompanyID) {
+      raw.corporateCompanyID = this.corporateCompanyID;
+    }
     coerceEmployeeFieldToApiString(raw, 'employeeName', this.EmployeeList || []);
     coerceEmployeeFieldToApiString(raw, 'salesManagerName', this.SalesManagerList || []);
     this.customerCorporateIndividualService.add(raw)  
     .subscribe(
       response => 
       { 
-        if (response && response.activationStatus && typeof response.activationStatus === 'string' && response.activationStatus.includes("Duplicate")) 
+        const parsed = this.parseSaveResponse(response);
+        if (parsed.duplicate) 
         {
           this.showNotification(
               'snackbar-danger',
@@ -279,6 +314,16 @@ export class FormDialogComponent
               'bottom',
               'center'
               );
+          this.saveDisabled = true;
+        }
+        else if (parsed.failed)
+        {
+          this.showNotification(
+            'snackbar-danger',
+            parsed.message || 'Operation Failed...!!!',
+            'bottom',
+            'center'
+          );
           this.saveDisabled = true;
         }
         else
