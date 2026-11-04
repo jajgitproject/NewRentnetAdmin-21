@@ -118,14 +118,22 @@
       
           <div class="row">
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                  [ngClass]="{'employee-dropdown-exited-selected': isSelectedSalesExecutiveExited()}">
                 <mat-label>Sales Executive</mat-label>
-                <input type="text" matInput formControlName="salesExecutive" [matAutocomplete]="auto5">
-                <mat-autocomplete #auto5="matAutocomplete" (optionSelected)="onSESelected($event.option.value)"  panelWidth="custom-autocomplete-panel">
+                <input type="text" matInput formControlName="salesExecutive" [matAutocomplete]="auto5"
+                    (keyup)="InitSalesExecutivePrefix()">
+                <mat-autocomplete #auto5="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                    [displayWith]="displaySalesExecutiveFn"
+                    (optionSelected)="onSESelected($event.option.value)"  panelWidth="custom-autocomplete-panel">
                   <mat-option *ngFor="let option of filteredEmployeeOptions | async"
-                    [value]="option.firstName + ' ' + option.lastName + '-' + option.mobile+ '-' + option.email"
+                    [value]="option"
+                    [class.employee-dropdown-exited]="isEmployeeExited(option)"
                     (click)="getSalesExecutiveID(option.employeeID)">
-                    {{option.firstName + ' ' + option.lastName + '-' + option.mobile+ '-' + option.email}}
+                    <span class="employee-dropdown-option-text"
+                        [class.employee-dropdown-option-text-exited]="isEmployeeExited(option)">
+                      {{ formatEmployeeDropdownLabel(option) }}
+                    </span>
                   </mat-option>
                 </mat-autocomplete>
                 <mat-error *ngIf="advanceTableForm.controls['salesExecutive'].hasError('salesExecutiveInvalid')">
@@ -135,14 +143,22 @@
             </div>
 
             <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                  [ngClass]="{'employee-dropdown-exited-selected': isSelectedKamExited()}">
                 <mat-label>KAM</mat-label>
-                <input type="text" matInput formControlName="kam" [matAutocomplete]="auto6">
-                <mat-autocomplete #auto6="matAutocomplete" (optionSelected)="onKAMSelected($event.option.value)"  panelWidth="custom-autocomplete-panel">
+                <input type="text" matInput formControlName="kam" [matAutocomplete]="auto6"
+                    (keyup)="InitKamPrefix()">
+                <mat-autocomplete #auto6="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                    [displayWith]="displayKamFn"
+                    (optionSelected)="onKAMSelected($event.option.value)"  panelWidth="custom-autocomplete-panel">
                   <mat-option *ngFor="let option of filteredEmployeesOptions | async"
-                    [value]="option.firstName + ' ' + option.lastName  +  '-' + option.mobile+ '-' + option.email"
+                    [value]="option"
+                    [class.employee-dropdown-exited]="isEmployeeExited(option)"
                     (click)="getCustomerKAMID(option.employeeID)">
-                    {{option.firstName + ' ' + option.lastName +  '-' + option.mobile+ '-' + option.email}}
+                    <span class="employee-dropdown-option-text"
+                        [class.employee-dropdown-option-text-exited]="isEmployeeExited(option)">
+                      {{ formatEmployeeDropdownLabel(option) }}
+                    </span>
                   </mat-option>
                 </mat-autocomplete>
                 <mat-error *ngIf="advanceTableForm.controls['kam'].hasError('kamInvalid')">

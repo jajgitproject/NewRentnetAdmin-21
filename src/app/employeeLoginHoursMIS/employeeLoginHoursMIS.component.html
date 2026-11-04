@@ -59,12 +59,20 @@
                     </mat-form-field>
                   </div>
                   <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                      [ngClass]="{'employee-dropdown-exited-selected': isSelectedNameEmployeeExited()}">
                       <mat-label>Employee Name</mat-label>
-                      <input matInput [formControl]="employeeNameCtrl" [matAutocomplete]="nameAuto" placeholder="All" (input)="onNameInput()" />
-                      <mat-autocomplete #nameAuto="matAutocomplete" (optionSelected)="onNameSelected($event.option.value)">
-                        <mat-option *ngFor="let option of filteredNameOptions | async" [value]="option">
-                          {{ fullName(option) }}
+                      <input matInput [formControl]="employeeNameSearch.control" [matAutocomplete]="nameAuto" placeholder="All"
+                        (input)="onNameInput()" (keyup)="employeeNameSearch.onKeyup()" />
+                      <mat-autocomplete #nameAuto="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                        [displayWith]="employeeNameSearch.displayEmployeeFn"
+                        (optionSelected)="onNameSelected($event.option.value)">
+                        <mat-option *ngFor="let option of employeeNameSearch.filteredOptions | async" [value]="option"
+                          [class.employee-dropdown-exited]="employeeNameSearch.isEmployeeExited(option)">
+                          <span class="employee-dropdown-option-text"
+                            [class.employee-dropdown-option-text-exited]="employeeNameSearch.isEmployeeExited(option)">
+                            {{ employeeNameSearch.formatEmployeeDropdownLabel(option) }}
+                          </span>
                         </mat-option>
                       </mat-autocomplete>
                     </mat-form-field>

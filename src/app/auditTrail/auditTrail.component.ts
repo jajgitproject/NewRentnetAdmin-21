@@ -2,11 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of } from 'rxjs';
-import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
-
 import { GeneralService } from '../general/general.service';
 import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
+import {
+  createDisplayEmployeeFn,
+  formatEmployeeDropdownLabel,
+  isEmployeeDropdownSelection,
+  isSelectedEmployeeExitedFromControl,
+} from '../shared/customer-employee-autocomplete';
 import { AuditChangedField, AuditTrailEvent, AuditTrailQueryInterpretation } from './auditTrail.model';
 import { AuditTrailService } from './auditTrail.service';
 import { AuditChangeDetailsDialogComponent } from './dialogs/change-details-dialog.component';
@@ -19,10 +23,11 @@ import { AuditNlpQuestionsDialogComponent } from './dialogs/nlp-questions-dialog
   styleUrls: ['./auditTrail.component.sass']
 })
 export class AuditTrailComponent implements OnInit {
-  employees: EmployeeDropDown[] = [];
-  filteredUserOptions: Observable<EmployeeDropDown[]> = of([]);
-  userCtrl = new FormControl();
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  userSearch: EmployeePrefixSearchField;
+  userCtrl: FormControl;
   selectedUserId: number | null = null;
+  displayUserFn = createDisplayEmployeeFn();
   moduleCtrl = new FormControl('');
   operationCtrl = new FormControl('');
   reservationIdCtrl = new FormControl(null);
@@ -45,40 +50,29 @@ export class AuditTrailComponent implements OnInit {
     private snackBar: MatSnackBar,
     private generalService: GeneralService,
     private dialog: MatDialog
-  ) {}
+  ) {
+    this.userSearch = new EmployeePrefixSearchField(this.generalService);
+    this.userCtrl = this.userSearch.control;
+  }
 
   ngOnInit(): void {
     this.resetDateRange();
-    this.bindUserFilter();
+    this.userCtrl.valueChanges.subscribe((value) => {
+      if (typeof value === 'string' || value == null || value === '') {
+        this.selectedUserId = null;
+      }
+    });
   }
 
-  private bindUserFilter(): void {
-    this.filteredUserOptions = this.userCtrl.valueChanges.pipe(
-      startWith(''),
-      debounceTime(200),
-      switchMap((value) => this.loadAndFilterUsers(value))
-    );
+  isSelectedUserExited(): boolean {
+    return isSelectedEmployeeExitedFromControl(this.userCtrl, []);
   }
 
-  private loadAndFilterUsers(value: string | EmployeeDropDown): Observable<EmployeeDropDown[]> {
-    if (value && typeof value !== 'string') {
-      return of([]);
+  onUserFilterInput(): void {
+    const raw = this.userCtrl.value;
+    if (typeof raw === 'string' || raw == null || raw === '') {
+      this.selectedUserId = null;
     }
-    const term = String(value || '').trim();
-    this.selectedUserId = null;
-    if (term.length < 3) {
-      return of([]);
-    }
-    if (this.employees.length) {
-      return of(this.filterUsers(term));
-    }
-    return this.generalService.GetEmployee().pipe(
-      map((data) => {
-        this.employees = (data || []).filter((emp) => this.isActiveUser(emp));
-        return this.filterUsers(term);
-      }),
-      catchError(() => of([]))
-    );
   }
 
   search(): void {
@@ -170,27 +164,22 @@ export class AuditTrailComponent implements OnInit {
     if (typeof emp === 'string') {
       return emp;
     }
-    const apiName = (emp.name || (emp as any).Name || '').trim();
+    if (isEmployeeDropdownSelection(emp)) {
+      return formatEmployeeDropdownLabel(emp);
+    }
+    const apiName = ((emp as any).name || (emp as any).Name || '').trim();
     if (apiName) {
       return apiName;
     }
-    const name = [emp.firstName || emp.employeeFirstName, emp.lastName || emp.employeeLastName]
-      .filter(Boolean)
-      .join(' ')
-      .trim();
-    const mobile = String(emp.mobile || (emp as any).Mobile || '').trim();
-    if (name && mobile) {
-      return name + ' - ' + mobile;
-    }
-    const id = emp.employeeID || (emp as any).EmployeeID;
-    if (name && id) {
-      return name + ' - #' + id;
-    }
-    return name || mobile || String(id || '');
+    return formatEmployeeDropdownLabel(emp as EmployeeDropDown);
   }
 
   onUserSelected(emp: EmployeeDropDown): void {
-    this.selectedUserId = emp?.employeeID ?? null;
+    if (!emp?.employeeID) {
+      return;
+    }
+    this.userSearch.onSelected(emp);
+    this.selectedUserId = emp.employeeID;
   }
 
   openNlpQuestions(): void {
@@ -282,7 +271,7 @@ export class AuditTrailComponent implements OnInit {
     this.reservationIdCtrl.setValue(null);
     this.allotmentIdCtrl.setValue(null);
     this.selectedUserId = null;
-    this.userCtrl.setValue('');
+    this.userSearch.reset();
     this.nlpCtrl.setValue('');
     this.nlpSearchText = null;
     this.nlpWarnings = [];
@@ -302,37 +291,6 @@ export class AuditTrailComponent implements OnInit {
 
   changedFields(evt: AuditTrailEvent): AuditChangedField[] {
     return evt?.changedFields || [];
-  }
-
-  private filterUsers(term: string): EmployeeDropDown[] {
-    const value = (term || '').toLowerCase();
-    return (this.employees || []).filter((e) => {
-      if (!this.isActiveUser(e)) {
-        return false;
-      }
-      const name = [e.firstName || e.employeeFirstName, e.lastName || e.employeeLastName]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      const mobile = String(e.mobile || (e as any).Mobile || '').toLowerCase();
-      const label = this.userDisplay(e).toLowerCase();
-      return label.includes(value) || name.includes(value) || mobile.includes(value);
-    });
-  }
-
-  private isActiveUser(emp: EmployeeDropDown | any): boolean {
-    if (!emp) {
-      return false;
-    }
-    const activation = String(emp.activationStatus ?? '').trim().toLowerCase();
-    if (activation === 'false' || activation === '0' || activation === 'no') {
-      return false;
-    }
-    const employment = String(emp.employmentStatus ?? '').trim().toLowerCase();
-    if (employment === 'exited' || employment === 'inactive' || employment === 'left') {
-      return false;
-    }
-    return true;
   }
 
   private toNumber(value: any): number | null {

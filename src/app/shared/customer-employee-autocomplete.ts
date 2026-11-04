@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { AbstractControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { GeneralService } from '../general/general.service';
 import { EmployeeDropDown } from '../employee/employeeDropDown.model';
@@ -112,6 +112,77 @@ export function initEmployeeNamePrefixSearch(
     control.updateValueAndValidity({ emitEvent: false });
     ctx.setFilteredOptions(of(filterEmployeesForAutocomplete(list, prefix)));
   });
+}
+
+/** Prefix employee search on a standalone FormControl (e.g. trip feedback passenger search). */
+export function initEmployeePrefixSearchOnControl(
+  generalService: GeneralService,
+  control: FormControl,
+  ctx: {
+    getEmployeeList: () => EmployeeDropDown[];
+    setEmployeeList: (list: EmployeeDropDown[]) => void;
+    setFilteredOptions: (options: Observable<EmployeeDropDown[]>) => void;
+    minLength?: number;
+  }
+): void {
+  const minLen = ctx.minLength ?? 3;
+  const raw = control.value;
+  const prefix =
+    typeof raw === 'string'
+      ? raw
+      : isEmployeeDropdownSelection(raw)
+        ? formatEmployeeDropdownLabel(raw)
+        : '';
+  if (prefix.length < minLen) {
+    ctx.setEmployeeList([]);
+    ctx.setFilteredOptions(of([]));
+    return;
+  }
+  if (isEmployeeDropdownSelection(raw)) {
+    return;
+  }
+  generalService.searchEmployeesByPrefix(prefix).subscribe((data) => {
+    const current = control.value;
+    const currentPrefix =
+      typeof current === 'string'
+        ? current
+        : isEmployeeDropdownSelection(current)
+          ? formatEmployeeDropdownLabel(current)
+          : '';
+    if (currentPrefix !== prefix) {
+      return;
+    }
+    const list = data || [];
+    ctx.setEmployeeList(list);
+    ctx.setFilteredOptions(of(filterEmployeesForAutocomplete(list, prefix)));
+  });
+}
+
+export function isSelectedEmployeeExitedFromControl(
+  control: FormControl | undefined,
+  list: EmployeeDropDown[]
+): boolean {
+  const value = control?.value;
+  if (isEmployeeDropdownSelection(value)) {
+    return isEmployeeExited(value);
+  }
+  const emp = findEmployeeByDropdownInput(value, list || []);
+  return emp ? isEmployeeExited(emp) : false;
+}
+
+/** Reservation group API expects `Name-mobile-email` composite strings. */
+export function employeeToReservationGroupFieldString(employee: EmployeeDropDown): string {
+  const name = `${employee.firstName || ''} ${employee.lastName || ''}`.trim();
+  return `${name}-${employee.mobile || ''}-${employee.email || ''}`;
+}
+
+export function normalizeReservationGroupEmployeeFieldsBeforeSave(raw: Record<string, unknown>): void {
+  for (const key of ['kam', 'salesExecutive']) {
+    const val = raw[key];
+    if (isEmployeeDropdownSelection(val)) {
+      raw[key] = employeeToReservationGroupFieldString(val as EmployeeDropDown);
+    }
+  }
 }
 
 export function patchEmployeeNameForEditById(

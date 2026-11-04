@@ -24,6 +24,7 @@ import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import moment from 'moment';
 import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 @Component({
   standalone: false,
   selector: 'app-stopReservation',
@@ -71,6 +72,7 @@ export class StopReservationComponent implements OnInit {
   SearchEmployeeName: string = '';
   next : FormControl = new FormControl();
   category : FormControl = new FormControl();
+  employeeSearch: EmployeePrefixSearchField;
 
   SearchStartDate: string = '';
   startDate : FormControl = new FormControl();
@@ -88,7 +90,10 @@ export class StopReservationComponent implements OnInit {
     public stopReservationService: StopReservationService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) {}
+  ) {
+    this.employeeSearch = new EmployeePrefixSearchField(this._generalService);
+    this.category = this.employeeSearch.control;
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -109,14 +114,13 @@ export class StopReservationComponent implements OnInit {
     });
     this.loadData();
 
-    this.InitEmployee();
     this.SubscribeUpdateService();
   }
   refresh() {
      
   
     this.SearchStopReservation = '';
-    this.category.setValue('');
+    this.employeeSearch.reset();
     this.SearchStartDate='';
     this.SearchEndDate='';
     this.SearchActivationStatus = true;
@@ -202,7 +206,7 @@ export class StopReservationComponent implements OnInit {
         this.searchTerm = '';
         break;
     }  
-      this.stopReservationService.getTableData(this.customer_ID,this.SearchStopReservation,this.category.value,this.SearchStartDate,this.SearchEndDate,this.SearchActivationStatus, this.PageNumber).subscribe
+      this.stopReservationService.getTableData(this.customer_ID,this.SearchStopReservation,this.getInstructedByFilter(),this.SearchStartDate,this.SearchEndDate,this.SearchActivationStatus, this.PageNumber).subscribe
     (
       data =>   
       {
@@ -357,38 +361,23 @@ export class StopReservationComponent implements OnInit {
       }
     );
   }
-  // InitEmployee(){
-  //   this._generalService.GetEmployeesForVehicleCategory().subscribe
-  //   (
-  //     data =>   
-  //     {
-  //       this.EmployeeList = data; 
-       
-  //     }
-  //   );
-  // }
-
-  InitEmployee(){
-    this._generalService.GetEmployeesForSupplierContract().subscribe(
-      data=>
-      {
-        this.EmployeeList=data;
-        this.filteredEmployeeOptions = this.category.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterNext(value || ''))
-        ); 
-      });
+  private getInstructedByFilter(): string {
+    if (this.employeeSearch.apiSearchName) {
+      return this.employeeSearch.apiSearchName;
+    }
+    const raw = this.employeeSearch.control.value;
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    return this.employeeSearch.formatEmployeeDropdownLabel(raw).split(' - ')[0]?.trim() || '';
   }
-  
-  private _filterNext(value: string): any {
-    const filterValue = value.toLowerCase();
-    
-    return this.EmployeeList.filter(
-      customer => 
-      {
-        return customer.firstName.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
+
+  isSelectedFilterEmployeeExited(): boolean {
+    const raw = this.employeeSearch.control.value;
+    if (raw && typeof raw === 'object' && this.employeeSearch.isEmployeeExited(raw)) {
+      return true;
+    }
+    return false;
   }
   SortingData(coloumName:any) {
      

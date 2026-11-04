@@ -15,6 +15,18 @@ import { CityDropDown } from 'src/app/city/cityDropDown.model';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { CustomerContractDropDown } from 'src/app/customerContract/customerContractDropDown.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -26,6 +38,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 export class FormDialogComponent implements OnInit, OnDestroy
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
+  displaySalesManagerFn = createDisplayEmployeeFn();
+
   showError: string;
   action: string;
   dialogTitle: string;
@@ -58,11 +75,11 @@ export class FormDialogComponent implements OnInit, OnDestroy
   public CityList?: CityDropDown[] = [];
   billingCityID:any;
 
-  filteredEmployeeOptions: Observable<EmployeeDropDown[]>;
+  filteredEmployeeOptions: Observable<EmployeeDropDown[]> = of([]);
   public EmployeeList?: EmployeeDropDown[] = [];
   employeeID:any
 
-  filteredSalesManagerOptions: Observable<EmployeeDropDown[]>;
+  filteredSalesManagerOptions: Observable<EmployeeDropDown[]> = of([]);
   public SalesManagerList?: EmployeeDropDown[] = [];
   salesManagerID:any
 
@@ -99,9 +116,11 @@ export class FormDialogComponent implements OnInit, OnDestroy
     this.InitSalutation();
     this.InitLocation();
     this.InitState();
-    this.InitKAMEmployee();
-    this.InitSalesManager();
     this.setupFieldAutoPopulation();
+    if (this.action === 'edit') {
+      this.patchKamForEdit();
+      this.patchSalesManagerForEdit();
+    }
     if (this.action === 'add') {
       this.setupDuplicateEntryValidation();
     }
@@ -502,19 +521,79 @@ export class FormDialogComponent implements OnInit, OnDestroy
       this.advanceTableForm.patchValue({ billingCityID: city.geoPointID });
     }
 
-    const employee = (this.EmployeeList || []).find(
-      e => this.normalizeLabel(this.employeeDisplayName(e)) === this.normalizeLabel(raw.employeeName)
-    );
-    if (employee) {
-      this.advanceTableForm.patchValue({ employeeID: employee.employeeID });
+    const kamEmp =
+      findEmployeeByDropdownInput(raw.employeeName, this.EmployeeList || []) ||
+      (isEmployeeDropdownSelection(raw.employeeName) ? raw.employeeName : null);
+    if (kamEmp?.employeeID) {
+      this.advanceTableForm.patchValue({ employeeID: kamEmp.employeeID });
     }
 
-    const salesManager = (this.SalesManagerList || []).find(
-      e => this.normalizeLabel(this.employeeDisplayName(e)) === this.normalizeLabel(raw.salesManagerName)
-    );
-    if (salesManager) {
-      this.advanceTableForm.patchValue({ salesManagerID: salesManager.employeeID });
+    const salesEmp =
+      findEmployeeByDropdownInput(raw.salesManagerName, this.SalesManagerList || []) ||
+      (isEmployeeDropdownSelection(raw.salesManagerName) ? raw.salesManagerName : null);
+    if (salesEmp?.employeeID) {
+      this.advanceTableForm.patchValue({ salesManagerID: salesEmp.employeeID });
     }
+  }
+
+  isSelectedKamExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'employeeName', this.EmployeeList || []);
+  }
+
+  isSelectedSalesManagerExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'salesManagerName', this.SalesManagerList || []);
+  }
+
+  private patchKamForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.employeeID,
+      this.advanceTableForm,
+      'employeeName',
+      {
+        getEmployeeList: () => this.EmployeeList || [],
+        setEmployeeList: (list) => { this.EmployeeList = list; },
+        setFilteredOptions: (options) => { this.filteredEmployeeOptions = options; },
+        onEmployeeId: (id) => {
+          this.employeeID = id;
+          this.advanceTableForm.patchValue({ employeeID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  private patchSalesManagerForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.salesManagerID,
+      this.advanceTableForm,
+      'salesManagerName',
+      {
+        getEmployeeList: () => this.SalesManagerList || [],
+        setEmployeeList: (list) => { this.SalesManagerList = list; },
+        setFilteredOptions: (options) => { this.filteredSalesManagerOptions = options; },
+        onEmployeeId: (id) => {
+          this.salesManagerID = id;
+          this.advanceTableForm.patchValue({ salesManagerID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  InitKAMEmployee(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'employeeName', {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredEmployeeOptions = options; },
+    });
+  }
+
+  InitSalesManagerPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'salesManagerName', {
+      getEmployeeList: () => this.SalesManagerList || [],
+      setEmployeeList: (list) => { this.SalesManagerList = list; },
+      setFilteredOptions: (options) => { this.filteredSalesManagerOptions = options; },
+    });
   }
 
   private validateReferenceIds(): string | null {
@@ -619,7 +698,10 @@ export class FormDialogComponent implements OnInit, OnDestroy
 
   public Post(): void
   {
-    this.individualCustomerService.add(this.advanceTableForm.getRawValue())
+    const raw = this.advanceTableForm.getRawValue();
+    coerceEmployeeFieldToApiString(raw, 'employeeName', this.EmployeeList || []);
+    coerceEmployeeFieldToApiString(raw, 'salesManagerName', this.SalesManagerList || []);
+    this.individualCustomerService.add(raw)
     .subscribe(
       response =>
       {
@@ -984,93 +1066,28 @@ export class FormDialogComponent implements OnInit, OnDestroy
         return match ? null : { employeeNameInvalid: true };
       };
     }
-    InitKAMEmployee()
-    {
-      this._generalService.GetEmployee().subscribe(
-      data =>
-      {
-        this.EmployeeList = data;
-        this.advanceTableForm.controls['employeeName'].setValidators([Validators.required,this.employeeNameValidator(this.EmployeeList)]);
-        this.advanceTableForm.controls['employeeName'].updateValueAndValidity();
-        this.filteredEmployeeOptions = this.advanceTableForm.controls['employeeName'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterEmployee(value || ''))
-        );
-      });
-    }
-    private _filterEmployee(value: string): any {
-      const filterValue = value.toLowerCase();
-      return this.EmployeeList.filter(
-      data =>
-       {
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-    }
-    OnEmployeeSelect(selectedEmployee: string)
-    {
-      const EmployeeName = this.EmployeeList.find(
-        data => this.normalizeLabel(this.employeeDisplayName(data)) === this.normalizeLabel(selectedEmployee));
-      if (EmployeeName)
-      {
-        this.getEmployeeID(EmployeeName.employeeID);
-      }
-    }
-    getEmployeeID(employeeID: any)
-    {
-      this.employeeID=employeeID;
-      this.advanceTableForm.patchValue({employeeID:this.employeeID});
+    OnEmployeeSelect(selectedEmployee: EmployeeDropDown): void {
+      onEmployeeAutocompleteSelected(
+        this.advanceTableForm,
+        'employeeName',
+        selectedEmployee,
+        (id) => {
+          this.employeeID = id;
+          this.advanceTableForm.patchValue({ employeeID: id }, { emitEvent: false });
+        }
+      );
     }
 
-    //--------------- Sales Manager -----------
-    salesManagerValidator(SalesManagerList: any[]): ValidatorFn {
-      return (control: AbstractControl): ValidationErrors | null => {
-        const value = this.normalizeLabel(control.value);
-        if (!value) {
-          return { salesManagerNameInvalid: true };
+    OnSalesManagerSelect(selectedEmployee: EmployeeDropDown): void {
+      onEmployeeAutocompleteSelected(
+        this.advanceTableForm,
+        'salesManagerName',
+        selectedEmployee,
+        (id) => {
+          this.salesManagerID = id;
+          this.advanceTableForm.patchValue({ salesManagerID: id }, { emitEvent: false });
         }
-        const match = (SalesManagerList || []).some(
-          employee => this.normalizeLabel(this.employeeDisplayName(employee)) === value
-        );
-        return match ? null : { salesManagerNameInvalid: true };
-      };
-    }
-    InitSalesManager()
-    {
-      this._generalService.GetEmployee().subscribe(
-      data =>
-      {
-        this.SalesManagerList = data;
-        this.advanceTableForm.controls['salesManagerName'].setValidators([Validators.required,this.salesManagerValidator(this.SalesManagerList)]);
-        this.advanceTableForm.controls['salesManagerName'].updateValueAndValidity();
-        this.filteredSalesManagerOptions = this.advanceTableForm.controls['salesManagerName'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterSalesManager(value || ''))
-        );
-      });
-    }
-    private _filterSalesManager(value: string): any {
-      const filterValue = value.toLowerCase();
-      return this.SalesManagerList.filter(
-      data =>
-       {
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-    }
-    OnSalesManagerSelect(selectedEmployee: string)
-    {
-      const EmployeeName = this.SalesManagerList.find(
-        data => this.normalizeLabel(this.employeeDisplayName(data)) === this.normalizeLabel(selectedEmployee));
-      if (EmployeeName)
-      {
-        this.getSalesManagerID(EmployeeName.employeeID);
-      }
-    }
-    getSalesManagerID(employeeID: any)
-    {
-      this.salesManagerID=employeeID;
-      this.advanceTableForm.patchValue({salesManagerID:this.salesManagerID});
+      );
     }
 
 }

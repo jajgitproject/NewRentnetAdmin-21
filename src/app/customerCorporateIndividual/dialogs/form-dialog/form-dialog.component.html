@@ -256,12 +256,20 @@
 
             <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">                  
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedKamExited()}">
                         <mat-label>KAM</mat-label>
-                        <input required type="text" matInput formControlName="employeeName" [matAutocomplete]="auto6">
-                        <mat-autocomplete #auto6="matAutocomplete" (optionSelected)="OnEmployeeSelect($event.option.value)" panelWidth="custom-autocomplete-panel">
-                          <mat-option *ngFor="let option of filteredEmployeeOptions | async" [value]="option.firstName +' '+option.lastName" (click)="getEmployeeID(option.employeeID)">
-                            {{option.firstName +' '+ option.lastName}}
+                        <input required type="text" matInput formControlName="employeeName" [matAutocomplete]="auto6"
+                            (keyup)="InitKAMEmployee()">
+                        <mat-autocomplete #auto6="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="displayEmployeeFn"
+                            (optionSelected)="OnEmployeeSelect($event.option.value)" panelWidth="custom-autocomplete-panel">
+                          <mat-option *ngFor="let option of filteredEmployeeOptions | async" [value]="option"
+                              [class.employee-dropdown-exited]="isEmployeeExited(option)">
+                            <span class="employee-dropdown-option-text"
+                                [class.employee-dropdown-option-text-exited]="isEmployeeExited(option)">
+                                {{ formatEmployeeDropdownLabel(option) }}
+                            </span>
                           </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['employeeName'].hasError('employeeNameInvalid')">
@@ -301,12 +309,20 @@
                 </div>
 
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">                  
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedSalesManagerExited()}">
                         <mat-label>Sales Manager</mat-label>
-                        <input required type="text" matInput formControlName="salesManagerName" [matAutocomplete]="auto8">
-                        <mat-autocomplete #auto8="matAutocomplete" (optionSelected)="OnSalesManagerSelect($event.option.value)" panelWidth="custom-autocomplete-panel">
-                          <mat-option *ngFor="let option of filteredSalesManagerOptions | async" [value]="option.firstName +' '+option.lastName" (click)="getSalesManagerID(option.employeeID)">
-                            {{option.firstName +' '+ option.lastName}}
+                        <input required type="text" matInput formControlName="salesManagerName" [matAutocomplete]="auto8"
+                            (keyup)="InitSalesManagerPrefix()">
+                        <mat-autocomplete #auto8="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="displaySalesManagerFn"
+                            (optionSelected)="OnSalesManagerSelect($event.option.value)" panelWidth="custom-autocomplete-panel">
+                          <mat-option *ngFor="let option of filteredSalesManagerOptions | async" [value]="option"
+                              [class.employee-dropdown-exited]="isEmployeeExited(option)">
+                            <span class="employee-dropdown-option-text"
+                                [class.employee-dropdown-option-text-exited]="isEmployeeExited(option)">
+                                {{ formatEmployeeDropdownLabel(option) }}
+                            </span>
                           </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['salesManagerName'].hasError('salesManagerNameInvalid')">

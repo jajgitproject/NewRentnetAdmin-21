@@ -72,13 +72,20 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                  
 
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedPassengerExited()}">
                         <mat-label>Passenger Name</mat-label>
-                        <input type="text" matInput [formControl]="searchEmployee" [matAutocomplete]="auto">
-                        <mat-autocomplete #auto="matAutocomplete">
-                          <mat-option *ngFor="let option of filteredEmployeeOptions | async" 
-                          [value]="option.firstName+' '+ option.lastName" (click)="getTitles(option.employeeID)">
-                            {{option.firstName +' ' + option.lastName}}
+                        <input type="text" matInput [formControl]="searchEmployee" [matAutocomplete]="auto"
+                            (keyup)="InitEmployee()">
+                        <mat-autocomplete #auto="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="displayEmployeeFn"
+                            (optionSelected)="onPassengerSelected($event.option.value)">
+                          <mat-option *ngFor="let option of filteredEmployeeOptions | async" [value]="option"
+                              [class.employee-dropdown-exited]="isEmployeeExited(option)">
+                            <span class="employee-dropdown-option-text"
+                                [class.employee-dropdown-option-text-exited]="isEmployeeExited(option)">
+                                {{ formatEmployeeDropdownLabel(option) }}
+                            </span>
                           </mat-option>
                         </mat-autocomplete>
                       </mat-form-field>

@@ -87,7 +87,8 @@
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-12 col-sm-12 user-filter">
-            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+              [ngClass]="{'employee-dropdown-exited-selected': isSelectedUserExited()}">
               <mat-label>User</mat-label>
               <input
                 type="text"
@@ -95,16 +96,22 @@
                 [formControl]="userCtrl"
                 [matAutocomplete]="autoUser"
                 placeholder="Type 3 characters"
+                (input)="onUserFilterInput()"
+                (keyup)="userSearch.onKeyup()"
               />
               <mat-autocomplete
                 #autoUser="matAutocomplete"
-                class="audit-user-panel"
+                class="audit-user-panel employee-dropdown-autocomplete-panel"
                 panelWidth="auto"
-                [displayWith]="userDisplay.bind(this)"
+                [displayWith]="displayUserFn"
                 (optionSelected)="onUserSelected($event.option.value)"
               >
-                <mat-option *ngFor="let emp of filteredUserOptions | async" [value]="emp">
-                  {{ userDisplay(emp) }}
+                <mat-option *ngFor="let emp of userSearch.filteredOptions | async" [value]="emp"
+                  [class.employee-dropdown-exited]="userSearch.isEmployeeExited(emp)">
+                  <span class="employee-dropdown-option-text"
+                    [class.employee-dropdown-option-text-exited]="userSearch.isEmployeeExited(emp)">
+                    {{ userSearch.formatEmployeeDropdownLabel(emp) }}
+                  </span>
                 </mat-option>
               </mat-autocomplete>
             </mat-form-field>

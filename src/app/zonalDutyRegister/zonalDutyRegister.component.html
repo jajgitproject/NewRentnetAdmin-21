@@ -1177,12 +1177,20 @@
       
       <div class="row">
         <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mb-2">
-           <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+           <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic"
+                [ngClass]="{'employee-dropdown-exited-selected': isSelectedKamExited()}">
                 <mat-label>KAM</mat-label>
-                <input type="text" matInput [formControl]="SearchKAM"  [matAutocomplete]="autoKAM">
-                <mat-autocomplete #autoKAM="matAutocomplete" (optionSelected)="OnKAMSelected($event.option.value)">
-                    <mat-option *ngFor="let option of filteredKAMOptions | async" [value]="option.firstName +' '+option.lastName">
-                        {{option.firstName +' '+ option.lastName}}
+                <input type="text" matInput [formControl]="SearchKAM" [matAutocomplete]="autoKAM"
+                    (input)="onKamInput()" (keyup)="kamEmployeeSearch.onKeyup()">
+                <mat-autocomplete #autoKAM="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                    [displayWith]="kamEmployeeSearch.displayEmployeeFn"
+                    (optionSelected)="OnKAMSelected($event.option.value)">
+                    <mat-option *ngFor="let option of kamEmployeeSearch.filteredOptions | async" [value]="option"
+                        [class.employee-dropdown-exited]="kamEmployeeSearch.isEmployeeExited(option)">
+                        <span class="employee-dropdown-option-text"
+                            [class.employee-dropdown-option-text-exited]="kamEmployeeSearch.isEmployeeExited(option)">
+                            {{ kamEmployeeSearch.formatEmployeeDropdownLabel(option) }}
+                        </span>
                     </mat-option>
                 </mat-autocomplete>
             </mat-form-field>
