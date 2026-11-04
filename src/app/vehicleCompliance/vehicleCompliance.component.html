@@ -87,7 +87,10 @@
                                         <tr *ngFor="let row of rows.controls; let i = index" [formGroupName]="i">
                                             <td class="cell-action">
                                                 <mat-form-field appearance="outline" class="field-fit field-action">
-                                                    <mat-select formControlName="action" (selectionChange)="onActionChange(i)">
+                                                    <mat-select formControlName="action"
+                                                        panelClass="vc-action-select-panel"
+                                                        [panelWidth]="null"
+                                                        (selectionChange)="onActionChange(i)">
                                                         <mat-option *ngFor="let opt of actionOptions" [value]="opt.value"
                                                             [disabled]="isActionOptionDisabled(opt.value, row)">
                                                             {{ opt.label }}
