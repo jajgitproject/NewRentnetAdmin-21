@@ -556,13 +556,20 @@
             </div>
 
             <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 mb-2">
-              <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-form-field class="example-full-width cp-allotment-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic"
+                  [ngClass]="{'employee-dropdown-exited-selected': isSelectedKamExited()}">
                 <mat-label>KAM</mat-label>
                 <input type="text" matInput formControlName="kAM" [matAutocomplete]="auto52">
-                <mat-autocomplete #auto52="matAutocomplete" panelWidth="custom-autocomplete-panel">
-                  <mat-option *ngFor="let option of KAMList"
-                              [value]="option.firstName +' '+option.lastName">
-                            {{option.firstName +' '+ option.lastName}}
+                <mat-autocomplete #auto52="matAutocomplete" panelWidth="custom-autocomplete-panel"
+                    class="employee-dropdown-autocomplete-panel"
+                    [displayWith]="displayKamEmployeeFn"
+                    (optionSelected)="onKamFilterSelected($event.option.value)">
+                  <mat-option *ngFor="let option of KAMList" [value]="option"
+                      [class.employee-dropdown-exited]="isEmployeeExited(option)">
+                    <span class="employee-dropdown-option-text"
+                        [class.employee-dropdown-option-text-exited]="isEmployeeExited(option)">
+                      {{ formatEmployeeDropdownLabel(option) }}
+                    </span>
                   </mat-option>
                 </mat-autocomplete>
               </mat-form-field>

@@ -131,6 +131,13 @@ import { InternalNoteDialogComponent } from '../internalNoteDetails/dialogs/inte
 import { ModeOfPaymentDropDown } from '../supplierContract/modeOfPaymentDropDown.model';
 import { InventoryDropDown } from '../inventory/inventoryDropDown.model';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
+import {
+  createDisplayEmployeeFn,
+  formatEmployeeDropdownLabel,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+} from '../shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -258,6 +265,9 @@ export class ControlPanelDesignComponent implements OnInit {
   public SupplierTypeList?: SupplierTypeDropDownModel[] = [];
 
   public KAMList?: EmployeeDropDown[] = [];
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayKamEmployeeFn = createDisplayEmployeeFn();
 
   constructor(
     public route: Router,
@@ -380,6 +390,55 @@ export class ControlPanelDesignComponent implements OnInit {
     } catch (error) {
       console.error('ControlPanel guarded init error:', error);
     }
+  }
+
+  private setupKamEmployeeFilter(): void {
+    const control = this.filterForm?.controls?.['kAM'];
+    if (!control) {
+      return;
+    }
+    control.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((value) => {
+        if (isEmployeeDropdownSelection(value)) {
+          return of([]);
+        }
+        const term = (value ?? '').toString().trim();
+        if (term.length < this._generalService.lengthToCheck) {
+          this.KAMList = [];
+          return of([]);
+        }
+        return this._generalService.searchEmployeesByPrefix(term);
+      }),
+      takeUntil(this.prefixAutocompleteDestroy$)
+    ).subscribe((list) => {
+      this.KAMList = list || [];
+    });
+  }
+
+  isSelectedKamExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.filterForm, 'kAM', this.KAMList || []);
+  }
+
+  onKamFilterSelected(employee: EmployeeDropDown): void {
+    if (!isEmployeeDropdownSelection(employee)) {
+      return;
+    }
+    this.filterForm.patchValue({ kAM: employee }, { emitEvent: false });
+  }
+
+  private normalizeKamFilterValue(kamValue: unknown): string {
+    if (kamValue == null) {
+      return '';
+    }
+    if (isEmployeeDropdownSelection(kamValue)) {
+      return `${kamValue.firstName || ''} ${kamValue.lastName || ''}`.trim();
+    }
+    if (typeof kamValue === 'string') {
+      return kamValue.trim();
+    }
+    return '';
   }
 
   private setupPrefixAutocomplete(
@@ -544,11 +603,7 @@ export class ControlPanelDesignComponent implements OnInit {
       (prefix) => this._generalService.GetSupplierTypeDropDownForControlPanel(prefix),
       (list) => { this.SupplierTypeList = list; }
     );
-    this.setupPrefixAutocomplete(
-      'kAM',
-      (prefix) => this._generalService.GetKAMDropDownForControlPanel(prefix),
-      (list) => { this.KAMList = list; }
-    );
+    this.setupKamEmployeeFilter();
     this.filterForm.controls['vehicleCategory'].valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -1006,8 +1061,10 @@ export class ControlPanelDesignComponent implements OnInit {
     {
       this.filterForm.patchValue({ BookingNo: '' });
     }
+    const rawFilters = this.filterForm.getRawValue();
     const requestPayload = {
-      ...this.filterForm.getRawValue(),
+      ...rawFilters,
+      kAM: this.normalizeKamFilterValue(rawFilters.kAM),
       showAllLocation: this.getEffectiveShowAllLocation(this.filterForm.get('showAllLocation')?.value)
     };
     this.filterForm.patchValue({ showAllLocation: requestPayload.showAllLocation }, { emitEvent: false });
