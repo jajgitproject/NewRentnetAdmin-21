@@ -21,6 +21,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { KamDetailsService } from './kamDetails.service';
 import { KamDetailsRoutingModule } from './kamDetails-routing.module';
 import { MyUploadComponent } from '../myupload/myupload.component';
@@ -53,6 +54,7 @@ import { KamDialogComponent } from './dialogs/kam-dialog/kam-dialog.component';
     MatSortModule,
     MatToolbarModule,
     MatMenuModule,
+    MatAutocompleteModule,
     MatProgressSpinnerModule,
     MyUploadModule
   ],

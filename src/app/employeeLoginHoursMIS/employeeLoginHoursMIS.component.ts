@@ -64,6 +64,8 @@ export class EmployeeLoginHoursMISComponent implements OnInit {
 
   employeeNameCtrl = new FormControl('');
 
+  employeeNameSearch: EmployeePrefixSearchField;
+
   employeeMobileCtrl = new FormControl('');
   employeeLocationCtrl = new FormControl('');
   loginStatusFilter = 'all';
