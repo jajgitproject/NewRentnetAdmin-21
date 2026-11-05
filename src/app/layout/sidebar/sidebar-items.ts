@@ -945,6 +945,16 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'complianceApprovalCenter',
+        title: 'Compliance Approval Center',
+        moduleName: 'complianceApprovalCenter',
+        icon: 'fas fa-check-circle',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'supplierComplianceDashboard',
         title: 'Supplier Compliance Dashboard',
         moduleName: 'supplier Compliance Dashboard',

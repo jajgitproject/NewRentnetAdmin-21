@@ -2999,6 +2999,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'complianceApprovalCenter',
+        loadChildren: () =>
+          import('./complianceApprovalCenter/complianceApprovalCenter.module').then(
+            (m) => m.ComplianceApprovalCenterModule
+          ),
+      },
+
+      {
         path: 'driverCompliance',
         loadChildren: () =>
           import('./driverCompliance/driverCompliance.module').then(

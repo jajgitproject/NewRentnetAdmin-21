@@ -1,0 +1,192 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Compliance Approval Center</h2>
+            </li>
+          </ul>
+          <p class="page-subtitle">Driver and inventory document verification queue</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row metric-row">
+      <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+        <div class="card metric-card metric-pending" (click)="filterByMetric('Pending')">
+          <div class="metric-body">
+            <span class="metric-label">Pending Verification</span>
+            <span class="metric-value">{{ metrics.pendingVerification }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+        <div class="card metric-card metric-rejected" (click)="filterByMetric('Rejected')">
+          <div class="metric-body">
+            <span class="metric-label">Rejected / Correction</span>
+            <span class="metric-value">{{ metrics.rejectedCorrection }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+        <div class="card metric-card metric-ageing" (click)="filterByMetric('PendingOver24Hours')">
+          <div class="metric-body">
+            <span class="metric-label">Pending &gt; 24 Hours</span>
+            <span class="metric-value">{{ metrics.pendingOver24Hours }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+        <div class="card metric-card metric-approved" (click)="filterByMetric('ApprovedToday')">
+          <div class="metric-body">
+            <span class="metric-label">Approved Today</span>
+            <span class="metric-value">{{ metrics.approvedToday }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="body">
+            <div class="filter-panel">
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Driver Name / Mobile / Registration No.</mat-label>
+                <input matInput [(ngModel)]="searchText" (keyup.enter)="applySearch()" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Resource Type</mat-label>
+                <mat-select [(ngModel)]="resourceType">
+                  <mat-option value="">All</mat-option>
+                  <mat-option value="Driver">Driver</mat-option>
+                  <mat-option value="Inventory">Inventory</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Document (Compliance)</mat-label>
+                <mat-select [(ngModel)]="searchDocumentID">
+                  <mat-option [value]="null">All</mat-option>
+                  <mat-option *ngFor="let doc of documentList" [value]="doc.documentID">
+                    {{ doc.documentName }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Verification Status</mat-label>
+                <mat-select [(ngModel)]="verificationStatus">
+                  <mat-option value="">Default (Pending + Rejected)</mat-option>
+                  <mat-option value="All">All</mat-option>
+                  <mat-option value="Unverified">Unverified</mat-option>
+                  <mat-option value="Rejected">Rejected</mat-option>
+                  <mat-option value="Verified">Verified</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Document Number</mat-label>
+                <input matInput [(ngModel)]="documentNumber" (keyup.enter)="applySearch()" />
+              </mat-form-field>
+
+              <div class="filter-actions">
+                <button mat-raised-button color="primary" (click)="applySearch()">Search</button>
+                <button mat-stroked-button (click)="refresh()">Reset</button>
+              </div>
+            </div>
+
+            <div class="scrollable-table-container">
+              <mat-table [dataSource]="rows" class="mat-cell floating-header-table">
+                <ng-container matColumnDef="resourceContext">
+                  <mat-header-cell *matHeaderCellDef>Driver / Mobile / Reg. No.</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.resourceContext }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="resourceType">
+                  <mat-header-cell *matHeaderCellDef>Resource Type</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.resourceType }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="resourceStatus">
+                  <mat-header-cell *matHeaderCellDef>Driver Status / Inventory Status</mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <span [ngClass]="row.resourceStatusAlert ? 'resource-status-alert' : ''">
+                      {{ row.resourceStatus || '—' }}
+                    </span>
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="documentName">
+                  <mat-header-cell *matHeaderCellDef>Document</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.documentName }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="verificationStatus">
+                  <mat-header-cell *matHeaderCellDef>Verification Status</mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <span class="status-pill" [ngClass]="statusClass(row.verificationStatus)">
+                      {{ row.verificationStatus || 'Unverified' }}
+                    </span>
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="aging">
+                  <mat-header-cell *matHeaderCellDef>Aging</mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <span [ngClass]="agingClass(row.aging)">{{ row.aging || '—' }}</span>
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="documentNumber">
+                  <mat-header-cell *matHeaderCellDef>Document Number</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.documentNumber }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="documentStartDate">
+                  <mat-header-cell *matHeaderCellDef>Start Date</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.documentStartDate }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="documentValidUpto">
+                  <mat-header-cell *matHeaderCellDef>Valid Upto</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.documentValidUpto }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="uploadedByEmployee">
+                  <mat-header-cell *matHeaderCellDef>Uploaded By Employee</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.uploadedByEmployee }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <mat-header-cell *matHeaderCellDef>Review</mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <button mat-raised-button color="primary" (click)="review(row)">Review</button>
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+              </mat-table>
+            </div>
+
+            <div *ngIf="!rows?.length" class="empty-state">No records found for the selected filters.</div>
+
+            <div class="pager-row">
+              <button mat-raised-button color="primary" (click)="previousPage()" [disabled]="pageNumber === 0">
+                Previous
+              </button>
+              <span class="page-indicator">Page {{ pageNumber + 1 }}</span>
+              <button mat-raised-button color="primary" (click)="nextPage()" [disabled]="!rows?.length">
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
