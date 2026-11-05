@@ -1,25 +1,32 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { DiscountDetailsService } from '../../discountDetails.service';
-import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
 import { DiscountDetails} from '../../discountDetails.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { map, startWith } from 'rxjs/operators';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
-import { atLeastOneRequired } from './atLeastOneRequired.component';
-import Swal from 'sweetalert2';
 import { atLeastOneRequiredNotBoth } from './atLeastOneRequiredNotBoth.component';
+import Swal from 'sweetalert2';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  employeeNameControlValidator,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
-  // Rename to avoid NG0300 collision with the embedded DiscountDetailsComponent
-  // (same selector registered in two different components inside the newForm
-  // module scope -> "Multiple components match node with tagname").
   selector: 'app-discountDetails-dialog',
   templateUrl: './discountDetails.component.html',
   styleUrls: ['./discountDetails.component.sass'],
@@ -28,6 +35,10 @@ import { atLeastOneRequiredNotBoth } from './atLeastOneRequiredNotBoth.component
 
 export class DiscountDetailsDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayApprovedEmployeeFn = createDisplayEmployeeFn();
+
   saveDisabled:boolean=true;
   buttonDisabled:boolean=false;
   status: any;
@@ -35,10 +46,12 @@ export class DiscountDetailsDialogComponent
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTable: DiscountDetails;
-  employeesID: any;
   reservationDiscountDetailsByEmployeesID: any;
   ReservationID: any;
   AllotmentID: any;
+
+  public EmployeeList?: EmployeeDropDown[] = [];
+  filteredCreatedByOptionss: Observable<EmployeeDropDown[]> = of([]);
 
   constructor(
   public dialogRef: MatDialogRef<DiscountDetailsDialogComponent>, 
@@ -49,14 +62,12 @@ export class DiscountDetailsDialogComponent
         public route:ActivatedRoute,
   public _generalService:GeneralService)
   {
-        // Set the defaults
         this.action = data.action;
         
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Reservation Discount';       
           this.advanceTable = data.advanceTable;
-          this.advanceTable.discountApprovedByEmployee = data.advanceTable.firstName +" "+ data.advanceTable.lastName;
           this.ImagePath = this.advanceTable.attachment;
       
         } else 
@@ -67,31 +78,97 @@ export class DiscountDetailsDialogComponent
           this.ReservationID = data.reservationID;
         }
         this.status = data.verifyDutyStatusAndCacellationStatus || data?.status?.status || data?.status;
-        // if(this.status!='Changes allow'){
-        //   this.buttonDisabled=true;
-        // }
          if(this.status === 'Changes allow'){
-    this.buttonDisabled = false;  // Save button enable
+    this.buttonDisabled = false;
 } else {
-    this.buttonDisabled = true;   // Save button disable
+    this.buttonDisabled = true;
 }
         this.advanceTableForm = this.createContactForm();
   }
-  public EmployeeList?: EmployeeDropDown[] = [];
-  filteredCreatedByOptionss: Observable<EmployeeDropDown[]>;
   public ngOnInit(): void
   {
     this.route.queryParams.subscribe(paramsData =>{
       const encryptedAllotmentID = paramsData.allotmentID;
       const encryptedReservationID = paramsData.reservationID;
-      this.AllotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID));
-      this.ReservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
-      
+      if (encryptedAllotmentID && encryptedReservationID) {
+        this.AllotmentID = this._generalService.decrypt(decodeURIComponent(encryptedAllotmentID));
+        this.ReservationID = this._generalService.decrypt(decodeURIComponent(encryptedReservationID));
+      }
     });
-  
-    
-   this.InitEmployee(); 
+
+    const employeeCtrl = this.advanceTableForm.get('discountApprovedByEmployee');
+    employeeCtrl?.setValidators([
+      Validators.required,
+      employeeNameControlValidator(() => this.EmployeeList || []),
+    ]);
+    employeeCtrl?.updateValueAndValidity({ emitEvent: false });
+
+    if (this.action === 'edit') {
+      this.patchApprovedEmployeeForEdit();
+    }
   }
+
+  isSelectedApprovedEmployeeExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'discountApprovedByEmployee', this.EmployeeList || []);
+  }
+
+  private patchApprovedEmployeeForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.discountApprovedByEmployeeID,
+      this.advanceTableForm,
+      'discountApprovedByEmployee',
+      {
+        getEmployeeList: () => this.EmployeeList || [],
+        setEmployeeList: (list) => { this.EmployeeList = list; },
+        setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+        onEmployeeId: (id) => {
+          this.reservationDiscountDetailsByEmployeesID = id;
+          this.advanceTableForm.patchValue({ discountApprovedByEmployeeID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  InitApprovedEmployeePrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'discountApprovedByEmployee', {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+    });
+  }
+
+  OnDisApprovedBySelect(selected: EmployeeDropDown): void {
+    if (isEmployeeDropdownSelection(selected)) {
+      const list = this.EmployeeList || [];
+      if (!list.some((e) => Number(e.employeeID) === Number(selected.employeeID))) {
+        this.EmployeeList = [selected, ...list];
+      }
+    }
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'discountApprovedByEmployee',
+      selected,
+      (id) => {
+        this.reservationDiscountDetailsByEmployeesID = id;
+        this.advanceTableForm.patchValue({ discountApprovedByEmployeeID: id }, { emitEvent: false });
+      }
+    );
+    this.advanceTableForm.get('discountApprovedByEmployee')?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private prepareEmployeeForSave(raw: Record<string, unknown>): void {
+    coerceEmployeeFieldToApiString(raw, 'discountApprovedByEmployee', this.EmployeeList || []);
+    const employee = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('discountApprovedByEmployee')?.value,
+      this.EmployeeList || []
+    );
+    if (employee?.employeeID) {
+      raw.discountApprovedByEmployeeID = employee.employeeID;
+      this.reservationDiscountDetailsByEmployeesID = employee.employeeID;
+    }
+  }
+
   createContactForm(): FormGroup 
   {
     return this.fb.group(
@@ -106,70 +183,12 @@ export class DiscountDetailsDialogComponent
       isAllowedOnExtras: [this.advanceTable.isAllowedOnExtras || null],
       discountApprovedByEmployeeID: [this.advanceTable.discountApprovedByEmployeeID],
       attachment:[this.advanceTable.attachment],
-      discountApprovedByEmployee:[this.advanceTable.discountApprovedByEmployee]      
+      discountApprovedByEmployee:[this.advanceTable.discountApprovedByEmployee, [Validators.required]]      
     }, { validator: atLeastOneRequiredNotBoth });
   }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-        this.advanceTableForm.controls['discountApprovedByEmployee'].setValidators([Validators.required,this.ApprovedByEmployeeValidator(this.EmployeeList)]);
-        this.advanceTableForm.controls['discountApprovedByEmployee'].updateValueAndValidity();
-        this.filteredCreatedByOptionss = this.advanceTableForm.controls['discountApprovedByEmployee'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        );
-      });
-  }
-
-  ApprovedByEmployeeValidator(EmployeeList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value?.toLowerCase();
-        const match = EmployeeList.some(data => ((data.firstName + ' ' + data.lastName).toLowerCase()) === value );
-      return match ? null : { discountApprovedByEmployeeInvalid: true };
-      };
-    }
-
-  private _filtersearchinstructed(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (!value || value.length < 3) {
-      return [];   
-    }
-    return this.EmployeeList.filter(
-      customer => 
-      {
-        return customer.firstName.toLowerCase().includes(filterValue);
-      }
-    );
-  }
-
-  OnDisApprovedBySelect(selectedDisApprovedBy: string)
-  {
-    const DisApprovedByName = this.EmployeeList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedDisApprovedBy
-    );
-    if (selectedDisApprovedBy) 
-    {
-      this.getemployee(DisApprovedByName.employeeID);
-    }
-  }
-  
-  getemployee(employeeID: any) 
-  {
-    this.reservationDiscountDetailsByEmployeesID=employeeID;
-  }
-
-  public noWhitespaceValidator(control: FormControl) {
-    const isWhitespace = (control.value || '').trim().length === 0;
-    const isValid = !isWhitespace;
-    return isValid ? null : { 'whitespace': true };
-}
 
   submit() 
   {
-    // emppty stuff
   }
   onNoClick(): void 
   {
@@ -189,9 +208,10 @@ export class DiscountDetailsDialogComponent
     {
  this.advanceTableForm.patchValue({allotmentID:this.AllotmentID});
     
-  }   // this.advanceTableForm.patchValue({allotmentID:this.AllotmentID});
-    this.advanceTableForm.patchValue({discountApprovedByEmployeeID:this.reservationDiscountDetailsByEmployeesID});
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+  }
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeForSave(requestObject);
+    this.advanceTableService.add(requestObject)  
     .subscribe(
     response => 
     { 
@@ -230,9 +250,13 @@ export class DiscountDetailsDialogComponent
   }
   public Put(): void
   {
-    //this.advanceTableForm.patchValue({allotmentID:this.AllotmentID});
-    this.advanceTableForm.patchValue({discountApprovedByEmployeeID:this.reservationDiscountDetailsByEmployeesID || this.advanceTable.discountApprovedByEmployeeID});
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeForSave(requestObject);
+    if (!requestObject.discountApprovedByEmployeeID) {
+      requestObject.discountApprovedByEmployeeID =
+        this.reservationDiscountDetailsByEmployeesID || this.advanceTable.discountApprovedByEmployeeID;
+    }
+    this.advanceTableService.update(requestObject)  
     .subscribe(
     response => 
     {
@@ -268,7 +292,6 @@ export class DiscountDetailsDialogComponent
     }
     return true;
   }
-   /////////////////for Image Upload////////////////////////////
    public response: { dbPath: '' };
    public ImagePath: string = "";
    public uploadFinished = (event) => {
@@ -279,6 +302,10 @@ export class DiscountDetailsDialogComponent
  
   public confirmAdd(): void 
   {
+    this.advanceTableForm.markAllAsTouched();
+    if (!this.advanceTableForm.valid) {
+      return;
+    }
     this.saveDisabled = false;
        if(this.action=="edit")
        {
@@ -290,5 +317,4 @@ export class DiscountDetailsDialogComponent
        }
   }
 }
-
 

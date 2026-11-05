@@ -16,6 +16,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { FormControl } from '@angular/forms';
 import { KAMDetailsClosing } from './kamDetailsClosing.model';
 import { KAMDetailsClosingService } from './kamDetailsClosing.service';
+import { isEmployeeExited } from '../shared/customer-employee-autocomplete';
 
 
 @Component({
@@ -115,6 +116,15 @@ kamCardLoadData()
   {
     //this.SearchDutyState='';
     
+  }
+
+  isKamEmployeeExited(row: KAMDetailsClosing): boolean {
+    if (!row) {
+      return false;
+    }
+    return isEmployeeExited({
+      employmentStatus: (row as any).employmentStatus ?? (row as any).EmploymentStatus,
+    } as any);
   }
 
 /////////////////for Image Upload////////////////////////////

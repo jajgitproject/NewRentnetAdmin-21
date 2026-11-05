@@ -10,7 +10,7 @@
                       <b>Employee Name</b>
                     </span>
                     <br />
-                    <span>{{data.firstName}} {{data.lastName}}</span>
+                    <span [class.employee-dropdown-option-text-exited]="isKamEmployeeExited(data)">{{data.firstName}} {{data.lastName}}</span>
                   </div>
                   <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <span>
@@ -23,7 +23,7 @@
                     <span>
                       <b>Employee Email</b>
                     </span>
-                    <br />showDGP
+                    <br />
                     <span>{{data.email}}</span>
                   </div>
                 </div>
