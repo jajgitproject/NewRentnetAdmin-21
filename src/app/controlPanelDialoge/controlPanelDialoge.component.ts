@@ -121,6 +121,7 @@ import { ReservationUpsellStatus } from '../reservationUpsell/reservationUpsell.
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 export class ControlPanelDialogeComponent {
+  readonly securityGuardBadgeSrc = 'assets/images/police-badge-security-guard.gif';
   dialogTitle: string;
   dutySlipID: number;
   public reservationInfo: any[] = [];
@@ -280,6 +281,38 @@ export class ControlPanelDialogeComponent {
         this.cdr.detectChanges();
       }
     );
+  }
+
+  hasSecurityGuard(item: any): boolean {
+    if (!item) {
+      return false;
+    }
+    const flag =
+      item.doesThisReservationContainSecurityGuard ??
+      item.DoesThisReservationContainSecurityGuard;
+    return flag === true || flag === 'true' || flag === 1;
+  }
+
+  getSecurityGuardDetailsText(item: any): string {
+    const details = (
+      item?.securityGuardDetails ??
+      item?.SecurityGuardDetails ??
+      ''
+    ).toString().trim();
+    return details || 'Security guard assigned (no details recorded).';
+  }
+
+  getSecurityGuardAltText(item: any): string {
+    return `This Reservation has Security guard with following details : ${this.getSecurityGuardDetailsText(item)}`;
+  }
+
+  openSecurityGuardDetailsDialog(item: any): void {
+    Swal.fire({
+      title: 'Security Guard Details',
+      text: this.getSecurityGuardDetailsText(item),
+      icon: 'info',
+      confirmButtonText: 'Close',
+    });
   }
 
   /** Primary guest passenger for VIP / Female labels (not booker). */

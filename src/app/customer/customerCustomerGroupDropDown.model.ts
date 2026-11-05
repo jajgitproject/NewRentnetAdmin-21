@@ -13,6 +13,7 @@ export class CustomerCustomerGroupDropDown {
   tallyCustomerID: number;
   customerIdentityNumber: string;
   contactNo: string;
+  customerCategory: string;
   isBookerAllowedToBeCreatedFromReservation: boolean;
 
   constructor(customerCustomerGroupDropDown) {
@@ -28,6 +29,7 @@ export class CustomerCustomerGroupDropDown {
       this.tallyCustomerID = customerCustomerGroupDropDown.tallyCustomerID || '';
       this.customerIdentityNumber = customerCustomerGroupDropDown.customerIdentityNumber || '';
       this.contactNo = customerCustomerGroupDropDown.contactNo || '';
+      this.customerCategory = customerCustomerGroupDropDown.customerCategory || '';
       const bookerAllowed =
         customerCustomerGroupDropDown.isBookerAllowedToBeCreatedFromReservation ??
         customerCustomerGroupDropDown.IsBookerAllowedToBeCreatedFromReservation;

@@ -109,6 +109,7 @@ export class ReservationComponent implements OnInit, OnDestroy {
   advanceTableRG:ReservationGroup
   reservationDataSource:Reservation[] | null;
   customerDetailData:any;
+  selectedCustomerCategory = '';
   isBookerAllowedToBeCreatedFromReservation = false;
   /** Wide layout for New Passenger / Create new Booker (matches legacy popup). */
   private readonly customerPersonQuickAddDialog = {
@@ -304,7 +305,9 @@ advanceTableIN: InternalNoteDetails | null;
       isTimeNotConfirmed:[''],
       isAddressCorrectionRequiredByKAM:[false],
       tripTo:[''],
-      tripType:['']
+      tripType:[''],
+      doesThisReservationContainSecurityGuard:[false],
+      securityGuardDetails:['', Validators.maxLength(500)]
   })
 
   googlePlacesForm = this.fb.group({
@@ -436,6 +439,7 @@ canCreateReservation: boolean;
   ngOnInit() { 
     this.LocationOutDate = this.LocationOutDate?.trim() ? this.LocationOutDate : null;
     this.applyStaticRequiredValidators();
+    this.setupSecurityGuardFieldValidators();
     if (this.isPickupCorrectionView()) {
       this.buttonDisabled = false;
       this.initPickupCorrectionEmbedded();
@@ -1006,6 +1010,11 @@ private buildReservationSaveBody(
       body.softCappingByPassDetails = this.softCappingBypassPayload.softCappingByPassDetails;
       body.softCappingByPassApproverID = this.softCappingBypassPayload.softCappingByPassApproverID;
     }
+    if (body.doesThisReservationContainSecurityGuard !== true) {
+      body.securityGuardDetails = null;
+    } else if (typeof body.securityGuardDetails === 'string') {
+      body.securityGuardDetails = body.securityGuardDetails.trim().slice(0, 500);
+    }
     return body;
   }
 
@@ -1021,6 +1030,11 @@ private buildReservationSaveBody(
     body.softCappingByPassReason = this.softCappingBypassPayload.softCappingByPassReason;
     body.softCappingByPassDetails = this.softCappingBypassPayload.softCappingByPassDetails;
     body.softCappingByPassApproverID = this.softCappingBypassPayload.softCappingByPassApproverID;
+  }
+  if (body.doesThisReservationContainSecurityGuard !== true) {
+    body.securityGuardDetails = null;
+  } else if (typeof body.securityGuardDetails === 'string') {
+    body.securityGuardDetails = body.securityGuardDetails.trim().slice(0, 500);
   }
   return body;
 }
@@ -1250,6 +1264,13 @@ toArray<T>(value: any): T[] {
         this.advanceTableForm.patchValue({transferedLocationID:this.advanceTable.transferedLocationID});
         this.advanceTableForm.patchValue({tripTo:this.advanceTable.tripTo || null});
         this.advanceTableForm.patchValue({tripType:this.advanceTable.tripType || null});
+        this.advanceTableForm.patchValue({
+          doesThisReservationContainSecurityGuard: this.advanceTable.doesThisReservationContainSecurityGuard ?? false,
+        });
+        this.advanceTableForm.patchValue({
+          securityGuardDetails: this.advanceTable.securityGuardDetails || '',
+        });
+        this.selectedCustomerCategory = (this.advanceTable.customerCategory || '').trim();
 
         //Drop Off Details
         this.advanceTableForm.patchValue({etrDate:this.advanceTable.etrDate});
@@ -1807,6 +1828,7 @@ toArray<T>(value: any): T[] {
     this.advanceTableForm.patchValue({customerTypeID:this.customerTypeID});
     this.InitCustomerCustomerGroup();
     this.advanceTableForm.controls['customerCustomerGroup'].setValue('');
+    this.selectedCustomerCategory = '';
   }
 
   // onCustomerInputChange(event: any) {
@@ -1830,6 +1852,7 @@ toArray<T>(value: any): T[] {
             map(value => this._filterCCG(value || ''))
           );
           this.syncBookerCreateAllowedFromCurrentCustomerId();
+          this.syncCustomerCategoryFromCurrentCustomerId();
         });
     
   }
@@ -1871,7 +1894,11 @@ toArray<T>(value: any): T[] {
     if (CustomerCustomerGroup) 
     {
       this.applyBookerCreateAllowedFromCustomerRow(CustomerCustomerGroup);
-      this.getCustomerCustomerGroupID(CustomerCustomerGroup.customerID,CustomerCustomerGroup.customerGroupID,CustomerCustomerGroup.customerName);
+      this.getCustomerCustomerGroupID(
+        CustomerCustomerGroup.customerID,
+        CustomerCustomerGroup.customerGroupID,
+        CustomerCustomerGroup
+      );
     }
   }
   
@@ -1879,6 +1906,11 @@ toArray<T>(value: any): T[] {
     this.customerID=customerID;
     this.customerGroupID=customerGroupID;
     this.customerDetailData = customer;
+    if (customer && typeof customer === 'object') {
+      this.applyCustomerCategoryFromRow(customer);
+    } else {
+      this.syncCustomerCategoryFromCurrentCustomerId();
+    }
     this.advanceTableForm.patchValue({customerID:this.customerID});
     this.advanceTableForm.patchValue({customerGroupID:this.customerGroupID});
     this.InitBooker();
@@ -3371,6 +3403,39 @@ public PostGoogleAddress(): void
 )
 }
 
+private setupSecurityGuardFieldValidators(): void {
+  const guardControl = this.advanceTableForm.get('doesThisReservationContainSecurityGuard');
+  const detailsControl = this.advanceTableForm.get('securityGuardDetails');
+  if (!guardControl || !detailsControl) {
+    return;
+  }
+  guardControl.valueChanges.subscribe((value) => {
+    if (value === true) {
+      detailsControl.setValidators([Validators.required, Validators.maxLength(500)]);
+    } else {
+      detailsControl.clearValidators();
+      detailsControl.setValidators([Validators.maxLength(500)]);
+      if (value === false) {
+        detailsControl.setValue('', { emitEvent: false });
+      }
+    }
+    detailsControl.updateValueAndValidity({ emitEvent: false });
+  });
+}
+
+private applyCustomerCategoryFromRow(row: CustomerCustomerGroupDropDown | undefined): void {
+  this.selectedCustomerCategory = (row?.customerCategory || '').trim();
+}
+
+private syncCustomerCategoryFromCurrentCustomerId(): void {
+  const id = this.customerID || this.advanceTableForm?.value?.customerID;
+  if (!id || !this.CustomerCustomerGroupList?.length) {
+    return;
+  }
+  const row = this.CustomerCustomerGroupList.find((c) => c.customerID === id);
+  this.applyCustomerCategoryFromRow(row);
+}
+
 private applyStaticRequiredValidators(): void {
   ['tripType', 'pickupDate', 'pickupAddressDetails', 'pickupAddress'].forEach((name) => {
     const control = this.advanceTableForm.get(name);
@@ -3652,6 +3717,14 @@ public PickupDetails(): boolean {
     Swal.fire({
       title: '',
       text: 'Please Select Service Location.',
+      icon: 'warning',
+    });
+    return false;
+  }
+  if (form.doesThisReservationContainSecurityGuard === true && this.isEmptyText(form.securityGuardDetails)) {
+    Swal.fire({
+      title: '',
+      text: 'Security guard details are required when Yes is selected.',
       icon: 'warning',
     });
     return false;

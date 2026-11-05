@@ -559,3 +559,15 @@ app-controlPanelDesign .control-panel-main-header .cp-booking-category-field .ma
   color: #424242;
   background: #f5f5f5;
 }
+
+:host ::ng-deep .cp-security-guard-icon {
+  cursor: pointer;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+::ng-deep .cp-security-guard-tooltip {
+  white-space: pre-wrap;
+  max-width: 360px;
+  font-size: 12px;
+}

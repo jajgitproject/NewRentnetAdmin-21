@@ -180,6 +180,9 @@
                                         </mat-option>
                                     </mat-autocomplete>
                                 </mat-form-field>
+                                <div *ngIf="selectedCustomerCategory" class="customer-category-display">
+                                    {{ selectedCustomerCategory }}
+                                </div>
                                 <div class="link-actions-below">
                                     <a class="link-action" (click)="ViewKAM()">View KAM</a>
                                 </div>
@@ -805,6 +808,31 @@
                                         Please select Trip Type
                                     </mat-error>
                                 </mat-form-field>                                
+                            </div>
+
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                    <mat-label>Contains Security Guard?</mat-label>
+                                    <mat-select formControlName="doesThisReservationContainSecurityGuard" required>
+                                        <mat-option [value]="true">Yes</mat-option>
+                                        <mat-option [value]="false">No</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Please select Yes or No
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"
+                                *ngIf="advanceTableForm.value.doesThisReservationContainSecurityGuard === true">
+                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                    <mat-label>Security Guard Details</mat-label>
+                                    <textarea matInput formControlName="securityGuardDetails" rows="3" maxlength="500" required></textarea>
+                                    <mat-hint align="end">{{ advanceTableForm.value.securityGuardDetails?.length || 0 }}/500</mat-hint>
+                                    <mat-error>
+                                        Security guard details are required (max 500 characters)
+                                    </mat-error>
+                                </mat-form-field>
                             </div>
 
                         </div>
