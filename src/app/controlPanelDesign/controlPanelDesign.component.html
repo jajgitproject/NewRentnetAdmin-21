@@ -1709,7 +1709,7 @@
                               </button>
                             </mat-menu>
                           </span>
-                          <span style="font-size: 12px;text-align: left;width:80px;float: left;">
+                          <span class="cp-imp-column" style="font-size: 12px;text-align: left;width:80px;float: left;">
                             <img *ngIf="data.newCustomer == true" src="assets/images/newCustomerImage.png" alt=""
                               width="20" height="20" matTooltip="New Customer" />
                             &nbsp;
@@ -1721,6 +1721,17 @@
                               &nbsp;
                             <i style="color: #0c0c0c; font-size: 10px"
                               *ngIf="data.importance == 'CXO'">CXO</i>
+                            &nbsp;
+                            <img *ngIf="hasSecurityGuard(data)"
+                              class="cp-security-guard-icon"
+                              [src]="securityGuardBadgeSrc"
+                              width="22"
+                              height="22"
+                              [alt]="getSecurityGuardAltText(data)"
+                              [matTooltip]="getSecurityGuardAltText(data)"
+                              matTooltipClass="cp-security-guard-tooltip"
+                              matTooltipShowDelay="200"
+                              (click)="openSecurityGuardDetailsDialog(data); $event.stopPropagation()" />
                             &nbsp;
                             <span *ngIf="getOwnershipImpLabel(data) as ownLabel"
                                   [matTooltip]="getOwnershipImpTooltip(data)"

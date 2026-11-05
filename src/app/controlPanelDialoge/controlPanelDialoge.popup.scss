@@ -618,5 +618,24 @@
     margin: 0 !important;
     box-sizing: border-box !important;
   }
+
+  .cp-reservation-details-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .cp-security-guard-icon {
+    cursor: pointer;
+    vertical-align: middle;
+    object-fit: contain;
+  }
+}
+
+::ng-deep .cp-security-guard-tooltip {
+  white-space: pre-wrap;
+  max-width: 360px;
+  font-size: 12px;
 }
 

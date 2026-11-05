@@ -67,8 +67,8 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
-          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 customer-field-block" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
+          <mat-form-field class="example-full-width customer-field-tight" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto1" />
             <mat-autocomplete #auto1="matAutocomplete" (optionSelected)="onCustomerSelected($event.option.value)"
@@ -96,6 +96,9 @@
               Please select a Customer
             </mat-error>
           </mat-form-field>
+          <div *ngIf="selectedCustomerCategory" class="customer-category-display">
+            {{ selectedCustomerCategory }}
+          </div>
           <!-- <div class="hint-container">
                     <mat-hint align="end">
                         <div style="display: flex; justify-content: flex-end; gap: 20px;">
@@ -113,8 +116,8 @@
                     </mat-hint>
                     </div> -->
         </div>
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
-          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 customer-field-block" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === false">
+          <mat-form-field class="example-full-width customer-field-tight" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto3" />
             <mat-autocomplete #auto3="matAutocomplete" (optionSelected)="onCustomerRDSelected($event.option.value)"
@@ -142,6 +145,9 @@
               Please select a Customer
             </mat-error>
           </mat-form-field>
+          <div *ngIf="selectedCustomerCategory" class="customer-category-display">
+            {{ selectedCustomerCategory }}
+          </div>
           <!-- <div class="hint-container">
                     <mat-hint align="end">
                         <div style="display: flex; justify-content: flex-end; gap: 20px;">
@@ -160,8 +166,8 @@
                     </div> -->
         </div>
 
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
-          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 customer-field-block" *ngIf="!this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
+          <mat-form-field class="example-full-width customer-field-tight" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto10" />
             <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCustomerRGByKAMSelected($event.option.value)"
@@ -177,11 +183,14 @@
               Please select a Customer
             </mat-error>
           </mat-form-field>
+          <div *ngIf="selectedCustomerCategory" class="customer-category-display">
+            {{ selectedCustomerCategory }}
+          </div>
         </div>
 
 
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
-          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 customer-field-block" *ngIf="this.advanceTableForm.value.customerGroupID && IsKAMRole === true">
+          <mat-form-field class="example-full-width customer-field-tight" appearance="outline" floatLabel="always" subscriptSizing="dynamic">
             <mat-label>Customer</mat-label>
             <input required type="text" matInput formControlName="customerCustomerGroup" [matAutocomplete]="auto10" />
             <mat-autocomplete #auto10="matAutocomplete" (optionSelected)="onCustomerCustomerGroupForRGByKAMSelected($event.option.value)"
@@ -197,6 +206,9 @@
               Please select a Customer
             </mat-error>
           </mat-form-field>
+          <div *ngIf="selectedCustomerCategory" class="customer-category-display">
+            {{ selectedCustomerCategory }}
+          </div>
         </div>
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2" *ngIf="action !== 'edit'">
           <div class="link-actions-below-left">

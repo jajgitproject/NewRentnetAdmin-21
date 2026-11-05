@@ -147,6 +147,7 @@ import {
   encapsulation:ViewEncapsulation.None
 })
 export class ControlPanelDesignComponent implements OnInit {
+  readonly securityGuardBadgeSrc = 'assets/images/police-badge-security-guard.gif';
   public cpInfo: ControlPanelData;
   public reservationInfo: any[]=[];
   public reservationHeaderInfo: ControlPanelHeaderDetails[];
@@ -1316,6 +1317,38 @@ export class ControlPanelDesignComponent implements OnInit {
 
   isFemaleTraveller(item: any): boolean {
     return this.getPrimaryGuestPassenger(item)?.gender === 'Female';
+  }
+
+  hasSecurityGuard(item: any): boolean {
+    if (!item) {
+      return false;
+    }
+    const flag =
+      item.doesThisReservationContainSecurityGuard ??
+      item.DoesThisReservationContainSecurityGuard;
+    return flag === true || flag === 'true' || flag === 1;
+  }
+
+  getSecurityGuardDetailsText(item: any): string {
+    const details = (
+      item?.securityGuardDetails ??
+      item?.SecurityGuardDetails ??
+      ''
+    ).toString().trim();
+    return details || 'Security guard assigned (no details recorded).';
+  }
+
+  getSecurityGuardAltText(item: any): string {
+    return `This Reservation has Security guard with following details : ${this.getSecurityGuardDetailsText(item)}`;
+  }
+
+  openSecurityGuardDetailsDialog(item: any): void {
+    Swal.fire({
+      title: 'Security Guard Details',
+      text: this.getSecurityGuardDetailsText(item),
+      icon: 'info',
+      confirmButtonText: 'Close',
+    });
   }
 
   public loadData(reservationID:any,index:number) {

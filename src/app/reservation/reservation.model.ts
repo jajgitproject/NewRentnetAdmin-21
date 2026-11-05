@@ -98,6 +98,9 @@ export class Reservation {
    isAddressCorrectionRequiredByKAM:boolean;
    tripTo:string;
    tripType:string;
+   doesThisReservationContainSecurityGuard:boolean;
+   securityGuardDetails:string;
+   customerCategory:string;
   constructor(reservation) {
     {
        this.reservationID = reservation.reservationID || -1;
@@ -148,6 +151,9 @@ export class Reservation {
        this.isAddressCorrectionRequiredByKAM=reservation.isAddressCorrectionRequiredByKAM === true;
        this.tripTo=reservation.tripTo || '';
        this.tripType=reservation.tripType || '';
+       this.doesThisReservationContainSecurityGuard=reservation.doesThisReservationContainSecurityGuard ?? false;
+       this.securityGuardDetails=reservation.securityGuardDetails || '';
+       this.customerCategory=reservation.customerCategory || '';
     }
 
   }

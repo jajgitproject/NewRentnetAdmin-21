@@ -93,6 +93,7 @@ export class FormDialogComponent implements OnInit {
   reservationBlocked: boolean = false;
   saveDisabled: boolean = true;
   isBookerAllowedToBeCreatedFromReservation = false;
+  selectedCustomerCategory = '';
 
   /** Wide layout for Create new Booker (same as booking screen New Passenger popup). */
   private readonly customerPersonQuickAddDialog = {
@@ -252,12 +253,43 @@ export class FormDialogComponent implements OnInit {
       this.advanceTable?.customerID;
     if (!id || !this.CustomerCustomerGroupList?.length) {
       this.isBookerAllowedToBeCreatedFromReservation = false;
+      if (!id) {
+        this.selectedCustomerCategory = '';
+      }
       return;
     }
     const row = this.CustomerCustomerGroupList.find(
-      (c) => c.customerID === id
+      (c) => Number(c.customerID) === Number(id)
     );
     this.applyBookerCreateAllowedFromCustomerRow(row);
+    this.applyCustomerCategoryFromRow(row);
+  }
+
+  private applyCustomerCategoryFromRow(
+    row: CustomerCustomerGroupDropDown | undefined
+  ): void {
+    if (!row) {
+      this.selectedCustomerCategory = '';
+      return;
+    }
+    const raw = row as { customerCategory?: string; CustomerCategory?: string };
+    this.selectedCustomerCategory = (
+      row.customerCategory ??
+      raw.CustomerCategory ??
+      ''
+    )
+      .toString()
+      .trim();
+  }
+
+  private applyCustomerCategoryForCustomerId(customerID: number): void {
+    if (!customerID || !this.CustomerCustomerGroupList?.length) {
+      return;
+    }
+    const row = this.CustomerCustomerGroupList.find(
+      (c) => Number(c.customerID) === Number(customerID)
+    );
+    this.applyCustomerCategoryFromRow(row);
   }
 
   formatCustomerOption(customer: CustomerCustomerGroupDropDown): string {
@@ -692,11 +724,13 @@ private _filterCCG(value: string): any[] {
 
     if (selectedCustomer) {
       this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
+      this.applyCustomerCategoryFromRow(selectedCustomer);
       this.getCustomerCustomerGroupID(selectedCustomer.customerID, selectedCustomer.customerGroupID, selectedCustomer.customerName, selectedCustomer.customerGroup, selectedCustomer.customerTypeID, selectedCustomer.customerType);
     }
   }
 
   getCustomerCustomerGroupID(customerID: any, customerGroupID: any, customer: any, customerGroup: any, customerTypeID: any, customerType: any) {
+    this.applyCustomerCategoryForCustomerId(customerID);
     this.customerID = customerID;
     this.customerGroupID = customerGroupID;
     this.customerDetailData = customer;
@@ -751,11 +785,13 @@ private _filterRD(value: string): any[] {
 
     if (selectedCustomer) {
       this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
+      this.applyCustomerCategoryFromRow(selectedCustomer);
       this.getCustomerIDForRD(selectedCustomer.customerID, selectedCustomer.customerGroupID, selectedCustomer.customerName, selectedCustomer.customerGroup, selectedCustomer.customerTypeID, selectedCustomer.customerType);
     }
   }
 
   getCustomerIDForRD(customerID: any, customerGroupID: any, customer: any, customerGroup: any, customerTypeID: any, customerType: any) {
+    this.applyCustomerCategoryForCustomerId(customerID);
     this.customerID = customerID;
     this.customerGroupID = customerGroupID;
     this.customerDetailData = customer;
@@ -1377,6 +1413,7 @@ private _filterRD(value: string): any[] {
       this.advanceTableForm.controls['customerGroupID'].setValue('');
       this.customerGroupID = 0;
       this.isBookerAllowedToBeCreatedFromReservation = false;
+      this.selectedCustomerCategory = '';
       this.InitCustomerRD();
      
     }
@@ -1390,6 +1427,7 @@ private _filterRD(value: string): any[] {
       this.advanceTableForm.controls['customerID'].setValue('');
       this.advanceTableForm.controls['customerCustomerGroup'].setValue('');
       this.isBookerAllowedToBeCreatedFromReservation = false;
+      this.selectedCustomerCategory = '';
      
     }
   }
@@ -1460,12 +1498,14 @@ private _filterRD(value: string): any[] {
       if (selectedCustomer) 
       {
         this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
+        this.applyCustomerCategoryFromRow(selectedCustomer);
         this.getCustomerIDForRGByKAM(selectedCustomer.customerID, selectedCustomer.customerGroupID, selectedCustomer.customerName, selectedCustomer.customerGroup, selectedCustomer.customerTypeID, selectedCustomer.customerType);
       }
     }
 
   getCustomerIDForRGByKAM(customerID: any, customerGroupID: any, customer: any, customerGroup: any, customerTypeID: any, customerType: any) 
   {
+    this.applyCustomerCategoryForCustomerId(customerID);
     this.customerID = customerID;
     this.customerGroupID = customerGroupID;
     this.customerDetailData = customer;
@@ -1538,11 +1578,13 @@ private _filterRD(value: string): any[] {
     if (selectedCustomer) 
     {
       this.applyBookerCreateAllowedFromCustomerRow(selectedCustomer);
+      this.applyCustomerCategoryFromRow(selectedCustomer);
       this.getCustomerCustomerGroupIDForRGByKAM(selectedCustomer.customerID, selectedCustomer.customerGroupID, selectedCustomer.customerName, selectedCustomer.customerGroup, selectedCustomer.customerTypeID, selectedCustomer.customerType);
     }
   }
 
   getCustomerCustomerGroupIDForRGByKAM(customerID: any, customerGroupID: any, customer: any, customerGroup: any, customerTypeID: any, customerType: any) {
+    this.applyCustomerCategoryForCustomerId(customerID);
     this.customerID = customerID;
     this.customerGroupID = customerGroupID;
     this.customerDetailData = customer;
