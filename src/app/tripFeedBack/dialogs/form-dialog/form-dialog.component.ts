@@ -14,9 +14,16 @@ import moment from 'moment';
 import { UomDropDown } from 'src/app/additionalService/uomDropDown.model';
 import { ServiceTypeDropDown } from 'src/app/general/serviceTypeDropDown.model';
 import { AdditionalServiceDropDown } from 'src/app/general/additionalServiceDropDown.model';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
+import {
+  createDisplayEmployeeFn,
+  formatEmployeeDropdownLabel,
+  initEmployeePrefixSearchOnControl,
+  isEmployeeDropdownSelection,
+  isSelectedEmployeeExitedFromControl,
+  isEmployeeExited,
+} from 'src/app/shared/customer-employee-autocomplete';
 //import { ServiceTypeDropDown } from 'src/app/serviceType/serviceTypeDropDown.model';
 // import { CityDropDown } from 'src/app/general/cityDropDown.model';
 // import { CityDropDown } from 'src/app/city/cityDropDown.model';
@@ -30,6 +37,10 @@ import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 
 export class FormDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
+
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
@@ -46,7 +57,7 @@ export class FormDialogComponent
   public uomList?: UomDropDown[] = [];
   public additionalList?: AdditionalServiceDropDown[] = [];
   public EmployeeList?: EmployeeDropDown[] = [];
-  filteredEmployeeOptions: Observable<EmployeeDropDown[]>;
+  filteredEmployeeOptions: Observable<EmployeeDropDown[]> = of([]);
   searchEmployee: FormControl = new FormControl();
   image: any;
   fileUploadEl: any;
@@ -100,7 +111,11 @@ export class FormDialogComponent
   }
   public ngOnInit(): void
   {
-    this.InitEmployee();
+    this.filteredEmployeeOptions = of([]);
+  }
+
+  isSelectedPassengerExited(): boolean {
+    return isSelectedEmployeeExitedFromControl(this.searchEmployee, this.EmployeeList || []);
   }
 
   
@@ -152,29 +167,20 @@ export class FormDialogComponent
  
     });
   }
-  InitEmployee() {
-    this._generalService.GetEmployee().subscribe(
-      data => {
-        this.EmployeeList = data;
-        this.filteredEmployeeOptions = this.searchEmployee.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filter(value || ''))
-        );
-      });
+  InitEmployee(): void {
+    initEmployeePrefixSearchOnControl(this._generalService, this.searchEmployee, {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredEmployeeOptions = options; },
+    });
   }
 
-  private _filter(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.EmployeeList.filter(
-      customer => {
-        return customer.firstName.toLowerCase().indexOf(filterValue) === 0;
-      }
-    );
-  }
-
-  getTitles(employeeID: any) {
-    this.employeeID = employeeID;
-    // this.searchEmployee.setValue(this.employeeID);
+  onPassengerSelected(employee: EmployeeDropDown): void {
+    if (!isEmployeeDropdownSelection(employee)) {
+      return;
+    }
+    this.searchEmployee.setValue(employee, { emitEvent: false });
+    this.employeeID = employee.employeeID;
   }
 //   public noWhitespaceValidator(control: FormControl) {
 //     const isWhitespace = (control.value || '').trim().length === 0;
@@ -197,6 +203,10 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({allotmentID: this.AllotmentID});
     this.advanceTableForm.patchValue({inventoryID: this.InventoryID});
     this.advanceTableForm.patchValue({driverID: this.DriverID});
+    const empVal = this.searchEmployee.value;
+    if (isEmployeeDropdownSelection(empVal)) {
+      this.employeeID = empVal.employeeID;
+    }
     this.advanceTableForm.patchValue({employeeID: this.employeeID })
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(

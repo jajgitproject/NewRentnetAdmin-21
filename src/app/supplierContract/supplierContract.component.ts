@@ -22,6 +22,8 @@ import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import moment from 'moment';
 import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
+import { isEmployeeDropdownSelection } from '../shared/customer-employee-autocomplete';
 interface MenuItem {
   label: string;
   action: (item: any) => void;
@@ -65,7 +67,8 @@ export class SupplierContractComponent implements OnInit {
   validTo : FormControl = new FormControl();
 
   SearchApprovedBy:string='';
-  approvedBy : FormControl = new FormControl();
+  approvedByEmployeeSearch: EmployeePrefixSearchField;
+  approvedBy : FormControl;
   filteredinstructedByOptionss: Observable<EmployeeDropDown[]>;
   searchinstructedBy: FormControl = new FormControl();
   
@@ -85,7 +88,10 @@ export class SupplierContractComponent implements OnInit {
     private snackBar: MatSnackBar,
     public route:ActivatedRoute,
     public _generalService: GeneralService
-  ) {}
+  ) {
+    this.approvedByEmployeeSearch = new EmployeePrefixSearchField(this._generalService);
+    this.approvedBy = this.approvedByEmployeeSearch.control;
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -98,7 +104,6 @@ export class SupplierContractComponent implements OnInit {
       //this.supplierRateCard_Name=paramsData.SupplierRateCardName;
       this.supplierName=paramsData.SupplierName;
     });
-    this.InitEmployee();
     this.loadData();
     this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
     this.SubscribeUpdateService();
@@ -122,37 +127,30 @@ export class SupplierContractComponent implements OnInit {
   //   );
   // }
 
-  InitEmployee(){
-    this._generalService.GetEmployeesForSupplierContract().subscribe(
-      data=>
-      {
-        this.EmployeeList=data;
-        this.filteredinstructedByOptionss = this.approvedBy.valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterNext(value || ''))
-        ); 
-      });
-  }
-  
-  private _filterNext(value: string): any {
-    const filterValue = value.toLowerCase();
-    // Only show results if 3 or more characters are typed
-    if (filterValue.length < 3) {
-      return [];
+  private getApprovedByFilter(): string {
+    if (this.approvedByEmployeeSearch.apiSearchName) {
+      return this.approvedByEmployeeSearch.apiSearchName;
     }
-    return this.EmployeeList.filter(
-      customer => 
-      {
-        return customer.firstName.toLowerCase().indexOf(filterValue)===0;
-      }
-    );
+    const raw = this.approvedBy.value;
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    if (isEmployeeDropdownSelection(raw)) {
+      return `${raw.firstName || ''} ${raw.lastName || ''}`.trim();
+    }
+    return '';
   }
-  
+
+  isSelectedApprovedByFilterExited(): boolean {
+    const raw = this.approvedByEmployeeSearch.control.value;
+    return isEmployeeDropdownSelection(raw) && this.approvedByEmployeeSearch.isEmployeeExited(raw);
+  }
+
   refresh() {
     this.SupplierContractName='';
     this.SearchValidFrom = '';
     this.SearchValidTo = '',
-    this.approvedBy.setValue(''),
+    this.approvedByEmployeeSearch.reset();
     this.searchTerm='';
     this.selectedFilter ='search';
     this.SearchActivationStatus = true;
@@ -240,7 +238,7 @@ export class SupplierContractComponent implements OnInit {
         this.SupplierContractName,
         this.SearchValidFrom,
         this.SearchValidTo,
-        this.approvedBy.value,
+        this.getApprovedByFilter(),
         this.SearchActivationStatus, 
         this.PageNumber).subscribe
     (

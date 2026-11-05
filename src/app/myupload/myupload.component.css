@@ -24,3 +24,15 @@
     border-color: darkgray;
     white-space: nowrap;
 }
+
+.upload-row--compact .upload-btn {
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 1.2;
+    min-height: 18px;
+    border-radius: 3px;
+}
+
+.upload-row--compact .upload-col {
+    min-width: 0;
+}

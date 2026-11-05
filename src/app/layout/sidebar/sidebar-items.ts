@@ -299,12 +299,12 @@ export const ROUTES: RouteInfo[] = [
 
       {
         path: 'kamAddressCorrection',
-        title: 'KAM Pickup Address Correction',
+        title: 'Update Pickup Location',
         moduleName: 'kamAddressCorrection',
         alternateAccessPageKeys: [
           'kamAddressCorrection',
-          'KAM Pickup Address Correction',
-          'KAM Address Correction'
+          'Update Pickup Location',
+          'Update Pickup Location'
         ],
         icon: 'fas fa-map-marked-alt',
         class: '',

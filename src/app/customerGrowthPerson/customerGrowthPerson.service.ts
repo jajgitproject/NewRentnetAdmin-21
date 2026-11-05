@@ -60,7 +60,6 @@ export class CustomerGrowthPersonService
 
   add(advanceTable: CustomerGrowthPerson) 
   {
-     debugger
     advanceTable.customerGrowthPersonID=-1;
     advanceTable.userID=this.generalService.getUserID();
     return this.httpClient.post<any>(this.API_URL , advanceTable);

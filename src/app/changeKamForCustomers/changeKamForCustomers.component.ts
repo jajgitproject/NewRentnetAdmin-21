@@ -23,7 +23,7 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import moment from 'moment';
-import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 @Component({
   standalone: false,
   selector: 'app-changeKamForCustomers',
@@ -76,7 +76,7 @@ export class ChangeKamForCustomersComponent implements OnInit {
 
   SearchEndDate: string = '';
   endingDate : FormControl = new FormControl();
-  public EmployeeList?: EmployeeDropDown[] = [];
+  employeeSearch: EmployeePrefixSearchField;
   searchTerm: any = '';
   selectedFilter: string = 'search';
   filterSelected:boolean = true;
@@ -99,7 +99,9 @@ export class ChangeKamForCustomersComponent implements OnInit {
     public changeKamForCustomersService: ChangeKamForCustomersService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) {}
+  ) {
+    this.employeeSearch = new EmployeePrefixSearchField(this._generalService);
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -119,13 +121,13 @@ export class ChangeKamForCustomersComponent implements OnInit {
      
     });
     this.loadData();
-    this.InitEmployee();
     this.SubscribeUpdateService();
   }
   refresh() {
      
     this.SearchChangeKamForCustomers = '';
     this.SearchEmployeeName='';
+    this.employeeSearch.reset();
     this.SearchStartDate='';
     this.SearchnewKAMActivationStatus = true;
     this.searchTerm = '';
@@ -148,8 +150,8 @@ export class ChangeKamForCustomersComponent implements OnInit {
     });
   }
   editCall(row) {
-      //  alert(row.id);
-    this.changeKamForCustomersID = row.id;
+    this.changeKamForCustomersID =
+      row.customerKeyAccountManagerID ?? row.keyAccountManagerUpdateID ?? row.changeKamForCustomersID;
     const dialogRef = this.dialog.open(FormDialogComponentHolder, {
       data: {
         advanceTable: row,
@@ -162,14 +164,14 @@ export class ChangeKamForCustomersComponent implements OnInit {
   }
   public SearchData()
   {
+    this.SearchEmployeeName = this.employeeSearch.apiSearchName || '';
     this.loadData();
-    //this.SearchChangeKamForCustomers='';
   }
   
   deleteItem(row)
   {
 
-    this.changeKamForCustomersID = row.id;
+    this.changeKamForCustomersID = this.changeKamForCustomersService.getRecordId(row);
     const dialogRef = this.dialog.open(DeleteDialogComponent, 
     {
       data: row
@@ -367,16 +369,6 @@ export class ChangeKamForCustomersComponent implements OnInit {
             }
           }
         }
-      }
-    );
-  }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-       
       }
     );
   }

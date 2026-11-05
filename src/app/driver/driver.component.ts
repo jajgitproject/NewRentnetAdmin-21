@@ -93,14 +93,14 @@ export class DriverComponent implements OnInit, AfterViewChecked, OnDestroy {
   public ServiceList?: OrganizationalEntityDropDown[] = [];
   location: FormControl = new FormControl();
   searchLocation: string = '';
-  sear
 
   searchTerm: any = '';
   selectedFilter: string = 'search';
 
   menuItems: any[] = [
     { label: 'Driving License', tooltip: 'Driver Driving License' },
-    { label: 'Document', },
+    { label: 'Compliance History', route: '/driverDocument' },
+    { label: 'Compliance', route: '/driverCompliance' },
     { label: 'Inventory Association', }
   ];
 
@@ -723,6 +723,21 @@ export class DriverComponent implements OnInit, AfterViewChecked, OnDestroy {
       const encryptedSupplierName = enc(supplier);
       const encryptedDriverPhone = enc(mobile);
       const redirectingFrom = enc('Driver');
+
+      if (menuItem?.route) {
+        const routePath = String(menuItem.route || '').replace(/^\//, '');
+        const commands = routePath.split('/').filter(Boolean);
+        const url = this.router.serializeUrl(
+          this.router.createUrlTree(commands, {
+            queryParams: {
+              DriverID: encryptedDriverID,
+              DriverName: encryptedDriverName,
+            },
+          })
+        );
+        window.open(this._generalService.buildAppWindowUrl(url), '_blank');
+        return;
+      }
 
       if (label === 'driving license') {
         const url = this.router.serializeUrl(

@@ -255,6 +255,24 @@
                     <input type="text" matInput [(ngModel)]="SearchCustomerAlertMessage">
                 </mat-form-field>
 
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                    [ngClass]="{'employee-dropdown-exited-selected': isSelectedFilterEmployeeExited()}">
+                    <mat-label>Employee</mat-label>
+                    <input type="text" matInput [formControl]="employeeSearch.control"
+                        [matAutocomplete]="autoEmployeeAlert" (keyup)="employeeSearch.onKeyup()">
+                    <mat-autocomplete #autoEmployeeAlert="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                        [displayWith]="employeeSearch.displayEmployeeFn"
+                        (optionSelected)="employeeSearch.onSelected($event.option.value)">
+                        <mat-option *ngFor="let option of employeeSearch.filteredOptions | async" [value]="option"
+                            [class.employee-dropdown-exited]="employeeSearch.isEmployeeExited(option)">
+                            <span class="employee-dropdown-option-text"
+                                [class.employee-dropdown-option-text-exited]="employeeSearch.isEmployeeExited(option)">
+                                {{ employeeSearch.formatEmployeeDropdownLabel(option) }}
+                            </span>
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+
                 <mat-form-field class="example-full-width mb-3"
                     appearance="outline" floatLabel="always">
                     <mat-label>Activation Status</mat-label>

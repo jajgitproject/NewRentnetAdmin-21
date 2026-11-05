@@ -11,9 +11,21 @@ import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { ModeOfPaymentDropDown } from 'src/app/modeOfPayment/modeOfPaymentDropDown.model';
 import { OrganizationalEntityDropDown } from 'src/app/organizationalEntity/organizationalEntityDropDown.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import moment from 'moment';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  employeeNameControlValidator,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -25,6 +37,11 @@ import moment from 'moment';
 
 export class FormDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
+  displayApprovedEmployeeFn = createDisplayEmployeeFn();
+
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
@@ -84,13 +101,16 @@ export class FormDialogComponent
   }
   public ngOnInit(): void
   {
-    this.InitCreatedBy();
-    this.InitApprovedBy();
+    this.filteredCreatedOptions = of([]);
+    this.filteredApprovedOptions = of([]);
+    if (this.action === 'edit') {
+      this.patchCreatedByForEdit();
+      this.patchApprovedByForEdit();
+    }
     this.InitCurrencies();
     this.InitModeOfPayment();
     this.InitBranch();
   }
-
 
   onNoClick()
   {
@@ -104,108 +124,107 @@ export class FormDialogComponent
     }
   }
 
-  //---------- Created By ----------
-  createdByValidator(CreatedList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = CreatedList.some(group => (group.firstName + ' ' + group.lastName).toLowerCase() === value);
-      return match ? null : { invalidCreatedBySelection: true };
-    };
+  isSelectedCreatedByExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'contractCreatedByName', this.CreatedList || []);
   }
-  InitCreatedBy()
-  {
-    this._generalService.GetEmployee().subscribe
-    (
-      data =>   
+
+  isSelectedApprovedByExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'contractApprovedByName', this.ApprovedList || []);
+  }
+
+  private patchCreatedByForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.contractCreatedByID,
+      this.advanceTableForm,
+      'contractCreatedByName',
       {
-        this.CreatedList = data;
-        this.advanceTableForm.controls['contractCreatedByName'].setValidators([Validators.required,this.createdByValidator(this.CreatedList)]);
-        this.advanceTableForm.controls['contractCreatedByName'].updateValueAndValidity();
-        this.filteredCreatedOptions = this.advanceTableForm.controls['contractCreatedByName'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCreated(value || ''))
-        );
+        getEmployeeList: () => this.CreatedList || [],
+        setEmployeeList: (list) => { this.CreatedList = list; },
+        setFilteredOptions: (options) => { this.filteredCreatedOptions = options; },
+        onEmployeeId: (id) => {
+          this.contractCreatedByID = id;
+          this.advanceTableForm.patchValue({ contractCreatedByID: id }, { emitEvent: false });
+        },
       }
     );
   }
-  private _filterCreated(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.CreatedList.filter(
-      data => 
-      {
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-  };
-  OnCreateBySelect(selectedCreatedBy: string)
-  {
-    const CreatedByName = this.CreatedList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedCreatedBy
-    );
-    if (selectedCreatedBy) 
-    {
-      this.getCreatedID(CreatedByName.employeeID);
-    }
-  }
-  getCreatedID(employeeID: any)
-  {
-    this.contractCreatedByID = employeeID;
-  }
 
-  
-  //---------- Approved By ----------
-  approvedByValidator(ApprovedList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = ApprovedList.some(group => (group.firstName + ' ' + group.lastName).toLowerCase() === value);
-      return match ? null : { invalidApprovedBySelection: true };
-    };
-  }
-
-  InitApprovedBy()
-  {
-    this._generalService.GetEmployee().subscribe
-    (
-      data =>   
+  private patchApprovedByForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.contractApprovedByID,
+      this.advanceTableForm,
+      'contractApprovedByName',
       {
-        this.ApprovedList = data; 
-        this.advanceTableForm.controls['contractApprovedByName'].setValidators([Validators.required,this.approvedByValidator(this.ApprovedList)]);
-        this.advanceTableForm.controls['contractApprovedByName'].updateValueAndValidity();
-        this.filteredApprovedOptions = this.advanceTableForm.controls['contractApprovedByName'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterApproved(value || ''))
-        );
+        getEmployeeList: () => this.ApprovedList || [],
+        setEmployeeList: (list) => { this.ApprovedList = list; },
+        setFilteredOptions: (options) => { this.filteredApprovedOptions = options; },
+        onEmployeeId: (id) => {
+          this.contractApprovedByID = id;
+          this.advanceTableForm.patchValue({ contractApprovedByID: id }, { emitEvent: false });
+        },
       }
     );
   }
-  private _filterApproved(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.ApprovedList.filter(
-      data => 
-      {
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-  };
-  OnApprovedBySelect(selectedApprovedBy: string)
-  {
-    const ApprovedByName = this.ApprovedList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedApprovedBy
-    );
-    if (selectedApprovedBy) 
-    {
-      this.getApprovedID(ApprovedByName.employeeID);
-    }
+
+  InitCreatedByPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'contractCreatedByName', {
+      getEmployeeList: () => this.CreatedList || [],
+      setEmployeeList: (list) => { this.CreatedList = list; },
+      setFilteredOptions: (options) => { this.filteredCreatedOptions = options; },
+    });
   }
-  getApprovedID(employeeID: any) 
-  {
-    this.contractApprovedByID = employeeID;
+
+  InitApprovedByPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'contractApprovedByName', {
+      getEmployeeList: () => this.ApprovedList || [],
+      setEmployeeList: (list) => { this.ApprovedList = list; },
+      setFilteredOptions: (options) => { this.filteredApprovedOptions = options; },
+    });
+  }
+
+  OnCreateBySelect(selectedCreatedBy: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'contractCreatedByName',
+      selectedCreatedBy,
+      (id) => {
+        this.contractCreatedByID = id;
+        this.advanceTableForm.patchValue({ contractCreatedByID: id }, { emitEvent: false });
+      }
+    );
+  }
+
+  OnApprovedBySelect(selectedApprovedBy: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'contractApprovedByName',
+      selectedApprovedBy,
+      (id) => {
+        this.contractApprovedByID = id;
+        this.advanceTableForm.patchValue({ contractApprovedByID: id }, { emitEvent: false });
+      }
+    );
+  }
+
+  private prepareEmployeeFieldsForSave(raw: Record<string, unknown>): void {
+    coerceEmployeeFieldToApiString(raw, 'contractCreatedByName', this.CreatedList || []);
+    coerceEmployeeFieldToApiString(raw, 'contractApprovedByName', this.ApprovedList || []);
+    const created = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('contractCreatedByName')?.value,
+      this.CreatedList || []
+    );
+    const approved = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('contractApprovedByName')?.value,
+      this.ApprovedList || []
+    );
+    if (created?.employeeID) {
+      raw.contractCreatedByID = created.employeeID;
+    }
+    if (approved?.employeeID) {
+      raw.contractApprovedByID = approved.employeeID;
+    }
   }
 
   InitCurrencies() 
@@ -493,7 +512,9 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({modeOfPaymentID:this.modeOfPaymentID || this.advanceTable.modeOfPaymentID});
     this.advanceTableForm.patchValue({contractApprovedByID:this.contractApprovedByID || this.advanceTable.contractApprovedByID});
     this.advanceTableForm.patchValue({contractCreatedByID:this.contractCreatedByID || this.advanceTable.contractCreatedByID});
-    this.advanceTableService.add(this.advanceTableForm.getRawValue()).subscribe(
+    const raw = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldsForSave(raw);
+    this.advanceTableService.add(raw).subscribe(
     response => 
     {
       this.dialogRef.close();
@@ -514,7 +535,9 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({modeOfPaymentID:this.modeOfPaymentID || this.advanceTable.modeOfPaymentID});
     this.advanceTableForm.patchValue({contractApprovedByID:this.contractApprovedByID || this.advanceTable.contractApprovedByID});
     this.advanceTableForm.patchValue({contractCreatedByID:this.contractCreatedByID || this.advanceTable.contractCreatedByID});
-    this.advanceTableService.update(this.advanceTableForm.getRawValue()).subscribe(
+    const raw = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldsForSave(raw);
+    this.advanceTableService.update(raw).subscribe(
     response => 
     {
         this.dialogRef.close();

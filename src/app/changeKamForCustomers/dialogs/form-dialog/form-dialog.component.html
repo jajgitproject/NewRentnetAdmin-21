@@ -2,12 +2,10 @@
     <div class="modalHeader">
         <div class="editRowModal">
             <div class="modalHeader clearfix">
-                <!-- <img [src]='advanceTable.img' alt="avatar"> -->
                 <div class="modal-about" style="text-align: center;">
                     <div class="font-weight-bold p-t-5 font-17">
                         {{dialogTitle}}
                     </div>
-
                 </div>
             </div>
         </div>
@@ -19,45 +17,60 @@
         <form class="register-form m-4" [formGroup]="advanceTableForm" (ngSubmit)="submit">
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedOldKamExited()}">
                         <mat-label>Old KAM</mat-label>
-                        <input required type="text" matInput formControlName="oldCustomerkamEmployee" [matAutocomplete]="auto">
-                        <mat-autocomplete #auto="matAutocomplete"
-                            (optionSelected)="OnEmployeeSelect($event.option.value, 'oldKam')">
-                            <mat-option *ngFor="let option of filteredinstructedByOptionss | async"
-                                [value]="option.employeeFirstName +' '+option.employeeLastName"
-                                (click)="getemployeeIDTitles(option.employeeID)">
-                                {{option.employeeFirstName +' '+ option.employeeLastName}}
+                        <input required type="text" matInput formControlName="oldCustomerkamEmployee"
+                            [matAutocomplete]="autoOld" (keyup)="InitOldKamEmployee($event)">
+                        <mat-autocomplete #autoOld="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="displayEmployeeFn"
+                            (optionSelected)="OnOldKamSelected($event.option.value)">
+                            <mat-option *ngFor="let option of filteredinstructedByOptionss | async" [value]="option"
+                                [class.employee-dropdown-exited]="isEmployeeExited(option)">
+                                <span class="employee-dropdown-option-text"
+                                    [class.employee-dropdown-option-text-exited]="isEmployeeExited(option)">
+                                    {{ formatEmployeeDropdownLabel(option) }}
+                                </span>
                             </mat-option>
                         </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['oldCustomerkamEmployee']?.hasError('customerKamNameInvalid')">
-                            Please select a Old Kam
+                        <mat-error
+                            *ngIf="advanceTableForm.controls['oldCustomerkamEmployee']?.hasError('required') && advanceTableForm.controls['oldCustomerkamEmployee']?.touched">
+                            Old KAM is required
+                        </mat-error>
+                        <mat-error
+                            *ngIf="advanceTableForm.controls['oldCustomerkamEmployee']?.hasError('employeeNameInvalid') && advanceTableForm.controls['oldCustomerkamEmployee']?.touched">
+                            Please select an old KAM
                         </mat-error>
                     </mat-form-field>
-
                 </div>
-
-
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedNewKamExited()}">
                         <mat-label>New KAM</mat-label>
-                        <input required type="text" matInput formControlName="newCustomerkamEmployee" [matAutocomplete]="auto1">
-                        <mat-autocomplete #auto1="matAutocomplete"
-                            (optionSelected)="OnKamEmployeeSelect($event.option.value, 'newKam')">
-                            <mat-option *ngFor="let option of filteredinstructedByOptions | async"
-                                [value]="option.firstName +' '+option.lastName"
-                                (click)="getkamemployeeIDTitles(option.employeeID)">
-                                {{option.firstName +' '+ option.lastName}}
+                        <input required type="text" matInput formControlName="newCustomerkamEmployee"
+                            [matAutocomplete]="autoNew" (keyup)="InitNewKamEmployee($event)">
+                        <mat-autocomplete #autoNew="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="displayEmployeeFn"
+                            (optionSelected)="OnNewKamSelected($event.option.value)">
+                            <mat-option *ngFor="let option of filteredinstructedByOptions | async" [value]="option"
+                                [class.employee-dropdown-exited]="isEmployeeExited(option)">
+                                <span class="employee-dropdown-option-text"
+                                    [class.employee-dropdown-option-text-exited]="isEmployeeExited(option)">
+                                    {{ formatEmployeeDropdownLabel(option) }}
+                                </span>
                             </mat-option>
                         </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.controls['newCustomerkamEmployee'].hasError('employeeNameInvalid')">
-                            Please select a New Kam
+                        <mat-error
+                            *ngIf="advanceTableForm.controls['newCustomerkamEmployee']?.hasError('required') && advanceTableForm.controls['newCustomerkamEmployee']?.touched">
+                            New KAM is required
+                        </mat-error>
+                        <mat-error
+                            *ngIf="advanceTableForm.controls['newCustomerkamEmployee']?.hasError('employeeNameInvalid') && advanceTableForm.controls['newCustomerkamEmployee']?.touched">
+                            Please select a new KAM
                         </mat-error>
                     </mat-form-field>
-
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -66,14 +79,7 @@
                             (blur)="onBlurFromDate($event.target.value)">
                         <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
                         <mat-datepicker #fromDate></mat-datepicker>
-                        <mat-error *ngIf="advanceTableForm.get('newKAMActivationFromDate')?.hasError('required')">
-                            From Date is required
-                        </mat-error>
-                        <mat-error *ngIf="advanceTableForm.get('newKAMActivationFromDate')?.hasError('invalidDate')">
-                            Invalid date format. Use DD/MM/YYYY.
-                        </mat-error>
                     </mat-form-field>
-
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
@@ -82,25 +88,18 @@
                             <mat-option [value]=true>Active</mat-option>
                             <mat-option [value]=false>Deleted</mat-option>
                         </mat-select>
-
-                        <mat-error *ngIf="advanceTableForm.get('newKAMActivationStatus').hasError('required')">
-                            newKAM Activation Status is required
-                        </mat-error>
                     </mat-form-field>
                 </div>
-
             </div>
-
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" *ngIf="saveDisabled" type="button"
-                            [disabled]="!advanceTableForm.valid" (click)="confirmAdd()">Save</button>
-                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
-                        <button mat-raised-button color="warn" (click)="onNoClick(action)" tabindex="-1">{{ action ===
-                            'add' ? 'Reset' : 'Cancel'}}</button>
+                        <button mat-raised-button color="primary" type="button" [disabled]="!advanceTableForm.valid"
+                            (click)="confirmAdd()">Save</button>
+                        <button mat-raised-button color="warn" (click)="onNoClick(action)" type="button">Cancel</button>
                     </div>
                 </div>
             </div>
         </form>
     </div>
+</div>

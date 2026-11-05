@@ -182,9 +182,11 @@
                       <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
                           <mat-label>Booker Name</mat-label>
-                          <input type="text" matInput [formControl]="bookerName" [matAutocomplete]="autoBooker">
-                          <mat-autocomplete #autoBooker="matAutocomplete">
-                            <mat-option *ngFor="let option of filteredBookerOptions | async" [value]="option.customerPersonName">
+                          <input type="text" matInput [formControl]="bookerName" [matAutocomplete]="autoBooker"
+                            (keyup)="onBookerKeyup()">
+                          <mat-autocomplete #autoBooker="matAutocomplete" [displayWith]="displayBookerFn"
+                            (optionSelected)="onBookerSelected($event.option.value)">
+                            <mat-option *ngFor="let option of filteredBookerOptions | async" [value]="option">
                               {{ option.customerPersonName }}
                             </mat-option>
                           </mat-autocomplete>
@@ -192,12 +194,20 @@
                       </div>
 
                       <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
-                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic"
+                          [ngClass]="{'employee-dropdown-exited-selected': isSelectedSalesPersonExited()}">
                           <mat-label>Sales Person</mat-label>
-                          <input type="text" matInput [formControl]="salesPerson" [matAutocomplete]="autoSalesPerson">
-                          <mat-autocomplete #autoSalesPerson="matAutocomplete">
-                            <mat-option *ngFor="let option of filteredSalesPersonOptions | async" [value]="option.salesPerson">
-                              {{ option.salesPerson }}
+                          <input type="text" matInput [formControl]="salesPersonSearch.control" [matAutocomplete]="autoSalesPerson"
+                            (keyup)="salesPersonSearch.onKeyup()">
+                          <mat-autocomplete #autoSalesPerson="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="salesPersonSearch.displayEmployeeFn"
+                            (optionSelected)="salesPersonSearch.onSelected($event.option.value)">
+                            <mat-option *ngFor="let option of salesPersonSearch.filteredOptions | async" [value]="option"
+                              [class.employee-dropdown-exited]="salesPersonSearch.isEmployeeExited(option)">
+                              <span class="employee-dropdown-option-text"
+                                [class.employee-dropdown-option-text-exited]="salesPersonSearch.isEmployeeExited(option)">
+                                {{ salesPersonSearch.formatEmployeeDropdownLabel(option) }}
+                              </span>
                             </mat-option>
                           </mat-autocomplete>
                         </mat-form-field>

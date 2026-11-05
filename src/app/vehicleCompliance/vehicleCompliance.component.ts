@@ -27,6 +27,14 @@ interface VehicleComplianceRowDocumentSnapshot {
   documentExpiry: Date | null;
 }
 
+/** Upload metadata is display-only; never passed to form patchValue (action changes must not clear it). */
+interface VehicleComplianceRowUploadMeta {
+  documentUploadDate: string;
+  documentUploadTime: string;
+  documentUploadByID: number | null;
+  documentUploadBy: string;
+}
+
 @Component({
   standalone: false,
   selector: 'app-vehicle-compliance',
@@ -43,7 +51,8 @@ export class VehicleComplianceComponent implements OnInit {
   saveInProgress = false;
   imagePaths: string[] = [];
   imageBroken: boolean[] = [];
-  private rowSnapshots: VehicleComplianceRowDocumentSnapshot[] = [];
+  rowSnapshots: VehicleComplianceRowDocumentSnapshot[] = [];
+  rowUploadMeta: VehicleComplianceRowUploadMeta[] = [];
   private rowLastActions: string[] = [];
 
   summaryCards: { key: string; label: string; value: number; icon: string }[] = [];
@@ -87,6 +96,7 @@ export class VehicleComplianceComponent implements OnInit {
         this.summary = null;
         this.rows.clear();
         this.rowSnapshots = [];
+        this.rowUploadMeta = [];
         this.showNotification('snackbar-danger', 'Failed to load vehicle compliance.', 'bottom', 'center');
       }
     );
@@ -100,9 +110,11 @@ export class VehicleComplianceComponent implements OnInit {
     this.imagePaths = [];
     this.imageBroken = [];
     this.rowSnapshots = [];
+    this.rowUploadMeta = [];
     this.rowLastActions = [];
     page.rows.forEach((row, index) => {
       this.rowSnapshots.push(this.snapshotFromRow(row));
+      this.rowUploadMeta.push(this.uploadMetaFromRow(row));
       this.rowLastActions.push(VehicleComplianceActions.doNotAddInfo);
       this.rows.push(this.createRowGroup(row));
       this.imagePaths[index] = row.documentImage || '';
@@ -161,7 +173,45 @@ export class VehicleComplianceComponent implements OnInit {
       verifiedBy: [row.verifiedBy ?? ''],
       verificationRemark: [row.verificationRemark ?? ''],
       verificationDate: [row.verificationDate ?? ''],
+      verificationTime: [row.verificationTime ?? ''],
     });
+  }
+
+  hasDocumentUploadMetadata(row: FormGroup): boolean {
+    return !!row.get('hasApplicableRecord')?.value;
+  }
+
+  documentUploadDateDisplay(index: number): string {
+    const meta = this.rowUploadMeta[index];
+    return meta?.documentUploadDate?.trim() || '';
+  }
+
+  documentUploadTimeDisplay(index: number): string {
+    const meta = this.rowUploadMeta[index];
+    return meta?.documentUploadTime?.trim() || '';
+  }
+
+  documentUploadByDisplay(index: number): string {
+    const meta = this.rowUploadMeta[index];
+    if (!meta) {
+      return '';
+    }
+    const name = (meta.documentUploadBy || '').trim();
+    if (name) {
+      return name;
+    }
+    if (meta.documentUploadByID != null && meta.documentUploadByID > 0) {
+      return String(meta.documentUploadByID);
+    }
+    return '';
+  }
+
+  hasAnyUploadDetail(index: number): boolean {
+    return !!(
+      this.documentUploadDateDisplay(index) ||
+      this.documentUploadTimeDisplay(index) ||
+      this.documentUploadByDisplay(index)
+    );
   }
 
   onActionChange(index: number): void {
@@ -214,6 +264,15 @@ export class VehicleComplianceComponent implements OnInit {
     };
   }
 
+  private uploadMetaFromRow(row: any): VehicleComplianceRowUploadMeta {
+    return {
+      documentUploadDate: row.documentUploadDate ?? '',
+      documentUploadTime: row.documentUploadTime ?? '',
+      documentUploadByID: row.documentUploadByID ?? null,
+      documentUploadBy: row.documentUploadBy ?? '',
+    };
+  }
+
   private getEmptyAddPatch(): VehicleComplianceRowDocumentSnapshot {
     return {
       inventoryDocumentID: -1,
@@ -223,6 +282,20 @@ export class VehicleComplianceComponent implements OnInit {
       documentImageNonAvailabilityReason: '',
       documentStartDate: null,
       documentExpiry: null,
+    };
+  }
+
+  private formPatchFromSnapshot(
+    patch: VehicleComplianceRowDocumentSnapshot
+  ): Record<string, unknown> {
+    return {
+      inventoryDocumentID: patch.inventoryDocumentID,
+      documentNumber: patch.documentNumber,
+      documentIssuingAuthority: patch.documentIssuingAuthority,
+      documentImage: patch.documentImage,
+      documentImageNonAvailabilityReason: patch.documentImageNonAvailabilityReason,
+      documentStartDate: patch.documentStartDate,
+      documentExpiry: patch.documentExpiry,
     };
   }
 
@@ -272,7 +345,7 @@ export class VehicleComplianceComponent implements OnInit {
     patch: VehicleComplianceRowDocumentSnapshot
   ): void {
     const group = this.rows.at(index) as FormGroup;
-    group.patchValue(patch, { emitEvent: false });
+    group.patchValue(this.formPatchFromSnapshot(patch), { emitEvent: false });
     this.imagePaths[index] = patch.documentImage || '';
     this.imageBroken[index] = false;
   }
@@ -437,6 +510,22 @@ export class VehicleComplianceComponent implements OnInit {
 
   qcStatusLabel(row: FormGroup): string {
     return this.qcStatusText(this.qcStatusKey(row));
+  }
+
+  qcVerificationTooltip(row: FormGroup): string {
+    const key = this.qcStatusKey(row);
+    if (key === 'na') {
+      return 'No applicable document';
+    }
+    const date = (row.get('verificationDate')?.value || '').toString().trim();
+    const time = (row.get('verificationTime')?.value || '').toString().trim();
+    const verifier = (row.get('verifiedBy')?.value || '').toString().trim();
+    return [
+      `Verification status: ${this.qcStatusText(key)}`,
+      `Verifier name: ${verifier || '—'}`,
+      `Date: ${date || '—'}`,
+      `Time: ${time || '—'}`,
+    ].join('\n');
   }
 
   qcStatusIcon(row: FormGroup): string {

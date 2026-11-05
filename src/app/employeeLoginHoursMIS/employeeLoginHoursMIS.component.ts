@@ -20,6 +20,8 @@ import { EmployeeDropDown } from '../employee/employeeDropDown.model';
 import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/organizationalEntityDropDown.model';
 
 import { EmployeeLoginHoursMISService } from './employeeLoginHoursMIS.service';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
+import { isEmployeeDropdownSelection } from '../shared/customer-employee-autocomplete';
 
 
 
@@ -96,8 +98,10 @@ export class EmployeeLoginHoursMISComponent implements OnInit {
 
     private generalService: GeneralService,
 
-  ) {}
-
+  ) {
+    this.employeeNameSearch = new EmployeePrefixSearchField(this.generalService);
+    this.employeeNameCtrl = this.employeeNameSearch.control;
+  }
 
 
   ngOnInit(): void {
@@ -156,7 +160,7 @@ export class EmployeeLoginHoursMISComponent implements OnInit {
     this.selectedEmployeeId = null;
     this.selectedLocationId = null;
     this.employeeNameCtrl.setValue('');
-    this.employeeMobileCtrl.setValue('');
+    this.employeeNameSearch.reset();
     this.employeeLocationCtrl.setValue('');
     this.loginStatusFilter = 'all';
     this.groupBy = 'day';
@@ -348,14 +352,6 @@ export class EmployeeLoginHoursMISComponent implements OnInit {
 
           startWith(''),
 
-          map((value) => this.filterByName(value || '')),
-
-        );
-
-        this.filteredMobileOptions = this.employeeMobileCtrl.valueChanges.pipe(
-
-          startWith(''),
-
           map((value) => this.filterByMobile(value || '')),
 
         );
@@ -438,13 +434,16 @@ export class EmployeeLoginHoursMISComponent implements OnInit {
 
     this.selectedEmployeeId = this.getEmployeeId(employee);
 
-    this.employeeNameCtrl.setValue(this.fullName(employee), { emitEvent: false });
+    this.employeeNameSearch.onSelected(employee);
 
     this.employeeMobileCtrl.setValue(this.getMobile(employee), { emitEvent: false });
 
   }
 
-
+  isSelectedNameEmployeeExited(): boolean {
+    const raw = this.employeeNameSearch.control.value;
+    return isEmployeeDropdownSelection(raw) && this.employeeNameSearch.isEmployeeExited(raw);
+  }
 
   onMobileSelected(employee: EmployeeDropDown): void {
 
@@ -551,9 +550,17 @@ export class EmployeeLoginHoursMISComponent implements OnInit {
       };
     }
 
+    const nameRaw = this.employeeNameSearch.control.value;
+    let employeeName = this.employeeNameSearch.apiSearchName || '';
+    if (!employeeName && typeof nameRaw === 'string') {
+      employeeName = nameRaw.trim();
+    }
+    if (!employeeName && isEmployeeDropdownSelection(nameRaw)) {
+      employeeName = this.fullName(nameRaw);
+    }
     return {
       employeeId: '',
-      employeeName: (this.employeeNameCtrl.value || '').trim(),
+      employeeName,
       employeeMobile: (this.employeeMobileCtrl.value || '').trim(),
       ...base,
     };

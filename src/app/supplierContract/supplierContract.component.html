@@ -81,14 +81,20 @@
                                                     </mat-autocomplete>
                                                   </mat-form-field> -->
 
-                                                  <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                                  <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                                                    [ngClass]="{'employee-dropdown-exited-selected': isSelectedApprovedByFilterExited()}">
                                                     <mat-label>Approved By</mat-label>
-                                                    <input type="text" matInput  [formControl]="approvedBy"
-                                                     [matAutocomplete]="auto1">
-                                                    <mat-autocomplete #auto1="matAutocomplete">
-                                                        <mat-option *ngFor="let option of filteredinstructedByOptionss | async" 
-                                                        [value]="option.firstName +' '+option.lastName">
-                                                          {{option.firstName +' '+ option.lastName}}
+                                                    <input type="text" matInput [formControl]="approvedBy"
+                                                     [matAutocomplete]="auto1" (keyup)="approvedByEmployeeSearch.onKeyup()">
+                                                    <mat-autocomplete #auto1="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                                                        [displayWith]="approvedByEmployeeSearch.displayEmployeeFn"
+                                                        (optionSelected)="approvedByEmployeeSearch.onSelected($event.option.value)">
+                                                        <mat-option *ngFor="let option of approvedByEmployeeSearch.filteredOptions | async" [value]="option"
+                                                            [class.employee-dropdown-exited]="approvedByEmployeeSearch.isEmployeeExited(option)">
+                                                            <span class="employee-dropdown-option-text"
+                                                                [class.employee-dropdown-option-text-exited]="approvedByEmployeeSearch.isEmployeeExited(option)">
+                                                                {{ approvedByEmployeeSearch.formatEmployeeDropdownLabel(option) }}
+                                                            </span>
                                                         </mat-option>
                                                     </mat-autocomplete>
                                                   </mat-form-field>

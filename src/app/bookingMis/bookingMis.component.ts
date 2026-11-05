@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { provideMomentDateAdapter } from '@angular/material-moment-adapter';
 import moment from 'moment';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { GeneralService } from '../general/general.service';
 import { SearchCriteria } from './bookingMis.model';
@@ -20,7 +20,7 @@ import { OrganizationalEntityDropDown } from '../organizationalEntity/organizati
 import { CustomerPersonDetailsDropDown } from '../passengerDetails/customerPersonDetailsDropDown.model';
 import { GeoPointTypeDropDown } from '../geoPointType/geoPointTypeDropDown.model';
 import { StatesDropDown } from '../organizationalEntity/stateDropDown.model';
-import { SalesPersonModel } from '../bookingBackupMIS/bookingBackupMIS.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 
 const BOOKING_MIS_DATE_FORMATS = {
   parse: {
@@ -64,7 +64,8 @@ export class BookingMisComponent implements OnInit, OnDestroy {
   city: FormControl = new FormControl();
   guestName: FormControl = new FormControl();
   bookerName: FormControl = new FormControl();
-  salesPerson: FormControl = new FormControl();
+  salesPersonSearch: EmployeePrefixSearchField;
+  salesPerson: FormControl;
   pickupDetail: FormControl = new FormControl();
   pickupSubDetail: FormControl = new FormControl();
 
@@ -89,7 +90,6 @@ export class BookingMisComponent implements OnInit, OnDestroy {
   CityList: CityDropDown[] = [];
   CustomerPersonList: CustomerPersonDetailsDropDown[] = [];
   BookerList: CustomerPersonDetailsDropDown[] = [];
-  SalesPersonList: SalesPersonModel[] = [];
   GeoPointTypeList: GeoPointTypeDropDown[] = [];
   PickupSpotList: StatesDropDown[] = [];
 
@@ -100,8 +100,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
   filteredCustomerLocationOptions: Observable<OrganizationalEntityDropDown[]>;
   filteredCityOptions: Observable<CityDropDown[]>;
   filteredCustomerPersonOptions: Observable<CustomerPersonDetailsDropDown[]>;
-  filteredBookerOptions: Observable<CustomerPersonDetailsDropDown[]>;
-  filteredSalesPersonOptions: Observable<SalesPersonModel[]>;
+  filteredBookerOptions: Observable<CustomerPersonDetailsDropDown[]> = of([]);
   filteredGeoPointTypeOptions: Observable<GeoPointTypeDropDown[]>;
   filteredPickupSpotOptions: Observable<StatesDropDown[]>;
 
@@ -109,15 +108,16 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     public generalService: GeneralService,
     public bookingMisService: BookingMisService
-  ) {}
+  ) {
+    this.salesPersonSearch = new EmployeePrefixSearchField(this.generalService);
+    this.salesPerson = this.salesPersonSearch.control;
+  }
 
   ngOnInit() {
     this.InitPaymentMode();
     this.initCustomerGroup();
     this.initCustomer();
-    this.InitBooker();
     this.initCity();
-    this.InitSalesPerson();
     this.InitGuestDetails();
     this.initCustomerLocation();
     this.initServiceLocation();
@@ -134,8 +134,10 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     this.modeOfPayment.setValue('');
     this.customer.setValue('');
     this.customerGroup.setValue('');
-    this.salesPerson.setValue('');
+    this.salesPersonSearch.reset();
     this.bookerName.setValue('');
+    this.BookerList = [];
+    this.filteredBookerOptions = of([]);
     this.city.setValue('');
     this.guestName.setValue('');
     this.pickupSubDetail.setValue('');
@@ -176,7 +178,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
         this.searchCancellationTo !== '' ? moment(this.searchCancellationTo).format('MMM DD yyyy') : '',
       SearchBookingDateFrom: formatMisSearchDateForApi(this.searchBookingDateFrom),
       SearchBookingDateTo: formatMisSearchDateForApi(this.searchBookingDateTo),
-      SearchSalesPerson: this.salesPerson?.value || '',
+      SearchSalesPerson: this.getSalesPersonFilter(),
       SearchDispatchStatus: this.searchDispatchStatus || '',
       SearchBookingStatus: this.searchBookingStatus || '',
       SearchCustomerLocation: this.customerLocation?.value || '',
@@ -184,7 +186,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
       SearchPickupDetail: this.pickupDetail?.value || '',
       SearchPickupSubDetail: this.pickupSubDetail?.value || '',
       SearchCustomerGroup: this.customerGroup?.value || '',
-      SearchBookerName: this.bookerName?.value || ''
+      SearchBookerName: this.getBookerFilter()
     };
   }
 
@@ -332,6 +334,10 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     return exportSearchButtonLabel(this.exportJobStatus, this.isExportJobInProgress());
   }
 
+  hasDutySlipIdSearch(): boolean {
+    return this.isSearchValueSet(this.searchDutySlip);
+  }
+
   validateSearchDateRanges(): string | null {
     const hasPickupFrom = this.isSearchValueSet(this.searchFromDate);
     const hasPickupTo = this.isSearchValueSet(this.searchToDate);
@@ -339,6 +345,25 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     const hasBookingTo = this.isSearchValueSet(this.searchBookingDateTo);
     const hasPickupRange = hasPickupFrom && hasPickupTo;
     const hasBookingRange = hasBookingFrom && hasBookingTo;
+    const hasDutySlipSearch = this.hasDutySlipIdSearch();
+
+    if (hasDutySlipSearch) {
+      if (hasBookingFrom !== hasBookingTo) {
+        return 'Please select both Booking Date From and Booking Date To.';
+      }
+      if (hasBookingRange) {
+        const bookingError = this.validateDatePair(
+          this.searchBookingDateFrom,
+          this.searchBookingDateTo,
+          'Booking date',
+          false
+        );
+        if (bookingError) {
+          return bookingError;
+        }
+      }
+      return null;
+    }
 
     if (hasPickupFrom !== hasPickupTo) {
       return 'Please select both Pickup Date From and Pickup Date To.';
@@ -421,7 +446,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
       this.isSearchValueSet(this.searchCancellationTo) ||
       this.isSearchValueSet(this.searchFromDate) ||
       this.isSearchValueSet(this.searchToDate) ||
-      this.isSearchValueSet(this.salesPerson?.value) ||
+      this.isSearchValueSet(this.getSalesPersonFilter()) ||
       this.isSearchValueSet(this.searchDispatchStatus) ||
       this.isSearchValueSet(this.searchBookingStatus) ||
       this.isSearchValueSet(this.customerLocation?.value) ||
@@ -446,7 +471,7 @@ export class BookingMisComponent implements OnInit, OnDestroy {
       this.isSearchValueSet(this.searchCancellationTo) ||
       this.isSearchValueSet(this.searchBookingDateFrom) ||
       this.isSearchValueSet(this.searchBookingDateTo) ||
-      this.isSearchValueSet(this.salesPerson?.value) ||
+      this.isSearchValueSet(this.getSalesPersonFilter()) ||
       this.isSearchValueSet(this.searchDispatchStatus) ||
       this.isSearchValueSet(this.searchBookingStatus) ||
       this.isSearchValueSet(this.customerLocation?.value) ||
@@ -658,24 +683,62 @@ export class BookingMisComponent implements OnInit, OnDestroy {
     });
   }
 
-  private InitSalesPerson() {
-    this.generalService.GetSalesPersonForBookingMIS().subscribe((data) => {
-      this.SalesPersonList = data || [];
-      this.filteredSalesPersonOptions = this.salesPerson.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.SalesPersonList, value, 'salesPerson'))
-      );
+  private getSalesPersonFilter(): string {
+    if (this.salesPersonSearch.apiSearchName) {
+      return this.salesPersonSearch.apiSearchName;
+    }
+    const raw = this.salesPersonSearch.control.value;
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    return this.salesPersonSearch.formatEmployeeDropdownLabel(raw).split(' - ')[0]?.trim() || '';
+  }
+
+  isSelectedSalesPersonExited(): boolean {
+    const raw = this.salesPersonSearch.control.value;
+    return raw && typeof raw === 'object' && this.salesPersonSearch.isEmployeeExited(raw);
+  }
+
+  displayBookerFn = (value: CustomerPersonDetailsDropDown | string | null): string => {
+    if (value == null) {
+      return '';
+    }
+    return typeof value === 'string' ? value : value.customerPersonName || '';
+  };
+
+  onBookerKeyup(): void {
+    const raw = this.bookerName.value;
+    const prefix = typeof raw === 'string' ? raw.trim() : this.displayBookerFn(raw);
+    const minLen = this.generalService.lengthToCheck || 3;
+    if (prefix.length < minLen) {
+      this.BookerList = [];
+      this.filteredBookerOptions = of([]);
+      return;
+    }
+    this.generalService.GetBookerDropDownForControlPanel(prefix).subscribe((data) => {
+      const current = this.bookerName.value;
+      const currentPrefix = typeof current === 'string' ? current.trim() : this.displayBookerFn(current);
+      if (currentPrefix !== prefix) {
+        return;
+      }
+      this.BookerList = data || [];
+      this.filteredBookerOptions = of(this.BookerList);
     });
   }
 
-  private InitBooker() {
-    this.generalService.getCustomerPersonDetails().subscribe((data) => {
-      this.BookerList = data || [];
-      this.filteredBookerOptions = this.bookerName.valueChanges.pipe(
-        startWith(''),
-        map((value) => this.filterList(this.BookerList, value, 'customerPersonName'))
-      );
-    });
+  onBookerSelected(person: CustomerPersonDetailsDropDown): void {
+    if (!person?.customerPersonName) {
+      return;
+    }
+    this.bookerName.setValue(person.customerPersonName, { emitEvent: false });
+  }
+
+  private getBookerFilter(): string {
+    const raw = this.bookerName.value;
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    return this.displayBookerFn(raw);
   }
 
   private InitGuestDetails() {

@@ -1,0 +1,196 @@
+<section class="content vehicle-compliance-page">
+    <div class="container-fluid">
+        <div class="block-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <ul>
+                        <li class="breadcrumb-item bcrumb-1">
+                            <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+                            <a href="#" onClick="return false;">Admin</a>|
+                            <a href="#" onClick="return false;">Driver Compliance</a>
+                        </li>
+                    </ul>
+                    <ul class="breadcrumb breadcrumb-style">
+                        <li class="breadcrumb-item">
+                            <h2>Driver Compliance for <strong>{{ driverName }}</strong></h2>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="vc-summary-strip" *ngIf="summaryCards?.length" role="list" aria-label="Compliance summary">
+            <article class="vc-summary-card" *ngFor="let card of summaryCards"
+                [ngClass]="'vc-summary-card--' + card.key" role="listitem"
+                [matTooltip]="card.label + ': ' + card.value">
+                <mat-icon class="vc-summary-card__icon" aria-hidden="true">{{ card.icon }}</mat-icon>
+                <div class="vc-summary-card__body">
+                    <span class="vc-summary-card__value">{{ card.value }}</span>
+                    <span class="vc-summary-card__label">{{ card.label }}</span>
+                </div>
+            </article>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="toolbar-row mb-3">
+                            <button mat-raised-button color="primary" (click)="loadPage()">Refresh</button>
+                            <button mat-raised-button color="accent" (click)="saveAll()" [disabled]="saveInProgress">
+                                Save all
+                            </button>
+                            <mat-spinner *ngIf="saveInProgress" diameter="28"></mat-spinner>
+                        </div>
+
+                        <p *ngIf="!page?.rows?.length" class="alert alert-primary text-center">
+                            No driver documents are configured in the Document master.
+                        </p>
+
+                        <form [formGroup]="complianceForm" *ngIf="rows?.length">
+                            <div class="scrollable-table-container">
+                                <table class="table table-bordered compliance-grid">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-action">Action</th>
+                                            <th class="col-document">Document</th>
+                                            <th class="col-qc">QC</th>
+                                            <th class="th-wrap col-number">
+                                                <span class="th-wrap-line">Document</span>
+                                                <span class="th-wrap-line">Number</span>
+                                            </th>
+                                            <th class="th-wrap col-date">
+                                                <span class="th-wrap-line">Start</span>
+                                                <span class="th-wrap-line">Date</span>
+                                            </th>
+                                            <th class="th-wrap col-date">
+                                                <span class="th-wrap-line">Expiry</span>
+                                                <span class="th-wrap-line">Date</span>
+                                            </th>
+                                            <th class="col-image">Image</th>
+                                            <th class="th-wrap col-reason">
+                                                <span class="th-wrap-line">Reason of non availability</span>
+                                                <span class="th-wrap-line">of image</span>
+                                            </th>
+                                            <th class="th-wrap col-issuing">
+                                                <span class="th-wrap-line">Issuing</span>
+                                                <span class="th-wrap-line">Authority</span>
+                                            </th>
+                                            <th class="th-wrap col-upload">
+                                                <span class="th-wrap-line th-wrap-line--compact">Upload Date</span>
+                                                <span class="th-wrap-line th-wrap-line--compact">Upload Time</span>
+                                                <span class="th-wrap-line th-wrap-line--compact">Uploaded By</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody formArrayName="rows">
+                                        <tr *ngFor="let row of rows.controls; let i = index" [formGroupName]="i">
+                                            <td class="cell-action">
+                                                <mat-form-field appearance="outline" class="field-fit field-action">
+                                                    <mat-select formControlName="action"
+                                                        panelClass="vc-action-select-panel"
+                                                        [panelWidth]="null"
+                                                        (selectionChange)="onActionChange(i)">
+                                                        <mat-option *ngFor="let opt of actionOptions" [value]="opt.value"
+                                                            [disabled]="isActionOptionDisabled(opt.value, row)">
+                                                            {{ opt.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="cell-document cell-wrap-text">
+                                                <span class="cell-wrap-text__inner">{{ row.get('documentName')?.value }}<span *ngIf="row.get('isMandatory')?.value" class="mandatory-mark">*</span></span>
+                                            </td>
+                                            <td class="cell-qc">
+                                                <mat-icon [matTooltip]="qcVerificationTooltip(row)"
+                                                    matTooltipClass="vc-qc-tooltip"
+                                                    matTooltipPosition="above"
+                                                    [ngClass]="qcStatusClass(row)">{{ qcStatusIcon(row) }}</mat-icon>
+                                            </td>
+                                            <td class="cell-text cell-number">
+                                                <mat-form-field appearance="outline" class="field-fit field-text">
+                                                    <input matInput formControlName="documentNumber" maxlength="50">
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="cell-date">
+                                                <mat-form-field appearance="outline" class="field-fit field-date">
+                                                    <input matInput placeholder="DD/MM/YYYY"
+                                                        [matDatepicker]="startPicker" formControlName="documentStartDate">
+                                                    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                                                    <mat-datepicker #startPicker></mat-datepicker>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="cell-date">
+                                                <mat-form-field appearance="outline" class="field-fit field-date">
+                                                    <input matInput placeholder="DD/MM/YYYY"
+                                                        [matDatepicker]="expiryPicker" formControlName="documentExpiry">
+                                                    <mat-datepicker-toggle matSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                                                    <mat-datepicker #expiryPicker></mat-datepicker>
+                                                    <mat-error *ngIf="row.get('documentExpiry')?.hasError('required')">
+                                                        Required
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="image-cell">
+                                                <button type="button" class="doc-image-thumb"
+                                                    *ngIf="hasDocumentImage(i)"
+                                                    [matTooltip]="isDocumentImageBroken(i) ? 'Image unavailable' : 'View full image'"
+                                                    (click)="openImagePreview(i, row)">
+                                                    <img *ngIf="!isDocumentImageBroken(i)"
+                                                        [src]="imagePaths[i]"
+                                                        alt="Document image"
+                                                        class="doc-image-thumb__img"
+                                                        (load)="onDocumentImageLoad(i)"
+                                                        (error)="onDocumentImageError(i)" />
+                                                    <span *ngIf="isDocumentImageBroken(i)" class="doc-image-thumb__fallback"
+                                                        aria-label="Image unavailable">
+                                                        <mat-icon>image_not_supported</mat-icon>
+                                                    </span>
+                                                </button>
+                                                <app-myupload buttonText="Upload" [compact]="true"
+                                                    (onUploadFinished)="uploadFinished(i, $event)"></app-myupload>
+                                            </td>
+                                            <td class="cell-text cell-reason">
+                                                <mat-form-field appearance="outline"
+                                                    class="field-fit field-text field-reason">
+                                                    <textarea matInput rows="3"
+                                                        formControlName="documentImageNonAvailabilityReason"
+                                                        (input)="onReasonChange(i)"></textarea>
+                                                    <mat-error *ngIf="row.get('documentImageNonAvailabilityReason')?.hasError('required')">
+                                                        Required when image is not available
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="cell-text cell-issuing">
+                                                <mat-form-field appearance="outline" class="field-fit field-text">
+                                                    <input matInput formControlName="documentIssuingAuthority" maxlength="50">
+                                                </mat-form-field>
+                                            </td>
+                                            <td class="cell-upload-meta cell-wrap-text">
+                                                <div *ngIf="hasDocumentUploadMetadata(row) && hasAnyUploadDetail(i)"
+                                                    class="upload-meta-block">
+                                                    <span *ngIf="documentUploadDateDisplay(i)"
+                                                        class="upload-meta-text upload-meta-line cell-wrap-text__inner">
+                                                        {{ documentUploadDateDisplay(i) }}
+                                                    </span>
+                                                    <span *ngIf="documentUploadTimeDisplay(i)"
+                                                        class="upload-meta-text upload-meta-line cell-wrap-text__inner">
+                                                        {{ documentUploadTimeDisplay(i) }}
+                                                    </span>
+                                                    <span *ngIf="documentUploadByDisplay(i)"
+                                                        class="upload-meta-text upload-meta-line cell-wrap-text__inner">
+                                                        {{ documentUploadByDisplay(i) }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -175,8 +175,19 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     this.loadData();
   }
 
+  isDutySlipIdSearchActive(): boolean {
+    const value = String(this.searchDutySlipID ?? '').trim();
+    if (!value) {
+      return false;
+    }
+    return value.split(',').some((part) => {
+      const id = parseInt(part.trim(), 10);
+      return !isNaN(id) && id > 0;
+    });
+  }
+
   public SearchData() {
-    if (!this.searchFromDate || !this.searchToDate) {
+    if (!this.isDutySlipIdSearchActive() && (!this.searchFromDate || !this.searchToDate)) {
       this.showNotification('snackbar-danger', 'From Date and To Date are required.', 'bottom', 'center');
       return;
     }
@@ -224,10 +235,10 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
   }
 
   public loadData() {
-    const fromDate = this.formatSearchDate(this.searchFromDate);
-    const toDate = this.formatSearchDate(this.searchToDate);
+    const fromDate = this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchFromDate);
+    const toDate = this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchToDate);
 
-    if (!fromDate || !toDate) {
+    if (!this.isDutySlipIdSearchActive() && (!fromDate || !toDate)) {
       return;
     }
 
@@ -581,8 +592,8 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       this.searchDutySlipID,
       this.getSelectedCustomerId(),
       this.searchIsAllotted,
-      this.formatSearchDate(this.searchFromDate),
-      this.formatSearchDate(this.searchToDate),
+      this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchFromDate),
+      this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchToDate),
       this.PageNumber,
       coloumName.active,
       this.sortType

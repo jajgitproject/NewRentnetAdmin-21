@@ -35,6 +35,12 @@ import { CityDropDown } from '../city/cityDropDown.model';
 import { LocationGroupDropDown } from '../locationGroup/locationGroupDropDown.model';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
+import {
+  formatEmployeeDropdownLabel,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+} from '../shared/customer-employee-autocomplete';
 @Component({
   standalone: false,
   selector: 'app-dutyRegister',
@@ -151,8 +157,11 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   filteredBranchOptions: Observable<OrganizationalEntityDropDown[]>;
 
   public KAMList?: EmployeeDropDown[] = [];
-  SearchKAM: FormControl = new FormControl();
+  kamEmployeeSearch: EmployeePrefixSearchField;
+  SearchKAM: FormControl;
   filteredKAMOptions: Observable<EmployeeDropDown[]>;
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
 
   public CustomerPersonList?: CustomerPersonDetailsDropDown[] = [];
   SearchCustomerPerson: FormControl = new FormControl();
@@ -287,6 +296,8 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.UserID = this._generalService.getUserID();
     this.IsKAMRole = localStorage.getItem('isThisAKeyAccountManagerRole') === 'true';
     console.log("UserID: ", this.UserID,this.IsKAMRole);
+    this.kamEmployeeSearch = new EmployeePrefixSearchField(this._generalService);
+    this.SearchKAM = this.kamEmployeeSearch.control;
   }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -318,7 +329,6 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.InitLocationGroup();
     this.InitCities();
     this.InitBranch();
-    this.InitKAM();
     this.resumeExportJobIfNeeded();
     //this.SubscribeUpdateService();
   }
@@ -335,7 +345,8 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.SearchCustomerGroup.setValue('');
     this.SearchCustomer.setValue('');
     this.SearchBranch.setValue('');
-    this.SearchKAM.setValue('');
+    this.kamEmployeeSearch.reset();
+    this.SearchKAMID = 0;
     this.SearchCustomerPerson.setValue('');
     this.SearchDutyType.setValue('');
     this.SearchFeedbackDate = '';
@@ -858,6 +869,10 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   }
 
   validatePickupDateRange(): string | null {
+    if (this.isDutySlipIdSearchActive()) {
+      return null;
+    }
+
     if (!this.SearchFromDate || !this.SearchToDate) {
       return 'Pickup date range is required. Please select From and To dates.';
     }
@@ -898,7 +913,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       SearchCustomerGroup: this.SearchCustomerGroup?.value || "",
       SearchCustomer: this.SearchCustomer?.value || "",
       SearchBranch: this.SearchBranch?.value || "",
-      SearchKAM: this.SearchKAM?.value || "",
+      SearchKAM: this.getKamFilterName(),
       SearchBranchID: this.SearchBranchID,
       SearchKAMID: this.SearchKAMID,
       SearchCustomerPersonName: this.SearchCustomerPerson?.value || "",
@@ -911,8 +926,8 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
       SearchSupplierType: this.SearchSupplierType?.value || "",
       SearchSupplier: (this.SearchSupplierID || 0) > 0 ? "" : this.resolveSupplierSearchValue(),
       SearchSupplierID: (this.SearchSupplier?.value || '').toString().trim() ? (this.SearchSupplierID || 0) : 0,
-      SearchFromDate: this.SearchFromDate ?? "",
-      SearchToDate: this.SearchToDate ?? "",
+      SearchFromDate: this.isDutySlipIdSearchActive() ? '' : (this.SearchFromDate ?? ''),
+      SearchToDate: this.isDutySlipIdSearchActive() ? '' : (this.SearchToDate ?? ''),
       SearchSalesPersonName: this.SearchSalesPerson?.value || "",
       SearchCarSent: this.SearchCarSend?.value || "",
       SearchCarBook: this.SearchCarBooked?.value || "",
@@ -1094,39 +1109,35 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
   }
 
   //----------KAM----------
-  InitKAM()
-  {
-    this._generalService.GetEmployee().subscribe(
-    data=>
-    {
-      this.KAMList = data;
-      this.filteredKAMOptions =this.SearchKAM.valueChanges.pipe(
-      startWith(""),
-      map(value => this._filterKAM(value || ''))
-      ); 
-    });
-  }
-  private _filterKAM(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (!value || value.length < 0)
-     {
-        return [];   
-      }
-    return this.KAMList.filter(
-      data => 
-      {
-        return data.firstName.toLowerCase().indexOf(filterValue)===0 || data.lastName.toLowerCase().indexOf(filterValue)===0;
-      });
+  private getKamFilterName(): string {
+    if (this.kamEmployeeSearch.apiSearchName) {
+      return this.kamEmployeeSearch.apiSearchName;
+    }
+    const raw = this.SearchKAM?.value;
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    if (isEmployeeDropdownSelection(raw)) {
+      return `${raw.firstName || ''} ${raw.lastName || ''}`.trim();
+    }
+    return '';
   }
 
-  OnKAMSelected(selectedName: string) {
-    const selectedSL = this.KAMList.find(
-      data => data.firstName + ' ' + data.lastName === selectedName
-    );
-  
-    if (selectedSL) {
-      this.getKAMID(selectedSL.employeeID);
+  isSelectedKamExited(): boolean {
+    const raw = this.kamEmployeeSearch.control.value;
+    return isEmployeeDropdownSelection(raw) && this.kamEmployeeSearch.isEmployeeExited(raw);
+  }
+
+  OnKAMSelected(selected: EmployeeDropDown): void {
+    if (!selected?.employeeID) {
+      return;
     }
+    this.kamEmployeeSearch.onSelected(selected);
+    this.getKAMID(selected.employeeID);
+  }
+
+  onKamInput(): void {
+    this.SearchKAMID = 0;
   }
 
   getKAMID(KAMID: any) {

@@ -23,7 +23,7 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import moment from 'moment';
-import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 @Component({
   standalone: false,
   selector: 'app-customerCollectionExecutive',
@@ -77,7 +77,7 @@ export class CustomerCollectionExecutiveComponent implements OnInit {
 
   SearchEndDate: string = '';
   endingDate : FormControl = new FormControl();
-  public EmployeeList?: EmployeeDropDown[] = [];
+  employeeSearch: EmployeePrefixSearchField;
   constructor(
     public route:ActivatedRoute,
     public httpClient: HttpClient,
@@ -86,7 +86,9 @@ export class CustomerCollectionExecutiveComponent implements OnInit {
     public customerCollectionExecutiveService: CustomerCollectionExecutiveService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) {}
+  ) {
+    this.employeeSearch = new EmployeePrefixSearchField(this._generalService);
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -94,26 +96,94 @@ export class CustomerCollectionExecutiveComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    this.route.queryParams.subscribe(paramsData =>{
-      const encryptedCustomerID = paramsData.CustomerID;
-    const encryptedCustomerName = paramsData.CustomerName;
-    
-    if (encryptedCustomerID && encryptedCustomerName) {
-      
-        this.customer_ID = this._generalService.decrypt(decodeURIComponent(encryptedCustomerID));
-        this.customer_Name = this._generalService.decrypt(decodeURIComponent(encryptedCustomerName));
-      }
-      
-    });
+    this.applyCustomerFromQuery(this.route.snapshot.queryParams);
+    this.route.queryParams.subscribe((paramsData) => this.applyCustomerFromQuery(paramsData));
     this.loadData();
-
-    this.InitEmployee();
     this.SubscribeUpdateService();
+  }
+
+  private applyCustomerFromQuery(paramsData: Record<string, unknown>): void {
+    const rawId = paramsData['CustomerID'] ?? paramsData['customerID'];
+    if (rawId != null && String(rawId).trim() !== '') {
+      this.customer_ID = this.resolveCustomerIdFromRoute(rawId);
+    }
+    const rawName = paramsData['CustomerName'] ?? paramsData['customerName'];
+    if (rawName != null && String(rawName).trim() !== '') {
+      this.customer_Name = this.resolveCustomerNameFromRoute(rawName);
+    }
+  }
+
+  private normalizeEncryptedRouteValue(raw: unknown): string {
+    if (raw == null) {
+      return '';
+    }
+    return decodeURIComponent(String(raw).trim()).replace(/ /g, '+');
+  }
+
+  private resolveCustomerIdFromRoute(raw: unknown): number | undefined {
+    const normalized = this.normalizeEncryptedRouteValue(raw);
+    if (!normalized) {
+      return undefined;
+    }
+    const decrypted = this._generalService.decrypt(normalized);
+    const fromDecrypt = Number(String(decrypted).trim());
+    if (Number.isFinite(fromDecrypt) && fromDecrypt > 0) {
+      return fromDecrypt;
+    }
+    const plain = Number(normalized);
+    if (Number.isFinite(plain) && plain > 0) {
+      return plain;
+    }
+    return undefined;
+  }
+
+  private resolveCustomerNameFromRoute(raw: unknown): string {
+    const normalized = this.normalizeEncryptedRouteValue(raw);
+    if (!normalized) {
+      return '';
+    }
+    const decrypted = this._generalService.decrypt(normalized);
+    return decrypted || normalized;
+  }
+
+  private getRouteCustomerIdRaw(): string | undefined {
+    const fromRoute =
+      this.route.snapshot.queryParams['CustomerID'] ??
+      this.route.snapshot.queryParams['customerID'];
+    if (fromRoute != null && String(fromRoute).trim() !== '') {
+      return String(fromRoute);
+    }
+    const hash = window.location.hash || '';
+    const queryStart = hash.indexOf('?');
+    if (queryStart < 0) {
+      return undefined;
+    }
+    const params = new URLSearchParams(hash.substring(queryStart + 1));
+    return params.get('CustomerID') ?? params.get('customerID') ?? undefined;
+  }
+
+  private getActiveCustomerId(): number {
+    const fromState = this.resolveCustomerIdFromRoute(this.customer_ID);
+    if (fromState) {
+      return fromState;
+    }
+    const fromRoute = this.resolveCustomerIdFromRoute(this.getRouteCustomerIdRaw());
+    if (fromRoute) {
+      return fromRoute;
+    }
+    if (Array.isArray(this.dataSource) && this.dataSource.length > 0) {
+      const rowId = Number(this.dataSource[0].customerID);
+      if (Number.isFinite(rowId) && rowId > 0) {
+        return rowId;
+      }
+    }
+    return 0;
   }
   refresh() 
   {  
     this.SearchCustomerCollectionExecutive = '';
-    this.EmployeeName.setValue('');    
+    this.EmployeeName.setValue('');
+    this.employeeSearch.reset();
     this.SearchEmployeeName='';
     this.SearchStartDate='';
     this.SearchEndDate='';
@@ -131,14 +201,15 @@ export class CustomerCollectionExecutiveComponent implements OnInit {
   }
   addNew()
   {
-    
+    const customerId = this.getActiveCustomerId();
     const dialogRef = this.dialog.open(FormDialogComponentHolder, 
     {
       data: 
         {
           advanceTable: this.advanceTable,
           action: 'add',
-          CustomerID:this.customer_ID,
+          CustomerID: customerId,
+          routeCustomerID: this.getRouteCustomerIdRaw(),
           CustomerName:this.customer_Name
         }
     });
@@ -158,8 +229,10 @@ export class CustomerCollectionExecutiveComponent implements OnInit {
   }
   public SearchData()
   {
+    const name = this.employeeSearch.apiSearchName || '';
+    this.SearchEmployeeName = name;
+    this.EmployeeName.setValue(name);
     this.loadData();
-    //this.SearchCustomerCollectionExecutive='';
   }
   
   deleteItem(row)
@@ -354,16 +427,6 @@ export class CustomerCollectionExecutiveComponent implements OnInit {
             }
           }
         }
-      }
-    );
-  }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-       
       }
     );
   }

@@ -11,7 +11,7 @@ import { GeneralService } from '../../../general/general.service';
 import { OrganizationalEntityDropDown } from 'src/app/general/organizationalEntityDropDown.model';
 import { DepartmentDropDown } from 'src/app/general/departmentDropDown.model';
 import { DesignationDropDown } from 'src/app/general/designationDropDown.model';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { VehicleDropDown } from 'src/app/vehicle/vehicleDropDown.model';
@@ -23,6 +23,17 @@ import { map, startWith } from 'rxjs/operators';
 import { CustomerContractDropDown } from 'src/app/customerContract/customerContractDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import moment from 'moment';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -34,15 +45,19 @@ import moment from 'moment';
 
 export class FormDialogComponentHolder 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayNegotiatedFn = createDisplayEmployeeFn();
+  displayApprovedFn = createDisplayEmployeeFn();
   employeeID:number;
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
   public EmployeeList?: EmployeeDropDown[] = [];
   public EmployeesList?: EmployeeDropDown[] = [];
-  filteredCreatedByOptionss: Observable<EmployeeDropDown[]>;
+  filteredCreatedByOptionss: Observable<EmployeeDropDown[]> = of([]);
   searchCreatedBy: FormControl = new FormControl();
-  filteredinstructedByOptionss: Observable<EmployeeDropDown[]>;
+  filteredinstructedByOptionss: Observable<EmployeeDropDown[]> = of([]);
   searchinstructedBy: FormControl = new FormControl();
   public CityList?: CityDropDown[] = [];
   public StatesList?: StateDropDown[] = [];
@@ -85,8 +100,6 @@ export class FormDialogComponentHolder
           this.dialogTitle =' Contract Mapping for ';       
           this.advanceTable = data.advanceTable;
 
-          this.searchCreatedBy.setValue(this.advanceTable.negotiatedBy);
-          this.searchinstructedBy.setValue(this.advanceTable.approvedBy);
           let startDate=moment(this.advanceTable.startDate).format('DD/MM/yyyy');
           let endDate=moment(this.advanceTable.endDate).format('DD/MM/yyyy');
           this.onBlurStartDateEdit(startDate);
@@ -103,10 +116,106 @@ export class FormDialogComponentHolder
   }
   public ngOnInit(): void
   {
-   //this.loadLastDateForCustomer();
-   this.InitEmployee(); 
-   this.InitEmployees();
+   if (this.action === 'edit') {
+     this.patchNegotiatedForEdit();
+     this.patchApprovedForEdit();
+   }
    this.InitCustomerContract();
+  }
+
+  isSelectedNegotiatedExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'negotiatedBy', this.EmployeesList || []);
+  }
+
+  isSelectedApprovedExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'approvedBy', this.EmployeeList || []);
+  }
+
+  private patchNegotiatedForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.negotiatedByID,
+      this.advanceTableForm,
+      'negotiatedBy',
+      {
+        getEmployeeList: () => this.EmployeesList || [],
+        setEmployeeList: (list) => { this.EmployeesList = list; },
+        setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+        onEmployeeId: (id) => {
+          this.employeeID = id;
+          this.advanceTableForm.patchValue({ negotiatedByID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  private patchApprovedForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.approvedByID,
+      this.advanceTableForm,
+      'approvedBy',
+      {
+        getEmployeeList: () => this.EmployeeList || [],
+        setEmployeeList: (list) => { this.EmployeeList = list; },
+        setFilteredOptions: (options) => { this.filteredinstructedByOptionss = options; },
+        onEmployeeId: (id) => {
+          this.employeesID = id;
+          this.advanceTableForm.patchValue({ approvedByID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  InitNegotiatedPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'negotiatedBy', {
+      getEmployeeList: () => this.EmployeesList || [],
+      setEmployeeList: (list) => { this.EmployeesList = list; },
+      setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+    });
+  }
+
+  InitApprovedPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'approvedBy', {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredinstructedByOptionss = options; },
+    });
+  }
+
+  onNegotiatedSelected(selected: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(this.advanceTableForm, 'negotiatedBy', selected, (id) => {
+      this.employeeID = id;
+      this.advanceTableForm.patchValue({ negotiatedByID: id }, { emitEvent: false });
+    });
+  }
+
+  onApprovedSelected(selected: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(this.advanceTableForm, 'approvedBy', selected, (id) => {
+      this.employeesID = id;
+      this.advanceTableForm.patchValue({ approvedByID: id }, { emitEvent: false });
+    });
+  }
+
+  private prepareEmployeeFieldsForSave(raw: Record<string, unknown>): void {
+    coerceEmployeeFieldToApiString(raw, 'negotiatedBy', this.EmployeesList || []);
+    coerceEmployeeFieldToApiString(raw, 'approvedBy', this.EmployeeList || []);
+    const negotiated = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('negotiatedBy')?.value,
+      this.EmployeesList || []
+    );
+    const approved = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('approvedBy')?.value,
+      this.EmployeeList || []
+    );
+    if (negotiated?.employeeID) {
+      raw.negotiatedByID = negotiated.employeeID;
+      this.employeeID = negotiated.employeeID;
+    }
+    if (approved?.employeeID) {
+      raw.approvedByID = approved.employeeID;
+      this.employeesID = approved.employeeID;
+    }
   }
   formControl = new FormControl('', 
   [
@@ -215,107 +324,6 @@ export class FormDialogComponentHolder
   }
   
 
-  //----------- Validation --------------
-  employeeNameValidator(EmployeesList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = EmployeesList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
-      return match ? null : { employeeNameInvalid: true };
-    };
-  }
-  
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe(
-      data=>
-      {
-        this.EmployeesList=data;
-        this.advanceTableForm.controls['negotiatedBy'].setValidators([Validators.required,this.employeeNameValidator(this.EmployeesList)]);
-        this.advanceTableForm.controls['negotiatedBy'].updateValueAndValidity();
-        this.filteredCreatedByOptionss = this.advanceTableForm.controls['negotiatedBy'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCreatedBy(value || ''))
-        ); 
-      });
-  }
-  
-  private _filterCreatedBy(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.EmployeesList.filter(
-      data => 
-      {
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-        //return customer.firstName.toLowerCase().indexOf(filterValue)===0;
-        // return customer.lastName.toLowerCase().indexOf(filterValue)===0;
-      });
-  }
-  OnNegotiatedBySelect(selectedNegotiatedBy: string)
-  {
-    const NegotiatedByName = this.EmployeesList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedNegotiatedBy
-    );
-    if (selectedNegotiatedBy) 
-    {
-      this.getemployee(NegotiatedByName.employeeID);
-    }
-  }
-  getemployee(employeeID: any)
-  {   
-    this.employeeID=employeeID;
-  }
-
-//---------- Approved By ----------
-ApprovedByValidator(EmployeeList: any[]): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = control.value?.toLowerCase();
-    const match = EmployeeList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
-    return match ? null : { approvedByInvalid: true };
-  };
-}
-  InitEmployees(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe(
-      data=>
-      {
-        this.EmployeeList=data;
-        this.advanceTableForm.controls['approvedBy'].setValidators([Validators.required,this.ApprovedByValidator(this.EmployeeList)]);
-        this.advanceTableForm.controls['approvedBy'].updateValueAndValidity();
-        this.filteredinstructedByOptionss = this.advanceTableForm.controls['approvedBy'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        ); 
-      });
-  }
-  
-  private _filtersearchinstructed(value: string): any {
-    const filterValue = value.toLowerCase();
-    // if (!value || value.length < 3) {
-    //   return [];   
-    // }
-    return this.EmployeeList.filter(
-      data => 
-      {
-        //return customer.firstName.toLowerCase().indexOf(filterValue)===0;
-        const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.includes(filterValue);
-      });
-  }
-  OnApprovedBySelect(selectedApprovedBy: string)
-  {
-    const ApprovedByName = this.EmployeeList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedApprovedBy
-    );
-    if (selectedApprovedBy) 
-    {
-      this.getemployeeIDTitles(ApprovedByName.employeeID);
-    }
-  }
-  getemployeeIDTitles(employeeID: any)
-  {     
-    this.employeesID=employeeID;
-  }
   openSearchDialog(){
 
     const dialogRef = this.SearchDialog.open(SearchDialogComponent, 
@@ -442,12 +450,11 @@ ApprovedByValidator(EmployeeList: any[]): ValidatorFn {
   }
   public Post(): void
   {
-    
     this.advanceTableForm.patchValue({customerID:this.customerID});
     this.advanceTableForm.patchValue({customerContractID: this.customerContractID});
-    this.advanceTableForm.patchValue({negotiatedByID:this.employeeID});
-    this.advanceTableForm.patchValue({approvedByID:this.employeesID});
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldsForSave(requestObject);
+    this.advanceTableService.add(requestObject)  
     .subscribe(
     response => 
     {
@@ -470,9 +477,15 @@ ApprovedByValidator(EmployeeList: any[]): ValidatorFn {
   {
     this.advanceTableForm.patchValue({customerID:this.data.customerID});
     this.advanceTableForm.patchValue({customerContractID: this.customerContractID || this.advanceTable.customerContractID});
-    this.advanceTableForm.patchValue({negotiatedByID:this.employeeID || this.advanceTable.negotiatedByID});
-    this.advanceTableForm.patchValue({approvedByID:this.employeesID || this.advanceTable.approvedByID});
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldsForSave(requestObject);
+    if (!requestObject.negotiatedByID) {
+      requestObject.negotiatedByID = this.employeeID || this.advanceTable.negotiatedByID;
+    }
+    if (!requestObject.approvedByID) {
+      requestObject.approvedByID = this.employeesID || this.advanceTable.approvedByID;
+    }
+    this.advanceTableService.update(requestObject)  
     .subscribe(
     response => 
     {  

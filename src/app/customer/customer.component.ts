@@ -32,6 +32,7 @@ import { RoleDropDown } from '../role/roleDropDown.model';
 import { RolePageMappingService } from '../rolePageMapping/rolePageMapping.service';
 import { FormDialogComponent as CIPlusComponent } from '../customerCorporateIndividual/dialogs/form-dialog/form-dialog.component';
 import { FormDialogComponent as IndividualCustomerComponent } from '../individualCustomer/dialogs/form-dialog/form-dialog.component';
+import { openCustomerChildRouteInNewTab } from '../shared/customer-child-route.util';
 
 interface MenuItem {
   label: string;
@@ -1446,18 +1447,64 @@ else if (menuItem.pageName === 'customerCityHigherExtraKMorHR') {
 //     }
 //   }); 
 // }
-// customerReservationExecutive(row) {
-//   this.router.navigate([
-//     '/customerReservationExecutive',  
-//   ],
-//   {
-//     queryParams: {
-//       CustomerID: row.customerID,
-//       CustomerName: row.customerName,
-     
-//     }
-//   }); 
-// }
+  private openCustomerChildRoute(routePath: string, row: any): void {
+    openCustomerChildRouteInNewTab(this._generalService, this.router, routePath, row);
+  }
+
+  customerAddress(row: any) {
+    this.openCustomerChildRoute('/customerAddress', row);
+  }
+  customerKeyAccountManager(row: any) {
+    this.openCustomerChildRoute('/customerKeyAccountManager', row);
+  }
+  customerBillingExecutive(row: any) {
+    this.openCustomerChildRoute('/customerBillingExecutive', row);
+  }
+  customerCollectionExecutive(row: any) {
+    this.openCustomerChildRoute('/customerCollectionExecutive', row);
+  }
+  customerReservationExecutive(row: any) {
+    this.openCustomerChildRoute('/customerReservationExecutive', row);
+  }
+  customerServiceExecutive(row: any) {
+    this.openCustomerChildRoute('/customerServiceExecutive', row);
+  }
+  customerConfigurationBilling(row: any) {
+    this.openCustomerChildRoute('/customerConfigurationBilling', row);
+  }
+  customerConfigurationReservation(row: any) {
+    this.openCustomerChildRoute('/customerConfigurationReservation', row);
+  }
+  customerCityMapping(row: any) {
+    this.openCustomerChildRoute('/customerCategoryMapping', row);
+  }
+  customerConfigurationSupplier(row: any) {
+    this.openCustomerChildRoute('/customerConfigurationSupplier', row);
+  }
+  customerBlocking(row: any) {
+    this.openCustomerChildRoute('/customerBlocking', row);
+  }
+  customerConfigurationInvoicing(row: any) {
+    this.openCustomerChildRoute('/customerConfigurationInvoicing', row);
+  }
+  customerSalesManager(row: any) {
+    this.openCustomerChildRoute('/customerSalesManager', row);
+  }
+  customerConfigurationMessaging(row: any) {
+    this.openCustomerChildRoute('/customerConfigurationMessaging', row);
+  }
+  customerStatus(row: any) {
+    this.openCustomerChildRoute('/customerConfigurationSEZ', row);
+  }
+  customerContractMapping(row: any) {
+    this.openCustomerChildRoute('/customerContractMapping', row);
+  }
+  customerReservationFields(row: any) {
+    this.openCustomerChildRoute('/customerReservationFields', row);
+  }
+  customerInvoiceTemplate(row: any) {
+    this.openCustomerChildRoute('/customerInvoiceTemplate', row);
+  }
 // customerSalesManager(row) {
 //   this.router.navigate([
 //     '/customerSalesManager',  

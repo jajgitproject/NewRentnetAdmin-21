@@ -71,32 +71,46 @@
 
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedCreatedByExited()}">
                         <mat-label>Created By</mat-label>                       
-                        <input required type="text" matInput [matAutocomplete]="auto" formControlName="contractCreatedByName">
-                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="OnCreateBySelect($event.option.value)">
-                            <mat-option *ngFor="let options of filteredCreatedOptions | async"
-                                [value]="options.firstName +' '+options.lastName" (click)="getCreatedID(options.employeeID)">
-                                {{options.firstName}} {{options.lastName}}
+                        <input required type="text" matInput [matAutocomplete]="auto" formControlName="contractCreatedByName"
+                            (keyup)="InitCreatedByPrefix()">
+                        <mat-autocomplete #auto="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="displayEmployeeFn"
+                            (optionSelected)="OnCreateBySelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredCreatedOptions | async" [value]="options"
+                                [class.employee-dropdown-exited]="isEmployeeExited(options)">
+                                <span class="employee-dropdown-option-text"
+                                    [class.employee-dropdown-option-text-exited]="isEmployeeExited(options)">
+                                    {{ formatEmployeeDropdownLabel(options) }}
+                                </span>
                             </mat-option>
                         </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.get('contractCreatedByName').hasError('invalidCreatedBySelection')">
+                        <mat-error *ngIf="advanceTableForm.get('contractCreatedByName').hasError('employeeNameInvalid')">
                             Please select Created By
                           </mat-error>
                     </mat-form-field>
                 </div>
 
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"> 
+                    <mat-form-field class="example-full-width" appearance="outline" floatLabel="always"
+                        [ngClass]="{'employee-dropdown-exited-selected': isSelectedApprovedByExited()}">
                         <mat-label>Approved By</mat-label>                       
-                        <input required type="text" matInput [matAutocomplete]="auto0" formControlName="contractApprovedByName">
-                        <mat-autocomplete #auto0="matAutocomplete" (optionSelected)="OnApprovedBySelect($event.option.value)">
-                            <mat-option *ngFor="let options of filteredApprovedOptions | async"
-                                [value]="options.firstName +' '+options.lastName" (click)="getApprovedID(options.employeeID)">
-                                {{options.firstName}} {{options.lastName}}
+                        <input required type="text" matInput [matAutocomplete]="auto0" formControlName="contractApprovedByName"
+                            (keyup)="InitApprovedByPrefix()">
+                        <mat-autocomplete #auto0="matAutocomplete" class="employee-dropdown-autocomplete-panel"
+                            [displayWith]="displayApprovedEmployeeFn"
+                            (optionSelected)="OnApprovedBySelect($event.option.value)">
+                            <mat-option *ngFor="let options of filteredApprovedOptions | async" [value]="options"
+                                [class.employee-dropdown-exited]="isEmployeeExited(options)">
+                                <span class="employee-dropdown-option-text"
+                                    [class.employee-dropdown-option-text-exited]="isEmployeeExited(options)">
+                                    {{ formatEmployeeDropdownLabel(options) }}
+                                </span>
                             </mat-option>
                         </mat-autocomplete>
-                        <mat-error *ngIf="advanceTableForm.get('contractApprovedByName').hasError('invalidApprovedBySelection')">
+                        <mat-error *ngIf="advanceTableForm.get('contractApprovedByName').hasError('employeeNameInvalid')">
                             Please select Approved By
                           </mat-error>
                     </mat-form-field>

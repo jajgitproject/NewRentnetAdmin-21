@@ -23,7 +23,7 @@ import { OrganizationalEntityDropDown } from '../organizationalEntityMessage/org
 import { VehicleDropDown } from '../vehicle/vehicleDropDown.model';
 import { CityDropDown } from '../city/cityDropDown.model';
 import moment from 'moment';
-import { EmployeeDropDown } from '../employee/employeeDropDown.model';
+import { EmployeePrefixSearchField } from '../shared/employee-prefix-search.field';
 import { CustomerContractDropDown } from '../customerContract/customerContractDropDown.model';
 
 interface MenuItem {
@@ -77,8 +77,7 @@ export class CustomerContractMappingComponent implements OnInit {
   selectedFilter: string = 'search';
   filterSelected:boolean = true;
 
-  SearchEmployeeName: string = '';
-  next : FormControl = new FormControl();
+  employeeSearch: EmployeePrefixSearchField;
 
   customerContractID: string = '';
   search: FormControl = new FormControl();
@@ -87,7 +86,6 @@ export class CustomerContractMappingComponent implements OnInit {
   filteredOptions: Observable<CustomerContractDropDown[]>;
   SearchEndDate: string = '';
   endingDate : FormControl = new FormControl();
-  public EmployeeList?: EmployeeDropDown[] = [];
   dialogCustomerContractData: any;
 
   // menuItems: any[] = [
@@ -105,7 +103,9 @@ export class CustomerContractMappingComponent implements OnInit {
     public customerContractMappingService: CustomerContractMappingService,
     private snackBar: MatSnackBar,
     public _generalService: GeneralService
-  ) {}
+  ) {
+    this.employeeSearch = new EmployeePrefixSearchField(this._generalService);
+  }
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
   @ViewChild('filter', { static: true }) filter: ElementRef;
@@ -125,8 +125,6 @@ export class CustomerContractMappingComponent implements OnInit {
 
     });
     this.loadData();
-
-    this.InitEmployee();
     this. InitCustomerContract();
     this.menuItems.sort((a, b) => a.label.localeCompare(b.label));
     this.SubscribeUpdateService();
@@ -134,7 +132,7 @@ export class CustomerContractMappingComponent implements OnInit {
   refresh() {
      
     this.SearchCustomerContractMapping = '';
-    this.SearchEmployeeName='';
+    this.employeeSearch.reset();
     this.search.setValue('');
     this.SearchEndDate='';
     this.SearchActivationStatus = true;
@@ -241,7 +239,7 @@ export class CustomerContractMappingComponent implements OnInit {
         break;
     }
     
-      this.customerContractMappingService.getTableData(this.customer_ID,this.SearchCustomerContractMapping,this.SearchEmployeeName,this.search.value,this.SearchEndDate,this.SearchActivationStatus, this.PageNumber).subscribe
+      this.customerContractMappingService.getTableData(this.customer_ID,this.SearchCustomerContractMapping,this.getEmployeeNameFilter(),this.search.value,this.SearchEndDate,this.SearchActivationStatus, this.PageNumber).subscribe
     (
       data =>   
       {
@@ -395,15 +393,20 @@ export class CustomerContractMappingComponent implements OnInit {
       }
     );
   }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-       
-      }
-    );
+  private getEmployeeNameFilter(): string {
+    if (this.employeeSearch.apiSearchName) {
+      return this.employeeSearch.apiSearchName;
+    }
+    const raw = this.employeeSearch.control.value;
+    if (typeof raw === 'string') {
+      return raw.trim();
+    }
+    return this.employeeSearch.formatEmployeeDropdownLabel(raw).split(' - ')[0]?.trim() || '';
+  }
+
+  isSelectedFilterEmployeeExited(): boolean {
+    const raw = this.employeeSearch.control.value;
+    return raw && typeof raw === 'object' && this.employeeSearch.isEmployeeExited(raw);
   }
 
   menuItems: any[] = [
@@ -503,7 +506,7 @@ export class CustomerContractMappingComponent implements OnInit {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
-    this.customerContractMappingService.getTableDataSort(this.customer_ID,this.SearchCustomerContractMapping,this.SearchEmployeeName,this.customerContractID,this.SearchEndDate,this.SearchActivationStatus, this.PageNumber, coloumName.active,this.sortType).subscribe
+    this.customerContractMappingService.getTableDataSort(this.customer_ID,this.SearchCustomerContractMapping,this.getEmployeeNameFilter(),this.customerContractID,this.SearchEndDate,this.SearchActivationStatus, this.PageNumber, coloumName.active,this.sortType).subscribe
     (
       data =>   
       {

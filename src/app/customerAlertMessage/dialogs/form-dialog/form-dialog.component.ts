@@ -8,10 +8,21 @@ import { GeneralService } from '../../../general/general.service';
 import { CustomerAlertMessage, CustomerAlertMessageTypeForDropDown } from '../../customerAlertMessage.model';
 import { CustomerAlertMessageService } from '../../customerAlertMessage.service';
 import { CustomerDropDown } from 'src/app/supplierCustomerFixedForAllPercentage/customerDropDown.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import moment from 'moment';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -23,6 +34,9 @@ import moment from 'moment';
 
 export class FormDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
   showError: string;
   action: string;
   dialogTitle: string;
@@ -38,7 +52,7 @@ export class FormDialogComponent
   customerAlertMessageTypeID: any;
 
   public EmployeeList?: EmployeeDropDown[] = [];
-  filteredinstructedByOptions: Observable<EmployeeDropDown[]>;
+  filteredinstructedByOptions: Observable<EmployeeDropDown[]> = of([]);
   employeeID: any;
   customerName: any;
   //CustomerID: any;
@@ -171,9 +185,56 @@ export class FormDialogComponent
 ngOnInit()
 {
   this.advanceTableForm.patchValue({customerName:this.customerName});
-  //this.InitCustomer();
   this.InitCustomerAlertMessageType();
-  this.InitEmployee();
+  if (this.action === 'edit') {
+    this.patchEmployeeForEdit();
+  }
+}
+
+isSelectedEmployeeExited(): boolean {
+  return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'employeeName', this.EmployeeList || []);
+}
+
+private patchEmployeeForEdit(): void {
+  patchEmployeeNameForEditById(
+    this._generalService,
+    this.advanceTable?.instructedBy,
+    this.advanceTableForm,
+    'employeeName',
+    {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredinstructedByOptions = options; },
+      onEmployeeId: (id) => {
+        this.employeeID = id;
+      },
+    }
+  );
+}
+
+InitEmployeePrefix(): void {
+  initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'employeeName', {
+    getEmployeeList: () => this.EmployeeList || [],
+    setEmployeeList: (list) => { this.EmployeeList = list; },
+    setFilteredOptions: (options) => { this.filteredinstructedByOptions = options; },
+  });
+}
+
+OnInstructedBySelect(selected: EmployeeDropDown): void {
+  onEmployeeAutocompleteSelected(this.advanceTableForm, 'employeeName', selected, (id) => {
+    this.employeeID = id;
+  });
+}
+
+private prepareEmployeeFieldForSave(raw: Record<string, unknown>): void {
+  coerceEmployeeFieldToApiString(raw, 'employeeName', this.EmployeeList || []);
+  const employee = findEmployeeByDropdownInput(
+    this.advanceTableForm.get('employeeName')?.value,
+    this.EmployeeList || []
+  );
+  if (employee?.employeeID) {
+    this.employeeID = employee.employeeID;
+  }
 }
 
 //---------- Customer ----------
@@ -204,59 +265,6 @@ ngOnInit()
 //   this.customerID=customerID;
 // }
 
-
-//----------- Instructed By ----------
-employeeNameValidator(EmployeeList: any[]): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = control.value?.toLowerCase();
-    const match = EmployeeList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
-    return match ? null : { employeeNameInvalid: true };
-  };
-}
-
-InitEmployee(){
-  this._generalService.GetEmployeesForVehicleCategory().subscribe
-  (
-    data =>   
-    {
-      this.EmployeeList = data;
-      this.advanceTableForm.controls['employeeName'].setValidators([Validators.required,
-        this.employeeNameValidator(this.EmployeeList)
-      ]);
-      this.advanceTableForm.controls['employeeName'].updateValueAndValidity();
-      this.filteredinstructedByOptions = this.advanceTableForm.controls['employeeName'].valueChanges.pipe(
-        startWith(""),
-        map(value => this._filtersearchinstructed(value || ''))
-      );
-    });
-}
-private _filtersearchinstructed(value: string): any {
-  const filterValue = value.toLowerCase();
-  // if (!value || value.length < 3) {
-  //     return [];   
-  //   }
-  return this.EmployeeList.filter(
-    data => 
-    {
-      //return customer.firstName.toLowerCase().includes(filterValue);
-      const fullName = `${data.firstName} ${data.lastName}`.toLowerCase();
-      return fullName.includes(filterValue);
-    });
-}
-OnInstructedBySelect(selectedInstructedBy: string)
-{
-  const InstructedByName = this.EmployeeList.find(
-    data => `${data.firstName} ${data.lastName}` === selectedInstructedBy
-  );
-  if (selectedInstructedBy) 
-  {
-    this.getEmployeeID(InstructedByName.employeeID);
-  }
-}
-getEmployeeID(employeeID: any) 
-{   
-  this.employeeID=employeeID;
-}
 
 /////////////////for Image Upload////////////////////////////
 public response: { dbPath: '' };
@@ -325,9 +333,11 @@ submit() {}
   {
     this.advanceTableForm.patchValue({customerID:this.customerID});
     this.advanceTableForm.patchValue({customerAlertMessageTypeID:this.customerAlertMessageTypeID});
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldForSave(requestObject);
     this.advanceTableForm.patchValue({instructedBy:this.employeeID});
-    this.advanceTableForm.patchValue({customerAlertMessageTypeID:this.customerAlertMessageTypeID});
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    requestObject.instructedBy = this.employeeID;
+    this.advanceTableService.add(requestObject)  
     .subscribe(
     response => 
     {
@@ -347,9 +357,10 @@ submit() {}
   {
     this.advanceTableForm.patchValue({customerID:this.customerID || this.advanceTable.customerID});
     this.advanceTableForm.patchValue({customerAlertMessageTypeID:this.customerAlertMessageTypeID || this.advanceTable.customerAlertMessageTypeID});
-    this.advanceTableForm.patchValue({instructedBy:this.employeeID || this.advanceTable.instructedBy});
-    this.advanceTableForm.patchValue({customerAlertMessageTypeID:this.customerAlertMessageTypeID || this.advanceTable.customerAlertMessageTypeID});
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldForSave(requestObject);
+    requestObject.instructedBy = this.employeeID || this.advanceTable.instructedBy;
+    this.advanceTableService.update(requestObject)  
     .subscribe(
     response => 
     {

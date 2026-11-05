@@ -25,6 +25,7 @@ import { SupplierDropDown } from '../supplier/supplierDropDown.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { VehicleCategory } from '../vehicleCategory/vehicleCategory.model';
 import { FormDialogCustomerShortComponent } from './dialogs/form-dialog/form-dialog.component';
+import { openCustomerChildRouteInNewTab } from '../shared/customer-child-route.util';
 @Component({
   standalone: false,
   selector: 'app-customerShort',
@@ -721,6 +722,23 @@ customerShortContractMapping(row) {
 //    });
 //   }
 // }
+
+  private openCustomerChildRoute(routePath: string, row: any): void {
+    openCustomerChildRouteInNewTab(this._generalService, this.router, routePath, row);
+  }
+
+  customerKeyAccountManager(row: any) {
+    this.openCustomerChildRoute('/customerKeyAccountManager', row);
+  }
+  customerBillingExecutive(row: any) {
+    this.openCustomerChildRoute('/customerBillingExecutive', row);
+  }
+  customerCollectionExecutive(row: any) {
+    this.openCustomerChildRoute('/customerCollectionExecutive', row);
+  }
+  customerReservationExecutive(row: any) {
+    this.openCustomerChildRoute('/customerReservationExecutive', row);
+  }
 }
 
 

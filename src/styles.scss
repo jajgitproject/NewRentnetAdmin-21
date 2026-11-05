@@ -587,6 +587,29 @@ form.customer-form-four-col mat-form-field {
   flex-shrink: 0 !important;
   box-sizing: border-box;
 }
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .mat-mdc-dialog-container .mdc-dialog__surface {
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 90vh !important;
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog app-form-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  max-height: 90vh;
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .addContainer {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.cdk-overlay-container .cdk-overlay-pane.document-form-dialog .addContainer [mat-dialog-content] {
+  flex: 1 1 auto;
+  min-height: 0;
+}
 
 /* KAM Pickup Address Correction dialog */
 .cdk-overlay-container .cdk-overlay-pane.kam-address-correction-dialog-panel.mat-mdc-dialog-panel {
@@ -1036,15 +1059,30 @@ mat-option {
 
 /* Material select panels: grow with longest option; cap to viewport.
    Exception: .inventory-select-panel matches the trigger width (panelWidth=auto). */
-.mat-mdc-select-panel:not(.inventory-select-panel):not(.upsell-reason-select-panel) {
+.mat-mdc-select-panel:not(.inventory-select-panel):not(.upsell-reason-select-panel):not(.vc-action-select-panel) {
   width: max-content !important;
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;
   overflow-x: auto;
 }
 
-.mat-mdc-select-panel:not(.inventory-select-panel):not(.upsell-reason-select-panel) .mat-mdc-option .mdc-list-item__primary-text {
+.mat-mdc-select-panel:not(.inventory-select-panel):not(.upsell-reason-select-panel):not(.vc-action-select-panel) .mat-mdc-option .mdc-list-item__primary-text {
   white-space: nowrap !important;
+}
+
+/* Vehicle Compliance action column: narrow trigger, full option labels when open */
+.vc-action-select-panel.mat-mdc-select-panel {
+  width: max-content !important;
+  min-width: 4.5rem !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
+  overflow-x: visible;
+}
+
+.vc-action-select-panel.mat-mdc-select-panel .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap !important;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .inventory-select-panel.mat-mdc-select-panel {
@@ -1105,6 +1143,13 @@ mat-option {
 
 .cdk-overlay-container .cdk-overlay-pane:not(.role-form-wide-dialog):has(.mat-mdc-select-panel):not(:has(.inventory-select-panel)):not(:has(.upsell-reason-select-panel)) {
   width: max-content !important;
+  max-width: min(92vw, calc(100vw - 24px)) !important;
+  box-sizing: border-box;
+}
+
+.cdk-overlay-container .cdk-overlay-pane:has(.vc-action-select-panel) {
+  width: max-content !important;
+  min-width: 4.5rem !important;
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;
 }
@@ -2387,5 +2432,24 @@ body.side-closed.submenu-closed.side-closed-hover .sidebar .menu .list li.menu-r
   flex-wrap: wrap;
   align-items: center;
   margin-bottom: 12px;
+}
+
+/* Employee dropdown / autocomplete (Material 21) — shared across admin pickers */
+.employee-dropdown-exited-selected .mat-mdc-input-element,
+.employee-dropdown-exited-selected .mdc-text-field__input {
+  color: #c62828 !important;
+}
+
+.employee-dropdown-autocomplete-panel .mat-mdc-option.employee-dropdown-exited .employee-dropdown-option-text,
+.employee-dropdown-select-panel .mat-mdc-option.employee-dropdown-exited .employee-dropdown-option-text,
+.employee-dropdown-option-text-exited {
+  color: #c62828;
+}
+
+.employee-dropdown-autocomplete-panel .mat-mdc-option.employee-dropdown-exited,
+.employee-dropdown-select-panel .mat-mdc-option.employee-dropdown-exited {
+  --mat-option-label-text-color: #c62828;
+  --mat-option-active-state-label-text-color: #c62828;
+  --mat-option-selected-state-label-text-color: #c62828;
 }
 

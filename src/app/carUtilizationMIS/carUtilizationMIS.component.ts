@@ -43,6 +43,7 @@ export class CarUtilizationMISComponent implements OnInit, OnDestroy {
   customerOptions: any[] = [];
   dutySlipIds = '';
   reservationIds = '';
+  readonly maxPickupDateRangeDays = 15;
 
   carRecords: CarUtilizationReportCarRow[] = [];
   reportDates: Date[] = [];
@@ -334,7 +335,15 @@ export class CarUtilizationMISComponent implements OnInit, OnDestroy {
     }
   }
 
+  hasDutySlipIdSearch(): boolean {
+    return this.normalizeOptionalText(this.dutySlipIds).length > 0;
+  }
+
   private validateDateRange(): string | null {
+    if (this.hasDutySlipIdSearch()) {
+      return null;
+    }
+
     if (!this.pickupDateFrom || !this.pickupDateTo) {
       return 'Pickup Date From and Pickup Date To are required.';
     }
@@ -345,6 +354,10 @@ export class CarUtilizationMISComponent implements OnInit, OnDestroy {
     }
     if (to.isBefore(from)) {
       return 'Pickup Date To cannot be earlier than Pickup Date From.';
+    }
+    const inclusiveDays = to.diff(from, 'days') + 1;
+    if (inclusiveDays > this.maxPickupDateRangeDays) {
+      return `Pickup date range cannot exceed ${this.maxPickupDateRangeDays} days.`;
     }
     return null;
   }
@@ -392,9 +405,10 @@ export class CarUtilizationMISComponent implements OnInit, OnDestroy {
   }
 
   private buildSearchCriteria() {
+    const dutySlipSearch = this.hasDutySlipIdSearch();
     return {
-      pickupDateFrom: this.formatDateForApi(this.pickupDateFrom),
-      pickupDateTo: this.formatDateForApi(this.pickupDateTo),
+      pickupDateFrom: dutySlipSearch ? null : this.formatDateForApi(this.pickupDateFrom),
+      pickupDateTo: dutySlipSearch ? null : this.formatDateForApi(this.pickupDateTo),
       carNumbers: this.normalizeOptionalText(this.carNumbers),
       customerName: this.extractCustomerName(this.customerNameControl.value),
       dutySlipIds: this.normalizeOptionalText(this.dutySlipIds),

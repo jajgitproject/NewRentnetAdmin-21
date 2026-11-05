@@ -1421,8 +1421,15 @@ private _filterRD(value: string): any[] {
               map(value => this._filterRGByKAM(value || ''))
             );
             this.syncBookerCreateAllowedFromCurrentCustomerId();
-          } else {
-            this.InitCustomerRD();
+          }
+          else
+          {
+            Swal.fire({
+              title: '',
+              text: 'You logged in as Key Account Manager, but you are not registered to any customer.',
+              icon: 'info',
+              confirmButtonText: 'OK'
+            });
           }
       },
       () => this.InitCustomerRD());          
@@ -1499,7 +1506,12 @@ private _filterRD(value: string): any[] {
       }
       else
       {
-        this.InitCustomerCG(customerGroupID);
+        Swal.fire({
+          title: '',
+          text: 'You logged in as Key Account Manager, but you are not registered to any customer.',
+          icon: 'info',
+          confirmButtonText: 'OK'
+        });
       }
     },
     () => this.InitCustomerCG(customerGroupID));

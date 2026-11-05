@@ -24,6 +24,11 @@ export class InventoryDocumentModel {
   verifiedBy:string;
   verificationRemark:string;
   verificationDate:string;
+  verificationTime:string;
+  documentUploadDate:string;
+  documentUploadTime:string;
+  documentUploadByID:number;
+  documentUploadBy:string;
   userID:number;
   constructor(inventoryDocumentModel) {
     {
@@ -46,8 +51,13 @@ export class InventoryDocumentModel {
        this.verifiedBy = inventoryDocumentModel.verifiedBy || '';
        this.verificationRemark = inventoryDocumentModel.verificationRemark || '';
        this.verificationDate = inventoryDocumentModel.verificationDate || '';
+       this.verificationTime = inventoryDocumentModel.verificationTime ?? inventoryDocumentModel.VerificationTime ?? '';
        this.documentExpiry = inventoryDocumentModel.documentExpiry ?? null;
        this.documentStartDate = inventoryDocumentModel.documentStartDate ?? null;
+       this.documentUploadDate = inventoryDocumentModel.documentUploadDate ?? inventoryDocumentModel.DocumentUploadDate ?? '';
+       this.documentUploadTime = inventoryDocumentModel.documentUploadTime ?? inventoryDocumentModel.DocumentUploadTime ?? '';
+       this.documentUploadByID = inventoryDocumentModel.documentUploadByID ?? inventoryDocumentModel.DocumentUploadByID ?? null;
+       this.documentUploadBy = inventoryDocumentModel.documentUploadBy ?? inventoryDocumentModel.DocumentUploadBy ?? '';
     }
   }
   
@@ -79,6 +89,7 @@ export class InventoryDocumentVerificationModel {
   verificationRemark:string;
   verificationDate:Date;
   verificationDateString:string;
+  verificationTime:string;
   status:string;
   userID:number;
   constructor(inventoryDocumentVerificationModel) {
@@ -86,6 +97,12 @@ export class InventoryDocumentVerificationModel {
        this.inventoryDocumentID = inventoryDocumentVerificationModel.inventoryDocumentID || -1;
        this.inventoryID = inventoryDocumentVerificationModel.inventoryID || '';
        this.inventoryName = inventoryDocumentVerificationModel.inventoryName || '';
+       this.document =
+         inventoryDocumentVerificationModel.document ??
+         inventoryDocumentVerificationModel.Document ??
+         inventoryDocumentVerificationModel.documentName ??
+         inventoryDocumentVerificationModel.DocumentName ??
+         '';
        this.documentID = inventoryDocumentVerificationModel.documentID || '';
        this.documentNumber = inventoryDocumentVerificationModel.documentNumber || '';
        this.documentIssuingAuthority = inventoryDocumentVerificationModel.documentIssuingAuthority || '';
@@ -101,9 +118,14 @@ export class InventoryDocumentVerificationModel {
        this.verifiedBy = inventoryDocumentVerificationModel.verifiedBy || '';
        this.verificationRemark = inventoryDocumentVerificationModel.verificationRemark || '';
        this.verificationDateString = inventoryDocumentVerificationModel.verificationDateString || '';
+       this.verificationTime = inventoryDocumentVerificationModel.verificationTime ?? inventoryDocumentVerificationModel.VerificationTime ?? '';
 
-       this.verificationDate=new Date();
-       this.documentExpiry=new Date();
+       const verificationDateRaw = inventoryDocumentVerificationModel.verificationDate ?? inventoryDocumentVerificationModel.VerificationDate;
+       this.verificationDate = verificationDateRaw || null;
+       const documentExpiryRaw =
+         inventoryDocumentVerificationModel.documentExpiry ??
+         inventoryDocumentVerificationModel.DocumentExpiry;
+       this.documentExpiry = documentExpiryRaw ? new Date(documentExpiryRaw) : null;
     }
   }
   

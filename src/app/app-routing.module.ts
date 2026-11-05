@@ -2999,6 +2999,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'driverCompliance',
+        loadChildren: () =>
+          import('./driverCompliance/driverCompliance.module').then(
+            (m) => m.DriverComplianceModule
+          ),
+      },
+
+      {
         path: 'driverDocumentVerification',
         loadChildren: () =>
           import('./driverDocumentVerification/driverDocumentVerification.module').then(

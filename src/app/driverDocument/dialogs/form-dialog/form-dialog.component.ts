@@ -7,13 +7,12 @@ import { DriverDocument } from '../../driverDocument.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { DriverDocumentDropDown } from '../../driverDocumentDropDown.model';
 import { CitiesDropDown } from 'src/app/organizationalEntity/citiesDropDown.model';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { AllCitiesDropDown } from '../../allCitiesDropDown.model';
-import { LicenseVerificationComponent } from '../license-verification/license-verification.component';
+//import { LicenseVerificationComponent } from '../license-verification/license-verification.component';
 import { DocumentDropDown } from 'src/app/general/documentDropDown.model';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import moment from 'moment';
@@ -52,9 +51,10 @@ export class FormDialogComponent
   fileUploadEl: any;
   addressGeoPointID: any;
   DriverName: string;
-  DriverID!: number;
-  driverDocumentService: any;
+  driverID!: number;
+  DriverDocumentService: any;
   searchAddressCity: string = '';
+  private pendingDocumentId: number | null = null;
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
   public dialog: MatDialog,
@@ -64,87 +64,250 @@ export class FormDialogComponent
     private el: ElementRef,
   public _generalService:GeneralService)
   {
-    this.DriverID= data.driverID,
-    this.DriverName =data.driverName,
-        // Set the defaults
-        this.action = data.action;
-        if (this.action === 'edit') 
-        {
-        
-          this.dialogTitle ='Document Details';       
-          this.advanceTable = data.advanceTable;
-         
-          this.ImagePath=this.advanceTable.documentImage;
-          this.searchTerm.setValue(this.advanceTable.addressCity);
-          var vd=this.advanceTable.verificationDate.split(' ');
-          this.advanceTable.verificationDate=vd[0];
-          // if(this.advanceTable.verified==='true'){
-          //   this.advanceTable.verifiedData="Verified";
-          // }
-
-          // if(this.advanceTable.verified==='false'){
-          //   this.advanceTable.verifiedData="Rejected";
-          // }
-          if (this.advanceTable.verified === 'true') {
-            this.advanceTable.verifiedData = "Verified"
-          }
-          if (this.advanceTable.verified === 'false') {
-            this.advanceTable.verifiedData = "Rejected"
-            
-          }
-        this.advanceTable = data.advanceTable;
-                let documentExpiry=moment(this.advanceTable.documentExpiry).format('DD/MM/yyyy');
-                
-                  this.onBlurUpdateDateEdit(documentExpiry);
-        } else 
-        {
-          this.dialogTitle = 'Document Details';
-          this.advanceTable = new DriverDocument({});
-          this.advanceTable.activationStatus=true;
-          this.advanceTable.verifiedData='N/A';
-          this.advanceTable.verified='true';
-          this.advanceTable.verifiedBy='N/A';
-          this.advanceTable.verificationRemark='N/A';
-          this.advanceTable.verificationDate=('N/A');
-          this.uploadedByName();
-        }
-        this.advanceTableForm = this.createContactForm();
-        //this.customerPersonName=data.CustomerPersonName;
-        //this.CustomerPersonName =data.customerPersonName,
+    this.driverID = data.driverID ?? data.DriverID;
+    this.DriverName = data.driverName ?? data.DriverName;
+    // Set the defaults
+    this.action = data.action;
+    if (this.action === 'edit') 
+    {
+      this.dialogTitle ='Document Details';       
+      this.advanceTable = data.advanceTable;
+      this.formatDocumentUploadFields(this.advanceTable);
+      this.formatVerificationFields(this.advanceTable);
+      if (this.advanceTable.verified === 'Verified' || this.advanceTable.verified === 'true') {
+        this.advanceTable.verifiedData = 'Verified';
+      }
+      if (this.advanceTable.verified === 'Rejected' || this.advanceTable.verified === 'false') {
+        this.advanceTable.verifiedData = 'Rejected';
+      }
+    }
+    else 
+    {
+      this.dialogTitle = 'Document Details';
+      this.advanceTable = new DriverDocument({});
+      this.advanceTable.activationStatus=true;
+      this.advanceTable.verifiedData='N/A';
+      this.advanceTable.verified='true';
+      this.advanceTable.verifiedBy='N/A';
+      this.advanceTable.verificationRemark='N/A';
+      this.advanceTable.verificationDate=('N/A');
+      this.uploadedByName();
+    }
+    this.advanceTableForm = this.createContactForm();
+    if (this.action === 'edit') {
+      this.loadEditRecord();
+    }
   }
+
+  private fieldValue(row: any, camel: string, pascal: string): any {
+    const value = row?.[camel] ?? row?.[pascal];
+    return value === undefined || value === null ? '' : value;
+  }
+
+  private formatDocumentUploadFields(row: any): void {
+    if (!row) {
+      return;
+    }
+    const uploadDateRaw = this.fieldValue(row, 'documentUploadDate', 'DocumentUploadDate');
+    if (uploadDateRaw) {
+      const parsed = moment(uploadDateRaw);
+      row.documentUploadDate = parsed.isValid() ? parsed.format('DD/MM/YYYY') : String(uploadDateRaw).split('T')[0];
+    }
+    const uploadTimeRaw = this.fieldValue(row, 'documentUploadTime', 'DocumentUploadTime');
+    if (uploadTimeRaw) {
+      const timeText = String(uploadTimeRaw);
+      row.documentUploadTime = timeText.length >= 8 ? timeText.substring(0, 8) : timeText;
+    }
+    row.documentUploadByID = row.documentUploadByID ?? row.DocumentUploadByID ?? null;
+    row.documentUploadBy = this.fieldValue(row, 'documentUploadBy', 'DocumentUploadBy');
+  }
+
+  private formatVerificationFields(row: any): void {
+    if (!row) {
+      return;
+    }
+    const dateRaw = this.fieldValue(row, 'verificationDate', 'VerificationDate');
+    if (dateRaw && dateRaw !== 'N/A') {
+      const parsed = moment(dateRaw);
+      row.verificationDate = parsed.isValid() ? parsed.format('DD/MM/YYYY') : String(dateRaw).split('T')[0].split(' ')[0];
+    }
+    const verificationTimeRaw = this.fieldValue(row, 'verificationTime', 'VerificationTime');
+    if (verificationTimeRaw) {
+      const timeText = String(verificationTimeRaw);
+      row.verificationTime = timeText.length >= 8 ? timeText.substring(0, 8) : timeText;
+    }
+  }
+
+  private resolveDocumentId(row: any): number | null {
+    const raw = row?.documentID ?? row?.DocumentID;
+    if (raw === undefined || raw === null || raw === '') {
+      return null;
+    }
+    const id = Number(raw);
+    return Number.isNaN(id) ? null : id;
+  }
+
+  private resolveDocumentName(row: any): string {
+    return (
+      row?.document ??
+      row?.Document ??
+      row?.documentName ??
+      row?.DocumentName ??
+      'Document'
+    ).toString();
+  }
+
+  private ensureDocumentInDropdown(row: any, documentId: number | null): void {
+    if (documentId == null) {
+      return;
+    }
+    const list = this.DocumentList ?? [];
+    const exists = list.some((item) => Number(item.documentID ?? item.DocumentID) === documentId);
+    if (exists) {
+      return;
+    }
+    this.DocumentList = [
+      ...list,
+      {
+        documentID: documentId,
+        documentName: this.resolveDocumentName(row),
+      },
+    ];
+  }
+
+  private applyDocumentSelection(row: any, documentId: number | null): void {
+    if (documentId == null) {
+      return;
+    }
+    this.ensureDocumentInDropdown(row, documentId);
+    this.advanceTableForm.patchValue({ documentID: documentId });
+  }
+
+  private bindEditFormValues(row: any): void {
+    const documentImage = this.fieldValue(row, 'documentImage', 'DocumentImage');
+    this.ImagePath = documentImage || '';
+
+    const documentExpiryRaw = this.fieldValue(row, 'documentExpiry', 'DocumentExpiry');
+    const documentStartRaw = this.fieldValue(row, 'documentStartDate', 'DocumentStartDate');
+    const documentId = this.resolveDocumentId(row);
+
+    this.advanceTable = row;
+    this.formatDocumentUploadFields(this.advanceTable);
+    this.formatVerificationFields(this.advanceTable);
+    this.searchTerm.setValue(this.fieldValue(row, 'addressCity', 'AddressCity'));
+
+    this.advanceTableForm.patchValue({
+      driverDocumentID: this.fieldValue(row, 'driverDocumentID', 'driverDocumentID'),
+      driverID: this.fieldValue(row, 'driverID', 'driverID') || this.data.driverID,
+      documentNumber: this.fieldValue(row, 'documentNumber', 'DocumentNumber'),
+      documentIssuingAuthority: this.fieldValue(row, 'documentIssuingAuthority', 'DocumentIssuingAuthority'),
+      documentImage,
+      documentImageNonAvailabilityReason: this.fieldValue(row, 'documentImageNonAvailabilityReason', 'DocumentImageNonAvailabilityReason'),
+      documentExpiry: documentExpiryRaw ? moment(documentExpiryRaw).toDate() : null,
+      documentStartDate: documentStartRaw ? moment(documentStartRaw).toDate() : null,
+      activationStatus: row.activationStatus ?? row.ActivationStatus,
+      addressCityID: row.addressCityID ?? row.AddressCityID,
+      address: row.address ?? row.Address,
+      addressCity: row.addressCity ?? row.AddressCity,
+      pin: row.pin ?? row.Pin,
+      verified: row.verified ?? row.Verified,
+      verifiedBy: row.verifiedBy ?? row.VerifiedBy,
+      verificationRemark: row.verificationRemark ?? row.VerificationRemark,
+      verificationDate: row.verificationDate ?? row.VerificationDate,
+    });
+
+    if (this.DocumentList?.length) {
+      this.applyDocumentSelection(row, documentId);
+      this.pendingDocumentId = null;
+    } else {
+      this.pendingDocumentId = documentId;
+    }
+
+    this.syncReasonRequiredValidators();
+  }
+
+  private loadEditRecord(): void {
+    const id = this.fieldValue(this.advanceTable, 'driverDocumentID', 'driverDocumentID');
+    if (!id) {
+      this.bindEditFormValues(this.advanceTable);
+      return;
+    }
+    this.advanceTableService.getById(Number(id)).subscribe(
+      (record) => {
+        if (record) {
+          this.bindEditFormValues(record);
+        } else {
+          this.bindEditFormValues(this.advanceTable);
+        }
+      },
+      () => {
+        this.bindEditFormValues(this.advanceTable);
+      }
+    );
+  }
+
   public ngOnInit(): void
   {
+    this.advanceTableForm.get('documentImage')?.valueChanges.subscribe(() => {
+      this.syncReasonRequiredValidators();
+    });
+    if (this.action !== 'edit') {
+      this.syncReasonRequiredValidators();
+    }
     this.InitCities();
     this.InitIssuingCity()
     this.intDocument();
   }
 
-  intDocument(){
-    this._generalService.getDocumentRequiredforDriver().subscribe
-    (
-      data =>   
-      {
-        this.DocumentList = data;
-        
+  private hasUploadedDocumentImage(): boolean {
+    const image = this.advanceTableForm?.get('documentImage')?.value;
+    return typeof image === 'string' && image.trim().length > 0;
+  }
+
+  private syncReasonRequiredValidators(): void {
+    const reasonControl = this.advanceTableForm.get('documentImageNonAvailabilityReason');
+    if (!reasonControl) {
+      return;
+    }
+    if (this.hasUploadedDocumentImage()) {
+      reasonControl.clearValidators();
+    } else {
+      reasonControl.setValidators([Validators.required]);
+    }
+    reasonControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  intDocument()
+  {
+    this.advanceTableService.GetDocumentForDriver().subscribe(
+      (data) => {
+        this.DocumentList = (data ?? []).map((item) => ({
+          documentID: Number(item.documentID ?? item.DocumentID),
+          documentName: item.documentName ?? item.DocumentName ?? '',
+        }));
+        if (this.pendingDocumentId != null) {
+          this.applyDocumentSelection(this.advanceTable, this.pendingDocumentId);
+          this.pendingDocumentId = null;
+        }
       }
     );
   }
   
-  InitCities(){
+  InitCities()
+  {
     this._generalService.GetCitiessAll().subscribe(
-      data=>
-      {
-        this.CityList=data;
-        // this.advanceTableForm.controls['addressCity'].setValidators([Validators.required,
-        //   this.cityTypeValidator(this.CityList)
-        // ]);
-        // this.advanceTableForm.controls['addressCity'].updateValueAndValidity();
-
-        this.filteredOptions = this.advanceTableForm.controls['addressCity'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filter(value || ''))
-        ); 
-      });
+    data=>
+    {
+      this.CityList=data;
+      // this.advanceTableForm.controls['addressCity'].setValidators([Validators.required,
+      //   this.cityTypeValidator(this.CityList)
+      // ]);
+      // this.advanceTableForm.controls['addressCity'].updateValueAndValidity();
+      this.filteredOptions = this.advanceTableForm.controls['addressCity'].valueChanges.pipe(
+        startWith(""),
+        map(value => this._filter(value || ''))
+      ); 
+    });
   }
 
   private _filter(value: string): any {
@@ -168,9 +331,11 @@ export class FormDialogComponent
     }
   }
 
-  getTitle(geoPointId: any) {
+  getTitle(geoPointId: any) 
+  {
     this.addressGeoPointID=geoPointId;
   }
+
   cityTypeValidator(CityList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const value = control.value?.toLowerCase();
@@ -178,16 +343,18 @@ export class FormDialogComponent
       return match ? null : { cityTypeInvalid: true };
     };
   }
-  InitIssuingCity(){
+
+  InitIssuingCity()
+  {
     this._generalService.GetCitiessAll().subscribe(
-      data=>
-      {
-        this.CitiesList=data;
-        this.filteredCityOptions = this.advanceTableForm.controls['addressCity'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtering(value || ''))
-        ); 
-      });
+    data=>
+    {
+      this.CitiesList=data;
+      this.filteredCityOptions = this.advanceTableForm.controls['addressCity'].valueChanges.pipe(
+        startWith(""),
+        map(value => this._filtering(value || ''))
+      ); 
+    });
   }
 
   private _filtering(value: string): any {
@@ -209,29 +376,30 @@ export class FormDialogComponent
     Validators.required
     // Validators.email,
   ]);
+
   getErrorMessage() 
   {
-      return this.formControl.hasError('required')
-      ? 'Required field'
-      : this.formControl.hasError('email')
-      ? 'Not a valid email'
-      : '';
+    return this.formControl.hasError('required')
+    ? 'Required field'
+    : this.formControl.hasError('email')
+    ? 'Not a valid email'
+    : '';
   }
   
   createContactForm(): FormGroup 
   {
-  
     return this.fb.group(
     {
       driverDocumentID: [this.advanceTable.driverDocumentID],
       driverID: [this.advanceTable.driverID],
-      documentID: [this.advanceTable.documentID],
+      documentID: [this.resolveDocumentId(this.advanceTable), Validators.required],
       documentNumber: [this.advanceTable?.documentNumber],
       documentIssuingAuthority: [this.advanceTable?.documentIssuingAuthority],
       documentImage: [this.advanceTable?.documentImage],
       documentImageNonAvailabilityReason: [this.advanceTable?.documentImageNonAvailabilityReason],
       addressCityID: [this.advanceTable?.addressCityID],
-      documentExpiry: [this.advanceTable.documentExpiry],
+      documentStartDate: [this.advanceTable.documentStartDate],
+      documentExpiry: [this.advanceTable.documentExpiry, Validators.required],
       activationStatus: [this.advanceTable.activationStatus],
       verifiedData: [this.advanceTable.verifiedData],
       verified: [this.advanceTable.verified],
@@ -244,30 +412,35 @@ export class FormDialogComponent
     });
   }
 
-  public noWhitespaceValidator(control: FormControl) {
+  public noWhitespaceValidator(control: FormControl)
+  {
     const isWhitespace = (control.value || '').trim().length === 0;
     const isValid = !isWhitespace;
     return isValid ? null : { 'whitespace': true };
-}
+  }
 
-uploadedByName(){
-  this._generalService.getEmployeeID(this._generalService.getUserID()).subscribe(
+  uploadedByName()
+  {
+    this._generalService.getEmployeeID(this._generalService.getUserID()).subscribe(
     data=>{
       this.EmployeeList=data;
       this.advanceTableForm.patchValue({uploadedBy:this.EmployeeList[0].firstName+' '+this.EmployeeList[0].lastName});
-    }
-  );
-}
+      }
+    );
+  }
 
   submit() 
   {
     // emppty stuff
   }
+
   reset(): void 
   {
     this.advanceTableForm.reset();
   }
-  onNoClick(){
+
+  onNoClick()
+  {
     this.dialogRef.close();
   }
 
@@ -280,18 +453,17 @@ uploadedByName(){
     .subscribe(
     response => 
     {
-        this.dialogRef.close();
-       this._generalService.sendUpdate('DriverDocumentCreate:DriverDocumentView:Success');//To Send Updates 
-       this.saveDisabled = true;
-    
+      this.dialogRef.close();
+      this._generalService.sendUpdate('DriverDocumentCreate:DriverDocumentView:Success');//To Send Updates 
+      this.saveDisabled = true;
     },
     error =>
     {
-       this._generalService.sendUpdate('DriverDocumentAll:DriverDocumentView:Failure');//To Send Updates 
-       this.saveDisabled = true; 
-    }
-  )
+      this._generalService.sendUpdate('DriverDocumentAll:DriverDocumentView:Failure');//To Send Updates 
+      this.saveDisabled = true; 
+    })
   }
+
   public Put(): void
   {
     this.advanceTableForm.patchValue({addressCityID:this.addressGeoPointID || this.advanceTable.addressCityID});
@@ -301,53 +473,39 @@ uploadedByName(){
     .subscribe(
     response => 
     {
-        this.dialogRef.close();
-       this._generalService.sendUpdate('DriverDocumentUpdate:DriverDocumentView:Success');//To Send Updates  
-       this.saveDisabled = true;
-       
+      this.dialogRef.close();
+      this._generalService.sendUpdate('DriverDocumentUpdate:DriverDocumentView:Success');//To Send Updates  
+      this.saveDisabled = true; 
     },
     error =>
     {
      this._generalService.sendUpdate('DriverDocumentAll:DriverDocumentView:Failure');//To Send Updates 
      this.saveDisabled = true; 
-    }
-  )
+    })
   }
 
-  // public confirmAdd(): void 
-  // {
-  //      if(this.action=="edit")
-  //      {
-  //       if(this.advanceTable.verified==='Verified'){
-  //         this.licenceVerification();
-  //       }
-  //       if(this.advanceTable.verified==='Rejected'){
-  //         this.Put();
-  //       } 
-  //      }
-  //      else
-  //      {
-  //         this.Post();
-  //      }
-
-  // }
-
   public confirmAdd(): void {
-    this.saveDisabled = false;
-    if (this.action == "edit") {
-
-      if (this.advanceTable.verified === 'Verified') {
-        this.licenceVerification();
-      }
-      if (this.advanceTable.verified === 'Rejected') {
-        this.Put();
-      }
-      if (this.advanceTable.verified === 'Unverified') {
-        this.Put();
-      }
-
+    this.syncReasonRequiredValidators();
+    if (!this.advanceTableForm.valid) {
+      return;
     }
-    else {
+    this.saveDisabled = false;
+    if (this.action == "edit") 
+    {
+      // if (this.advanceTable.verified === 'Verified') {
+      //   this.licenceVerification();
+      // }
+      if (this.advanceTable.verified === 'Rejected') 
+      {
+        this.Put();
+      }
+      if (this.advanceTable.verified === 'Unverified') 
+      {
+        this.Put();
+      }
+    }
+    else 
+    {
       this.Post();
     }
   }
@@ -360,24 +518,25 @@ uploadedByName(){
   {
     this.response = event;
     this.ImagePath = this._generalService.getImageURL() + this.response.dbPath;
-    this.advanceTableForm.patchValue({documentImage:this.ImagePath})
+    this.advanceTableForm.patchValue({documentImage:this.ImagePath});
+    this.syncReasonRequiredValidators();
   }
 
-  licenceVerification()
-  {
-    const dialogRef = this.dialog.open(LicenseVerificationComponent, 
-    {
-      data: 
-        {
-          advanceTable: this.advanceTable,
-          advanceTableForm:this.advanceTableForm,
-          addressGeoPointID:this.addressGeoPointID,
-          //issuingGeoPointID:this.issuingGeoPointID,
-          driverID:this.advanceTable.driverID,
-          dialogRefrence:this.dialogRef
-        }
-    });
-  }
+  // licenceVerification()
+  // {
+  //   const dialogRef = this.dialog.open(LicenseVerificationComponent, 
+  //   {
+  //     data: 
+  //       {
+  //         advanceTable: this.advanceTable,
+  //         advanceTableForm:this.advanceTableForm,
+  //         addressGeoPointID:this.addressGeoPointID,
+  //         //issuingGeoPointID:this.issuingGeoPointID,
+  //         driverID:this.advanceTable.driverID,
+  //         dialogRefrence:this.dialogRef
+  //       }
+  //   });
+  // }
 
 //start date
 onBlurUpdateDate(value: string): void {
@@ -407,6 +566,34 @@ if (validDate) {
 } else {
   this.advanceTableForm.get('documentExpiry')?.setErrors({ invalidDate: true });
 }
+}
+
+onBlurUpdateStartDate(value: string): void {
+  value = this._generalService.resetDateiflessthan12(value);
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    this.advanceTableForm.get('documentStartDate')?.setValue(formattedDate);
+  } else if (value?.trim()) {
+    this.advanceTableForm.get('documentStartDate')?.setErrors({ invalidDate: true });
+  } else {
+    this.advanceTableForm.get('documentStartDate')?.setValue(null);
+    this.advanceTableForm.get('documentStartDate')?.setErrors(null);
+  }
+}
+
+onBlurUpdateStartDateEdit(value: string): void {
+  const validDate = moment(value, 'DD/MM/YYYY', true).isValid();
+  if (validDate) {
+    const formattedDate = moment(value, 'DD/MM/YYYY').toDate();
+    if (this.action === 'edit') {
+      this.advanceTable.documentStartDate = formattedDate;
+    } else {
+      this.advanceTableForm.get('documentStartDate')?.setValue(formattedDate);
+    }
+  } else if (value?.trim()) {
+    this.advanceTableForm.get('documentStartDate')?.setErrors({ invalidDate: true });
+  }
 }
 
 }

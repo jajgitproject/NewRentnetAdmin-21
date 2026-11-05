@@ -7,7 +7,18 @@ import { ReservationGroup } from '../../reservationGroup.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import {
+  createDisplayEmployeeFn,
+  employeeNameControlValidator,
+  employeeToReservationGroupFieldString,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  normalizeReservationGroupEmployeeFieldsBeforeSave,
+} from 'src/app/shared/customer-employee-autocomplete';
 import { CustomerTypeDropDown } from 'src/app/customerType/customerTypeDropDown.model';
 import { CustomerCustomerGroupDropDown } from 'src/app/customer/customerCustomerGroupDropDown.model';
 import { CustomerPersonDropDown } from 'src/app/customerPerson/customerPersonDropDown.model';
@@ -34,6 +45,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   })
 
 export class FormDialogComponent {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayKamFn = createDisplayEmployeeFn();
+  displaySalesExecutiveFn = createDisplayEmployeeFn();
+
   showError: string;
   action: string;
   dialogTitle: string;
@@ -49,7 +65,7 @@ export class FormDialogComponent {
   filteredBookerOptions: Observable<CustomerPersonDropDown[]>;
   searchBooker: FormControl = new FormControl();
 
-  filteredEmployeeOptions: Observable<EmployeeDropDown[]>;
+  filteredEmployeeOptions: Observable<EmployeeDropDown[]> = of([]);
   searchEmployee: FormControl = new FormControl();
 
   public TransferLocationList?: OrganizationalEntityDropDown | null;
@@ -57,7 +73,9 @@ export class FormDialogComponent {
   public CustomerCustomerGroupList?: CustomerCustomerGroupDropDown[] = [];
   public BookerList?: CustomerPersonDropDown[] = [];
   public EmployeeList?: EmployeeDropDown[] = [];
-  filteredEmployeesOptions: Observable<EmployeeDropDown[]>;
+  public kamPrefixList?: EmployeeDropDown[] = [];
+  public sePrefixList?: EmployeeDropDown[] = [];
+  filteredEmployeesOptions: Observable<EmployeeDropDown[]> = of([]);
   customerTypeID: any;
   customerID: any;
   customerGroupID: any;
@@ -770,36 +788,47 @@ export class FormDialogComponent {
   //------------------Sales Executive-----------
 
   InitSalesExecutive() {
-    this._generalService.GetEmployee().subscribe(
-      data => {
-        this.EmployeeList = data;
-        this.advanceTableForm.controls['salesExecutive'].setValidators([
-          this.salesExecutiveValidator(this.EmployeeList)
-        ]);
-        this.advanceTableForm.controls['salesExecutive'].updateValueAndValidity();
-        this.filteredEmployeeOptions = this.advanceTableForm.controls['salesExecutive'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterSE(value || ''))
-        )
-      });;
+    this.advanceTableForm.controls['salesExecutive'].enable();
+    this.sePrefixList = [];
+    this.filteredEmployeeOptions = of([]);
   }
 
-  private _filterSE(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.EmployeeList?.filter(
-      customer => {
-        return customer.firstName.toLowerCase().includes(filterValue) || customer.mobile.toLowerCase().includes(filterValue) || customer.email.toLowerCase().includes(filterValue);
-      }
-    );
+  InitSalesExecutivePrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'salesExecutive', {
+      getEmployeeList: () => this.sePrefixList || [],
+      setEmployeeList: (list) => { this.sePrefixList = list; },
+      setFilteredOptions: (options) => { this.filteredEmployeeOptions = options; },
+    });
   }
-  onSESelected(selectedSEName: string) {
-    const selectedSE = this.EmployeeList.find(
-      data => data.firstName + ' ' + data.lastName === selectedSEName
-    );
 
-    if (selectedSE) {
+  onSESelected(selectedSE: EmployeeDropDown | string) {
+    if (isEmployeeDropdownSelection(selectedSE)) {
       this.getSalesExecutiveID(selectedSE.employeeID);
+      this.advanceTableForm.patchValue(
+        { salesExecutive: selectedSE, salesExecutiveID: selectedSE.employeeID },
+        { emitEvent: false }
+      );
+      return;
     }
+    if (selectedSE && typeof selectedSE === 'object' && selectedSE.employeeID) {
+      const composite = `${selectedSE.firstName} ${selectedSE.lastName}-${selectedSE.mobile}-${selectedSE.email}`;
+      this.getSalesExecutiveID(selectedSE.employeeID);
+      this.advanceTableForm.patchValue({ salesExecutive: composite }, { emitEvent: false });
+      return;
+    }
+    const selected = this.sePrefixList?.find(
+      (data) => employeeToReservationGroupFieldString(data).toLowerCase() === String(selectedSE).toLowerCase()
+    ) || this.salesManagerList?.find(
+      (data) =>
+        `${data.firstName} ${data.lastName}-${data.mobile}-${data.email}`.toLowerCase() === String(selectedSE).toLowerCase()
+    );
+    if (selected?.employeeID) {
+      this.getSalesExecutiveID(selected.employeeID);
+    }
+  }
+
+  isSelectedSalesExecutiveExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'salesExecutive', this.sePrefixList || []);
   }
   getSalesExecutiveID(salesExecutiveID: any) {
     this.salesExecutiveID = salesExecutiveID;
@@ -820,7 +849,14 @@ export class FormDialogComponent {
   salesExecutiveValidator(EmployeeList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) {
-        return null; // No value to validate, return null (no error)
+        return null;
+      }
+      if (isEmployeeDropdownSelection(control.value)) {
+        return null;
+      }
+      const prefixErr = employeeNameControlValidator(() => this.sePrefixList || [])(control);
+      if (!prefixErr) {
+        return null;
       }
       const value = control.value?.toLowerCase();
       const match = EmployeeList.some(option => (option.firstName + ' ' + option.lastName + '-' + option.mobile + '-' + option.email).toLowerCase() === value);
@@ -831,36 +867,46 @@ export class FormDialogComponent {
   //------------------Customer KAM-----------
 
   InitCustomerKAM() {
-    this._generalService.GetEmployee().subscribe(
-      data => {
-        this.EmployeeList = data;
-        this.advanceTableForm.controls['kam'].setValidators([
-          this.customerKAMValidator(this.EmployeeList)
-        ]);
-        this.advanceTableForm.controls['kam'].updateValueAndValidity();
-        this.filteredEmployeesOptions = this.advanceTableForm.controls['kam'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterKAM(value || ''))
-        )
-      });;
+    this.advanceTableForm.controls['kam'].enable();
+    this.kamPrefixList = [];
+    this.filteredEmployeesOptions = of([]);
   }
 
-  private _filterKAM(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.EmployeeList?.filter(
-      customer => {
-        return customer.firstName.toLowerCase().includes(filterValue) || customer.mobile.toLowerCase().includes(filterValue) || customer.email.toLowerCase().includes(filterValue);
-      }
-    );
+  InitKamPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'kam', {
+      getEmployeeList: () => this.kamPrefixList || [],
+      setEmployeeList: (list) => { this.kamPrefixList = list; },
+      setFilteredOptions: (options) => { this.filteredEmployeesOptions = options; },
+    });
   }
-  onKAMSelected(selectedSEName: string) {
-    const selectedSE = this.EmployeeList.find(
-      data => data.firstName + ' ' + data.lastName === selectedSEName
-    );
 
-    if (selectedSE) {
-      this.getCustomerKAMID(selectedSE.employeeID);
+  onKAMSelected(selectedKam: EmployeeDropDown | string) {
+    if (isEmployeeDropdownSelection(selectedKam)) {
+      this.getCustomerKAMID(selectedKam.employeeID);
+      this.advanceTableForm.patchValue({ kam: selectedKam, kamID: selectedKam.employeeID }, { emitEvent: false });
+      return;
     }
+    if (selectedKam && typeof selectedKam === 'object' && selectedKam.employeeID) {
+      const composite = `${selectedKam.firstName} ${selectedKam.lastName}-${selectedKam.mobile}-${selectedKam.email}`;
+      this.getCustomerKAMID(selectedKam.employeeID);
+      this.advanceTableForm.patchValue({ kam: composite }, { emitEvent: false });
+      return;
+    }
+    const selected =
+      this.kamPrefixList?.find(
+        (data) => employeeToReservationGroupFieldString(data).toLowerCase() === String(selectedKam).toLowerCase()
+      ) ||
+      this.customerKamList?.find(
+        (data) =>
+          `${data.firstName} ${data.lastName}-${data.mobile}-${data.email}`.toLowerCase() === String(selectedKam).toLowerCase()
+      );
+    if (selected?.employeeID) {
+      this.getCustomerKAMID(selected.employeeID);
+    }
+  }
+
+  isSelectedKamExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'kam', this.kamPrefixList || []);
   }
   getCustomerKAMID(kamID: any) {
     this.kamID = kamID;
@@ -870,7 +916,14 @@ export class FormDialogComponent {
   customerKAMValidator(EmployeesList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) {
-        return null; // No value to validate, return null (no error)
+        return null;
+      }
+      if (isEmployeeDropdownSelection(control.value)) {
+        return null;
+      }
+      const prefixErr = employeeNameControlValidator(() => this.kamPrefixList || [])(control);
+      if (!prefixErr) {
+        return null;
       }
       const value = control.value?.toLowerCase();
       const match = EmployeesList.some(option => (option.firstName + ' ' + option.lastName + '-' + option.mobile + '-' + option.email).toLowerCase() === value);
@@ -919,10 +972,12 @@ export class FormDialogComponent {
 
     this.advanceTableForm.patchValue({ reservationExecutiveID: this._generalService.getUserID() });
 
-    this.advanceTableService.add(this.advanceTableForm.getRawValue()).subscribe({
+    const raw = this.advanceTableForm.getRawValue();
+    normalizeReservationGroupEmployeeFieldsBeforeSave(raw);
+    this.advanceTableService.add(raw).subscribe({
       next: (response: any) => {
         this.saveDisabled = true; // Show Save button, hide spinner
-        this.dialogRef.close(this.advanceTableForm.getRawValue());
+        this.dialogRef.close(raw);
         this._generalService.sendUpdate('ReservationGroupCreate:ReservationGroupView:Success');
         if (response.numberOfBookings === 1) {
           const encryptedCustomerID = encodeURIComponent(this._generalService.encrypt(this.customerID.toString()));
@@ -1038,7 +1093,9 @@ export class FormDialogComponent {
       serviceLocationID: this.locationID || this.advanceTable.locationID
     });
 
-    this.advanceTableService.update(this.advanceTableForm.getRawValue()).subscribe({
+    const raw = this.advanceTableForm.getRawValue();
+    normalizeReservationGroupEmployeeFieldsBeforeSave(raw);
+    this.advanceTableService.update(raw).subscribe({
       next: () => {
         this.saveDisabled = true; // Show Save button, hide spinner
         this.dialogRef.close();

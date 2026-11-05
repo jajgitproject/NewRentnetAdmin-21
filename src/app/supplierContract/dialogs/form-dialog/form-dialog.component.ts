@@ -13,9 +13,20 @@ import { QualificationDropDown } from 'src/app/general/qualificationDropDown.mod
 import { ModeOfPaymentDropDown } from '../../modeOfPaymentDropDown.model';
 import { PaymentCycleDropDown } from '../../paymentCycleDropDown.model';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import moment from 'moment';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 @Component({
   standalone: false,
   selector: 'app-form-dialog',
@@ -26,6 +37,11 @@ import moment from 'moment';
 
 export class FormDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayNegotiatedFn = createDisplayEmployeeFn();
+  displayApprovedFn = createDisplayEmployeeFn();
+
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
@@ -38,9 +54,11 @@ export class FormDialogComponent
   public ModeOfPaymentList?: ModeOfPaymentDropDown[] = [];
   public PaymentCycleList?: PaymentCycleDropDown[] = [];
   public EmployeeList?: EmployeeDropDown[] = [];
-  filteredCreatedByOptionss: Observable<EmployeeDropDown[]>;
+  public NegotiatedList?: EmployeeDropDown[] = [];
+  public ApprovedList?: EmployeeDropDown[] = [];
+  filteredCreatedByOptionss: Observable<EmployeeDropDown[]> = of([]);
   searchCreatedBy: FormControl = new FormControl();
-  filteredinstructedByOptionss: Observable<EmployeeDropDown[]>;
+  filteredinstructedByOptionss: Observable<EmployeeDropDown[]> = of([]);
   searchinstructedBy: FormControl = new FormControl();
   filteredModeOfPaymentOptionss: Observable<ModeOfPaymentDropDown[]>;
   searchModeOfPayment: FormControl = new FormControl();
@@ -92,10 +110,91 @@ export class FormDialogComponent
   }
   public ngOnInit(): void
   {
-    this.InitEmployee();
-    this.InitEmployees();
+    if (this.action === 'edit') {
+      this.patchNegotiatedForEdit();
+      this.patchApprovedForEdit();
+    }
     this.InitModeOfPayment();
     this.InitPaymentCycle();
+  }
+
+  isSelectedNegotiatedExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'negotiatedBy', this.NegotiatedList || []);
+  }
+
+  isSelectedApprovedExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'approvedBy', this.ApprovedList || []);
+  }
+
+  private patchNegotiatedForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.negotiatedByID,
+      this.advanceTableForm,
+      'negotiatedBy',
+      {
+        getEmployeeList: () => this.NegotiatedList || [],
+        setEmployeeList: (list) => { this.NegotiatedList = list; },
+        setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+        onEmployeeId: (id) => {
+          this.employeeID = id;
+          this.advanceTableForm.patchValue({ negotiatedByID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  private patchApprovedForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.approvedByID,
+      this.advanceTableForm,
+      'approvedBy',
+      {
+        getEmployeeList: () => this.ApprovedList || [],
+        setEmployeeList: (list) => { this.ApprovedList = list; },
+        setFilteredOptions: (options) => { this.filteredinstructedByOptionss = options; },
+        onEmployeeId: (id) => {
+          this.employeesID = id;
+          this.advanceTableForm.patchValue({ approvedByID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  InitNegotiatedPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'negotiatedBy', {
+      getEmployeeList: () => this.NegotiatedList || [],
+      setEmployeeList: (list) => { this.NegotiatedList = list; },
+      setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+    });
+  }
+
+  InitApprovedPrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'approvedBy', {
+      getEmployeeList: () => this.ApprovedList || [],
+      setEmployeeList: (list) => { this.ApprovedList = list; },
+      setFilteredOptions: (options) => { this.filteredinstructedByOptionss = options; },
+    });
+  }
+
+  private prepareEmployeeFieldsForSave(raw: Record<string, unknown>): void {
+    coerceEmployeeFieldToApiString(raw, 'negotiatedBy', this.NegotiatedList || []);
+    coerceEmployeeFieldToApiString(raw, 'approvedBy', this.ApprovedList || []);
+    const negotiated = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('negotiatedBy')?.value,
+      this.NegotiatedList || []
+    );
+    const approved = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('approvedBy')?.value,
+      this.ApprovedList || []
+    );
+    if (negotiated?.employeeID) {
+      raw.negotiatedByID = negotiated.employeeID;
+    }
+    if (approved?.employeeID) {
+      raw.approvedByID = approved.employeeID;
+    }
   }
   formControl = new FormControl('', 
   [
@@ -226,102 +325,36 @@ export class FormDialogComponent
   //   );
   // }
 
-  //----------- Employee  Validation --------------
-  employeeNameValidator(EmployeeList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = EmployeeList.some(employee => (employee.firstName + ' ' + employee.lastName).toLowerCase() === value);
-      return match ? null : { employeeNameInvalid: true };
-    };
-  }
-  
-  InitEmployee(){
-    this._generalService.GetEmployeesForSupplierContract().subscribe(
-      data=>
-      {
-        this.EmployeeList=data;
-        this.advanceTableForm.controls['negotiatedBy'].setValidators([Validators.required,this.employeeNameValidator(this.EmployeeList)]);
-        this.advanceTableForm.controls['negotiatedBy'].updateValueAndValidity();
-        this.filteredCreatedByOptionss = this.advanceTableForm.controls['negotiatedBy'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filterCreatedBy(value || ''))
-        ); 
-      });
-  }
-  
-  private _filterCreatedBy(value: string): any {
-    const filterValue = value.toLowerCase();
-    // Only show results if 3 or more characters are typed
-    if (filterValue.length < 3) {
-      return [];
-    }
-    return this.EmployeeList.filter(
-      data => 
-      {
-        const fullName=`${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.toLowerCase().includes(filterValue);
+  onNegotiatedSelected(selectedNegotiated: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'negotiatedBy',
+      selectedNegotiated,
+      (id) => {
+        this.employeeID = id;
+        this.advanceTableForm.patchValue({ negotiatedByID: id }, { emitEvent: false });
       }
     );
   }
 
-  onNegotiatedSelected(selectedNegotiated: string) {
-    const negotiatedselect = this.EmployeeList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedNegotiated
+  onApprovedSelected(selectedApproved: EmployeeDropDown): void {
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'approvedBy',
+      selectedApproved,
+      (id) => {
+        this.employeesID = id;
+        this.advanceTableForm.patchValue({ approvedByID: id }, { emitEvent: false });
+      }
     );
-  
-    if (selectedNegotiated) {
-      this.getemployee(negotiatedselect.employeeID);
-    }
   }
-  
+
   getemployee(employeeID: any) {
-    
-    this.employeeID=employeeID;
+    this.employeeID = employeeID;
   }
 
-  InitEmployees(){
-    
-    this._generalService.GetEmployeesForVehicleCategory().subscribe(
-      data=>
-      {
-        this.EmployeeList=data;
-        this.advanceTableForm.controls['approvedBy'].setValidators([Validators.required,this.employeeNameValidator(this.EmployeeList)]);
-        this.advanceTableForm.controls['approvedBy'].updateValueAndValidity();
-        this.filteredinstructedByOptionss = this.advanceTableForm.controls['approvedBy'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        ); 
-      });
-  }
-  
-  private _filtersearchinstructed(value: string): any {
-    const filterValue = value.toLowerCase();
-    // Only show results if 3 or more characters are typed
-    if (filterValue.length < 3) {
-      return [];
-    }
-    return this.EmployeeList.filter(
-      data => 
-      {
-        const fullName=`${data.firstName} ${data.lastName}`.toLowerCase();
-        return fullName.toLowerCase().includes(filterValue);
-      }
-    );
-  }
-  
-  onApprovedSelected(selectedApproved: string) {
-    const Approvedselect = this.EmployeeList.find(
-      data => `${data.firstName} ${data.lastName}` === selectedApproved
-    );
-  
-    if (selectedApproved) {
-      this.getemployeeIDTitles(Approvedselect.employeeID);
-    }
-  }
-  
   getemployeeIDTitles(employeeID: any) {
-    
-    this.employeesID=employeeID;
+    this.employeesID = employeeID;
   }
 
   // InitModeOfPayment(){
@@ -459,7 +492,9 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({ modeOfPaymentID: this.modeOfPaymentID });
     this.advanceTableForm.patchValue({ paymentCycleID: this.paymentCycleID });
 
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())
+    const raw = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldsForSave(raw);
+    this.advanceTableService.add(raw)
       .subscribe(
         response => {
           this.saveDisabled = true; // Hide spinner when request completes
@@ -480,7 +515,9 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({ modeOfPaymentID: this.modeOfPaymentID || this.advanceTable.modeOfPaymentID });
     this.advanceTableForm.patchValue({ paymentCycleID: this.paymentCycleID || this.advanceTable.paymentCycleID });
 
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())
+    const raw = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeFieldsForSave(raw);
+    this.advanceTableService.update(raw)
       .subscribe(
         response => {
           this.saveDisabled = true; // Hide spinner when request completes

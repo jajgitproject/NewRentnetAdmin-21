@@ -634,6 +634,9 @@ dateValidator() {
     if (!control.value) {
       return null;
     }
+    if (control.value instanceof Date && !isNaN(control.value.getTime())) {
+      return null;
+    }
     const isValid = moment(control.value, 'DD/MM/YYYY', true).isValid();
     return isValid ? null : { invalidDate: true };
   };

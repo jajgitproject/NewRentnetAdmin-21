@@ -59,18 +59,18 @@
                             </mat-form-field>
 
                             <mat-form-field appearance="outline" floatLabel="always" class="search-field">
-                                <mat-label>From Date *</mat-label>
+                                <mat-label>From Date</mat-label>
                                 <input type="text" matInput [matDatepicker]="fromDate"
-                                    [(ngModel)]="searchFromDate" required>
-                                <mat-datepicker-toggle matSuffix [for]="fromDate"></mat-datepicker-toggle>
+                                    [(ngModel)]="searchFromDate" [required]="!isDutySlipIdSearchActive()" [disabled]="isDutySlipIdSearchActive()">
+                                <mat-datepicker-toggle matSuffix [for]="fromDate" [disabled]="isDutySlipIdSearchActive()"></mat-datepicker-toggle>
                                 <mat-datepicker #fromDate></mat-datepicker>
                             </mat-form-field>
 
                             <mat-form-field appearance="outline" floatLabel="always" class="search-field">
-                                <mat-label>To Date *</mat-label>
+                                <mat-label>To Date</mat-label>
                                 <input type="text" matInput [matDatepicker]="toDate"
-                                    [(ngModel)]="searchToDate" required>
-                                <mat-datepicker-toggle matSuffix [for]="toDate"></mat-datepicker-toggle>
+                                    [(ngModel)]="searchToDate" [required]="!isDutySlipIdSearchActive()" [disabled]="isDutySlipIdSearchActive()">
+                                <mat-datepicker-toggle matSuffix [for]="toDate" [disabled]="isDutySlipIdSearchActive()"></mat-datepicker-toggle>
                                 <mat-datepicker #toDate></mat-datepicker>
                             </mat-form-field>
 

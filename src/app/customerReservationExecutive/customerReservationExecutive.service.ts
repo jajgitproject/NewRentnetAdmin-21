@@ -64,20 +64,46 @@ export class CustomerReservationExecutiveService
     return this.httpClient.get(this.API_URL + '/'+CustomerID +'/'+SearchCustomerReservationExecutive  + '/' + SearchEmployeeName + '/' + SearchStartDate+'/' + SearchEndDate +'/' + SearchActivationStatus +'/' + PageNumber + '/'+coloumName+'/'+sortType);
   }
 
-  add(advanceTable: CustomerReservationExecutive) 
-  {
-     
-    advanceTable.customerReservationExecutiveID=-1;
-   
-    advanceTable.fromDateString=this.generalService.getTimeApplicable(advanceTable.fromDate);
-    advanceTable.toDateString=this.generalService.getTimeApplicableTO(advanceTable.toDate);
-    return this.httpClient.post<any>(this.API_URL , advanceTable);
+  private prepareSaveBody(
+    src: Record<string, unknown>,
+    mode: 'create' | 'update'
+  ): Record<string, unknown> {
+    const body: Record<string, unknown> = { ...src };
+    if (mode === 'create') {
+      body.customerReservationExecutiveID = -1;
+    } else {
+      body.customerReservationExecutiveID = Number(
+        src['customerReservationExecutiveID'] ??
+          src['customerReservationExecutiveid'] ??
+          -1
+      );
+    }
+    body.customerID = Number(src['customerID'] ?? src['CustomerID'] ?? 0);
+    body.employeeID = Number(src['employeeID'] ?? src['EmployeeID'] ?? 0);
+    if (body.activationStatus === '' || body.activationStatus == null) {
+      body.activationStatus = true;
+    }
+    const fromDate = src['fromDate'] as Date;
+    body.fromDate = fromDate;
+    body.fromDateString = this.generalService.getTimeApplicable(fromDate);
+    let toDate = src['toDate'] as Date | null | undefined;
+    if (!toDate || (toDate instanceof Date && Number.isNaN(toDate.getTime()))) {
+      toDate = fromDate;
+    }
+    body.toDate = toDate;
+    body.toDateString = this.generalService.getTimeApplicableTO(toDate);
+    return body;
   }
-  update(advanceTable: CustomerReservationExecutive)
+
+  add(advanceTable: CustomerReservationExecutive | Record<string, unknown>) 
   {
-    advanceTable.fromDateString=this.generalService.getTimeApplicable(advanceTable.fromDate);
-    advanceTable.toDateString=this.generalService.getTimeApplicableTO(advanceTable.toDate);
-    return this.httpClient.put<any>(this.API_URL , advanceTable);
+    const body = this.prepareSaveBody(advanceTable as Record<string, unknown>, 'create');
+    return this.httpClient.post<any>(this.API_URL , body);
+  }
+  update(advanceTable: CustomerReservationExecutive | Record<string, unknown>)
+  {
+    const body = this.prepareSaveBody(advanceTable as Record<string, unknown>, 'update');
+    return this.httpClient.put<any>(this.API_URL , body);
   }
   delete(customerReservationExecutiveid: number):  Observable<any> 
   {

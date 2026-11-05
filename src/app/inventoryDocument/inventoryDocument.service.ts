@@ -197,10 +197,14 @@ export class InventoryDocumentService
 
   updateVerification(advanceTable: InventoryDocumentVerificationModel)
   {
-    advanceTable.userID=this.generalService.getUserID();
-    advanceTable.verificationDateString=this.generalService.getTimeApplicable(advanceTable.verificationDate);
-    advanceTable.verifiedByID=this.generalService.getUserID();
-    return this.httpClient.put<any>(this.API_URL_Verify , advanceTable);
+    const payload = {
+      inventoryDocumentID: advanceTable.inventoryDocumentID,
+      verified: advanceTable.verified,
+      verificationRemark: advanceTable.verificationRemark,
+      userID: this.generalService.getUserID(),
+      verifiedByID: this.generalService.getUserID(),
+    };
+    return this.httpClient.put<any>(this.API_URL_Verify, payload);
   }
 
   GetDocumentForInventory(): Observable<DocumentDropDown[]> 
