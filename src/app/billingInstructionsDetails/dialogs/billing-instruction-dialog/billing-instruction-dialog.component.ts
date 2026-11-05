@@ -2,15 +2,26 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { BillingInstructionsDetailsService } from '../../billingInstructionsDetails.service';
-import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
 import { BillingInstructionsDetails } from '../../billingInstructionsDetails.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { map, startWith } from 'rxjs/operators';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  employeeNameControlValidator,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -22,6 +33,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 export class BillingInstructionsDetailsDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
+
   saveDisabled:boolean=true;
   buttonDisabled:boolean=false;
   status: any;
@@ -29,9 +44,11 @@ export class BillingInstructionsDetailsDialogComponent
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTable: BillingInstructionsDetails;
-  employeeID: any;
   reservationBillingInstructionByEmployeesID: any;
   ReservationID: any;
+
+  public EmployeeList?: EmployeeDropDown[] = [];
+  filteredCreatedByOptionss: Observable<EmployeeDropDown[]> = of([]);
 
   constructor(
   public dialogRef: MatDialogRef<BillingInstructionsDetailsDialogComponent>, 
@@ -41,14 +58,12 @@ export class BillingInstructionsDetailsDialogComponent
     private fb: FormBuilder,
   public _generalService:GeneralService)
   {
-        // Set the defaults
         this.action = data.action;
         
         if (this.action === 'edit') 
         {
           this.dialogTitle ='Billing Instruction';       
           this.advanceTable = data.advanceTable;
-          this.advanceTable.reservationBillingInstructionByEmployee = data.advanceTable.firstName +" "+ data.advanceTable.lastName;
           this.ImagePath = this.advanceTable.reservationBillingInstructionAttachment;
       
         } else 
@@ -59,23 +74,93 @@ export class BillingInstructionsDetailsDialogComponent
           this.ReservationID = data.reservationID;
         }
         this.status=data?.status?.status || data?.status || data;
-        // if(this.status!='Changes allow'){
-        //   this.buttonDisabled=true;
-        // }
           if(this.status === 'Changes allow'){
-    this.buttonDisabled = false;  // Save button enable
+    this.buttonDisabled = false;
 } else {
-    this.buttonDisabled = true;   // Save button disable
+    this.buttonDisabled = true;
 }
         this.advanceTableForm = this.createContactForm();
   }
   
-  public EmployeeList?: EmployeeDropDown[] = [];
-  filteredCreatedByOptionss: Observable<EmployeeDropDown[]>;
   public ngOnInit(): void
   {
-   this.InitEmployee(); 
+    const employeeCtrl = this.advanceTableForm.get('reservationBillingInstructionByEmployee');
+    employeeCtrl?.setValidators([
+      Validators.required,
+      employeeNameControlValidator(() => this.EmployeeList || []),
+    ]);
+    employeeCtrl?.updateValueAndValidity({ emitEvent: false });
+
+    if (this.action === 'edit') {
+      this.patchEmployeeForEdit();
+    }
   }
+
+  isSelectedEmployeeExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(
+      this.advanceTableForm,
+      'reservationBillingInstructionByEmployee',
+      this.EmployeeList || []
+    );
+  }
+
+  private patchEmployeeForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.reservationBillingInstructionByEmployeeID,
+      this.advanceTableForm,
+      'reservationBillingInstructionByEmployee',
+      {
+        getEmployeeList: () => this.EmployeeList || [],
+        setEmployeeList: (list) => { this.EmployeeList = list; },
+        setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+        onEmployeeId: (id) => {
+          this.reservationBillingInstructionByEmployeesID = id;
+          this.advanceTableForm.patchValue({ reservationBillingInstructionByEmployeeID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  InitEmployeePrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'reservationBillingInstructionByEmployee', {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+    });
+  }
+
+  onEmployeeSelected(selected: EmployeeDropDown): void {
+    if (isEmployeeDropdownSelection(selected)) {
+      const list = this.EmployeeList || [];
+      if (!list.some((e) => Number(e.employeeID) === Number(selected.employeeID))) {
+        this.EmployeeList = [selected, ...list];
+      }
+    }
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'reservationBillingInstructionByEmployee',
+      selected,
+      (id) => {
+        this.reservationBillingInstructionByEmployeesID = id;
+        this.advanceTableForm.patchValue({ reservationBillingInstructionByEmployeeID: id }, { emitEvent: false });
+      }
+    );
+    this.advanceTableForm.get('reservationBillingInstructionByEmployee')?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private prepareEmployeeForSave(raw: Record<string, unknown>): void {
+    coerceEmployeeFieldToApiString(raw, 'reservationBillingInstructionByEmployee', this.EmployeeList || []);
+    const employee = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('reservationBillingInstructionByEmployee')?.value,
+      this.EmployeeList || []
+    );
+    if (employee?.employeeID) {
+      raw.reservationBillingInstructionByEmployeeID = employee.employeeID;
+      this.reservationBillingInstructionByEmployeesID = employee.employeeID;
+    }
+  }
+
   createContactForm(): FormGroup 
   {
     return this.fb.group(
@@ -86,70 +171,13 @@ export class BillingInstructionsDetailsDialogComponent
       reservationBillingInstruction: [this.advanceTable.reservationBillingInstruction],
       reservationBillingInstructionAttachment: [this.advanceTable.reservationBillingInstructionAttachment],
       reservationBillingInstructionByEmployeeID: [this.advanceTable.reservationBillingInstructionByEmployeeID],
-      reservationBillingInstructionByEmployee:[this.advanceTable.reservationBillingInstructionByEmployee],
+      reservationBillingInstructionByEmployee:[this.advanceTable.reservationBillingInstructionByEmployee, [Validators.required]],
       
     });
   }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-        this.advanceTableForm.controls['reservationBillingInstructionByEmployee'].setValidators([Validators.required,this.BillingInstructionByEmployeeValidator(this.EmployeeList)]);
-        this.advanceTableForm.controls['reservationBillingInstructionByEmployee'].updateValueAndValidity();
-        this.filteredCreatedByOptionss = this.advanceTableForm.controls['reservationBillingInstructionByEmployee'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        );
-      }
-    );
-  }
-  BillingInstructionByEmployeeValidator(EmployeeList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = EmployeeList.some(data => ((data.firstName + ' ' + data.lastName).toLowerCase()) === value );
-        return match ? null : { reservationBillingInstructionByEmployeeInvalid: true };
-      };
-    }
-
-  private _filtersearchinstructed(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (!value || value.length < 3) {
-      return [];   
-    }
-    return this.EmployeeList.filter(
-      customer => 
-      {
-        return customer.firstName.toLowerCase().includes(filterValue);
-      }
-    );
-  }
-
-  onEmployeeSelected(selectedStateName: string) {
-    const selectedState = this.EmployeeList.find(
-      data => data.firstName +' '+ data.lastName === selectedStateName
-    );
-  
-    if (selectedState) {
-      this.getemployee(selectedState.employeeID);
-    }
-  }
-  
-  getemployee(employeeID: any) 
-  {
-    this.reservationBillingInstructionByEmployeesID=employeeID;
-  }
-
-  public noWhitespaceValidator(control: FormControl) {
-    const isWhitespace = (control.value || '').trim().length === 0;
-    const isValid = !isWhitespace;
-    return isValid ? null : { 'whitespace': true };
-}
 
   submit() 
   {
-    // emppty stuff
   }
   onNoClick(): void 
   {
@@ -166,8 +194,9 @@ export class BillingInstructionsDetailsDialogComponent
   public Post(): void
   {
     this.advanceTableForm.patchValue({reservationID:this.ReservationID});
-    this.advanceTableForm.patchValue({reservationBillingInstructionByEmployeeID:this.reservationBillingInstructionByEmployeesID });
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeForSave(requestObject);
+    this.advanceTableService.add(requestObject)  
     .subscribe(
     response => 
     { 
@@ -195,8 +224,13 @@ export class BillingInstructionsDetailsDialogComponent
   public Put(): void
   {
     this.advanceTableForm.patchValue({reservationID:this.advanceTable.reservationID});
-    this.advanceTableForm.patchValue({reservationBillingInstructionByEmployeeID:this.advanceTable.reservationBillingInstructionByEmployeeID});
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeForSave(requestObject);
+    if (!requestObject.reservationBillingInstructionByEmployeeID) {
+      requestObject.reservationBillingInstructionByEmployeeID =
+        this.reservationBillingInstructionByEmployeesID || this.advanceTable.reservationBillingInstructionByEmployeeID;
+    }
+    this.advanceTableService.update(requestObject)  
     .subscribe(
     response => 
     {
@@ -222,7 +256,6 @@ export class BillingInstructionsDetailsDialogComponent
     }
   )
   }
-   /////////////////for Image Upload////////////////////////////
    public response: { dbPath: '' };
    public ImagePath: string = "";
    public uploadFinished = (event) => {
@@ -233,6 +266,10 @@ export class BillingInstructionsDetailsDialogComponent
  
   public confirmAdd(): void 
   {
+    this.advanceTableForm.markAllAsTouched();
+    if (!this.advanceTableForm.valid) {
+      return;
+    }
     this.saveDisabled=false;
        if(this.action=="edit")
        {
@@ -244,5 +281,4 @@ export class BillingInstructionsDetailsDialogComponent
        }
   }
 }
-
 

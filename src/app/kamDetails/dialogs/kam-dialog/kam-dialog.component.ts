@@ -1,12 +1,21 @@
 // @ts-nocheck
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { KamDetailsService } from '../../kamDetails.service';
 import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
 import { KamDetails } from '../../kamDetails.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
+import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
+import { Observable, of } from 'rxjs';
+import {
+  createDisplayEmployeeFn,
+  formatEmployeeDropdownLabel,
+  initEmployeePrefixSearchOnControl,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromControl,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -16,12 +25,24 @@ import { GeneralService } from '../../../general/general.service';
   providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }]
 })
 
-export class KamDialogComponent 
+export class KamDialogComponent implements OnInit
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
+
   action: string;
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTable: KamDetails;
+
+  employeeNameControl = new FormControl<string | EmployeeDropDown>('');
+  public EmployeeList?: EmployeeDropDown[] = [];
+  filteredEmployeeOptions: Observable<EmployeeDropDown[]> = of([]);
+  selectedEmployeeMobile = '';
+  selectedEmployeeEmail = '';
+  selectedEmployeeID: number;
+
   constructor(
   public dialogRef: MatDialogRef<KamDialogComponent>, 
   @Inject(MAT_DIALOG_DATA) public data: any,
@@ -29,21 +50,47 @@ export class KamDialogComponent
     private fb: FormBuilder,
   public _generalService:GeneralService)
   {
-        // Set the defaults
         this.action = data.action;
         if (this.action === 'edit') 
         {
-          //this.dialogTitle ='Edit KamDetails';       
           this.dialogTitle ='KamDetails';
           this.advanceTable = data.advanceTable;
         } else 
         {
-          //this.dialogTitle = 'Create KamDetails';
           this.dialogTitle = 'KamDetails';
           this.advanceTable = new KamDetails({});
           this.advanceTable.activationStatus="Active";
         }
         this.advanceTableForm = this.createContactForm();
+  }
+
+  ngOnInit(): void {
+    if (this.advanceTable?.updatedBy) {
+      this.selectedEmployeeID = Number(this.advanceTable.updatedBy);
+    }
+  }
+
+  isSelectedEmployeeExited(): boolean {
+    return isSelectedEmployeeExitedFromControl(this.employeeNameControl, this.EmployeeList || []);
+  }
+
+  InitEmployeePrefix(): void {
+    initEmployeePrefixSearchOnControl(this._generalService, this.employeeNameControl, {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredEmployeeOptions = options; },
+    });
+  }
+
+  onEmployeeSelected(employee: EmployeeDropDown): void {
+    if (!isEmployeeDropdownSelection(employee)) {
+      return;
+    }
+    this.employeeNameControl.setValue(employee, { emitEvent: false });
+    this.selectedEmployeeID = employee.employeeID;
+    this.selectedEmployeeMobile = employee.mobile || '';
+    this.selectedEmployeeEmail = employee.email || '';
+    this.advanceTableForm.patchValue({ updatedBy: employee.employeeID }, { emitEvent: false });
   }
 
   createContactForm(): FormGroup 
@@ -66,7 +113,6 @@ export class KamDialogComponent
 
   submit() 
   {
-    // emppty stuff
   }
   onNoClick(): void 
   {
@@ -74,11 +120,13 @@ export class KamDialogComponent
   }
   public Post(): void
   {
+    if (this.selectedEmployeeID) {
+      this.advanceTableForm.patchValue({ updatedBy: this.selectedEmployeeID });
+    }
     this.advanceTableService.add(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
     { 
-     
        if(response.activationStatus.indexOf("Duplicate") !== -1)
        {
         this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
@@ -86,22 +134,24 @@ export class KamDialogComponent
        else 
        {
         this.dialogRef.close();
-       this._generalService.sendUpdate('KamDetailsCreate:KamDetailsView:Success');//To Send Updates  
+       this._generalService.sendUpdate('KamDetailsCreate:KamDetailsView:Success');
     }
   },
     error =>
     {
-       this._generalService.sendUpdate('KamDetailsAll:KamDetailsView:Failure');//To Send Updates  
+       this._generalService.sendUpdate('KamDetailsAll:KamDetailsView:Failure');
     }
   )
   }
   public Put(): void
   {
+    if (this.selectedEmployeeID) {
+      this.advanceTableForm.patchValue({ updatedBy: this.selectedEmployeeID });
+    }
     this.advanceTableService.update(this.advanceTableForm.getRawValue())  
     .subscribe(
     response => 
     {
-     
        if(response.activationStatus.indexOf("Duplicate") !== -1)
        {
         this._generalService.sendUpdate('DataNotFound:DuplicacyError:Failure');
@@ -109,12 +159,12 @@ export class KamDialogComponent
        else 
        {
         this.dialogRef.close();
-       this._generalService.sendUpdate('KamDetailsUpdate:KamDetailsView:Success');//To Send Updates   
+       this._generalService.sendUpdate('KamDetailsUpdate:KamDetailsView:Success');
        }
     },
     error =>
     {
-     this._generalService.sendUpdate('KamDetailsAll:KamDetailsView:Failure');//To Send Updates  
+     this._generalService.sendUpdate('KamDetailsAll:KamDetailsView:Failure');
     }
   )
   }
@@ -130,5 +180,4 @@ export class KamDialogComponent
        }
   }
 }
-
 

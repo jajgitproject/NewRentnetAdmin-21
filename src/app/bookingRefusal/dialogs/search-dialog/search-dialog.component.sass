@@ -1,0 +1,144 @@
+/* Dialog shell + overlay panels (encapsulation disabled on this component). */
+
+.cdk-overlay-container .cdk-overlay-pane.booking-refusal-search-dialog-panel.mat-mdc-dialog-panel
+  position: fixed !important
+  left: 50% !important
+  top: 50% !important
+  margin: 0 !important
+  width: 60vw !important
+  min-width: min(320px, 94vw) !important
+  max-width: 60vw !important
+  max-height: 90vh !important
+  transform: translate(-50%, -50%) !important
+  flex-shrink: 0 !important
+  box-sizing: border-box !important
+  contain: layout !important
+  --mat-dialog-container-max-width: 60vw
+
+.cdk-overlay-pane.booking-refusal-search-dialog-panel > .mat-mdc-dialog-container,
+.cdk-overlay-pane.booking-refusal-search-dialog-panel .mdc-dialog__surface,
+.cdk-overlay-pane.booking-refusal-search-dialog-panel .mat-mdc-dialog-container .mat-mdc-dialog-surface
+  width: 100% !important
+  max-width: 100% !important
+  overflow: hidden !important
+  max-height: 90vh !important
+  display: flex !important
+  flex-direction: column !important
+
+.cdk-overlay-pane.booking-refusal-search-dialog-panel .mat-mdc-dialog-container
+  padding: 0 !important
+
+.cdk-overlay-pane.booking-refusal-search-dialog-panel .mat-mdc-dialog-content,
+.cdk-overlay-pane.booking-refusal-search-dialog-panel [mat-dialog-content]
+  flex: 1 1 auto !important
+  min-height: 0 !important
+  max-height: calc(90vh - 132px) !important
+  overflow-x: hidden !important
+  overflow-y: auto !important
+  margin: 0 !important
+  padding: 0 !important
+
+.cdk-overlay-pane.booking-refusal-search-dialog-panel .mat-mdc-dialog-actions,
+.cdk-overlay-pane.booking-refusal-search-dialog-panel [mat-dialog-actions]
+  flex: 0 0 auto !important
+  flex-shrink: 0 !important
+  margin: 0 !important
+  padding: 12px 20px 16px !important
+  border-top: 1px solid #e8e8e8
+  justify-content: flex-start
+  gap: 8px
+
+.cdk-overlay-container .mat-mdc-select-panel.booking-refusal-search-select-panel,
+.cdk-overlay-container .mat-mdc-autocomplete-panel.booking-refusal-search-autocomplete-panel
+  max-height: 280px !important
+  width: auto !important
+  min-width: 0 !important
+  max-width: min(520px, calc(100vw - 48px)) !important
+  z-index: 1060 !important
+
+.booking-refusal-search-dialog
+  display: flex
+  flex-direction: column
+  min-height: 0
+  max-height: calc(90vh - 24px)
+  width: 100%
+  box-sizing: border-box
+  overflow: hidden
+
+  &__header
+    flex: 0 0 auto
+    padding: 16px 12px 8px 20px
+    border-bottom: 1px solid #e8e8e8
+
+  &__content
+    flex: 1 1 auto
+    min-height: 0
+    overflow: hidden
+
+  &__form
+    padding: 16px 20px 8px
+    margin: 0
+
+  &__fields
+    margin-left: 0
+    margin-right: 0
+
+  &__fields .mat-mdc-form-field,
+  &__fields .mat-form-field
+    width: 100%
+
+  &__fields .mat-mdc-form-field-subscript-wrapper,
+  &__fields .mat-form-field-subscript-wrapper
+    height: 0 !important
+    min-height: 0 !important
+    margin: 0 !important
+    padding: 0 !important
+    overflow: hidden !important
+
+  &__status-field
+    .mat-mdc-text-field-wrapper,
+    .mat-form-field-flex
+      height: 56px !important
+      max-height: 56px !important
+      min-height: 56px !important
+      box-sizing: border-box
+
+    .mat-mdc-form-field-flex
+      align-items: center
+
+    .mat-mdc-form-field-infix,
+    .mat-form-field-infix
+      min-height: 56px !important
+      max-height: 56px !important
+      padding-top: 16px !important
+      padding-bottom: 16px !important
+      box-sizing: border-box
+
+    &.mat-focused,
+    &.mat-form-field-should-float
+      .mat-mdc-text-field-wrapper,
+      .mat-form-field-flex
+        height: 56px !important
+        max-height: 56px !important
+
+    .mat-mdc-select-trigger,
+    .mat-select-trigger
+      height: 24px
+      line-height: 24px
+
+  &__actions
+    button mat-icon
+      margin-right: 4px
+      vertical-align: middle
+      font-size: 20px
+      height: 20px
+      width: 20px
+
+@media (max-width: 576px)
+  .booking-refusal-search-dialog__form
+    padding: 12px 12px 4px
+
+  .cdk-overlay-pane.booking-refusal-search-dialog-panel .mat-mdc-dialog-actions,
+  .cdk-overlay-pane.booking-refusal-search-dialog-panel [mat-dialog-actions]
+    flex-wrap: wrap
+    padding: 12px !important

@@ -1658,6 +1658,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'bookingRefusal',
+        loadChildren: () =>
+          import('./bookingRefusal/bookingRefusal.module').then(
+            (m) => m.BookingRefusalModule
+          )
+      },
+
+      {
         path: 'CarAndDriverAllotmentTemp',
         loadChildren: () =>
           import('./CarAndDriverAllotmentTemp/CarAndDriverAllotmentTemp.module').then(
@@ -2996,6 +3004,20 @@ const routes: Routes = [
           import('./driverDocument/driverDocument.module').then(
             (m) => m.DriverDocumentModule
           )
+      },
+
+      {
+        path: 'complianceApprovalCenter',
+        loadChildren: () =>
+          import('./complianceApprovalCenter/complianceApprovalCenter.module').then(
+            (m) => m.ComplianceApprovalCenterModule
+          ),
+      },
+
+      {
+        path: 'complianceMonitor',
+        loadChildren: () =>
+          import('./complianceMonitor/complianceMonitor.module').then((m) => m.ComplianceMonitorModule),
       },
 
       {

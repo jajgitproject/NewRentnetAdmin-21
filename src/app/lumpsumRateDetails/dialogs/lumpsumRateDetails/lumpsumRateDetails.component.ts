@@ -2,21 +2,29 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { LumpsumRateDetailsService } from '../../lumpsumRateDetails.service';
-import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
+import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
 import { LumpsumRateDetails} from '../../lumpsumRateDetails.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { map, startWith } from 'rxjs/operators';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  employeeNameControlValidator,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
-  // Rename to avoid NG0300 collision with the embedded LumpsumRateDetailsComponent
-  // (same selector registered in two different components inside the newForm
-  // module scope -> "Multiple components match node with tagname").
   selector: 'app-lumpsumRateDetails-dialog',
   templateUrl: './lumpsumRateDetails.component.html',
   styleUrls: ['./lumpsumRateDetails.component.sass'],
@@ -25,6 +33,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 export class LumpsumRateDetailsDialogComponent 
 {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayApprovedEmployeeFn = createDisplayEmployeeFn();
+
   saveDisabled:boolean=true;
   buttonDisabled:boolean=false;
   status: any;
@@ -32,9 +44,11 @@ export class LumpsumRateDetailsDialogComponent
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTable: LumpsumRateDetails;
-  employeesID: any;
   reservationDiscountDetailsByEmployeesID: any;
   ReservationID: any;
+
+  public EmployeeList?: EmployeeDropDown[] = [];
+  filteredCreatedByOptionss: Observable<EmployeeDropDown[]> = of([]);
 
   constructor(
   public dialogRef: MatDialogRef<LumpsumRateDetailsDialogComponent>, 
@@ -44,42 +58,105 @@ export class LumpsumRateDetailsDialogComponent
     private fb: FormBuilder,
   public _generalService:GeneralService)
   {
-        // Set the defaults
         this.action = data.action;
         
         if (this.action === 'edit') 
         {
-          //this.dialogTitle ='Edit lumpsum Rate';       
           this.dialogTitle ='Lumpsum Rate';
           this.advanceTable = data.advanceTable;
-          this.advanceTable.lumpsumRateApprovedByEmployee = data.advanceTable.firstName +" "+ data.advanceTable.lastName;
           this.ImagePath = this.advanceTable.attachment;
       
         } else 
         {
-          //this.dialogTitle = 'Create lumpsum Rate';
           this.dialogTitle = 'Lumpsum Rate';
           this.advanceTable = new LumpsumRateDetails({});
           this.advanceTable.activationStatus=true;
           this.ReservationID = data.reservationID;
         }
         this.status=data?.status?.status || data?.status || data;
-        // if(this.status!='Changes allow'){
-        //   this.buttonDisabled=true;
-        // }
          if(this.status === 'Changes allow'){
-    this.buttonDisabled = false;  // Save button enable
+    this.buttonDisabled = false;
 } else {
-    this.buttonDisabled = true;   // Save button disable
+    this.buttonDisabled = true;
 }
         this.advanceTableForm = this.createContactForm();
   }
-  public EmployeeList?: EmployeeDropDown[] = [];
-  filteredCreatedByOptionss: Observable<EmployeeDropDown[]>;
+
   public ngOnInit(): void
   {
-   this.InitEmployee(); 
+    const employeeCtrl = this.advanceTableForm.get('lumpsumRateApprovedByEmployee');
+    employeeCtrl?.setValidators([
+      Validators.required,
+      employeeNameControlValidator(() => this.EmployeeList || []),
+    ]);
+    employeeCtrl?.updateValueAndValidity({ emitEvent: false });
+
+    if (this.action === 'edit') {
+      this.patchApprovedEmployeeForEdit();
+    }
   }
+
+  isSelectedApprovedEmployeeExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(this.advanceTableForm, 'lumpsumRateApprovedByEmployee', this.EmployeeList || []);
+  }
+
+  private patchApprovedEmployeeForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.lumpsumRateApprovedByEmployeeID,
+      this.advanceTableForm,
+      'lumpsumRateApprovedByEmployee',
+      {
+        getEmployeeList: () => this.EmployeeList || [],
+        setEmployeeList: (list) => { this.EmployeeList = list; },
+        setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+        onEmployeeId: (id) => {
+          this.reservationDiscountDetailsByEmployeesID = id;
+          this.advanceTableForm.patchValue({ lumpsumRateApprovedByEmployeeID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  InitApprovedEmployeePrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'lumpsumRateApprovedByEmployee', {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+    });
+  }
+
+  onEmployeeSelected(selected: EmployeeDropDown): void {
+    if (isEmployeeDropdownSelection(selected)) {
+      const list = this.EmployeeList || [];
+      if (!list.some((e) => Number(e.employeeID) === Number(selected.employeeID))) {
+        this.EmployeeList = [selected, ...list];
+      }
+    }
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'lumpsumRateApprovedByEmployee',
+      selected,
+      (id) => {
+        this.reservationDiscountDetailsByEmployeesID = id;
+        this.advanceTableForm.patchValue({ lumpsumRateApprovedByEmployeeID: id }, { emitEvent: false });
+      }
+    );
+    this.advanceTableForm.get('lumpsumRateApprovedByEmployee')?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private prepareEmployeeForSave(raw: Record<string, unknown>): void {
+    coerceEmployeeFieldToApiString(raw, 'lumpsumRateApprovedByEmployee', this.EmployeeList || []);
+    const employee = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('lumpsumRateApprovedByEmployee')?.value,
+      this.EmployeeList || []
+    );
+    if (employee?.employeeID) {
+      raw.lumpsumRateApprovedByEmployeeID = employee.employeeID;
+      this.reservationDiscountDetailsByEmployeesID = employee.employeeID;
+    }
+  }
+
   createContactForm(): FormGroup 
   {
     return this.fb.group(
@@ -90,71 +167,13 @@ export class LumpsumRateDetailsDialogComponent
       lumpsumRatePercentage: [this.advanceTable.lumpsumRatePercentage],
       lumpsumRateApprovedByEmployeeID: [this.advanceTable.lumpsumRateApprovedByEmployeeID],
       attachment:[this.advanceTable.attachment],
-      lumpsumRateApprovedByEmployee:[this.advanceTable.lumpsumRateApprovedByEmployee],
+      lumpsumRateApprovedByEmployee:[this.advanceTable.lumpsumRateApprovedByEmployee, [Validators.required]],
       
     });
   }
-  InitEmployee(){
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-        this.advanceTableForm.controls['lumpsumRateApprovedByEmployee'].setValidators([Validators.required,this.ApprovedByEmployeeValidator(this.EmployeeList)]);
-        this.advanceTableForm.controls['lumpsumRateApprovedByEmployee'].updateValueAndValidity();
-        this.filteredCreatedByOptionss = this.advanceTableForm.controls['lumpsumRateApprovedByEmployee'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        );
-      }
-    );
-  }
-
-  ApprovedByEmployeeValidator(EmployeeList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = EmployeeList.some(data => ((data.firstName + ' ' + data.lastName).toLowerCase()) === value );
-        return match ? null : { lumpsumRateApprovedByEmployeeInvalid: true };
-      };
-    }
-
-  private _filtersearchinstructed(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (!value || value.length < 3) {
-      return [];   
-    }
-    return this.EmployeeList.filter(
-      customer => 
-      {
-        return customer.firstName.toLowerCase().includes(filterValue);
-      }
-    );
-  }
-  
-  onEmployeeSelected(selectedStateName: string) {
-    const selectedState = this.EmployeeList.find(
-      data => data.firstName +' '+ data.lastName === selectedStateName
-    );
-  
-    if (selectedState) {
-      this.getemployee(selectedState.employeeID);
-    }
-  }
-  
-  getemployee(employeeID: any) {
-    
-    this.reservationDiscountDetailsByEmployeesID=employeeID;
-  }
-
-  public noWhitespaceValidator(control: FormControl) {
-    const isWhitespace = (control.value || '').trim().length === 0;
-    const isValid = !isWhitespace;
-    return isValid ? null : { 'whitespace': true };
-}
 
   submit() 
   {
-    // emppty stuff
   }
   onNoClick(): void 
   {
@@ -170,10 +189,10 @@ export class LumpsumRateDetailsDialogComponent
   }
   public Post(): void
   {
-    
     this.advanceTableForm.patchValue({reservationID:this.ReservationID});
-    this.advanceTableForm.patchValue({lumpsumRateApprovedByEmployeeID:this.reservationDiscountDetailsByEmployeesID });
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())  
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeForSave(requestObject);
+    this.advanceTableService.add(requestObject)  
     .subscribe(
     response => 
     { 
@@ -201,8 +220,13 @@ export class LumpsumRateDetailsDialogComponent
   public Put(): void
   {
     this.advanceTableForm.patchValue({reservationID:this.advanceTable.reservationID});
-    this.advanceTableForm.patchValue({lumpsumRateApprovedByEmployeeID:this.advanceTable.lumpsumRateApprovedByEmployeeID  });
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())  
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeForSave(requestObject);
+    if (!requestObject.lumpsumRateApprovedByEmployeeID) {
+      requestObject.lumpsumRateApprovedByEmployeeID =
+        this.reservationDiscountDetailsByEmployeesID || this.advanceTable.lumpsumRateApprovedByEmployeeID;
+    }
+    this.advanceTableService.update(requestObject)  
     .subscribe(
     response => 
     {
@@ -228,7 +252,6 @@ export class LumpsumRateDetailsDialogComponent
     }
   )
   }
-   /////////////////for Image Upload////////////////////////////
    public response: { dbPath: '' };
    public ImagePath: string = "";
    public uploadFinished = (event) => {
@@ -239,6 +262,10 @@ export class LumpsumRateDetailsDialogComponent
  
   public confirmAdd(): void 
   {
+    this.advanceTableForm.markAllAsTouched();
+    if (!this.advanceTableForm.valid) {
+      return;
+    }
     this.saveDisabled=false;
        if(this.action=="edit")
        {
@@ -250,5 +277,4 @@ export class LumpsumRateDetailsDialogComponent
        }
   }
 }
-
 

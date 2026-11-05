@@ -10,8 +10,20 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { InternalNote } from '../../internalNoteDetails.model';
 import { InternalNoteDetailsService } from '../../internalNoteDetails.service';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import {
+  coerceEmployeeFieldToApiString,
+  createDisplayEmployeeFn,
+  employeeNameControlValidator,
+  findEmployeeByDropdownInput,
+  formatEmployeeDropdownLabel,
+  initEmployeeNamePrefixSearch,
+  isEmployeeDropdownSelection,
+  isEmployeeExited,
+  isSelectedEmployeeExitedFromForm,
+  onEmployeeAutocompleteSelected,
+  patchEmployeeNameForEditById,
+} from 'src/app/shared/customer-employee-autocomplete';
 
 @Component({
   standalone: false,
@@ -22,6 +34,10 @@ import { map, startWith } from 'rxjs/operators';
   })
 
 export class InternalNoteDialogComponent {
+  formatEmployeeDropdownLabel = formatEmployeeDropdownLabel;
+  isEmployeeExited = isEmployeeExited;
+  displayEmployeeFn = createDisplayEmployeeFn();
+
   isSaving = false;
   buttonDisabled = false;
   status = '';
@@ -32,7 +48,7 @@ export class InternalNoteDialogComponent {
   ReservationID: any;
   reservationBillingInstructionByEmployeesID: any;
   public EmployeeList?: EmployeeDropDown[] = [];
-  filteredCreatedByOptionss: Observable<EmployeeDropDown[]>;
+  filteredCreatedByOptionss: Observable<EmployeeDropDown[]> = of([]);
 
   constructor(
     public dialogRef: MatDialogRef<InternalNoteDialogComponent>,
@@ -49,8 +65,6 @@ export class InternalNoteDialogComponent {
       this.dialogTitle = 'Internal Note';
       this.advanceTable = data.advanceTable;
       this.ImagePath = this.advanceTable.reservationInternalNoteAttachment;
-      this.advanceTable.reservationInternalNoteByEmployee=this.advanceTable.firstName+" "+this.advanceTable.lastName;
-      //this.advanceTableForm.patchValue({reservationInternalNote:data.reservationInternalNote});
     } 
     else
     {
@@ -102,7 +116,48 @@ export class InternalNoteDialogComponent {
 
   public ngOnInit(): void
   {
-   this.InitEmployee(); 
+    const employeeCtrl = this.advanceTableForm.get('reservationInternalNoteByEmployee');
+    employeeCtrl?.setValidators([
+      employeeNameControlValidator(() => this.EmployeeList || []),
+    ]);
+    employeeCtrl?.updateValueAndValidity({ emitEvent: false });
+    if (this.action === 'edit') {
+      this.patchEmployeeForEdit();
+    }
+  }
+
+  isSelectedEmployeeExited(): boolean {
+    return isSelectedEmployeeExitedFromForm(
+      this.advanceTableForm,
+      'reservationInternalNoteByEmployee',
+      this.EmployeeList || []
+    );
+  }
+
+  private patchEmployeeForEdit(): void {
+    patchEmployeeNameForEditById(
+      this._generalService,
+      this.advanceTable?.reservationInternalNoteByEmployeeID,
+      this.advanceTableForm,
+      'reservationInternalNoteByEmployee',
+      {
+        getEmployeeList: () => this.EmployeeList || [],
+        setEmployeeList: (list) => { this.EmployeeList = list; },
+        setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+        onEmployeeId: (id) => {
+          this.reservationBillingInstructionByEmployeesID = id;
+          this.advanceTableForm.patchValue({ reservationInternalNoteByEmployeeID: id }, { emitEvent: false });
+        },
+      }
+    );
+  }
+
+  InitEmployeePrefix(): void {
+    initEmployeeNamePrefixSearch(this._generalService, this.advanceTableForm, 'reservationInternalNoteByEmployee', {
+      getEmployeeList: () => this.EmployeeList || [],
+      setEmployeeList: (list) => { this.EmployeeList = list; },
+      setFilteredOptions: (options) => { this.filteredCreatedByOptionss = options; },
+    });
   }
  
   createContactForm(): FormGroup {
@@ -137,6 +192,18 @@ export class InternalNoteDialogComponent {
   onNoClick(): void {
     this.dialogRef.close();
   }
+  private prepareEmployeeForSave(raw: Record<string, unknown>): void {
+    coerceEmployeeFieldToApiString(raw, 'reservationInternalNoteByEmployee', this.EmployeeList || []);
+    const employee = findEmployeeByDropdownInput(
+      this.advanceTableForm.get('reservationInternalNoteByEmployee')?.value,
+      this.EmployeeList || []
+    );
+    if (employee?.employeeID) {
+      raw.reservationInternalNoteByEmployeeID = employee.employeeID;
+      this.reservationBillingInstructionByEmployeesID = employee.employeeID;
+    }
+  }
+
   private resolveEmployeeIdForSave(): number | null {
     const selected = Number(this.reservationBillingInstructionByEmployeesID);
     if (selected > 0) {
@@ -171,7 +238,9 @@ export class InternalNoteDialogComponent {
       return;
     }
     this.advanceTableForm.patchValue({ reservationID: this.ReservationID });
-    this.advanceTableService.add(this.advanceTableForm.getRawValue())
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeForSave(requestObject);
+    this.advanceTableService.add(requestObject)
       .subscribe(
         response => {
           this.showNotification(
@@ -200,7 +269,9 @@ export class InternalNoteDialogComponent {
     }
     this.advanceTableForm.patchValue({ reservationID: this.advanceTable.reservationID });
 
-    this.advanceTableService.update(this.advanceTableForm.getRawValue())
+    const requestObject = this.advanceTableForm.getRawValue();
+    this.prepareEmployeeForSave(requestObject);
+    this.advanceTableService.update(requestObject)
       .subscribe(
         response => {
            this.showNotification(
@@ -257,64 +328,23 @@ export class InternalNoteDialogComponent {
      }
     
    }
-   InitEmployee(){
-
-    this._generalService.GetEmployeesForVehicleCategory().subscribe
-    (
-      data =>   
-      {
-        this.EmployeeList = data; 
-        this.advanceTableForm.controls['reservationInternalNoteByEmployee'].setValidators([
-          this.InternalNoteByEmployeeValidator(this.EmployeeList),
-        ]);
-        this.advanceTableForm.controls['reservationInternalNoteByEmployee'].updateValueAndValidity();
-        this.filteredCreatedByOptionss = this.advanceTableForm.controls['reservationInternalNoteByEmployee'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filtersearchinstructed(value || ''))
-        );
+  onEmployeeSelected(selected: EmployeeDropDown): void {
+    if (isEmployeeDropdownSelection(selected)) {
+      const list = this.EmployeeList || [];
+      if (!list.some((e) => Number(e.employeeID) === Number(selected.employeeID))) {
+        this.EmployeeList = [selected, ...list];
+      }
+    }
+    onEmployeeAutocompleteSelected(
+      this.advanceTableForm,
+      'reservationInternalNoteByEmployee',
+      selected,
+      (id) => {
+        this.reservationBillingInstructionByEmployeesID = id;
+        this.advanceTableForm.patchValue({ reservationInternalNoteByEmployeeID: id }, { emitEvent: false });
       }
     );
-  }
-
-  InternalNoteByEmployeeValidator(EmployeeList: any[]): ValidatorFn {
-      return (control: AbstractControl): ValidationErrors | null => {
-        const raw = control.value;
-        if (!raw || String(raw).trim() === '') {
-          return null;
-        }
-        const value = String(raw).toLowerCase();
-        const match = EmployeeList.some(
-          (data) => ((data.firstName + ' ' + data.lastName).toLowerCase()) === value
-        );
-        return match ? null : { reservationInternalNoteByEmployeeInvalid: true };
-      };
-    }
-
-  private _filtersearchinstructed(value: string): any {
-    const filterValue = value.toLowerCase();
-    if (!value || value.length < 3) {
-      return [];   
-    }
-    return this.EmployeeList.filter(
-      customer => 
-      {
-        return customer.firstName.toLowerCase().includes(filterValue);
-      }
-    );
-  }
-
-  onEmployeeSelected(selectedStateName: string) {
-    const selectedState = this.EmployeeList.find(
-      data => data.firstName +' '+ data.lastName === selectedStateName
-    );
-  
-    if (selectedState) {
-      this.getemployee(selectedState.employeeID);
-    }
-  }
-  
-  getemployee(employeeID: any) {
-    this.reservationBillingInstructionByEmployeesID=employeeID;
+    this.advanceTableForm.get('reservationInternalNoteByEmployee')?.updateValueAndValidity({ emitEvent: false });
   }
   /////////////////for Image Upload////////////////////////////
   public response: { dbPath: '' };

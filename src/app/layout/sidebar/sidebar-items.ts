@@ -252,6 +252,19 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'bookingRefusal',
+        title: 'Booking Refusal',
+        pageKey: 'Booking Refusal',
+        moduleName: 'bookingRefusal',
+        alternateAccessPageKeys: ['bookingRefusal', 'Booking Refusal'],
+        icon: 'fas fa-ban',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
        {
         path: 'rejectedQCDriverPhoto',
         title: 'Rejected QC Driver Photo',
@@ -952,6 +965,26 @@ export const ROUTES: RouteInfo[] = [
         title: 'Driver Compliance Dashboard',
         moduleName: 'driver Compliance Dashboard',
         icon: 'fas fa-tachometer-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'complianceApprovalCenter',
+        title: 'Compliance Approval Center',
+        moduleName: 'complianceApprovalCenter',
+        icon: 'fas fa-check-circle',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'complianceMonitor',
+        title: 'Compliance Monitor',
+        moduleName: 'complianceMonitor',
+        icon: 'fas fa-heartbeat',
         class: '',
         groupTitle: false,
         submenu: [],

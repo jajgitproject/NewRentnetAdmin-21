@@ -1,0 +1,160 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <ul class="breadcrumb breadcrumb-style">
+        <li class="breadcrumb-item"><h2>Compliance Monitor &amp; Renewal</h2></li>
+      </ul>
+      <p class="page-subtitle">Unified driver and inventory document expiry tracking</p>
+    </div>
+
+    <div class="row metric-row">
+      <div class="col-xl col-lg-4 col-md-6 col-sm-12" *ngFor="let card of [
+        { key: 'Due30', label: 'Due within 30 Days', value: metrics.dueWithin30Days, cls: '' },
+        { key: 'Due15', label: 'Due within 15 Days', value: metrics.dueWithin15Days, cls: 'metric-warn' },
+        { key: 'Due7', label: 'Critical within 7 Days', value: metrics.criticalWithin7Days, cls: 'metric-warn' },
+        { key: 'Expired', label: 'Expired / Blocking', value: metrics.expiredBlocking, cls: 'metric-danger' },
+        { key: 'RenewalPending', label: 'Renewals Pending Approval', value: metrics.renewalsPendingApproval, cls: 'metric-pending' }
+      ]">
+        <div class="card metric-card" [ngClass]="card.cls" (click)="filterByMetric(card.key)">
+          <div class="metric-body">
+            <span class="metric-label">{{ card.label }}</span>
+            <span class="metric-value">{{ card.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="body">
+            <div class="filter-panel">
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Search resource or compliance</mat-label>
+                <input matInput [(ngModel)]="searchText" (keyup.enter)="applySearch()" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Resource Type</mat-label>
+                <mat-select [(ngModel)]="resourceType">
+                  <mat-option value="">All</mat-option>
+                  <mat-option value="Driver">Driver</mat-option>
+                  <mat-option value="Inventory">Inventory</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Document (Compliance)</mat-label>
+                <mat-select [(ngModel)]="searchDocumentID">
+                  <mat-option [value]="null">All</mat-option>
+                  <mat-option *ngFor="let doc of documentList" [value]="doc.documentID">{{ doc.documentName }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Urgency</mat-label>
+                <mat-select [(ngModel)]="urgency">
+                  <mat-option value="">Default (≤ 30 days)</mat-option>
+                  <mat-option value="All">All</mat-option>
+                  <mat-option value="Expired">Expired</mat-option>
+                  <mat-option value="Days7">≤ 7 days</mat-option>
+                  <mat-option value="Days15">≤ 15 days</mat-option>
+                  <mat-option value="Days30">≤ 30 days</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Branch</mat-label>
+                <mat-select [(ngModel)]="branchID" (selectionChange)="onBranchChange()">
+                  <mat-option [value]="null">All</mat-option>
+                  <mat-option *ngFor="let branch of branchList" [value]="branch.organizationalEntityID">
+                    {{ branch.organizationalEntityName }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Location</mat-label>
+                <mat-select [(ngModel)]="locationID">
+                  <mat-option [value]="null">All</mat-option>
+                  <mat-option *ngFor="let loc of locationList" [value]="loc.organizationalEntityID">
+                    {{ loc.organizationalEntityName }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <div class="filter-actions">
+                <button mat-raised-button color="primary" (click)="applySearch()">Search</button>
+                <button mat-stroked-button (click)="refresh()">Reset</button>
+              </div>
+            </div>
+
+            <div class="scrollable-table-container">
+              <mat-table [dataSource]="rows" class="mat-cell floating-header-table">
+                <ng-container matColumnDef="resourceType">
+                  <mat-header-cell *matHeaderCellDef>Resource</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.resourceType }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="resourceIdentifier">
+                  <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.resourceIdentifier }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="documentName">
+                  <mat-header-cell *matHeaderCellDef>Compliance</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.documentName }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="validUpto">
+                  <mat-header-cell *matHeaderCellDef>Current Valid Upto</mat-header-cell>
+                  <mat-cell *matCellDef="let row">{{ row.validUpto }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="expiryStatus">
+                  <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <span class="status-pill" [ngClass]="statusClass(row.expiryStatusClass)">{{ row.expiryStatus }}</span>
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="deploymentEffect">
+                  <mat-header-cell *matHeaderCellDef>Deployment Effect</mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <span class="status-pill" [ngClass]="statusClass(row.deploymentEffectClass)">{{ row.deploymentEffect }}</span>
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="owner">
+                  <mat-header-cell *matHeaderCellDef>Owner (Location)</mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <span>{{ row.owner || '—' }}</span>
+                    <span class="small-muted" *ngIf="row.branchName"> · {{ row.branchName }}</span>
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <button mat-raised-button color="primary" (click)="renew(row)">Renew</button>
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+              </mat-table>
+            </div>
+
+            <div *ngIf="!rows?.length" class="empty-state">No records found for the selected filters.</div>
+
+            <div class="pager-row">
+              <button mat-raised-button color="primary" (click)="previousPage()" [disabled]="pageNumber === 0">Previous</button>
+              <span class="page-indicator">Page {{ pageNumber + 1 }}</span>
+              <button mat-raised-button color="primary" (click)="nextPage()" [disabled]="!rows?.length">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
