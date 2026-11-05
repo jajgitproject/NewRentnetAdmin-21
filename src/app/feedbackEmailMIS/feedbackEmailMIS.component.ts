@@ -71,6 +71,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
   searchCustomerControl: FormControl = new FormControl('');
   customerOptions: any[] = [];
   searchIsAllotted: string = '';
+  searchEmailSent: string = 'No';
   searchFromDate: string = '';
   searchToDate: string = '';
   selection = new SelectionModel<any>(true, []);
@@ -80,6 +81,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
   sendJobRunning = false;
   sendJobError = '';
   sendJobStartedAt: number | null = null;
+  private lastPollSentCount = 0;
   private sendPollSub: Subscription;
   private customerAutocompleteSub: Subscription;
 
@@ -169,6 +171,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     this.searchCustomerControl.setValue('');
     this.customerOptions = [];
     this.searchIsAllotted = '';
+    this.searchEmailSent = 'No';
     this.selectedFilter = 'search';
     this.selection.clear();
     this.initDefaultDates();
@@ -247,6 +250,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       this.searchDutySlipID,
       this.getSelectedCustomerId(),
       this.searchIsAllotted,
+      this.searchEmailSent,
       fromDate,
       toDate,
       this.PageNumber
@@ -254,7 +258,9 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       (
         data => {
           this.dataSource = data;
-          this.selection.clear();
+          if (!this.sendJobRunning) {
+            this.selection.clear();
+          }
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );
@@ -290,6 +296,13 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     return 'No';
   }
 
+  getFeedbackEmailSent(row: any): any {
+    if (!row) {
+      return false;
+    }
+    return row.isFeedbackEmailSent ?? row.IsFeedbackEmailSent;
+  }
+
   getRecordCount(): number {
     return Array.isArray(this.dataSource) ? this.dataSource.length : 0;
   }
@@ -323,9 +336,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const withEmail = selectedRows.filter(row =>
-      (row.passengerEmail || '').toString().trim().includes('@')
-    );
+    const withEmail = selectedRows.filter(row => this.hasValidPassengerEmail(row));
     const missingEmail = selectedRows.length - withEmail.length;
 
     Swal.fire({
@@ -339,13 +350,26 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed || result.value) {
-        this.startFeedbackEmailJob(selectedRows);
+        if (withEmail.length === 0) {
+          Swal.fire({
+            title: 'No valid email addresses in the selected records',
+            icon: 'warning',
+          });
+          return;
+        }
+        this.startFeedbackEmailJob(withEmail);
       }
     });
   }
 
+  private hasValidPassengerEmail(row: any): boolean {
+    const email = (row?.passengerEmail ?? row?.PassengerEmail ?? '').toString().trim();
+    return email.length > 0 && email.includes('@');
+  }
+
   private startFeedbackEmailJob(selectedRows: any[]) {
-    const reservationIDs = selectedRows
+    const rowsToSend = (selectedRows || []).filter(row => this.hasValidPassengerEmail(row));
+    const reservationIDs = rowsToSend
       .map(row => Number(row.reservationID))
       .filter(id => id > 0);
 
@@ -423,9 +447,15 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
 
   private startSendPolling(jobId: string) {
     this.stopSendPolling();
+    this.lastPollSentCount = 0;
     this.sendPollSub = this.feedbackEmailMISService.pollSendJob(jobId).subscribe(
       (status: any) => {
         this.sendJobStatus = status;
+        const sentCount = status?.sentCount ?? status?.SentCount ?? 0;
+        if (sentCount > this.lastPollSentCount) {
+          this.lastPollSentCount = sentCount;
+          this.refreshSentEmailRowsFromServer();
+        }
         const current = String(status?.status ?? status?.Status ?? '').toLowerCase();
 
         if (current === 'failed') {
@@ -463,6 +493,34 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       this.sendPollSub.unsubscribe();
       this.sendPollSub = undefined;
     }
+  }
+
+  private refreshSentEmailRowsFromServer() {
+    if (!Array.isArray(this.dataSource)) {
+      return;
+    }
+
+    const fromDate = this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchFromDate);
+    const toDate = this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchToDate);
+    if (!this.isDutySlipIdSearchActive() && (!fromDate || !toDate)) {
+      return;
+    }
+
+    this.feedbackEmailMISService.getTableData(
+      this.searchReservationID,
+      this.searchDutySlipID,
+      this.getSelectedCustomerId(),
+      this.searchIsAllotted,
+      this.searchEmailSent,
+      fromDate,
+      toDate,
+      this.PageNumber
+    ).subscribe(
+      (data) => {
+        this.dataSource = data;
+      },
+      () => { }
+    );
   }
 
   private async extractJobErrorMessage(error: any): Promise<string> {
@@ -592,6 +650,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       this.searchDutySlipID,
       this.getSelectedCustomerId(),
       this.searchIsAllotted,
+      this.searchEmailSent,
       this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchFromDate),
       this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchToDate),
       this.PageNumber,

@@ -59,6 +59,14 @@
                             </mat-form-field>
 
                             <mat-form-field appearance="outline" floatLabel="always" class="search-field">
+                                <mat-label>Email Sent Yes/No</mat-label>
+                                <mat-select [(ngModel)]="searchEmailSent">
+                                    <mat-option value="Yes">Yes</mat-option>
+                                    <mat-option value="No">No</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" floatLabel="always" class="search-field">
                                 <mat-label>From Date</mat-label>
                                 <input type="text" matInput [matDatepicker]="fromDate"
                                     [(ngModel)]="searchFromDate" [required]="!isDutySlipIdSearchActive()" [disabled]="isDutySlipIdSearchActive()">
@@ -156,7 +164,7 @@
                                             <ng-container matColumnDef="IsFeedbackEmailSent">
                                                 <mat-header-cell *matHeaderCellDef mat-sort-header>Feedback Email Sent</mat-header-cell>
                                                 <mat-cell *matCellDef="let row">
-                                                    {{ formatYesNo(row.isFeedbackEmailSent) }}</mat-cell>
+                                                    {{ formatYesNo(getFeedbackEmailSent(row)) }}</mat-cell>
                                             </ng-container>
 
                                             <ng-container matColumnDef="ReservationID">
