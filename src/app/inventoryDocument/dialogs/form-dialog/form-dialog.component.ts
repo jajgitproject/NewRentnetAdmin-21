@@ -92,6 +92,7 @@ export class FormDialogComponent
       this.advanceTable.verificationRemark='N/A';
       this.advanceTable.verificationDate=('N/A');
       this.uploadedByName();
+      this.applyAddModeDocumentPreselection(data);
     }
     this.advanceTableForm = this.createContactForm();
     if (this.action === 'edit') {
@@ -145,6 +146,31 @@ export class FormDialogComponent
     }
     const id = Number(raw);
     return Number.isNaN(id) ? null : id;
+  }
+
+  private applyAddModeDocumentPreselection(dialogData: any): void {
+    const raw =
+      dialogData?.preselectedDocumentID ??
+      dialogData?.PreselectedDocumentID ??
+      dialogData?.documentID ??
+      dialogData?.DocumentID;
+    const documentId = this.resolveDocumentId({ documentID: raw });
+    if (documentId == null) {
+      return;
+    }
+    const documentName = (
+      dialogData?.preselectedDocumentName ??
+      dialogData?.PreselectedDocumentName ??
+      dialogData?.documentName ??
+      dialogData?.DocumentName ??
+      ''
+    ).toString();
+    this.advanceTable.documentID = documentId;
+    if (documentName) {
+      this.advanceTable.document = documentName;
+      this.advanceTable.documentName = documentName;
+    }
+    this.pendingDocumentId = documentId;
   }
 
   private resolveDocumentName(row: any): string {

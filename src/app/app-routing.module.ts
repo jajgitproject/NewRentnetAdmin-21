@@ -3007,6 +3007,12 @@ const routes: Routes = [
       },
 
       {
+        path: 'complianceMonitor',
+        loadChildren: () =>
+          import('./complianceMonitor/complianceMonitor.module').then((m) => m.ComplianceMonitorModule),
+      },
+
+      {
         path: 'driverCompliance',
         loadChildren: () =>
           import('./driverCompliance/driverCompliance.module').then(

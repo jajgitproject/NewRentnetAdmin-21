@@ -955,6 +955,16 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'complianceMonitor',
+        title: 'Compliance Monitor',
+        moduleName: 'complianceMonitor',
+        icon: 'fas fa-heartbeat',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'supplierComplianceDashboard',
         title: 'Supplier Compliance Dashboard',
         moduleName: 'supplier Compliance Dashboard',
