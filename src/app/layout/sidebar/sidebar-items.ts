@@ -252,6 +252,19 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
 
+      {
+        path: 'bookingRefusal',
+        title: 'Booking Refusal',
+        pageKey: 'Booking Refusal',
+        moduleName: 'bookingRefusal',
+        alternateAccessPageKeys: ['bookingRefusal', 'Booking Refusal'],
+        icon: 'fas fa-ban',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
        {
         path: 'rejectedQCDriverPhoto',
         title: 'Rejected QC Driver Photo',

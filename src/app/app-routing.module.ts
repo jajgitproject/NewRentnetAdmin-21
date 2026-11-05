@@ -1658,6 +1658,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'bookingRefusal',
+        loadChildren: () =>
+          import('./bookingRefusal/bookingRefusal.module').then(
+            (m) => m.BookingRefusalModule
+          )
+      },
+
+      {
         path: 'CarAndDriverAllotmentTemp',
         loadChildren: () =>
           import('./CarAndDriverAllotmentTemp/CarAndDriverAllotmentTemp.module').then(
