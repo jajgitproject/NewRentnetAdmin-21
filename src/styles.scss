@@ -355,67 +355,16 @@ form.customer-form-four-col mat-form-field {
   max-width: 95vw !important;
 }
 
-/* Booking screen — soft capping bypass (centered, compact) */
-.cdk-global-overlay-wrapper:has(> .cdk-overlay-pane.soft-capping-bypass-dialog-panel) {
-  justify-content: center !important;
-  align-items: center !important;
-}
-.cdk-overlay-container .cdk-overlay-pane.soft-capping-bypass-dialog-panel.mat-mdc-dialog-panel {
-  position: fixed !important;
-  left: 50% !important;
-  top: 50% !important;
-  margin: 0 !important;
-  width: min(520px, calc(100vw - 32px)) !important;
-  min-width: min(520px, calc(100vw - 32px)) !important;
-  max-width: min(520px, calc(100vw - 32px)) !important;
-  max-height: 90vh !important;
-  transform: translate(-50%, -50%) !important;
-  flex-shrink: 0 !important;
-  box-sizing: border-box !important;
-  --mat-dialog-container-max-width: min(520px, calc(100vw - 32px));
-}
-.cdk-overlay-container .cdk-overlay-pane.soft-capping-bypass-dialog-panel > .mat-mdc-dialog-container,
-.cdk-overlay-container .cdk-overlay-pane.soft-capping-bypass-dialog-panel .mdc-dialog__surface,
-.cdk-overlay-container .cdk-overlay-pane.soft-capping-bypass-dialog-panel .mat-mdc-dialog-surface {
-  width: 100% !important;
-  max-width: 100% !important;
-  max-height: 90vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-}
-.cdk-overlay-container .cdk-overlay-pane.soft-capping-bypass-dialog-panel app-soft-capping-bypass-dialog {
-  display: flex !important;
-  flex-direction: column !important;
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  max-height: 90vh !important;
-  overflow: hidden !important;
-}
-.cdk-overlay-container .cdk-overlay-pane.soft-capping-bypass-dialog-panel .mat-mdc-dialog-content,
-.cdk-overlay-container .cdk-overlay-pane.soft-capping-bypass-dialog-panel .mdc-dialog__content {
-  display: flex !important;
-  flex-direction: column !important;
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  overflow: visible !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  padding: 0 !important;
-}
-.cdk-overlay-container .cdk-overlay-pane.soft-capping-bypass-dialog-panel .mat-mdc-dialog-actions,
-.cdk-overlay-container .cdk-overlay-pane.soft-capping-bypass-dialog-panel .mdc-dialog__actions {
-  flex-shrink: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
+/* Soft capping bypass — dropdown panels only (dialog uses standard template like si-dialog) */
+.cdk-overlay-container .cdk-overlay-pane:has(.soft-cap-select-panel),
+.cdk-overlay-container .cdk-overlay-pane:has(.soft-cap-approver-autocomplete-panel) {
+  z-index: 21000 !important;
+  max-width: min(480px, calc(100vw - 48px)) !important;
 }
 
-/* Soft capping bypass — keep select/autocomplete panels from stretching the dialog */
 .cdk-overlay-container .mat-mdc-select-panel.soft-cap-select-panel,
 .cdk-overlay-container .mat-mdc-autocomplete-panel.soft-cap-approver-autocomplete-panel {
-  max-width: min(472px, calc(100vw - 80px)) !important;
+  max-width: min(480px, calc(100vw - 48px)) !important;
 }
 
 /* Booking screen — KAM pickup address correction history */
@@ -1128,7 +1077,7 @@ mat-option {
  * sets pane width = trigger width and long options clip — Control Panel avoids
  * this on mat-select via [panelWidth]="null"; autocompletes need pane-level sizing.
  */
-.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-autocomplete-panel:not(.google-autocomplete-panel)) {
+.cdk-overlay-container .cdk-overlay-pane:has(.mat-mdc-autocomplete-panel:not(.google-autocomplete-panel):not(.soft-cap-approver-autocomplete-panel)) {
   width: max-content !important;
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;
@@ -1141,7 +1090,7 @@ mat-option {
   box-sizing: border-box;
 }
 
-.cdk-overlay-container .cdk-overlay-pane:not(.role-form-wide-dialog):has(.mat-mdc-select-panel):not(:has(.inventory-select-panel)):not(:has(.upsell-reason-select-panel)) {
+.cdk-overlay-container .cdk-overlay-pane:not(.role-form-wide-dialog):has(.mat-mdc-select-panel):not(:has(.inventory-select-panel)):not(:has(.upsell-reason-select-panel)):not(:has(.soft-cap-select-panel)) {
   width: max-content !important;
   max-width: min(92vw, calc(100vw - 24px)) !important;
   box-sizing: border-box;

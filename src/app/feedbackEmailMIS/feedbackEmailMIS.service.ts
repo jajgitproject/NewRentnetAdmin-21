@@ -17,26 +17,27 @@ export class FeedbackEmailMISService {
 
   /** CRUD METHODS */
   getTableData(searchReservationID: string, searchDutySlipID: string, searchCustomer: string, searchIsAllotted: string,
-    searchFromDate: string, searchToDate: string, PageNumber: number): Observable<any> {
+    searchEmailSent: string, searchFromDate: string, searchToDate: string, PageNumber: number): Observable<any> {
     return this.httpClient.get(this.buildSearchUrl(
-      searchReservationID, searchDutySlipID, searchCustomer, searchIsAllotted,
+      searchReservationID, searchDutySlipID, searchCustomer, searchIsAllotted, searchEmailSent,
       searchFromDate, searchToDate, PageNumber, 'PickupDate', 'Descending'));
   }
 
   getTableDataSort(searchReservationID: string, searchDutySlipID: string, searchCustomer: string, searchIsAllotted: string,
-    searchFromDate: string, searchToDate: string, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
+    searchEmailSent: string, searchFromDate: string, searchToDate: string, PageNumber: number, coloumName: string, sortType: string): Observable<any> {
     return this.httpClient.get(this.buildSearchUrl(
-      searchReservationID, searchDutySlipID, searchCustomer, searchIsAllotted,
+      searchReservationID, searchDutySlipID, searchCustomer, searchIsAllotted, searchEmailSent,
       searchFromDate, searchToDate, PageNumber, coloumName, sortType));
   }
 
   private buildSearchUrl(searchReservationID: string, searchDutySlipID: string, searchCustomer: string, searchIsAllotted: string,
-    searchFromDate: string, searchToDate: string, PageNumber: number, coloumName: string, sortType: string): string {
+    searchEmailSent: string, searchFromDate: string, searchToDate: string, PageNumber: number, coloumName: string, sortType: string): string {
     return this.API_URL + '/'
       + this.toPathValue(searchReservationID) + '/'
       + this.toPathValue(searchDutySlipID) + '/'
       + this.toPathValue(searchCustomer) + '/'
       + this.toPathValue(searchIsAllotted) + '/'
+      + this.toPathValue(searchEmailSent) + '/'
       + this.toPathValue(searchFromDate) + '/'
       + this.toPathValue(searchToDate) + '/'
       + PageNumber + '/'
