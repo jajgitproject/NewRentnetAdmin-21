@@ -180,6 +180,17 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'callMasking',
+        title: 'Call Masking',
+        moduleName: 'callMasking',
+        icon: 'fas fa-phone',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'addB2CServiceLocation',
         title: 'Add B2C Service Location',
         moduleName: 'addB2CServiceLocation',
