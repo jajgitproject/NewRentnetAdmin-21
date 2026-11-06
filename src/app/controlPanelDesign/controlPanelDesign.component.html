@@ -1325,7 +1325,7 @@
                   <span style="
                       font-size: 12px;
                       text-align: left;
-                      width: 150px;
+                      width: 180px;
                       float: left;cursor: pointer;" (click)="sortByColumnName('registrationNumber')"
                     [ngClass]="{'active-sort': sortColumn === 'registrationNumber'}">
                     <b>Car No<br>Car Sent<br>Driver</b>
@@ -1928,12 +1928,22 @@
                             </span>
                           </span>
 
-                          <span style="font-size: 12px;text-align: left;width: 150px;float: left;">
+                          <span style="font-size: 12px;text-align: left;width: 180px;float: left;">
                             {{data.registrationNumber ? data.registrationNumber: 'N/A'}}
                             <br />
                             {{data.carSent ? data.carSent: 'N/A'}}
                             <br />
-                            {{data.driverName ? data.driverName: 'N/A'}} - {{data.driverPhone ? data.driverPhone:'N/A'}}
+                            {{data.driverName ? data.driverName: 'N/A'}}
+                            <ng-container *ngIf="data.driverPhone && data.driverPhone.indexOf(' Vir No. ') >= 0; else driverPhoneOnly">
+                              <br />
+                              {{ data.driverPhone.split(' Vir No. ')[0] }}
+                              <br />
+                              Vir No. {{ data.driverPhone.split(' Vir No. ')[1] }}
+                            </ng-container>
+                            <ng-template #driverPhoneOnly>
+                              <br />
+                              {{data.driverPhone ? data.driverPhone:'N/A'}}
+                            </ng-template>
                           </span>
 
                           <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
