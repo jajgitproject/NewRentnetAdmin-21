@@ -2178,10 +2178,7 @@ OnDropOffGeoLocationClick(option:any)
     if (value === true) {
       return 'Yes';
     }
-    if (value === false) {
-      return 'No';
-    }
-    return 'N/A';
+    return 'No';
   }
 
   hasDisplayValue(value: string | number | null | undefined): boolean {
