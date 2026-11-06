@@ -1355,6 +1355,13 @@ const routes: Routes = [
           )
       },
       {
+        path: 'customerCallMasking',
+        loadChildren: () =>
+          import('./customerCallMasking/customerCallMasking.module').then(
+            (m) => m.CustomerCallMaskingModule
+          )
+      },
+      {
         path: 'reservationGroup',
         loadChildren: () =>
           import('./reservationGroup/reservationGroup.module').then(
