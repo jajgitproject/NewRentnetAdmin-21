@@ -6257,6 +6257,23 @@ private canThisRoleCreateBackDateBooking(): boolean {
   }
 
   //---------- Reservation Capping ----------
+  /** Hard/soft capping applies only while creating a new booking, not when revisiting to edit an existing reservation. */
+  private shouldSkipReservationCapping(): boolean {
+    if (this.shouldUseEditPrefill()) {
+      return true;
+    }
+    const loadedReservationId = this.advanceTable?.reservationID;
+    if (
+      !this.isEmptyId(loadedReservationId)
+      && !this.isEmptyId(this.advanceTable?.vehicleID)
+      && !this.isEmptyId(this.advanceTable?.pickupCityID)
+      && this.advanceTable?.pickupDate
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   private getCustomerGroupDisplayName(): string {
     if (this.customerGroup) {
       return this.customerGroup;
@@ -6476,8 +6493,6 @@ private canThisRoleCreateBackDateBooking(): boolean {
     const cap = data?.cap ?? data?.Cap ?? 0;
     const dialogRef = this.dialog.open(SoftCappingBypassDialogComponent, {
       width: '520px',
-      maxWidth: '92vw',
-      panelClass: 'soft-capping-bypass-dialog-panel',
       disableClose: true,
       autoFocus: false,
       data: {
@@ -6517,6 +6532,9 @@ private canThisRoleCreateBackDateBooking(): boolean {
   }
 
   private checkReservationCappingForSave(): Promise<'proceed' | 'abort' | 'done'> {
+    if (this.shouldSkipReservationCapping()) {
+      return Promise.resolve('proceed');
+    }
     const params = this.getReservationCappingRequestParams();
     if (!params) {
       return Promise.resolve('proceed');
@@ -6547,6 +6565,9 @@ private canThisRoleCreateBackDateBooking(): boolean {
 
   public GetReservationCapping(customerGroupID,customerID,pickupDate,cityID,packageTypeID,vehicleID)
   {
+    if (this.shouldSkipReservationCapping()) {
+      return;
+    }
     // All 6 params are path segments; any missing value produces URLs like
     // /CheckReservationCapping/4616/9/Invalid%20date/undefined/... and 400s.
     if (!customerGroupID || !customerID || !pickupDate || !cityID || !packageTypeID || !vehicleID) {

@@ -1,70 +1,62 @@
-<div class="soft-cap-shell" [class.soft-cap-shell--saving]="saving">
-  <div class="soft-cap-header">
-    <mat-icon class="soft-cap-header-icon" aria-hidden="true">info</mat-icon>
+<div class="scb-dialog" [class.scb-dialog--busy]="saving">
+  <div class="scb-dialog__header">
     <div>
-      <h2 class="soft-cap-title">Soft capping — approval required</h2>
-      <p class="soft-cap-subtitle">Provide a reason and approver to continue saving this reservation.</p>
+      <h2 class="scb-dialog__title">Soft capping — approval required</h2>
+      <span class="scb-dialog__hint">Provide a reason and approver to continue saving this reservation.</span>
     </div>
+    <button mat-icon-button type="button" (click)="cancel()" [disabled]="saving" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 
-  <mat-dialog-content class="soft-cap-body">
-    <section class="soft-cap-summary" aria-label="Capping summary">
-      <p class="soft-cap-summary-text">{{ data.summaryMessage }}</p>
-      <p class="soft-cap-summary-meta">
+  <div mat-dialog-content class="scb-dialog__body">
+    <div class="scb-dialog__summary">
+      <p class="scb-dialog__summary-text">{{ data.summaryMessage }}</p>
+      <p class="scb-dialog__summary-count">
         Projected booking <strong>{{ data.bookingCount }}</strong> of daily limit <strong>{{ data.cap }}</strong>.
       </p>
-    </section>
+    </div>
 
-    <p class="soft-cap-save-error" *ngIf="saveError">{{ saveError }}</p>
+    <p class="scb-dialog__error" *ngIf="saveError">{{ saveError }}</p>
 
-    <form [formGroup]="form" class="soft-cap-form" novalidate>
-      <div class="soft-cap-field">
-        <label class="soft-cap-label" for="soft-cap-reason">Reason <span class="req">*</span></label>
-        <mat-form-field appearance="outline" class="soft-cap-mat-field" subscriptSizing="fixed" floatLabel="always">
-          <mat-select
-            id="soft-cap-reason"
-            formControlName="reason"
-            placeholder="Select reason"
-            panelClass="soft-cap-select-panel"
-            panelWidth="">
+    <form class="register-form" [formGroup]="form" novalidate>
+      <div class="scb-dialog__row">
+        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+          <mat-label>Reason</mat-label>
+          <mat-select formControlName="reason" panelClass="soft-cap-select-panel">
             <mat-option *ngFor="let reason of reasonOptions" [value]="reason">{{ reason }}</mat-option>
           </mat-select>
           <mat-error *ngIf="form.get('reason')?.hasError('required')">Reason is required</mat-error>
         </mat-form-field>
       </div>
 
-      <div class="soft-cap-field">
-        <label class="soft-cap-label" for="soft-cap-details">Additional details <span class="req">*</span></label>
-        <mat-form-field appearance="outline" class="soft-cap-mat-field" subscriptSizing="fixed" floatLabel="always">
+      <div class="scb-dialog__row">
+        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+          <mat-label>Additional details</mat-label>
           <textarea
-            id="soft-cap-details"
             matInput
             rows="3"
             formControlName="details"
-            placeholder="Minimum 10 characters"
-            maxlength="2000"></textarea>
+            placeholder="Minimum 10 characters"></textarea>
           <mat-hint>At least 10 characters</mat-hint>
           <mat-error *ngIf="form.get('details')?.hasError('required')">Additional details are required</mat-error>
           <mat-error *ngIf="form.get('details')?.hasError('minlength')">Enter at least 10 characters</mat-error>
         </mat-form-field>
       </div>
 
-      <div class="soft-cap-field">
-        <label class="soft-cap-label" for="soft-cap-approver">Approver <span class="req">*</span></label>
-        <mat-form-field appearance="outline" class="soft-cap-mat-field" subscriptSizing="fixed" floatLabel="always">
+      <div class="scb-dialog__row">
+        <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+          <mat-label>Approver</mat-label>
           <input
-            id="soft-cap-approver"
             type="text"
             matInput
             formControlName="approver"
-            placeholder="Type at least 3 characters to search employees"
+            placeholder="Type at least 3 characters to search"
             [matAutocomplete]="approverAuto"
             autocomplete="off" />
           <mat-autocomplete
             #approverAuto="matAutocomplete"
-            class="soft-cap-approver-autocomplete"
             panelClass="soft-cap-approver-autocomplete-panel"
-            panelWidth=""
             [displayWith]="displayApprover"
             (optionSelected)="onApproverSelected($event.option.value)">
             <mat-option *ngFor="let emp of approverOptions | async" [value]="emp">
@@ -77,18 +69,18 @@
         </mat-form-field>
       </div>
     </form>
-  </mat-dialog-content>
+  </div>
 
-  <mat-dialog-actions align="end" class="soft-cap-actions">
-    <button mat-stroked-button type="button" [disabled]="saving" (click)="cancel()">Cancel</button>
-    <button mat-flat-button color="primary" type="button" [disabled]="saving" (click)="submit()">
-      <span *ngIf="!saving">Continue &amp; save</span>
-      <span *ngIf="saving">Saving…</span>
+  <div mat-dialog-actions class="scb-dialog__actions">
+    <button mat-raised-button color="warn" type="button" [disabled]="saving" (click)="cancel()" tabindex="-1">Cancel</button>
+    <mat-spinner *ngIf="saving" diameter="28"></mat-spinner>
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      *ngIf="!saving"
+      (click)="submit()">
+      Continue &amp; save
     </button>
-  </mat-dialog-actions>
-
-  <div class="soft-cap-saving-overlay" *ngIf="saving" aria-live="polite" aria-busy="true">
-    <mat-spinner diameter="44"></mat-spinner>
-    <p>Saving reservation…</p>
   </div>
 </div>
