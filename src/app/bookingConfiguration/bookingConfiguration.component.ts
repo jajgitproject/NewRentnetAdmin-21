@@ -2174,6 +2174,16 @@ OnDropOffGeoLocationClick(option:any)
     return String(value);
   }
 
+  formatEscortRequired(value: boolean | null | undefined): string {
+    if (value === true) {
+      return 'Yes';
+    }
+    if (value === false) {
+      return 'No';
+    }
+    return 'N/A';
+  }
+
   hasDisplayValue(value: string | number | null | undefined): boolean {
     if (value === null || value === undefined) {
       return false;

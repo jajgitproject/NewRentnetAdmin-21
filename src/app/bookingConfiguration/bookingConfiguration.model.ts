@@ -32,6 +32,7 @@ export class BookingConfigurationCustomerDetails {
   gstin:string;
   location:string;
   specialRequest:string;
+  escortRequired?: boolean | null;
   
   constructor(bookingConfigurationCustomerDetails) {
     {
@@ -66,6 +67,7 @@ export class BookingConfigurationCustomerDetails {
       this.gstin = bookingConfigurationCustomerDetails.gstin || '';
       this.location = bookingConfigurationCustomerDetails.location || '';
       this.specialRequest = bookingConfigurationCustomerDetails.specialRequest || '';
+      this.escortRequired = bookingConfigurationCustomerDetails.escortRequired ?? null;
     }
   } 
 }

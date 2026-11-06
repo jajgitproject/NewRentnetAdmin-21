@@ -134,6 +134,10 @@
                 <span class="bc-label">Special Instructions</span>
                 <span class="bc-value">{{ displayOrDash(getIntegrationFieldValue('Comments') || customerDetails?.specialRequest) }}</span>
               </div>
+              <div class="bc-additional-row">
+                <span class="bc-label">Escort Required</span>
+                <span class="bc-value">{{ formatEscortRequired(customerDetails?.escortRequired) }}</span>
+              </div>
               <div class="bc-additional-row" *ngIf="hasDisplayValue(getIntegrationFieldValue('legNo'))">
                 <span class="bc-label">Leg No.</span>
                 <span class="bc-value">{{ displayOrDash(getIntegrationFieldValue('legNo')) }}</span>
