@@ -28,6 +28,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { StaticImageComponent } from '../shared/static-image/static-image.component';
+import { ClosingImageViewModule } from '../shared/closing-image-view/closing-image-view.module';
 @NgModule({
   declarations: [
     DutyTollParkingEntryComponent,
@@ -58,7 +59,8 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     MatProgressSpinnerModule,
     MyUploadModule,
     MatExpansionModule,
-    StaticImageComponent
+    StaticImageComponent,
+    ClosingImageViewModule
   ],
   providers: [DutyTollParkingEntryService],
   exports:[DutyTollParkingEntryComponent]

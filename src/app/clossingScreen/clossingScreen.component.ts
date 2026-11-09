@@ -3760,9 +3760,10 @@ showAndScrollSalesPerson() {
 },
   error =>
   {
+    const message = error?.error?.message;
     this.showNotification(
       'snackbar-danger',
-      'Operation Failed...!!!',
+      typeof message === 'string' && message.trim() ? message : 'Operation Failed...!!!',
       'bottom',
       'center'
     );

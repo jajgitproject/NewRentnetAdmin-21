@@ -13,6 +13,7 @@ import { MatMenu, MatMenuTrigger } from '@angular/material/menu';
 import { GeneralService } from '../general/general.service';
 import { MyUploadComponent } from '../myupload/myupload.component';
 import { FormDialogComponent } from '../dutyTollParkingEntry/dialogs/form-dialog/form-dialog.component';
+import { ClosingImageViewDialogComponent } from '../clossingOne/dialog/closingImageViewDialog/closingImageViewDialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { FormControl } from '@angular/forms';
 @Component({
@@ -387,8 +388,21 @@ deleteItem(row)
   }
 
   openImageInNewTab(imageUrl: string) {
-    window.open(imageUrl, '_blank');
-}
+    this.openReceiptImage(imageUrl, 'Toll Parking', 'Toll parking image not available.');
+  }
+
+  private openReceiptImage(imageUrl: string, title: string, missingMessage: string) {
+    const path = (imageUrl ?? '').toString().trim();
+    if (!path || /^(null|undefined)$/i.test(path)) {
+      this.showNotification('snackbar-warning', missingMessage, 'bottom', 'center');
+      return;
+    }
+    this.dialog.open(ClosingImageViewDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: { title, imagePath: path }
+    });
+  }
 }
 
 

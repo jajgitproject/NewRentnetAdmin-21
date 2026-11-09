@@ -20,6 +20,7 @@ import { DeleteDialogCityComponent } from '../dashboard/city-master/dialogscity/
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
 import { FormControl } from '@angular/forms';
 import { FormDialogComponent as  ApprovalFormDialogComponent} from '../dutyInterstateTaxApproval/dialogs/form-dialog/form-dialog.component';
+import { ClosingImageViewDialogComponent } from '../clossingOne/dialog/closingImageViewDialog/closingImageViewDialog.component';
 
 @Component({
   standalone: false,
@@ -377,8 +378,17 @@ deleteItem(row)
   }
 
   openImageInNewTab(imageUrl: string) {
-    window.open(imageUrl, '_blank');
-}
+    const path = (imageUrl ?? '').toString().trim();
+    if (!path || /^(null|undefined)$/i.test(path)) {
+      this.showNotification('snackbar-warning', 'Interstate tax image not available.', 'bottom', 'center');
+      return;
+    }
+    this.dialog.open(ClosingImageViewDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: { title: 'Interstate Tax', imagePath: path }
+    });
+  }
 }
 
 

@@ -26,6 +26,7 @@
         maxHeight="70vh"
         [alt]="dialogTitle"
         cssClass="closing-image-view__img"
+        (resolved)="onImageResolved($event)"
         (failed)="onImageFailed()"></app-static-image>
     </div>
     <img

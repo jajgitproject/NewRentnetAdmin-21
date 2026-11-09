@@ -122,7 +122,7 @@ import { DutySlipImageService } from '../dutySlipImage/dutySlipImage.service';
 import { DutySlipImageDetailsShowModule } from '../dutySlipImageDetailsShow/dutySlipImageDetailsShow.module';
 import { FormDialogChangeSupplierForInventory } from './dialog/changeSupplierForInventory/changeSupplierForInventory.component';
 import { ClosingSectionViewDialogComponent } from './dialog/closingSectionViewDialog/closingSectionViewDialog.component';
-import { ClosingImageViewDialogComponent } from './dialog/closingImageViewDialog/closingImageViewDialog.component';
+import { ClosingImageViewModule } from '../shared/closing-image-view/closing-image-view.module';
 import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 
@@ -134,8 +134,7 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     CurrentdataInformationComponent,
     DutySACComponent,
     FormDialogChangeSupplierForInventory,
-    ClosingSectionViewDialogComponent,
-    ClosingImageViewDialogComponent
+    ClosingSectionViewDialogComponent
     ],
   imports: [
     MatTabsModule,
@@ -201,6 +200,7 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     DutySlipImageModule,
     SummaryOfDutyModule,
     DutySlipImageDetailsShowModule,
+    ClosingImageViewModule,
     StaticImageComponent
   ],
   exports:[ClossingOneComponent],

@@ -31,6 +31,7 @@ import { DutyInterstateTaxApprovalService } from '../dutyInterstateTaxApproval/d
 import { DutyInterstateTaxApprovalModule } from '../dutyInterstateTaxApproval/dutyInterstateTaxApproval.module';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { StaticImageComponent } from '../shared/static-image/static-image.component';
+import { ClosingImageViewModule } from '../shared/closing-image-view/closing-image-view.module';
 
 @NgModule({
   declarations: [
@@ -64,7 +65,8 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     MyUploadModule,
     MatExpansionModule,
     DutyInterstateTaxApprovalModule,
-    StaticImageComponent
+    StaticImageComponent,
+    ClosingImageViewModule
   ],
   providers: [DutyInterstateTaxService,DutyInterstateTaxApprovalService],
   exports:[DutyInterstateTaxComponent]

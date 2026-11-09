@@ -20,6 +20,7 @@ export class ClosingImageViewDialogComponent {
   photoSlot: QcPhotoSlot;
   isPdf = false;
   loadFailed = false;
+  resolvedUrl: string | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<ClosingImageViewDialogComponent>,
@@ -35,17 +36,18 @@ export class ClosingImageViewDialogComponent {
     return this.photoSlot?.displayUrl ?? null;
   }
 
+  onImageResolved(url: string): void {
+    this.resolvedUrl = url;
+    this.loadFailed = false;
+    this.updatePdfFlag();
+  }
+
   onImageFailed(): void {
-    if (this.photoSlot?.advanceOnFailed(this.generalService)) {
-      this.loadFailed = false;
-      this.updatePdfFlag();
-      return;
-    }
     this.loadFailed = true;
   }
 
   openImageInNewTab(): void {
-    const url = this.displayUrl;
+    const url = this.resolvedUrl || this.displayUrl;
     if (url) {
       window.open(url, '_blank');
     }

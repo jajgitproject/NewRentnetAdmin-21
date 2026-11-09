@@ -18,7 +18,7 @@ import { GeneralService } from '../../general/general.service';
       [style.max-width]="maxWidth"
       [style.max-height]="maxHeight"
       (error)="onError()"
-      (load)="load.emit($event)" />
+      (load)="onLoad($event)" />
   `,
 })
 export class StaticImageComponent implements OnChanges {
@@ -31,10 +31,13 @@ export class StaticImageComponent implements OnChanges {
   @Input() maxHeight: string | null = null;
 
   @Output() load = new EventEmitter<Event>();
+  @Output() resolved = new EventEmitter<string>();
   @Output() failed = new EventEmitter<void>();
 
   currentSrc: string | null = null;
   hidden = false;
+  private candidates: string[] = [];
+  private candidateIndex = 0;
 
   constructor(private generalService: GeneralService) {}
 
@@ -44,22 +47,55 @@ export class StaticImageComponent implements OnChanges {
     }
   }
 
+  onLoad(event: Event): void {
+    this.load.emit(event);
+    if (this.currentSrc) {
+      this.resolved.emit(this.currentSrc);
+    }
+  }
+
   onError(): void {
+    const nextIndex = this.candidateIndex + 1;
+    if (nextIndex < this.candidates.length) {
+      this.candidateIndex = nextIndex;
+      this.currentSrc = this.candidates[nextIndex];
+      return;
+    }
     this.hidden = true;
     this.failed.emit();
   }
 
   private resetSrc(): void {
     this.hidden = false;
+    this.candidates = [];
+    this.candidateIndex = 0;
     const value = (this.src ?? '').toString().trim();
     if (!value || /^(null|undefined)$/i.test(value)) {
       this.currentSrc = null;
       return;
     }
-    if (/^https?:\/\//i.test(value)) {
+
+    if (value.startsWith('data:')) {
+      this.candidates = [value];
       this.currentSrc = value;
       return;
     }
-    this.currentSrc = this.generalService.resolveStaticImageUrl(value);
+
+    const candidates = this.generalService.qcPhotoUrlCandidates(value);
+    if (candidates.length > 0) {
+      this.candidates = candidates;
+      this.currentSrc = candidates[0];
+      return;
+    }
+
+    if (value.startsWith('data:') || /^https?:\/\//i.test(value)) {
+      this.candidates = [value];
+      this.currentSrc = value;
+      return;
+    }
+
+    const resolved = this.generalService.resolveStaticImageUrl(value);
+    this.candidates = resolved ? [resolved] : [];
+    this.currentSrc = resolved;
   }
 }

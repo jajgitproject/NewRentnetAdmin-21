@@ -25,6 +25,7 @@ import { MyUploadComponent } from '../myupload/myupload.component';
 import { MyUploadModule } from '../myupload/myupload.module';
 import { GooglePlaceModule } from '@compat/google-places-shim';
 import { StaticImageComponent } from '../shared/static-image/static-image.component';
+import { ClosingImageViewModule } from '../shared/closing-image-view/closing-image-view.module';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { StaticImageComponent } from '../shared/static-image/static-image.compon
     MyUploadModule,
     GooglePlaceModule,
     StaticImageComponent,
+    ClosingImageViewModule,
   ],
   providers: []
 })

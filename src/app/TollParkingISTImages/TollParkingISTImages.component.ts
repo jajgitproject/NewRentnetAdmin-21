@@ -19,6 +19,7 @@ import { TollParkingISTImagesService } from './TollParkingISTImages.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ClosingImageViewDialogComponent } from '../clossingOne/dialog/closingImageViewDialog/closingImageViewDialog.component';
 
 @Component({
   standalone: false,
@@ -110,8 +111,22 @@ export class TollParkingISTImagesComponent {
     this.dialogRef.close();
   }
 
-  openImageInNewTab(imageUrl: string) {
-    window.open(imageUrl, '_blank');
+  openImageInNewTab(imageUrl: string, title = 'Image') {
+    const path = imageUrl == null ? '' : String(imageUrl).trim();
+    if (!path || /^(null|undefined)$/i.test(path)) {
+      this.snackBar.open(title + ' not available.', '', {
+        duration: 2000,
+        verticalPosition: 'bottom',
+        horizontalPosition: 'center',
+        panelClass: 'snackbar-warning'
+      });
+      return;
+    }
+    this.dialog.open(ClosingImageViewDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: { title, imagePath: path }
+    });
   }
 }
 

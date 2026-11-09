@@ -8,10 +8,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { AuthService } from 'src/app/core/service/auth.service';
 
-import { MatDialog } from '@angular/material/dialog';
-
-import { FormDialogComponent } from 'src/app/validateOTP/dialogs/form-dialog/form-dialog.component';
-
 import { ExpirationDateService } from 'src/app/shared/expirationDate.service';
 import { RuntimeConfigService } from 'src/app/core/service/runtime-config.service';
 // Login geolocation disabled (EmployeeLoginSessionSettings.RequireLoginLocation = false on API).
@@ -69,7 +65,6 @@ export class SigninComponent implements OnInit {
 
     private authService: AuthService,
 
-    private dialog: MatDialog,
     private expirationDateService: ExpirationDateService,
     private runtimeConfig: RuntimeConfigService,
   ) {}
@@ -308,56 +303,6 @@ export class SigninComponent implements OnInit {
 
     const employee = currentUser.employee ?? currentUser.Employee;
 
-    const mobile = String(employee?.Mobile ?? employee?.mobile ?? '');
-
-    const typedLogin = String(this.f.email?.value ?? '');
-
-    const OTP_BYPASS_NUMBERS = [
-
-      '9560342610',
-
-      '9811051222',
-
-      '8527057487',
-
-      '9990788001',
-
-      '8273089744',
-
-      '8447685514',
-
-      '9891785921',
-      '7080004819',
-      '9721486346',
-
-    ];
-
-
-
-    if (OTP_BYPASS_NUMBERS.includes(mobile) || OTP_BYPASS_NUMBERS.includes(typedLogin)) {
-
-      this.isPasswordDeactivated = false;
-
-      this.authService.markOtpVerified();
-
-      const role = localStorage.getItem('role');
-
-      if (role === 'Admin') {
-
-        this.router.navigate(['/controlPanelDesign']);
-
-      } else {
-
-        this.router.navigate(['/welcome/welcome']);
-
-      }
-
-      return;
-
-    }
-
-
-
     const pwdExp =
 
       employee?.PasswordExpirationDate ?? employee?.passwordExpirationDate;
@@ -368,7 +313,7 @@ export class SigninComponent implements OnInit {
 
       this.isPasswordDeactivated = false;
 
-      this.openValidateOTPModal();
+      this.finishLogin();
 
       return;
 
@@ -396,7 +341,7 @@ export class SigninComponent implements OnInit {
 
     this.isPasswordDeactivated = false;
 
-    this.openValidateOTPModal();
+    this.finishLogin();
 
   }
 
@@ -458,32 +403,21 @@ export class SigninComponent implements OnInit {
 
 
 
-  openValidateOTPModal() {
+  private finishLogin(): void {
 
-    this.otpDialogOpen = true;
+    this.authService.markOtpVerified();
 
-    const dialogRef = this.dialog.open(FormDialogComponent, {
+    const role = localStorage.getItem('role');
 
-      width: '300px',
+    if (role === 'Admin') {
 
-      disableClose: true,
+      this.router.navigate(['/controlPanelDesign']);
 
-      data: { action: 'validate' }
+    } else {
 
-    });
+      this.router.navigate(['/welcome/welcome']);
 
-
-
-    dialogRef.afterClosed().subscribe((result) => {
-
-      this.otpDialogOpen = false;
-
-      // Dialog dismissed without completing OTP: drop the half-authenticated session.
-      if (!result?.verified && !this.authService.isOtpVerified()) {
-        this.authService.clearLocalSession();
-      }
-
-    });
+    }
 
   }
 }
