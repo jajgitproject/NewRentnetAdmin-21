@@ -631,6 +631,9 @@ export class ClossingOneComponent implements OnInit, AfterViewInit, OnDestroy {
             this.VehicleID = this.closingDataAdvanceTable?.vehicleID;
             this.guestName = this.closingDataAdvanceTable?.guestName;
             this.DutySlipMap= this.closingDataAdvanceTable?.dutySlipMap;
+            if (!this.allotmentStatus && this.closingDataAdvanceTable?.allotmentID) {
+              this.allotmentStatus = 'Alloted';
+            }
             this.CityName = this.closingDataAdvanceTable?.city;
             this.Package = this.closingDataAdvanceTable?.package;
             this.carBooked=this.closingDataAdvanceTable?.vehicle;

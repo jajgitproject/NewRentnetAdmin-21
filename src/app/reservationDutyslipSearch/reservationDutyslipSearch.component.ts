@@ -109,7 +109,9 @@ export class ReservationDutyslipSearchComponent implements OnInit {
     const encryptedPickupAddress = encodeURIComponent(this._generalService.encrypt(item.pickupAddress));
     const encryptedDropOffAddress = encodeURIComponent(this._generalService.encrypt(item.dropOffAddress));
     const encryptedLocationOutAddress = encodeURIComponent(this._generalService.encrypt(item.organizationalEntityName));
-  
+      // Search API only returns allotted duties; closingOne uses this for Duty Slip Map / print actions.
+    const encryptedAllotmentStatus = encodeURIComponent(this._generalService.encrypt('Alloted'));
+
       // Create URL with encrypted query parameters
      const url = this.router.serializeUrl(
       this.router.createUrlTree(['/closingOne'], {
@@ -132,7 +134,8 @@ export class ReservationDutyslipSearchComponent implements OnInit {
           locationOutTime: encryptedLocationOutTime,
           pickupAddress: encryptedPickupAddress,
           dropOffAddress: encryptedDropOffAddress,
-          locationOutAddress: encryptedLocationOutAddress
+          locationOutAddress: encryptedLocationOutAddress,
+          allotmentStatus: encryptedAllotmentStatus
         }
       }));
     window.location.href = this._generalService.FormURL + url;
