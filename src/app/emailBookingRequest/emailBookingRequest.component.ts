@@ -3,7 +3,7 @@ import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { EmailBookingClerkEfficiencyRow, EmailBookingRequestListItem } from './emailBookingRequest.model';
+import { EmailBookingClerkEfficiencyRow, KaptureTicketGridRow } from './emailBookingRequest.model';
 import { EmailBookingRequestService } from './emailBookingRequest.service';
 import { GeneralService } from '../general/general.service';
 
@@ -17,9 +17,9 @@ export class EmailBookingRequestComponent implements OnInit, OnDestroy {
   fromDateCtrl = new FormControl();
   toDateCtrl = new FormControl();
   trnCtrl = new FormControl('');
-  statusCtrl = new FormControl('AwaitingConfirmation');
-  viewCtrl = new FormControl('queue');
-  rows: EmailBookingRequestListItem[] = [];
+  rows: KaptureTicketGridRow[] = [];
+  pageNumber = 1;
+  readonly pageSize = 50;
   loading = false;
   pollingMailbox = false;
   claiming = false;
@@ -42,11 +42,8 @@ export class EmailBookingRequestComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const today = new Date();
-    const from = new Date();
-    from.setDate(today.getDate() - 7);
-    this.fromDateCtrl.setValue(from);
-    this.toDateCtrl.setValue(today);
+    this.fromDateCtrl.setValue(null);
+    this.toDateCtrl.setValue(null);
     this.myUserId = Number(this.generalService.getUserID() || 0);
     this.search();
     this.refreshTimer = setInterval(() => this.search(true), 20000);
@@ -61,20 +58,41 @@ export class EmailBookingRequestComponent implements OnInit, OnDestroy {
 
   search(silent = false): void {
     if (!silent) {
+      this.pageNumber = 1;
+    }
+    this.loadPage(silent);
+  }
+
+  previousPage(): void {
+    if (this.pageNumber <= 1 || this.loading) {
+      return;
+    }
+    this.pageNumber -= 1;
+    this.loadPage(false);
+  }
+
+  nextPage(): void {
+    if (this.loading || this.rows.length < this.pageSize) {
+      return;
+    }
+    this.pageNumber += 1;
+    this.loadPage(false);
+  }
+
+  private loadPage(silent: boolean): void {
+    if (!silent) {
       this.loading = true;
     }
     this.service
-      .search(
+      .searchKapture(
         this.formatDate(this.fromDateCtrl.value),
         this.formatDate(this.toDateCtrl.value),
         String(this.trnCtrl.value || '').trim() || null,
-        this.statusCtrl.value,
-        1,
-        this.viewCtrl.value || 'queue'
+        this.pageNumber
       )
       .subscribe(
         (data) => {
-          this.rows = (data || []).map((row) => this.normalizeRow(row));
+          this.rows = data || [];
           this.loading = false;
           this.refreshQueueCounts();
           this.refreshTodayPerformance();
@@ -83,19 +101,12 @@ export class EmailBookingRequestComponent implements OnInit, OnDestroy {
           this.rows = [];
           this.loading = false;
           if (!silent) {
-            this.snackBar.open('Could not load email booking requests. Check that UAT tables exist.', '', {
+            this.snackBar.open('Could not load tickets from KaptureTicket.', '', {
               duration: 4000
             });
           }
         }
       );
-  }
-
-  canConfigure(row: EmailBookingRequestListItem): boolean {
-    if (this.isWaiting(row?.requestStatus)) {
-      return true;
-    }
-    return this.isAwaiting(row?.requestStatus) && (!row?.isInProgress || !!row?.isMine);
   }
 
   nextEmail(): void {
@@ -122,36 +133,29 @@ export class EmailBookingRequestComponent implements OnInit, OnDestroy {
     );
   }
 
-  openConfiguration(row: EmailBookingRequestListItem): void {
-    if (!this.canConfigure(row)) {
+  openConfiguration(row: KaptureTicketGridRow): void {
+    const ticketId = Number(row?.kaptureTicketId || 0);
+    if (!ticketId || this.claiming) {
       return;
     }
-    const id = this.rowId(row);
-    if (!id) {
-      this.snackBar.open('This row has no request id.', '', { duration: 3000 });
-      return;
-    }
-    if (this.isWaiting(row?.requestStatus)) {
-      this.router.navigate(['/emailBookingConfiguration'], { queryParams: { BookingID: id } });
-      return;
-    }
-    this.service.claim(id).subscribe(
-      () => {
+    this.claiming = true;
+    this.service.openKaptureTicket(ticketId).subscribe(
+      (res) => {
+        this.claiming = false;
+        const id = Number(res?.emailBookingRequestId || 0);
+        if (!id) {
+          this.snackBar.open(res?.result || 'This ticket could not be opened.', '', { duration: 4000 });
+          return;
+        }
         this.router.navigate(['/emailBookingConfiguration'], { queryParams: { BookingID: id } });
       },
       (err) => {
-        this.snackBar.open(err?.error?.result || 'Another clerk has this email.', '', { duration: 4000 });
-        this.search();
+        this.claiming = false;
+        this.snackBar.open(err?.error?.result || 'This ticket could not be opened.', '', {
+          duration: 5000
+        });
       }
     );
-  }
-
-  private isAwaiting(status: string | undefined): boolean {
-    return String(status || '').trim().toLowerCase() === 'awaitingconfirmation';
-  }
-
-  private isWaiting(status: string | undefined): boolean {
-    return String(status || '').trim().toLowerCase() === 'waitingforreply';
   }
 
   pollMailbox(): void {
@@ -162,12 +166,12 @@ export class EmailBookingRequestComponent implements OnInit, OnDestroy {
     this.service.pollNow().subscribe(
       (res) => {
         this.pollingMailbox = false;
-        this.snackBar.open(res?.result || 'Mailbox read.', '', { duration: 4000 });
+        this.snackBar.open(res?.result || 'Tickets read.', '', { duration: 4000 });
         this.search();
       },
       (err) => {
         this.pollingMailbox = false;
-        this.snackBar.open(err?.error?.result || 'Could not read the mailbox.', '', { duration: 6000 });
+        this.snackBar.open(err?.error?.result || 'Could not read tickets.', '', { duration: 6000 });
       }
     );
   }
@@ -194,32 +198,6 @@ export class EmailBookingRequestComponent implements OnInit, OnDestroy {
         this.snackBar.open(err?.error?.result || 'Ingest failed', '', { duration: 4000 });
       }
     );
-  }
-
-  private normalizeRow(row: any): EmailBookingRequestListItem {
-    return {
-      emailBookingRequestId: Number(row?.emailBookingRequestId ?? row?.EmailBookingRequestId ?? row?.EmailBookingRequestID ?? 0),
-      emailBookingRequestGroupId: Number(row?.emailBookingRequestGroupId ?? row?.EmailBookingRequestGroupId ?? 0),
-      customerTravelRequestNumber: row?.customerTravelRequestNumber ?? row?.CustomerTravelRequestNumber,
-      customerName: row?.customerName ?? row?.CustomerName,
-      requestDate: row?.requestDate ?? row?.RequestDate,
-      requestTime: row?.requestTime ?? row?.RequestTime,
-      pickupDate: row?.pickupDate ?? row?.PickupDate,
-      pickupTime: row?.pickupTime ?? row?.PickupTime,
-      requestStatus: row?.requestStatus ?? row?.RequestStatus,
-      reservationEmailAiId: row?.reservationEmailAiId ?? row?.ReservationEmailAiId ?? row?.ReservationEmailAIID,
-      confidence: row?.confidence ?? row?.Confidence,
-      bookerName: row?.bookerName ?? row?.BookerName,
-      bookerMobile: row?.bookerMobile ?? row?.BookerMobile,
-      subject: row?.subject ?? row?.Subject,
-      claimedByUserID: row?.claimedByUserID ?? row?.ClaimedByUserID,
-      isMine: !!(row?.isMine ?? row?.IsMine),
-      isInProgress: !!(row?.isInProgress ?? row?.IsInProgress)
-    };
-  }
-
-  private rowId(row: EmailBookingRequestListItem | any): number {
-    return Number(row?.emailBookingRequestId ?? row?.EmailBookingRequestId ?? row?.EmailBookingRequestID ?? 0);
   }
 
   private parseId(result: string | undefined): number {

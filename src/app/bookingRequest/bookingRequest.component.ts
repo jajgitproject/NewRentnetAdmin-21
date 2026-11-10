@@ -47,6 +47,7 @@ export class BookingRequestComponent implements OnInit {
   actionRow: BookingRequest | null = null;
 
   dataSource: BookingRequest[] | null;
+  bookingCount = 0;
   SearchActivationStatus: boolean = true;
   PageNumber: number = 0;
   search: FormControl = new FormControl();
@@ -302,15 +303,20 @@ export class BookingRequestComponent implements OnInit {
     return null;
   }
 
+  private applyBookingResult(data: any) {
+    this.dataSource = data;
+    const total = Number(data?.[0]?.totalBookingCount ?? data?.[0]?.TotalBookingCount);
+    this.bookingCount = Number.isFinite(total) ? total : (data?.length || 0);
+  }
+
   public loadData()
   {
     const { fromDate, toDate } = this.getFormattedSearchDates();
     this.bookingRequestService.getTableData(fromDate,toDate,this.SearchTRN,this.SearchiTRN,this.customerGroupName.value,this.SearchEcoBookingNo,this.getConfirmByEcoApiValue(),this.PageNumber).subscribe(
       data => {
-        this.dataSource = data;
-        console.log('dataSource', this.dataSource);
+        this.applyBookingResult(data);
       },
-      (error: HttpErrorResponse) => { this.dataSource = null; }
+      (error: HttpErrorResponse) => { this.applyBookingResult(null); }
     );
   }
   showNotification(colorName, text, placementFrom, placementAlign) {
@@ -447,9 +453,9 @@ export class BookingRequestComponent implements OnInit {
     const { fromDate, toDate } = this.getFormattedSearchDates();
     this.bookingRequestService.getTableDataSort(fromDate, toDate, this.SearchTRN, this.SearchiTRN, this.customerGroupName.value, this.SearchEcoBookingNo, this.getConfirmByEcoApiValue(), this.PageNumber, coloumName.active, this.sortType).subscribe(
         data => {
-          this.dataSource = data;
+          this.applyBookingResult(data);
         },
-        (error: HttpErrorResponse) => { this.dataSource = null; }
+        (error: HttpErrorResponse) => { this.applyBookingResult(null); }
       );
   }
 

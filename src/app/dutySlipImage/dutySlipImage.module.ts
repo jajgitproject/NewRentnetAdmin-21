@@ -31,6 +31,7 @@ import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angul
 import { DutySlipImageService } from './dutySlipImage.service';
 import { DutySlipImageRoutingModule } from './dutySlipImage-routing.module';
 import { DutySlipImageComponent } from './dutySlipImage.component';
+import { StaticImageComponent } from '../shared/static-image/static-image.component';
 
 @NgModule({
   declarations: [
@@ -64,6 +65,7 @@ import { DutySlipImageComponent } from './dutySlipImage.component';
     MatMenuModule,
     MatProgressSpinnerModule,
     MyUploadModule,
+    StaticImageComponent
     //TwoDigitDecimaNumberDirective
   ],
   exports: [advanceTableForm],

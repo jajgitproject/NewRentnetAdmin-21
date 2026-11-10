@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { GeneralService } from '../general/general.service';
 import {
@@ -10,6 +11,7 @@ import {
   EmailBookingFindReservationsPayload,
   EmailBookingRequestDetail,
   EmailBookingRequestListItem,
+  KaptureTicketGridRow,
   EmailBookingReservationCandidate,
   EmailBookingSettings
 } from './emailBookingRequest.model';
@@ -50,6 +52,34 @@ export class EmailBookingRequestService {
       params = params.set('status', status);
     }
     return this.http.get<EmailBookingRequestListItem[]>(this.apiBase + '/requests', { params });
+  }
+
+  searchKapture(
+    fromDate: string | null,
+    toDate: string | null,
+    ticketId: string | null,
+    pageNumber: number
+  ): Observable<KaptureTicketGridRow[]> {
+    let params = new HttpParams().set('pageNumber', String(pageNumber || 1));
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    if (ticketId) {
+      params = params.set('ticketId', ticketId);
+    }
+    return this.http.get<any[]>(this.apiBase + '/kaptureTickets', { params }).pipe(
+      map((rows) => (rows || []).map((row) => this.normalizeKapture(row)))
+    );
+  }
+
+  openKaptureTicket(kaptureTicketId: number): Observable<{ emailBookingRequestId?: number; result?: string }> {
+    return this.http.post<{ emailBookingRequestId?: number; result?: string }>(
+      this.apiBase + '/kaptureTickets/' + kaptureTicketId + '/request',
+      {}
+    );
   }
 
   getById(id: number): Observable<EmailBookingRequestDetail> {
@@ -187,5 +217,17 @@ export class EmailBookingRequestService {
       body,
       dateOfEmail: dateOfEmail || undefined
     });
+  }
+
+  private normalizeKapture(row: any): KaptureTicketGridRow {
+    return {
+      kaptureTicketId: Number(row?.kaptureTicketId ?? row?.KaptureTicketId ?? 0),
+      ticketId: row?.ticketId ?? row?.TicketId,
+      emailSubject: row?.emailSubject ?? row?.EmailSubject,
+      customerEmail: row?.customerEmail ?? row?.CustomerEmail,
+      ticketCreatedOn: row?.ticketCreatedOn ?? row?.TicketCreatedOn,
+      ticketStatus: row?.ticketStatus ?? row?.TicketStatus,
+      createdOn: row?.createdOn ?? row?.CreatedOn
+    };
   }
 }

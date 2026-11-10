@@ -558,6 +558,51 @@ export class GeneralService {
     return fileName.length > 0 && fileName.includes('.');
   }
 
+  /** First StaticFiles host that actually has the file. Images and PDFs. */
+  firstReachableStaticImageUrl(path: string | null | undefined): Promise<string | null> {
+    return this.firstReachableUrl(this.qcPhotoUrlCandidates(path), path);
+  }
+
+  private async firstReachableUrl(candidates: string[], originalPath: string | null | undefined): Promise<string | null> {
+    const unreadable: string[] = [];
+    const stored = (originalPath ?? '').toString().trim();
+    for (const url of candidates) {
+      const result = await this.probeStaticFile(url);
+      if (result === 'yes') {
+        return url;
+      }
+      if (result === 'unreadable') {
+        unreadable.push(url);
+      }
+    }
+    if (unreadable.length === 0) {
+      return null;
+    }
+    return unreadable.find((url) => url === stored) || unreadable[0];
+  }
+
+  /**
+   * A missing file returns a readable 404. A file that is present is often
+   * served without CORS headers, so the browser blocks the response.
+   */
+  private async probeStaticFile(url: string): Promise<'yes' | 'no' | 'unreadable'> {
+    try {
+      let response = await fetch(url, { method: 'HEAD', mode: 'cors', credentials: 'omit' });
+      if (response.status === 405 || response.status === 501) {
+        response = await fetch(url, { method: 'GET', mode: 'cors', credentials: 'omit' });
+      }
+      if (response.ok) {
+        return 'yes';
+      }
+      if (response.status === 404 || response.status === 410) {
+        return 'no';
+      }
+      return 'unreadable';
+    } catch {
+      return 'unreadable';
+    }
+  }
+
   /** Skip informational placeholder images stored instead of real toll/interstate scans. */
   isPlaceholderReceiptImage(path: string | null | undefined): boolean {
     const value = (path ?? '').toLowerCase();

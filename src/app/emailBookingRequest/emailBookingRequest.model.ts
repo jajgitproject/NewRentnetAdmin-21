@@ -1,3 +1,13 @@
+export interface KaptureTicketGridRow {
+  kaptureTicketId: number;
+  ticketId?: string;
+  emailSubject?: string;
+  customerEmail?: string;
+  ticketCreatedOn?: string;
+  ticketStatus?: string;
+  createdOn?: string;
+}
+
 export interface EmailBookingRequestListItem {
   emailBookingRequestId: number;
   emailBookingRequestGroupId: number;
@@ -214,6 +224,8 @@ export interface EmailBookingRequestDetail {
   suggestedSameGuest?: boolean;
   suggestedMultiReason?: string;
   requestDetailsEmailEnabled?: boolean;
+  learnedCustomerName?: string;
+  learnedCustomerId?: number;
   correspondence?: EmailBookingCorrespondenceItem[];
   attachments?: EmailBookingAttachmentItem[];
 }

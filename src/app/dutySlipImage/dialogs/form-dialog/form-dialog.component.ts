@@ -129,7 +129,18 @@ private cdr: ChangeDetectorRef)
 
   openImageInNewTab() 
   {
-    window.open(this.ImagePath, '_blank');
+    const path = (this.ImagePath ?? '').toString().trim();
+    if (!path || /^(null|undefined)$/i.test(path)) {
+      this.showNotification('snackbar-warning', 'Duty slip image not available.', 'bottom', 'center');
+      return;
+    }
+    this._generalService.firstReachableStaticImageUrl(path).then((url) => {
+      if (!url) {
+        this.showNotification('snackbar-warning', 'Duty slip image could not be loaded.', 'bottom', 'center');
+        return;
+      }
+      window.open(url, '_blank');
+    });
   }
   
   formControl = new FormControl('', 

@@ -11,6 +11,8 @@ import { GeneralService } from '../general/general.service';
 export class MyUploadComponent implements OnInit {
   public progress: number;
   public message: string;
+  public messageType: '' | 'success' | 'error' = '';
+  private readonly sampleFileName = 'TollParking_2026-10-30.jpg';
   @Input() buttonText = 'Upload File';
   @Input() compact = false;
   @Input() accept = '';
@@ -22,7 +24,9 @@ export class MyUploadComponent implements OnInit {
     if (files.length === 0) {
       return;
     }
-    this.message="Uploaded..."
+    this.message = '';
+    this.messageType = '';
+    this.progress = 0;
     let fileToUpload = <File>files[0];
     const formData = new FormData();
     formData.append('file', fileToUpload, fileToUpload.name);
@@ -34,16 +38,20 @@ export class MyUploadComponent implements OnInit {
             if (event.type === HttpEventType.UploadProgress)
             {
               this.progress = Math.round(100 * event.loaded / event.total);
-              if (this.progress == 100)
-              this.message = "Upload Successful";
             }
             else if (event.type == HttpEventType.Response)
             {
-              this.message = 'Upload success.';
+              this.message = 'Upload successful.';
+              this.messageType = 'success';
               this.onUploadFinished.emit(event.body);
             }
         },
-
+        error =>
+        {
+          const reason = (error?.error?.message || 'File upload was blocked.').toString();
+          this.message = reason + ' Sample file name: ' + this.sampleFileName;
+          this.messageType = 'error';
+        }
     );
   }
 }

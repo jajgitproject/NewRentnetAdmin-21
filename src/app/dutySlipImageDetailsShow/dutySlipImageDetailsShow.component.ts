@@ -20,6 +20,7 @@ import { DutySlipImageDetailsShow }
   from './dutySlipImageDetailsShow.model';
 import Swal from 'sweetalert2';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { GeneralService } from '../general/general.service';
 
 @Component({
   standalone: false,
@@ -45,7 +46,8 @@ export class DutySlipImageDetailsShowComponent {
     public dutySlipImageDetailsShowService:
       DutySlipImageDetailsShowService,
         private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private generalService: GeneralService
   ) {
     this.dutySlipID = data.dutySlipID;
   }
@@ -59,7 +61,18 @@ export class DutySlipImageDetailsShowComponent {
   }
 
   openImageInNewTab(imageUrl: string) {
-    window.open(imageUrl, '_blank');
+    const path = (imageUrl ?? '').toString().trim();
+    if (!path || /^(null|undefined)$/i.test(path)) {
+      this.showNotification('snackbar-warning', 'Duty slip image not available.', 'bottom', 'center');
+      return;
+    }
+    this.generalService.firstReachableStaticImageUrl(path).then((url) => {
+      if (!url) {
+        this.showNotification('snackbar-warning', 'Duty slip image could not be loaded.', 'bottom', 'center');
+        return;
+      }
+      window.open(url, '_blank');
+    });
   }
 
   public DutySlipImageLoadData() {

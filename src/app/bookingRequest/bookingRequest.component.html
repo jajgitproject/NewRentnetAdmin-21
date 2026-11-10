@@ -92,6 +92,7 @@
         <button mat-icon-button type="button" matTooltip="Refresh" (click)="loadData()">
           <mat-icon>refresh</mat-icon>
         </button>
+        <span class="br-booking-count">Bookings: {{ bookingCount }}</span>
         <button mat-stroked-button type="button" class="br-columns-btn" [matMenuTriggerFor]="columnsMenu">
           <mat-icon>view_column</mat-icon>
           Columns

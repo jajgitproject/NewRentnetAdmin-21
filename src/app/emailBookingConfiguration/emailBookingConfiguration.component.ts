@@ -316,7 +316,7 @@ export class EmailBookingConfigurationComponent implements OnInit, OnDestroy {
           bookerEmail: this.pick(ai, 'bookerEmail') || sender.email,
           passengerName: this.pick(ai, 'passengerName') || this.pick(ai, 'bookerName') || this.pick(req, 'bookerName') || sender.name,
           passengerMobile: this.pick(ai, 'passengerMobile') || this.pick(ai, 'bookerMobile') || this.pick(req, 'bookerMobile') || emailPhone,
-          passengerEmail: this.pick(ai, 'passengerEmail') || this.pick(ai, 'bookerEmail') || sender.email,
+          passengerEmail: this.pick(ai, 'passengerEmail') || this.guestEmailFromText(),
           packageType: this.pick(ai, 'packageType'),
           package: this.pick(ai, 'package'),
           vehicleCategory: this.pick(ai, 'vehicleCategory'),
@@ -374,7 +374,7 @@ export class EmailBookingConfigurationComponent implements OnInit, OnDestroy {
           bookerEmail: this.captured.bookerEmail || sender.email || '',
           passengerName: this.sanitizePersonName(this.captured.passengerName || this.captured.bookerName || sender.name || ''),
           passengerMobile: this.digitsMobile(this.captured.passengerMobile || this.captured.bookerMobile || emailPhone),
-          passengerEmail: this.captured.passengerEmail || this.captured.bookerEmail || sender.email || '',
+          passengerEmail: this.captured.passengerEmail || '',
           specialInstructions: this.captured.specialRequest || '',
           reservationExecutiveID: this.generalService.getUserID(),
           primaryBookerID: 0,
@@ -1173,7 +1173,9 @@ export class EmailBookingConfigurationComponent implements OnInit, OnDestroy {
     if (this.advanceTableForm.value.customerID) {
       return;
     }
-    const match = this.matchCustomerFromBody()
+    const match = this.matchLearnedCustomer()
+      || this.matchCustomerByGuestDomain()
+      || this.matchCustomerFromBody()
       || this.exactMatch(this.CustomerList, (row) => row.customerName, this.hints.customerName)
       || this.matchCustomerByFromDomain();
     if (match) {
@@ -2324,6 +2326,8 @@ export class EmailBookingConfigurationComponent implements OnInit, OnDestroy {
       reservationEmailAiId: this.pick(raw, 'reservationEmailAiId', 'ReservationEmailAIID'),
       reservationId: this.pick(raw, 'reservationId', 'ReservationID'),
       requestDetailsEmailEnabled: !!(this.pick(raw, 'requestDetailsEmailEnabled') ?? raw?.RequestDetailsEmailEnabled),
+      learnedCustomerName: this.pick(raw, 'learnedCustomerName'),
+      learnedCustomerId: Number(this.pick(raw, 'learnedCustomerId') || 0) || undefined,
       correspondence: this.normalizeCorrespondence(raw?.correspondence ?? raw?.Correspondence),
       attachments: this.normalizeAttachments(raw?.attachments ?? raw?.Attachments)
     };
@@ -2512,12 +2516,60 @@ export class EmailBookingConfigurationComponent implements OnInit, OnDestroy {
     return best;
   }
 
+  private guestEmailFromText(): string {
+    const body = [this.detail?.textBody, this.detail?.htmlBody, this.detail?.subject].filter(Boolean).join('\n');
+    const match = body.match(/(?:guest|passenger|travell?er)\s*e-?mail\s*[:\t]\s*([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/i);
+    return match ? match[1] : '';
+  }
+
+  private guestEmail(): string {
+    const fromCapture = String(this.captured?.passengerEmail || this.pick(this.detail?.aiCapture, 'passengerEmail') || '').trim();
+    if (fromCapture.includes('@')) {
+      return fromCapture;
+    }
+    return this.guestEmailFromText();
+  }
+
+  private isEcoDomain(domain: string): boolean {
+    return domain === 'ecosmobility.com'
+      || domain === 'ecorentacar.com'
+      || domain.endsWith('.ecosmobility.com')
+      || domain.endsWith('.ecorentacar.com');
+  }
+
+  private matchLearnedCustomer(): CustomerDropDown | null {
+    const domain = this.emailDomain(this.guestEmail());
+    if (!domain || this.isPublicMailDomain(domain) || this.isEcoDomain(domain)) {
+      return null;
+    }
+    const learnedId = Number(this.detail?.learnedCustomerId || 0);
+    if (learnedId) {
+      const byId = (this.CustomerList || []).find((row) => Number(row.customerID) === learnedId);
+      if (byId) {
+        return byId;
+      }
+    }
+    return this.exactMatch(this.CustomerList, (row) => row.customerName, this.detail?.learnedCustomerName);
+  }
+
+  private matchCustomerByGuestDomain(): CustomerDropDown | null {
+    const domain = this.emailDomain(this.guestEmail());
+    if (!domain || this.isPublicMailDomain(domain) || this.isEcoDomain(domain)) {
+      return null;
+    }
+    return this.matchCustomerByDomain(domain);
+  }
+
   private matchCustomerByFromDomain(): CustomerDropDown | null {
     const sender = this.parseSender(this.detail?.fromAddress);
     const domain = this.emailDomain(sender.email);
     if (!domain || this.isPublicMailDomain(domain)) {
       return null;
     }
+    return this.matchCustomerByDomain(domain);
+  }
+
+  private matchCustomerByDomain(domain: string): CustomerDropDown | null {
     const token = this.companyTokenFromDomain(domain);
     if (!token || token.length < 2) {
       return null;

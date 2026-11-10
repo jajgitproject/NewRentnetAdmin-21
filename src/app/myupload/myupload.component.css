@@ -1,8 +1,16 @@
 .upload {
+    display: block;
     font-weight: bold;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+.upload-success {
     color: #28a745;
-    margin-left: 15px;
-    line-height: 36px;
+}
+
+.upload-error {
+    color: #c0392b;
 }
 
 .upload-row {

@@ -2,14 +2,8 @@
     <div class="col-md-3 upload-col">
         <input type="file" #file [accept]="accept" placeholder="Choose file" (change)="uploadFile(file.files)" class="upload-input">
         <button type="button" class="btn btn-success upload-btn" (click)="file.click()">{{ buttonText }}</button>
+        <span class="upload" *ngIf="message" [class.upload-error]="messageType === 'error'" [class.upload-success]="messageType === 'success'">
+          {{ message }}
+        </span>
     </div>
-    <!-- <div class="col-md-4" style="text-align:center">
-        <span class="upload" *ngIf="progress > 0">
-        <br>
-      {{progress}}%
-    </span>
-        <span class="upload" *ngIf="message">
-      {{message}}
-    </span>
-    </div> -->
 </div>

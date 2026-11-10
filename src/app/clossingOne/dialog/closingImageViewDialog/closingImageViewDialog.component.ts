@@ -47,6 +47,18 @@ export class ClosingImageViewDialogComponent {
   }
 
   openImageInNewTab(): void {
+    if (this.isPdf) {
+      const path = this.data?.imagePath || this.displayUrl;
+      this.generalService.firstReachableStaticImageUrl(path).then((url) => {
+        const target = url || this.resolvedUrl;
+        if (target) {
+          window.open(target, '_blank');
+        } else {
+          this.loadFailed = true;
+        }
+      });
+      return;
+    }
     const url = this.resolvedUrl || this.displayUrl;
     if (url) {
       window.open(url, '_blank');

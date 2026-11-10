@@ -3,8 +3,7 @@
     <div class="block-header">
       <h2>Email Booking Request</h2>
       <p class="page-subtitle">
-        Queue of emails waiting for a clerk. Next email claims the oldest available row for you.
-        Other clerks do not see your claimed row until you save, release, or the 15-minute lock expires.
+        Latest tickets from KaptureTicket, 50 at a time. Set dates to narrow the list. Configure opens that ticket.
       </p>
     </div>
     <div class="card">
@@ -28,43 +27,12 @@
           </div>
           <div class="col-lg-2">
             <mat-form-field appearance="outline" class="example-full-width">
-              <mat-label>TRN</mat-label>
+              <mat-label>Ticket, subject, or email</mat-label>
               <input matInput [formControl]="trnCtrl" />
             </mat-form-field>
           </div>
-          <div class="col-lg-2">
-            <mat-form-field appearance="outline" class="example-full-width">
-              <mat-label>Status</mat-label>
-              <mat-select [formControl]="statusCtrl">
-                <mat-option value="AwaitingConfirmation">Awaiting confirmation</mat-option>
-                <mat-option value="all">All</mat-option>
-                <mat-option value="Confirmed">Confirmed</mat-option>
-                <mat-option value="UpdateReservation">Update</mat-option>
-                <mat-option value="CancelReservation">Cancel</mat-option>
-                <mat-option value="WaitingForReply">Waiting for reply</mat-option>
-                <mat-option value="Rejected">Rejected</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div class="col-lg-2">
-            <mat-form-field appearance="outline" class="example-full-width">
-              <mat-label>View</mat-label>
-              <mat-select [formControl]="viewCtrl">
-                <mat-option value="queue">Available + mine</mat-option>
-                <mat-option value="all">All (supervisor)</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
           <div class="col-lg-12 filter-actions">
-            <button mat-raised-button color="primary" type="button" (click)="nextEmail()"
-              [disabled]="loading || claiming">
-              {{ claiming ? 'Claiming…' : 'Next email' }}
-            </button>
-            <button mat-stroked-button type="button" (click)="search()" [disabled]="loading">Search</button>
-            <button mat-stroked-button type="button" (click)="pollMailbox()"
-              [disabled]="loading || pollingMailbox">
-              {{ pollingMailbox ? 'Reading mailbox…' : 'Read mailbox' }}
-            </button>
+            <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="loading">Search</button>
             <span class="queue-count" *ngIf="unconfirmedCount != null">
               Unconfirmed emails: <strong>{{ unconfirmedCount }}</strong>
               <span class="queue-count-available" *ngIf="availableCount != null && availableCount !== unconfirmedCount">
@@ -111,48 +79,39 @@
         <table class="email-ai-table">
           <thead>
             <tr>
-              <th>Request</th>
+              <th>Ticket</th>
               <th>Subject</th>
-              <th>Customer</th>
-              <th>Booker</th>
-              <th>Pickup</th>
+              <th>Sender</th>
+              <th>Created</th>
               <th>Status</th>
-              <th>Claim</th>
-              <th>Confidence</th>
               <th class="col-configure">Configure</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of rows" class="data-row" [class.data-row-locked]="!canConfigure(row)"
-              (click)="openConfiguration(row)">
-              <td>{{ row.emailBookingRequestId }}</td>
-              <td>{{ row.subject || '—' }}</td>
-              <td>{{ row.customerName || '—' }}</td>
-              <td>{{ row.bookerName || '—' }} {{ row.bookerMobile ? ' - ' + row.bookerMobile : '' }}</td>
-              <td>{{ row.pickupDate || '—' }}</td>
-              <td>{{ row.requestStatus }}</td>
-              <td>
-                <span *ngIf="!row.isMine && row.isInProgress">In progress</span>
-                <span *ngIf="!row.isMine && !row.isInProgress && !canConfigure(row)" class="locked-label">Locked</span>
-                <span *ngIf="!row.isMine && !row.isInProgress && canConfigure(row)">Available</span>
-              </td>
-              <td>{{ row.confidence != null ? row.confidence + '%' : '—' }}</td>
-              <td class="col-configure" (click)="$event.stopPropagation()">
-                <button mat-raised-button color="primary" type="button"
-                  *ngIf="canConfigure(row)" (click)="openConfiguration(row)">
+            <tr *ngFor="let row of rows" class="data-row">
+              <td>{{ row.ticketId || row.kaptureTicketId }}</td>
+              <td>{{ row.emailSubject || '—' }}</td>
+              <td>{{ row.customerEmail || '—' }}</td>
+              <td>{{ row.ticketCreatedOn || row.createdOn || '—' }}</td>
+              <td>{{ row.ticketStatus || '—' }}</td>
+              <td class="col-configure">
+                <button mat-raised-button color="primary" type="button" (click)="openConfiguration(row)" [disabled]="claiming">
                   Configure
                 </button>
-                <span *ngIf="!canConfigure(row)" class="locked-label">Locked</span>
               </td>
             </tr>
             <tr *ngIf="rows.length === 0">
-              <td colspan="9">
-                No email booking requests in this range. Paste an email below and push it to the gate — Configure
-                then appears on that row.
+              <td colspan="6">
+                No tickets in this date range.
               </td>
             </tr>
           </tbody>
         </table>
+        <div class="grid-pager" *ngIf="rows.length || pageNumber > 1">
+          <button mat-stroked-button type="button" (click)="previousPage()" [disabled]="loading || pageNumber <= 1">Previous</button>
+          <span>Page {{ pageNumber }}</span>
+          <button mat-stroked-button type="button" (click)="nextPage()" [disabled]="loading || rows.length < pageSize">Next</button>
+        </div>
         </div>
 
         <div class="test-ingest">
