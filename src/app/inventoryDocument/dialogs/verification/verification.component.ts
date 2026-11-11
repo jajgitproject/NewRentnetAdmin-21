@@ -166,10 +166,16 @@ export class FormDialogInventoryVerificationsComponent
       : '';
   }
 
-  isImageUploaded(): boolean
- {
-    return this.advanceTable.documentImage && 
-         this.advanceTable.documentImage !== this._generalService.ImageURL + 'StaticFiles/Images/';
+  isImageUploaded(): boolean {
+    const image =
+      this.advanceTableForm?.get('documentImage')?.value ?? this.advanceTable?.documentImage;
+    return this._generalService.isValidStaticImageUrl(image);
+  }
+
+  documentImageViewUrl(): string {
+    const image =
+      this.advanceTableForm?.get('documentImage')?.value ?? this.advanceTable?.documentImage;
+    return this._generalService.isValidStaticImageUrl(image) ? image : '';
   }
   
   createContactForm(): FormGroup 
@@ -182,8 +188,18 @@ export class FormDialogInventoryVerificationsComponent
       documentID: [this.advanceTable.documentID],
       documentNumber: [this.advanceTable.documentNumber],
       documentIssuingAuthority: [this.advanceTable.documentIssuingAuthority],
-      documentImage: [this.advanceTable.documentImage],
-      documentImageNonAvailabilityReason: [this.advanceTable.documentImageNonAvailabilityReason],
+      documentImage: [
+        this._generalService.isValidStaticImageUrl(this.advanceTable.documentImage)
+          ? this.advanceTable.documentImage
+          : '',
+      ],
+      documentImageNonAvailabilityReason: [
+        this.fieldValue(
+          this.advanceTable,
+          'documentImageNonAvailabilityReason',
+          'DocumentImageNonAvailabilityReason'
+        ),
+      ],
       addressCityID: [this.advanceTable.addressCityID],
       documentExpiry: [this.advanceTable.documentExpiry],
       activationStatus: [this.advanceTable.activationStatus],

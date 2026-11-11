@@ -67,9 +67,10 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-label>Document Image</mat-label>
                     <br>
-                    <a *ngIf="ImagePath" href="{{ ImagePath }}" target="_blank">
-                        <img [src]="ImagePath" class="table" style="height: 80px; width: auto;">
+                    <a *ngIf="hasDocumentImagePreview()" href="{{ ImagePath }}" target="_blank">
+                        <img [src]="ImagePath" class="table" style="height: 80px; width: auto;" alt="Document image">
                     </a>
+                    <span *ngIf="!hasDocumentImagePreview()" class="document-image-not-uploaded">No Image Uploaded</span>
                     <div class="mt-2">
                         <app-myupload (onUploadFinished)="uploadFinished($event)"></app-myupload>
                     </div>

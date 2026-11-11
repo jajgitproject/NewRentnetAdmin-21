@@ -74,6 +74,8 @@ export class FormDialogComponent
       this.advanceTable = data.advanceTable;
       this.formatDocumentUploadFields(this.advanceTable);
       this.formatVerificationFields(this.advanceTable);
+      const editImageRaw = this.fieldValue(this.advanceTable, 'documentImage', 'DocumentImage');
+      this.ImagePath = this._generalService.isValidStaticImageUrl(editImageRaw) ? editImageRaw : '';
       if (this.advanceTable.verified === 'Verified' || this.advanceTable.verified === 'true') {
         this.advanceTable.verifiedData = 'Verified';
       }
@@ -209,9 +211,18 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({ documentID: documentId });
   }
 
+  private resolveDocumentImageForForm(row: any): string {
+    const raw = this.fieldValue(row, 'documentImage', 'DocumentImage');
+    return this._generalService.isValidStaticImageUrl(raw) ? raw : '';
+  }
+
+  public hasDocumentImagePreview(): boolean {
+    return this._generalService.isValidStaticImageUrl(this.ImagePath);
+  }
+
   private bindEditFormValues(row: any): void {
-    const documentImage = this.fieldValue(row, 'documentImage', 'DocumentImage');
-    this.ImagePath = documentImage || '';
+    const documentImage = this.resolveDocumentImageForForm(row);
+    this.ImagePath = documentImage;
 
     const documentExpiryRaw = this.fieldValue(row, 'documentExpiry', 'DocumentExpiry');
     const documentStartRaw = this.fieldValue(row, 'documentStartDate', 'DocumentStartDate');
@@ -287,7 +298,7 @@ export class FormDialogComponent
 
   private hasUploadedDocumentImage(): boolean {
     const image = this.advanceTableForm?.get('documentImage')?.value;
-    return typeof image === 'string' && image.trim().length > 0;
+    return this._generalService.isValidStaticImageUrl(image);
   }
 
   private syncReasonRequiredValidators(): void {
@@ -421,8 +432,18 @@ export class FormDialogComponent
       documentID: [this.resolveDocumentId(this.advanceTable), Validators.required],
       documentNumber: [this.advanceTable?.documentNumber],
       documentIssuingAuthority: [this.advanceTable?.documentIssuingAuthority],
-      documentImage: [this.advanceTable?.documentImage],
-      documentImageNonAvailabilityReason: [this.advanceTable?.documentImageNonAvailabilityReason],
+      documentImage: [
+        this.action === 'edit'
+          ? this.resolveDocumentImageForForm(this.advanceTable)
+          : this.advanceTable?.documentImage,
+      ],
+      documentImageNonAvailabilityReason: [
+        this.fieldValue(
+          this.advanceTable,
+          'documentImageNonAvailabilityReason',
+          'DocumentImageNonAvailabilityReason'
+        ),
+      ],
       addressCityID: [this.advanceTable?.addressCityID],
       documentStartDate: [this.advanceTable.documentStartDate],
       documentExpiry: [this.advanceTable.documentExpiry, Validators.required],

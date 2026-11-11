@@ -182,10 +182,14 @@ export class InventoryDocumentService
     if (!advanceTable.documentIssuingAuthority?.trim()) {
       advanceTable.documentIssuingAuthority = null;
     }
-    if (advanceTable.documentImage?.trim()) {
+    const hasImage = this.generalService.isValidStaticImageUrl(advanceTable.documentImage);
+    if (hasImage) {
       advanceTable.documentImageNonAvailabilityReason = null;
     } else if (!advanceTable.documentImageNonAvailabilityReason?.trim()) {
       advanceTable.documentImageNonAvailabilityReason = null;
+      advanceTable.documentImage = null;
+    } else {
+      advanceTable.documentImage = null;
     }
   }
 

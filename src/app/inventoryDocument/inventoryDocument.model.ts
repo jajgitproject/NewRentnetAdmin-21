@@ -39,8 +39,11 @@ export class InventoryDocumentModel {
        this.documentID = inventoryDocumentModel.documentID || '';
        this.documentNumber = inventoryDocumentModel.documentNumber || '';
        this.documentIssuingAuthority = inventoryDocumentModel.documentIssuingAuthority || '';
-       this.documentImage = inventoryDocumentModel.documentImage || '';
-       this.documentImageNonAvailabilityReason = inventoryDocumentModel.documentImageNonAvailabilityReason || '';
+       this.documentImage = inventoryDocumentModel.documentImage ?? inventoryDocumentModel.DocumentImage ?? '';
+       this.documentImageNonAvailabilityReason =
+         inventoryDocumentModel.documentImageNonAvailabilityReason
+         ?? inventoryDocumentModel.DocumentImageNonAvailabilityReason
+         ?? '';
        this.addressCityID = inventoryDocumentModel.addressCityID || 0;
        this.address = inventoryDocumentModel.address || '';
        this.documentExpiryString = inventoryDocumentModel.documentExpiryString || '';
@@ -106,8 +109,14 @@ export class InventoryDocumentVerificationModel {
        this.documentID = inventoryDocumentVerificationModel.documentID || '';
        this.documentNumber = inventoryDocumentVerificationModel.documentNumber || '';
        this.documentIssuingAuthority = inventoryDocumentVerificationModel.documentIssuingAuthority || '';
-       this.documentImage = inventoryDocumentVerificationModel.documentImage || '';
-       this.documentImageNonAvailabilityReason = inventoryDocumentVerificationModel.documentImageNonAvailabilityReason || '';
+       this.documentImage =
+         inventoryDocumentVerificationModel.documentImage
+         ?? inventoryDocumentVerificationModel.DocumentImage
+         ?? '';
+       this.documentImageNonAvailabilityReason =
+         inventoryDocumentVerificationModel.documentImageNonAvailabilityReason
+         ?? inventoryDocumentVerificationModel.DocumentImageNonAvailabilityReason
+         ?? '';
        this.addressCityID = inventoryDocumentVerificationModel.addressCityID || 0;
        this.address = inventoryDocumentVerificationModel.address || '';
        this.documentExpiryString = inventoryDocumentVerificationModel.documentExpiryString || '';
