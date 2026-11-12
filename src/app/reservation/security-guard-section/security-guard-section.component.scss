@@ -1,0 +1,80 @@
+:host ::ng-deep mat-card.example-card {
+  padding: 0;
+  background-color: #ebeef1;
+  margin-bottom: 20px;
+}
+
+:host ::ng-deep mat-card.example-card mat-card-header {
+  background-color: #17a2b8 !important;
+  padding: 5px;
+  min-height: 30px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep mat-card.example-card mat-card-header h5 {
+  margin: 0;
+  line-height: 1;
+  color: white;
+  font-weight: 500;
+}
+
+:host ::ng-deep mat-card.example-card mat-card-content {
+  padding: 10px;
+}
+
+/* Match main booking pickup/drop-off address field styling */
+:host ::ng-deep .cp-address-field .mat-mdc-text-field-wrapper,
+:host ::ng-deep .cp-address-field .mdc-text-field,
+:host ::ng-deep .cp-address-field .mat-mdc-form-field-infix {
+  overflow: visible !important;
+}
+
+:host ::ng-deep .cp-address-field .mat-mdc-form-field-infix {
+  min-height: 56px !important;
+  height: auto !important;
+  padding-top: 18px !important;
+  padding-bottom: 10px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  box-sizing: border-box !important;
+}
+
+:host ::ng-deep .cp-address-field textarea.mat-mdc-input-element {
+  align-self: stretch !important;
+  width: 100% !important;
+  min-height: 2.5rem !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 6px 0 2px 0 !important;
+  line-height: 1.35 !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  field-sizing: content;
+  resize: vertical;
+  box-sizing: border-box !important;
+}
+
+.sg-readonly-field {
+  padding: 0.5rem 0;
+}
+
+.link-actions-below {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 0.75rem;
+  line-height: 1;
+}
+
+.link-action {
+  cursor: pointer;
+  color: #007bff;
+  font-size: 10px !important;
+  font-style: italic;
+  text-decoration: none;
+}

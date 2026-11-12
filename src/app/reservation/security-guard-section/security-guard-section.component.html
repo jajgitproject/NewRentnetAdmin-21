@@ -1,0 +1,186 @@
+<ng-container *ngIf="visible" [formGroup]="form">
+
+  <br>
+
+  <mat-card class="example-card">
+    <mat-card-header>
+      <h5 style="color: white;">Security Guard Personnel</h5>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="row">
+        <div class="col-xl-12 mb-2">
+          <mat-checkbox formControlName="securityGuardInfoNotReceived"
+            (change)="onGuardInfoNotReceived($event.checked)">
+            Security Guard Info Not Received
+          </mat-checkbox>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!form.value.securityGuardInfoNotReceived">
+          <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+            <mat-label>Security Guard (Gender, VIP Status)</mat-label>
+            <input type="text" matInput formControlName="securityGuard" [matAutocomplete]="autoSg" />
+            <mat-autocomplete #autoSg="matAutocomplete" (optionSelected)="onGuardSelected($event.option.value)">
+              <mat-option *ngFor="let option of toArray(filteredGuardOptions | async)"
+                [value]="buildGuardDisplay(option)">
+                {{ buildGuardDisplay(option) }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+          <div class="link-actions-below">
+            <a class="link-action" (click)="openNewSecurityGuard()">New Security Guard</a>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="showGuardContactFields()">
+          <div class="sg-readonly-field"><strong>Email:</strong> {{ form.value.securityGuardEmail }}</div>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2" *ngIf="showGuardContactFields()">
+          <div class="sg-readonly-field"><strong>Mobile:</strong> {{ form.value.securityGuardMobile }}</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <br>
+
+  <mat-card class="example-card">
+    <mat-card-header>
+      <h5 style="color: white;">Security Guard Pickup Details</h5>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="row">
+        <div class="col-xl-12 mb-2">
+          <mat-checkbox formControlName="securityGuardPickupInfoNotReceived">
+            Security Guard Pick Up Info Not Received
+          </mat-checkbox>
+        </div>
+        <ng-container *ngIf="!form.value.securityGuardPickupInfoNotReceived">
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Pickup Date</mat-label>
+              <input matInput [matDatepicker]="sgPuDate" formControlName="securityGuardPickupDate" />
+              <mat-datepicker-toggle matSuffix [for]="sgPuDate"></mat-datepicker-toggle>
+              <mat-datepicker #sgPuDate></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Pickup Time</mat-label>
+              <input matInput [owlDateTimeTrigger]="sgPuTime" [owlDateTime]="sgPuTime"
+                formControlName="securityGuardPickupTime" />
+              <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="sgPuTime"><mat-icon>schedule</mat-icon></button>
+              <owl-date-time [pickerType]="'timer'" #sgPuTime></owl-date-time>
+            </mat-form-field>
+            <mat-checkbox formControlName="securityGuardPickupIsTimeNotConfirmed"
+              (change)="onSgPickupTnc($event.checked)">TNC</mat-checkbox>
+          </div>
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Pickup City</mat-label>
+              <input type="text" matInput formControlName="securityGuardPickupCity" [matAutocomplete]="autoSgPuCity" />
+              <mat-autocomplete #autoSgPuCity="matAutocomplete">
+                <mat-option *ngFor="let option of toArray(filteredSgPickupCityOptions | async)"
+                  [value]="option.geoPointName" (click)="getSgPickupCityID(option.geoPointID)">
+                  {{ option.geoPointName }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Pickup Address</mat-label>
+              <textarea matInput formControlName="securityGuardPickupAddress" rows="2"
+                [matAutocomplete]="autoSgPuAddr"></textarea>
+              <mat-autocomplete #autoSgPuAddr="matAutocomplete"
+                (optionSelected)="onSgPickupAddressSelected($event.option.value)"
+                panelWidth="fit-content"
+                class="google-autocomplete-panel">
+                <mat-option *ngFor="let option of toArray(filteredSgPickupAddressOptions | async)"
+                  [value]="option.geoSearchString">
+                  {{ option.geoSearchString }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Pickup Address Details i.e Street/Flat No./Flight No./Train No.</mat-label>
+              <textarea matInput formControlName="securityGuardPickupAddressDetails" rows="2"></textarea>
+            </mat-form-field>
+          </div>
+        </ng-container>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <br>
+
+  <mat-card class="example-card">
+    <mat-card-header>
+      <h5 style="color: white;">Security Guard DropOff Details</h5>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="row">
+        <div class="col-xl-12 mb-2">
+          <mat-checkbox formControlName="securityGuardDropOffInfoNotReceived">
+            Security Guard Drop off Info Not Received
+          </mat-checkbox>
+        </div>
+        <ng-container *ngIf="!form.value.securityGuardDropOffInfoNotReceived">
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Drop Off Date</mat-label>
+              <input matInput [matDatepicker]="sgDoDate" formControlName="securityGuardDropOffDate" />
+              <mat-datepicker-toggle matSuffix [for]="sgDoDate"></mat-datepicker-toggle>
+              <mat-datepicker #sgDoDate></mat-datepicker>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Drop Off Time</mat-label>
+              <input matInput [owlDateTimeTrigger]="sgDoTime" [owlDateTime]="sgDoTime"
+                formControlName="securityGuardDropOffTime" />
+              <button mat-icon-button matSuffix type="button" [owlDateTimeTrigger]="sgDoTime"><mat-icon>schedule</mat-icon></button>
+              <owl-date-time [pickerType]="'timer'" #sgDoTime></owl-date-time>
+            </mat-form-field>
+            <mat-checkbox formControlName="securityGuardDropOffIsTimeNotConfirmed"
+              (change)="onSgDropOffTnc($event.checked)">TNC</mat-checkbox>
+          </div>
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Drop Off City</mat-label>
+              <input type="text" matInput formControlName="securityGuardDropOffCity" [matAutocomplete]="autoSgDoCity" />
+              <mat-autocomplete #autoSgDoCity="matAutocomplete">
+                <mat-option *ngFor="let option of toArray(filteredSgDropOffCityOptions | async)"
+                  [value]="option.geoPointName" (click)="getSgDropOffCityID(option.geoPointID)">
+                  {{ option.geoPointName }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Drop Off Address</mat-label>
+              <textarea matInput formControlName="securityGuardDropOffAddress" rows="2"
+                [matAutocomplete]="autoSgDoAddr"></textarea>
+              <mat-autocomplete #autoSgDoAddr="matAutocomplete"
+                (optionSelected)="onSgDropOffAddressSelected($event.option.value)"
+                panelWidth="fit-content"
+                class="google-autocomplete-panel">
+                <mat-option *ngFor="let option of toArray(filteredSgDropOffAddressOptions | async)"
+                  [value]="option.geoSearchString">
+                  {{ option.geoSearchString }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+            <mat-form-field class="example-full-width cp-booking-field cp-address-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+              <mat-label>Drop Off Address Details i.e Street/Flat No./Flight No./Train No.</mat-label>
+              <textarea matInput formControlName="securityGuardDropOffAddressDetails" rows="2"></textarea>
+            </mat-form-field>
+          </div>
+        </ng-container>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+</ng-container>

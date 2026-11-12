@@ -307,7 +307,32 @@ advanceTableIN: InternalNoteDetails | null;
       tripTo:[''],
       tripType:[''],
       doesThisReservationContainSecurityGuard:[false],
-      securityGuardDetails:['', Validators.maxLength(500)]
+      securityGuardDetails:['', Validators.maxLength(500)],
+      securityGuardID: [null],
+      securityGuard: [''],
+      securityGuardEmail: [''],
+      securityGuardMobile: [''],
+      securityGuardInfoNotReceived: [false],
+      securityGuardPickupCityID: [null],
+      securityGuardPickupCity: [''],
+      securityGuardPickupDate: [null],
+      securityGuardPickupTime: [null],
+      securityGuardPickupAddress: [''],
+      securityGuardPickupAddressLatLong: [''],
+      securityGuardPickupAddressDetails: [''],
+      securityGuardPickupStopOrderPriority: [null],
+      securityGuardPickupInfoNotReceived: [false],
+      securityGuardPickupIsTimeNotConfirmed: [false],
+      securityGuardDropOffDate: [null],
+      securityGuardDropOffTime: [null],
+      securityGuardDropOffCityID: [null],
+      securityGuardDropOffCity: [''],
+      securityGuardDropOffAddress: [''],
+      securityGuardDropOffAddressLatLong: [''],
+      securityGuardDropOffAddressDetails: [''],
+      securityGuardDropOffStopOrderPriority: [null],
+      securityGuardDropOffInfoNotReceived: [false],
+      securityGuardDropOffIsTimeNotConfirmed: [false],
   })
 
   googlePlacesForm = this.fb.group({
@@ -1005,13 +1030,9 @@ private buildReservationSaveBody(
     body.projectCode = Array.isArray(body.projectCode) ? body.projectCode : [];
     body.fieldValue = Array.isArray(body.fieldValue) ? body.fieldValue : [];
     body.customerSpecificFields = body.customerSpecificFields || null;
-    if (this.softCappingBypassPayload) {
-      body.softCappingByPassReason = this.softCappingBypassPayload.softCappingByPassReason;
-      body.softCappingByPassDetails = this.softCappingBypassPayload.softCappingByPassDetails;
-      body.softCappingByPassApproverID = this.softCappingBypassPayload.softCappingByPassApproverID;
-    }
+    this.applySoftCappingBypassToSaveBody(body);
     if (body.doesThisReservationContainSecurityGuard !== true) {
-      body.securityGuardDetails = null;
+      this.clearSecurityGuardSavePayload(body);
     } else if (typeof body.securityGuardDetails === 'string') {
       body.securityGuardDetails = body.securityGuardDetails.trim().slice(0, 500);
     }
@@ -1026,17 +1047,33 @@ private buildReservationSaveBody(
   if (!body.reservationID) {
     body.reservationID = csfPayload.reservationID;
   }
+  this.applySoftCappingBypassToSaveBody(body);
+    if (body.doesThisReservationContainSecurityGuard !== true) {
+      this.clearSecurityGuardSavePayload(body);
+    } else if (typeof body.securityGuardDetails === 'string') {
+      body.securityGuardDetails = body.securityGuardDetails.trim().slice(0, 500);
+    }
+    return body;
+}
+
+private applySoftCappingBypassToSaveBody(body: Record<string, unknown>): void {
   if (this.softCappingBypassPayload) {
     body.softCappingByPassReason = this.softCappingBypassPayload.softCappingByPassReason;
     body.softCappingByPassDetails = this.softCappingBypassPayload.softCappingByPassDetails;
     body.softCappingByPassApproverID = this.softCappingBypassPayload.softCappingByPassApproverID;
+    return;
   }
-  if (body.doesThisReservationContainSecurityGuard !== true) {
-    body.securityGuardDetails = null;
-  } else if (typeof body.securityGuardDetails === 'string') {
-    body.securityGuardDetails = body.securityGuardDetails.trim().slice(0, 500);
-  }
-  return body;
+  body.softCappingByPassReason = null;
+  body.softCappingByPassDetails = null;
+  body.softCappingByPassApproverID = null;
+}
+
+private clearSecurityGuardSavePayload(body: Record<string, unknown>): void {
+  body.securityGuardDetails = null;
+  body.securityGuardID = null;
+  body.securityGuardInfoNotReceived = false;
+  body.securityGuardPickupInfoNotReceived = false;
+  body.securityGuardDropOffInfoNotReceived = false;
 }
 
 private normalizeCustomerFieldValue(value: unknown): string {
@@ -1168,11 +1205,12 @@ toArray<T>(value: any): T[] {
     this.reservationService.getBookingDetails(this.ReservationID).subscribe(
       data=>
       {
+        try {
          if (data != null && Array.isArray(data) && data.length > 0) 
       {
 
-        this.reservationDataSource=data;
-        this.advanceTable=this.reservationDataSource[0];
+        this.reservationDataSource = data;
+        this.advanceTable = this.reservationDataSource[0];
         console.log(this.advanceTable);
         const reservationSourceMissingOnLoad = this.isEmptyText(this.advanceTable?.reservationSource);
         const normalizedReservationSource = reservationSourceMissingOnLoad ? 'Email' : this.advanceTable.reservationSource;
@@ -1186,8 +1224,12 @@ toArray<T>(value: any): T[] {
           ? 'Confirmed'
           : this.advanceTable.reservationStatus;
         this.ReservationStatus = normalizedReservationStatus;
-        let pickupDate=moment(this.advanceTable.pickupDate).format('DD/MM/yyyy');
-          this.onBlurUpdateDateEdit(pickupDate);
+        if (this.advanceTable.pickupDate) {
+          const pickupDate = moment(this.advanceTable.pickupDate).format('DD/MM/yyyy');
+          if (pickupDate && pickupDate !== 'Invalid date') {
+            this.onBlurUpdateDateEdit(pickupDate);
+          }
+        }
         if (this.advanceTable.pickupAddressLatLong) {
           var value = this.advanceTable.pickupAddressLatLong.replace(
             '(',
@@ -1205,7 +1247,7 @@ toArray<T>(value: any): T[] {
           this.advanceTableForm.patchValue({pickupAddressLatLong:null});
         }
 
-       if(this.advanceTable.dropOffAddressLatLong === null)
+       if (this.isEmptyText(this.advanceTable.dropOffAddressLatLong))
        {
         this.advanceTableForm.patchValue({dropOffAddressLatLong:null});
        }
@@ -1264,11 +1306,41 @@ toArray<T>(value: any): T[] {
         this.advanceTableForm.patchValue({transferedLocationID:this.advanceTable.transferedLocationID});
         this.advanceTableForm.patchValue({tripTo:this.advanceTable.tripTo || null});
         this.advanceTableForm.patchValue({tripType:this.advanceTable.tripType || null});
-        this.advanceTableForm.patchValue({
-          doesThisReservationContainSecurityGuard: this.advanceTable.doesThisReservationContainSecurityGuard ?? false,
-        });
+        const sgPickupGeo = this.formatLatLongFromApi(this.advanceTable.securityGuardPickupAddressLatLong);
+        const sgDropGeo = this.formatLatLongFromApi(this.advanceTable.securityGuardDropOffAddressLatLong);
+        const containsSecurityGuard = this.toReservationBool(this.advanceTable.doesThisReservationContainSecurityGuard);
         this.advanceTableForm.patchValue({
           securityGuardDetails: this.advanceTable.securityGuardDetails || '',
+          securityGuardID: this.advanceTable.securityGuardID || null,
+          securityGuardEmail: this.advanceTable.securityGuardEmail || '',
+          securityGuardMobile: this.advanceTable.securityGuardMobile || '',
+          securityGuardInfoNotReceived: this.toReservationBool(this.advanceTable.securityGuardInfoNotReceived),
+          securityGuardPickupCityID: this.advanceTable.securityGuardPickupCityID || null,
+          securityGuardPickupCity: this.advanceTable.securityGuardPickupCity || '',
+          securityGuardPickupDate: this.coerceApiDate(this.advanceTable.securityGuardPickupDate),
+          securityGuardPickupTime: this.coerceApiDateTime(this.advanceTable.securityGuardPickupTime),
+          securityGuardPickupAddress: this.advanceTable.securityGuardPickupAddress || '',
+          securityGuardPickupAddressLatLong: sgPickupGeo,
+          securityGuardPickupAddressDetails: this.advanceTable.securityGuardPickupAddressDetails || '',
+          securityGuardPickupStopOrderPriority: this.advanceTable.securityGuardPickupStopOrderPriority ?? null,
+          securityGuardPickupInfoNotReceived: this.toReservationBool(this.advanceTable.securityGuardPickupInfoNotReceived),
+          securityGuardPickupIsTimeNotConfirmed: this.toReservationBool(this.advanceTable.securityGuardPickupIsTimeNotConfirmed),
+          securityGuardDropOffDate: this.coerceApiDate(this.advanceTable.securityGuardDropOffDate),
+          securityGuardDropOffTime: this.coerceApiDateTime(this.advanceTable.securityGuardDropOffTime),
+          securityGuardDropOffCityID: this.advanceTable.securityGuardDropOffCityID || null,
+          securityGuardDropOffCity: this.advanceTable.securityGuardDropOffCity || '',
+          securityGuardDropOffAddress: this.advanceTable.securityGuardDropOffAddress || '',
+          securityGuardDropOffAddressLatLong: sgDropGeo,
+          securityGuardDropOffAddressDetails: this.advanceTable.securityGuardDropOffAddressDetails || '',
+          securityGuardDropOffStopOrderPriority: this.advanceTable.securityGuardDropOffStopOrderPriority ?? null,
+          securityGuardDropOffInfoNotReceived: this.toReservationBool(this.advanceTable.securityGuardDropOffInfoNotReceived),
+          securityGuardDropOffIsTimeNotConfirmed: this.toReservationBool(this.advanceTable.securityGuardDropOffIsTimeNotConfirmed),
+          securityGuard: (this.advanceTable.securityGuardName && this.advanceTable.securityGuardID)
+            ? `${this.advanceTable.securityGuardName} - ${this.advanceTable.gender || ''} - General - ${this.advanceTable.securityGuardMobile || ''} -`
+            : (this.advanceTableForm.get('securityGuard')?.value || ''),
+        }, { emitEvent: false });
+        this.advanceTableForm.patchValue({
+          doesThisReservationContainSecurityGuard: containsSecurityGuard,
         });
         this.selectedCustomerCategory = (this.advanceTable.customerCategory || '').trim();
 
@@ -1317,9 +1389,11 @@ toArray<T>(value: any): T[] {
         this.InitPassenger();
         // Package-dependent APIs are re-triggered after contract + package
         // type normalization completes inside onPickupDateChange().
-        let pickupDateOnload = moment(this.advanceTable.pickupDate).format('DD/MM/YYYY');
-        if (this.isValidPickupDateInput(pickupDateOnload)) {
-          this.onPickupDateChangeAndLocationTimeSet(pickupDateOnload);
+        if (this.advanceTable.pickupDate) {
+          const pickupDateOnload = moment(this.advanceTable.pickupDate).format('DD/MM/YYYY');
+          if (this.isValidPickupDateInput(pickupDateOnload)) {
+            this.onPickupDateChangeAndLocationTimeSet(pickupDateOnload);
+          }
         }
         this.InitCompanyForCustomer();
         this.dropOffSpotTypeID=this.advanceTable.dropOffSpotTypeID;
@@ -1336,10 +1410,15 @@ toArray<T>(value: any): T[] {
         this.reservationDataSource = null;
        
       }
+        } catch (loadError) {
+          console.error('loadData failed while binding reservation', loadError);
+          this.reservationDataSource = null;
+        } finally {
        this.isLoadingdata = false;
        if (this.isPickupCorrectionView()) {
          this.finishPickupCorrectionInit();
        }
+        }
     },
     (error: HttpErrorResponse) => { 
       this.reservationDataSource = null;
@@ -3403,24 +3482,73 @@ public PostGoogleAddress(): void
 )
 }
 
+private validateSecurityGuardSection(form: Record<string, unknown>): boolean {
+  if (!form.securityGuardInfoNotReceived && this.isEmptyId(form.securityGuardID)) {
+    Swal.fire({ title: '', text: 'Select a security guard or check Security Guard Info Not Received.', icon: 'warning' });
+    return false;
+  }
+  if (!form.securityGuardPickupInfoNotReceived) {
+    if (this.isEmptyId(form.securityGuardPickupCityID)) {
+      Swal.fire({ title: '', text: 'Security guard pickup city is required.', icon: 'warning' });
+      return false;
+    }
+    if (!form.securityGuardPickupIsTimeNotConfirmed && this.isEmptyValue(form.securityGuardPickupTime)) {
+      Swal.fire({ title: '', text: 'Security guard pickup time is required (or select TNC).', icon: 'warning' });
+      return false;
+    }
+    if (this.isEmptyText(form.securityGuardPickupAddress)) {
+      Swal.fire({ title: '', text: 'Security guard pickup address is required.', icon: 'warning' });
+      return false;
+    }
+    if (!this.isValidLatLong(form.securityGuardPickupAddressLatLong)) {
+      Swal.fire({ title: '', text: 'Select a valid security guard pickup address from the list.', icon: 'warning' });
+      return false;
+    }
+  }
+  if (!form.securityGuardDropOffInfoNotReceived) {
+    if (this.isEmptyId(form.securityGuardDropOffCityID)) {
+      Swal.fire({ title: '', text: 'Security guard drop-off city is required.', icon: 'warning' });
+      return false;
+    }
+    if (!form.securityGuardDropOffIsTimeNotConfirmed && this.isEmptyValue(form.securityGuardDropOffTime)) {
+      Swal.fire({ title: '', text: 'Security guard drop-off time is required (or select TNC).', icon: 'warning' });
+      return false;
+    }
+    if (this.isEmptyText(form.securityGuardDropOffAddress)) {
+      Swal.fire({ title: '', text: 'Security guard drop-off address is required.', icon: 'warning' });
+      return false;
+    }
+    if (!this.isValidLatLong(form.securityGuardDropOffAddressLatLong)) {
+      Swal.fire({ title: '', text: 'Select a valid security guard drop-off address from the list.', icon: 'warning' });
+      return false;
+    }
+  }
+  return true;
+}
+
 private setupSecurityGuardFieldValidators(): void {
   const guardControl = this.advanceTableForm.get('doesThisReservationContainSecurityGuard');
   const detailsControl = this.advanceTableForm.get('securityGuardDetails');
-  if (!guardControl || !detailsControl) {
+  if (!guardControl) {
     return;
   }
-  guardControl.valueChanges.subscribe((value) => {
-    if (value === true) {
-      detailsControl.setValidators([Validators.required, Validators.maxLength(500)]);
-    } else {
-      detailsControl.clearValidators();
-      detailsControl.setValidators([Validators.maxLength(500)]);
-      if (value === false) {
-        detailsControl.setValue('', { emitEvent: false });
-      }
-    }
+  if (detailsControl) {
+    detailsControl.setValidators([Validators.maxLength(500)]);
     detailsControl.updateValueAndValidity({ emitEvent: false });
-  });
+  }
+  const syncDetailsEnabled = (contains: unknown) => {
+    if (!detailsControl) {
+      return;
+    }
+    const yes = this.toReservationBool(contains);
+    if (yes) {
+      detailsControl.enable({ emitEvent: false });
+    } else {
+      detailsControl.disable({ emitEvent: false });
+    }
+  };
+  syncDetailsEnabled(guardControl.value);
+  guardControl.valueChanges.subscribe((value) => syncDetailsEnabled(value));
 }
 
 private applyCustomerCategoryFromRow(row: CustomerCustomerGroupDropDown | undefined): void {
@@ -3527,6 +3655,30 @@ private isValidLatLong(value: unknown): boolean {
   return Number.isFinite(lat) && Number.isFinite(lng)
     && lat >= -90 && lat <= 90
     && lng >= -180 && lng <= 180;
+}
+
+private formatLatLongFromApi(raw: unknown): string {
+  return this.normalizeSavedAddressLatLong(raw) || '';
+}
+
+private toReservationBool(value: unknown): boolean {
+  return value === true || value === 1 || value === '1' || value === 'true';
+}
+
+private coerceApiDate(value: unknown): Date | null {
+  if (value == null || value === '') {
+    return null;
+  }
+  const parsed = moment(value);
+  return parsed.isValid() ? parsed.toDate() : null;
+}
+
+private coerceApiDateTime(value: unknown): Date | null {
+  if (value == null || value === '') {
+    return null;
+  }
+  const parsed = moment(value);
+  return parsed.isValid() ? parsed.toDate() : null;
 }
 
 private normalizeSavedAddressLatLong(raw: unknown): string | null {
@@ -3721,12 +3873,7 @@ public PickupDetails(): boolean {
     });
     return false;
   }
-  if (form.doesThisReservationContainSecurityGuard === true && this.isEmptyText(form.securityGuardDetails)) {
-    Swal.fire({
-      title: '',
-      text: 'Security guard details are required when Yes is selected.',
-      icon: 'warning',
-    });
+  if (form.doesThisReservationContainSecurityGuard === true && !this.validateSecurityGuardSection(form)) {
     return false;
   }
   if (this.isEmptyText(form.tripType)) {
@@ -3913,13 +4060,45 @@ public validateCustomerSpecificFields(): boolean {
       // back) as a structured error - show its message when available.
       this.showNotification(
         'snackbar-danger',
-        error?.error?.message || 'Operation Failed.....!!!',
+        this.extractReservationSaveError(error),
         'bottom',
         'center'
       );
       // this._generalService.sendUpdate('QualificationAll:QualificationView:Failure');//To Send Updates  
     }
   )
+  }
+
+  private extractReservationSaveError(error: any): string {
+    const body = error?.error;
+    if (body?.message) {
+      const message = String(body.message).replace(/^Failure:\s*/i, '').trim();
+      return message || String(body.message);
+    }
+    if (body?.title && body?.detail) {
+      return `${body.title}: ${body.detail}`;
+    }
+    if (body?.title) {
+      return String(body.title);
+    }
+  if (body?.errors && typeof body.errors === 'object') {
+      const parts = Object.keys(body.errors)
+        .map((key) => {
+          const val = body.errors[key];
+          return Array.isArray(val) ? val.join(' ') : String(val);
+        })
+        .filter((p) => p.trim());
+      if (parts.length) {
+        return parts.join(' ');
+      }
+    }
+    if (typeof body === 'string' && body.trim()) {
+      return body.trim();
+    }
+  if (error?.message) {
+      return String(error.message);
+    }
+    return 'Operation Failed.....!!!';
   }
 
   public PutForReservationEdit(): void
@@ -3995,7 +4174,7 @@ public validateCustomerSpecificFields(): boolean {
       this.rejectSoftCapSaveHooks(error);
       this.showNotification(
         'snackbar-danger',
-        error?.error?.message || 'Operation Failed.....!!!',
+        this.extractReservationSaveError(error),
         'bottom',
         'center'
       );

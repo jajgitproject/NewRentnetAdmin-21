@@ -63,6 +63,7 @@ import { LocationOutTimeEditComponent } from './dialogs/locationOutTimeEdit/loca
 import { KamPickupAddressHistoryDialogComponent } from './dialogs/kam-pickup-address-history-dialog/kam-pickup-address-history-dialog.component';
 import { SoftCappingBypassDialogComponent } from './dialogs/soft-capping-bypass-dialog/soft-capping-bypass-dialog.component';
 import { ReservationGroupDetailsService } from '../reservationGroupDetails/reservationGroupDetails.service';
+import { SecurityGuardSectionComponent } from './security-guard-section/security-guard-section.component';
 @NgModule({
   declarations: [
     ReservationComponent,
@@ -102,7 +103,8 @@ import { ReservationGroupDetailsService } from '../reservationGroupDetails/reser
     SpecialInstructionDetailsModule,
     InternalNoteDetailsModule,
     SettledRateDetailsModule,
-    EmailInfoModule
+    EmailInfoModule,
+    SecurityGuardSectionComponent
   ],
   exports: [ReservationComponent, FormDialogComponent],
   providers: [ReservationService,AddPassengersService,CustomerShortService,PersonShortService,ViewKAMService,

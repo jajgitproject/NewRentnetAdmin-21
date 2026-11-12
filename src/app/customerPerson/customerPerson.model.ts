@@ -17,6 +17,7 @@ export class CustomerPerson {
   isContactPerson:boolean;
   isBooker:boolean;
   isPassenger:boolean;
+  isSecurityGuard:boolean;
   isAdmin:boolean;
   maskMobileNumber:boolean;
   isPostPickUpCallAllowed:boolean;
@@ -62,6 +63,7 @@ export class CustomerPerson {
        this.isContactPerson = customerPerson.isContactPerson ?? null;
        this.isBooker = customerPerson.isBooker ?? null;
        this.isPassenger = customerPerson.isPassenger ?? null;
+       this.isSecurityGuard = customerPerson.isSecurityGuard === true;
        this.isAdmin = customerPerson.isAdmin ?? null;
        this.maskMobileNumber = customerPerson.maskMobileNumber ?? null;
        this.isPostPickUpCallAllowed = customerPerson.isPostPickUpCallAllowed ?? false;

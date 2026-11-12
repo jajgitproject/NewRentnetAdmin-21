@@ -149,7 +149,8 @@ export class ReservationService
     else
     {
       advanceTable.dropOffTimeString=this.generalService.getTimeApplicable(advanceTable.dropOffTime);
-    }   
+    }
+    this.normalizeSecurityGuardPayload(advanceTable);
     return this.httpClient.post<any>(this.API_URL , advanceTable);
   }
 
@@ -159,6 +160,60 @@ export class ReservationService
     return this.httpClient.post<any>(this.GA_API_URL , advanceTable);
   }
 
+  private normalizeSecurityGuardPayload(advanceTable: any): void {
+    if (!advanceTable) {
+      return;
+    }
+
+    const toBool = (v: unknown): boolean => v === true || v === 'true' || v === 1 || v === '1';
+    advanceTable.doesThisReservationContainSecurityGuard = toBool(advanceTable.doesThisReservationContainSecurityGuard);
+
+    const toPositiveInt = (v: unknown): number | null => {
+      if (v === '' || v === null || v === undefined) {
+        return null;
+      }
+      const n = Number(v);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    };
+
+    const toNonNegativeInt = (v: unknown): number | null => {
+      if (v === '' || v === null || v === undefined) {
+        return null;
+      }
+      const n = Number(v);
+      return Number.isFinite(n) && n >= 0 ? n : null;
+    };
+
+    advanceTable.securityGuardID = toPositiveInt(advanceTable.securityGuardID);
+    advanceTable.securityGuardPickupCityID = toPositiveInt(advanceTable.securityGuardPickupCityID);
+    advanceTable.securityGuardDropOffCityID = toPositiveInt(advanceTable.securityGuardDropOffCityID);
+    advanceTable.securityGuardPickupStopOrderPriority = toNonNegativeInt(advanceTable.securityGuardPickupStopOrderPriority);
+    advanceTable.securityGuardDropOffStopOrderPriority = toNonNegativeInt(advanceTable.securityGuardDropOffStopOrderPriority);
+
+    const normalizeDateField = (dateKey: string, stringKey: string): void => {
+      if (advanceTable[dateKey] === '' || advanceTable[dateKey] === undefined) {
+        advanceTable[dateKey] = null;
+        advanceTable[stringKey] = null;
+      } else if (advanceTable[dateKey] != null) {
+        advanceTable[stringKey] = this.generalService.getTimeApplicable(advanceTable[dateKey]);
+      }
+    };
+
+    const normalizeTimeField = (timeKey: string, stringKey: string): void => {
+      if (advanceTable[timeKey] === '' || advanceTable[timeKey] === undefined) {
+        advanceTable[timeKey] = null;
+        advanceTable[stringKey] = null;
+      } else if (advanceTable[timeKey] != null) {
+        advanceTable[stringKey] = this.generalService.getTimeApplicable(advanceTable[timeKey]);
+      }
+    };
+
+    normalizeDateField('securityGuardPickupDate', 'securityGuardPickupDateString');
+    normalizeDateField('securityGuardDropOffDate', 'securityGuardDropOffDateString');
+    normalizeTimeField('securityGuardPickupTime', 'securityGuardPickupTimeString');
+    normalizeTimeField('securityGuardDropOffTime', 'securityGuardDropOffTimeString');
+  }
+
   private preserveSoftCappingBypassFields(advanceTable: any): void {
     if (!advanceTable) {
       return;
@@ -166,12 +221,18 @@ export class ReservationService
     const reason = advanceTable.softCappingByPassReason;
     const details = advanceTable.softCappingByPassDetails;
     const approverId = advanceTable.softCappingByPassApproverID;
-    if (reason == null && details == null && approverId == null) {
+    const hasReason = reason != null && String(reason).trim() !== '';
+    const hasDetails = details != null && String(details).trim() !== '';
+    const hasApprover = approverId != null && Number(approverId) > 0;
+    if (!hasReason && !hasDetails && !hasApprover) {
+      delete advanceTable.softCappingByPassReason;
+      delete advanceTable.softCappingByPassDetails;
+      delete advanceTable.softCappingByPassApproverID;
       return;
     }
-    advanceTable.softCappingByPassReason = reason ?? '';
-    advanceTable.softCappingByPassDetails = details ?? '';
-    advanceTable.softCappingByPassApproverID = approverId ?? null;
+    advanceTable.softCappingByPassReason = hasReason ? String(reason).trim() : null;
+    advanceTable.softCappingByPassDetails = hasDetails ? String(details).trim() : null;
+    advanceTable.softCappingByPassApproverID = hasApprover ? Number(approverId) : null;
   }
 
   update(advanceTable: any)
@@ -280,7 +341,8 @@ export class ReservationService
     else
     {
       advanceTable.etrTimeString=this.generalService.getTimeApplicable(advanceTable.etrTime);
-    }   
+    }
+    this.normalizeSecurityGuardPayload(advanceTable);
     return this.httpClient.put<any>(this.API_URL , advanceTable);
   }
 
@@ -374,6 +436,7 @@ export class ReservationService
       {
         advanceTable.etrTimeString=this.generalService.getTimeApplicable(advanceTable.etrTime);
       }
+    this.normalizeSecurityGuardPayload(advanceTable);
     return this.httpClient.put<any>(this.API_URL+'/'+'UpdateReservationForEdit' , advanceTable);
   }
 

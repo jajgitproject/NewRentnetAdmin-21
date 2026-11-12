@@ -810,31 +810,6 @@
                                 </mat-form-field>                                
                             </div>
 
-                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
-                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                                    <mat-label>Contains Security Guard?</mat-label>
-                                    <mat-select formControlName="doesThisReservationContainSecurityGuard" required>
-                                        <mat-option [value]="true">Yes</mat-option>
-                                        <mat-option [value]="false">No</mat-option>
-                                    </mat-select>
-                                    <mat-error>
-                                        Please select Yes or No
-                                    </mat-error>
-                                </mat-form-field>
-                            </div>
-
-                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2"
-                                *ngIf="advanceTableForm.value.doesThisReservationContainSecurityGuard === true">
-                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
-                                    <mat-label>Security Guard Details</mat-label>
-                                    <textarea matInput formControlName="securityGuardDetails" rows="3" maxlength="500" required></textarea>
-                                    <mat-hint align="end">{{ advanceTableForm.value.securityGuardDetails?.length || 0 }}/500</mat-hint>
-                                    <mat-error>
-                                        Security guard details are required (max 500 characters)
-                                    </mat-error>
-                                </mat-form-field>
-                            </div>
-
                         </div>
                     </mat-card-content>
                 </mat-card>
@@ -1095,6 +1070,46 @@
                             </div> -->
                     </mat-card-content>
                 </mat-card>
+
+                <br>
+
+                <mat-card class="example-card">
+                    <mat-card-header>
+                        <h5 style="color: white;">Security Guard</h5>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="row">
+                            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6 mb-2">
+                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                    <mat-label>Contains Security Guard?</mat-label>
+                                    <mat-select formControlName="doesThisReservationContainSecurityGuard" required>
+                                        <mat-option [value]="true">Yes</mat-option>
+                                        <mat-option [value]="false">No</mat-option>
+                                    </mat-select>
+                                    <mat-error>
+                                        Please select Yes or No
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 mb-2">
+                                <mat-form-field class="example-full-width cp-booking-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                                    <mat-label>Security Guard Details</mat-label>
+                                    <textarea matInput formControlName="securityGuardDetails" rows="2" maxlength="500"></textarea>
+                                    <mat-hint align="end">Max 500 characters</mat-hint>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <app-security-guard-section
+                    [form]="advanceTableForm"
+                    [customerGroupID]="advanceTableForm.value.customerGroupID"
+                    [customerID]="customerID"
+                    [reservationID]="reservationID"
+                    [cityList]="CityList"
+                    [dropOffCityList]="DropOffCityList">
+                </app-security-guard-section>
 
                 <br>
 

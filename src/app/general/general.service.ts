@@ -2088,6 +2088,10 @@ GetCPForPassenger(customerGroupID:number): Observable<CustomerPersonDropDown[]> 
   return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/getCPForPassenger/"+customerGroupID);
 }
 
+GetCPForSecurityGuard(customerGroupID: number): Observable<CustomerPersonDropDown[]> {
+  return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + 'CustomerPerson/getCPForSecurityGuard/' + customerGroupID);
+}
+
 GetCPForBookerInCPSearch(): Observable<CustomerPersonDropDown[]> {
   return this.http.get<CustomerPersonDropDown[]>(this.BaseURL + "CustomerPerson/GetCPASBookerCPSearch");
 }

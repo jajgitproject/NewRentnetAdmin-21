@@ -1,0 +1,41 @@
+<div class="addContainer">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17">Register Security Guard</div>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button type="button" (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" class="m-4">
+      <mat-form-field class="example-full-width" appearance="outline">
+        <mat-label>Security Guard Name</mat-label>
+        <input matInput formControlName="customerPersonName" required />
+        <mat-error>Name is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width" appearance="outline">
+        <mat-label>Primary Email</mat-label>
+        <input matInput formControlName="primaryEmail" required />
+        <mat-error>Valid email is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width" appearance="outline">
+        <mat-label>Primary Mobile</mat-label>
+        <input matInput formControlName="primaryMobile" required />
+        <mat-error>Mobile is required</mat-error>
+      </mat-form-field>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button mat-raised-button color="primary" type="button" [disabled]="saving" (click)="save()">Save</button>
+        <button mat-button type="button" (click)="dialogRef.close()">Cancel</button>
+      </div>
+    </form>
+  </mat-dialog-content>
+</div>

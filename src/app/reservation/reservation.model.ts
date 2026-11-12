@@ -100,6 +100,31 @@ export class Reservation {
    tripType:string;
    doesThisReservationContainSecurityGuard:boolean;
    securityGuardDetails:string;
+   securityGuardID:number;
+   securityGuardName:string;
+   securityGuardEmail:string;
+   securityGuardMobile:string;
+   securityGuardInfoNotReceived:boolean;
+   securityGuardPickupCityID:number;
+   securityGuardPickupCity:string;
+   securityGuardPickupDate:Date;
+   securityGuardPickupTime:Date;
+   securityGuardPickupAddress:string;
+   securityGuardPickupAddressLatLong:string;
+   securityGuardPickupAddressDetails:string;
+   securityGuardPickupStopOrderPriority:number;
+   securityGuardPickupInfoNotReceived:boolean;
+   securityGuardPickupIsTimeNotConfirmed:boolean;
+   securityGuardDropOffDate:Date;
+   securityGuardDropOffTime:Date;
+   securityGuardDropOffCityID:number;
+   securityGuardDropOffCity:string;
+   securityGuardDropOffAddress:string;
+   securityGuardDropOffAddressLatLong:string;
+   securityGuardDropOffAddressDetails:string;
+   securityGuardDropOffStopOrderPriority:number;
+   securityGuardDropOffInfoNotReceived:boolean;
+   securityGuardDropOffIsTimeNotConfirmed:boolean;
    customerCategory:string;
   constructor(reservation) {
     {
@@ -153,6 +178,31 @@ export class Reservation {
        this.tripType=reservation.tripType || '';
        this.doesThisReservationContainSecurityGuard=reservation.doesThisReservationContainSecurityGuard ?? false;
        this.securityGuardDetails=reservation.securityGuardDetails || '';
+       this.securityGuardID=reservation.securityGuardID || null;
+       this.securityGuardName=reservation.securityGuardName || '';
+       this.securityGuardEmail=reservation.securityGuardEmail || '';
+       this.securityGuardMobile=reservation.securityGuardMobile || '';
+       this.securityGuardInfoNotReceived=reservation.securityGuardInfoNotReceived === true;
+       this.securityGuardPickupCityID=reservation.securityGuardPickupCityID || null;
+       this.securityGuardPickupCity=reservation.securityGuardPickupCity || '';
+       this.securityGuardPickupDate=reservation.securityGuardPickupDate || null;
+       this.securityGuardPickupTime=reservation.securityGuardPickupTime || null;
+       this.securityGuardPickupAddress=reservation.securityGuardPickupAddress || '';
+       this.securityGuardPickupAddressLatLong=reservation.securityGuardPickupAddressLatLong || '';
+       this.securityGuardPickupAddressDetails=reservation.securityGuardPickupAddressDetails || '';
+       this.securityGuardPickupStopOrderPriority=reservation.securityGuardPickupStopOrderPriority || null;
+       this.securityGuardPickupInfoNotReceived=reservation.securityGuardPickupInfoNotReceived === true;
+       this.securityGuardPickupIsTimeNotConfirmed=reservation.securityGuardPickupIsTimeNotConfirmed === true;
+       this.securityGuardDropOffDate=reservation.securityGuardDropOffDate || null;
+       this.securityGuardDropOffTime=reservation.securityGuardDropOffTime || null;
+       this.securityGuardDropOffCityID=reservation.securityGuardDropOffCityID || null;
+       this.securityGuardDropOffCity=reservation.securityGuardDropOffCity || '';
+       this.securityGuardDropOffAddress=reservation.securityGuardDropOffAddress || '';
+       this.securityGuardDropOffAddressLatLong=reservation.securityGuardDropOffAddressLatLong || '';
+       this.securityGuardDropOffAddressDetails=reservation.securityGuardDropOffAddressDetails || '';
+       this.securityGuardDropOffStopOrderPriority=reservation.securityGuardDropOffStopOrderPriority || null;
+       this.securityGuardDropOffInfoNotReceived=reservation.securityGuardDropOffInfoNotReceived === true;
+       this.securityGuardDropOffIsTimeNotConfirmed=reservation.securityGuardDropOffIsTimeNotConfirmed === true;
        this.customerCategory=reservation.customerCategory || '';
     }
 
