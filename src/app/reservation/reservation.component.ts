@@ -1031,11 +1031,7 @@ private buildReservationSaveBody(
     body.fieldValue = Array.isArray(body.fieldValue) ? body.fieldValue : [];
     body.customerSpecificFields = body.customerSpecificFields || null;
     this.applySoftCappingBypassToSaveBody(body);
-    if (body.doesThisReservationContainSecurityGuard !== true) {
-      this.clearSecurityGuardSavePayload(body);
-    } else if (typeof body.securityGuardDetails === 'string') {
-      body.securityGuardDetails = body.securityGuardDetails.trim().slice(0, 500);
-    }
+    this.applySecurityGuardConditionalClears(body);
     return body;
   }
 
@@ -1048,12 +1044,8 @@ private buildReservationSaveBody(
     body.reservationID = csfPayload.reservationID;
   }
   this.applySoftCappingBypassToSaveBody(body);
-    if (body.doesThisReservationContainSecurityGuard !== true) {
-      this.clearSecurityGuardSavePayload(body);
-    } else if (typeof body.securityGuardDetails === 'string') {
-      body.securityGuardDetails = body.securityGuardDetails.trim().slice(0, 500);
-    }
-    return body;
+  this.applySecurityGuardConditionalClears(body);
+  return body;
 }
 
 private applySoftCappingBypassToSaveBody(body: Record<string, unknown>): void {
@@ -1069,11 +1061,169 @@ private applySoftCappingBypassToSaveBody(body: Record<string, unknown>): void {
 }
 
 private clearSecurityGuardSavePayload(body: Record<string, unknown>): void {
+  body.doesThisReservationContainSecurityGuard = false;
   body.securityGuardDetails = null;
   body.securityGuardID = null;
+  body.securityGuard = null;
+  body.securityGuardEmail = null;
+  body.securityGuardMobile = null;
   body.securityGuardInfoNotReceived = false;
+  body.securityGuardPickupCityID = null;
+  body.securityGuardPickupCity = null;
+  body.securityGuardPickupDate = null;
+  body.securityGuardPickupTime = null;
+  body.securityGuardPickupDateString = null;
+  body.securityGuardPickupTimeString = null;
+  body.securityGuardPickupAddress = null;
+  body.securityGuardPickupAddressDetails = null;
+  body.securityGuardPickupAddressLatLong = null;
+  body.securityGuardPickupStopOrderPriority = null;
   body.securityGuardPickupInfoNotReceived = false;
+  body.securityGuardPickupIsTimeNotConfirmed = false;
+  body.securityGuardDropOffCityID = null;
+  body.securityGuardDropOffCity = null;
+  body.securityGuardDropOffDate = null;
+  body.securityGuardDropOffTime = null;
+  body.securityGuardDropOffDateString = null;
+  body.securityGuardDropOffTimeString = null;
+  body.securityGuardDropOffAddress = null;
+  body.securityGuardDropOffAddressDetails = null;
+  body.securityGuardDropOffAddressLatLong = null;
+  body.securityGuardDropOffStopOrderPriority = null;
   body.securityGuardDropOffInfoNotReceived = false;
+  body.securityGuardDropOffIsTimeNotConfirmed = false;
+}
+
+private applySecurityGuardConditionalClears(body: Record<string, unknown>): void {
+  if (!this.toReservationBool(body.doesThisReservationContainSecurityGuard)) {
+    this.clearSecurityGuardSavePayload(body);
+    return;
+  }
+
+  if (typeof body.securityGuardDetails === 'string') {
+    const trimmed = body.securityGuardDetails.trim();
+    body.securityGuardDetails = trimmed.length > 0 ? trimmed.slice(0, 500) : null;
+  } else if (body.securityGuardDetails === '' || body.securityGuardDetails === undefined) {
+    body.securityGuardDetails = null;
+  }
+
+  if (this.toReservationBool(body.securityGuardInfoNotReceived)) {
+    body.securityGuardID = null;
+    body.securityGuard = null;
+    body.securityGuardEmail = null;
+    body.securityGuardMobile = null;
+  }
+
+  if (this.toReservationBool(body.securityGuardPickupInfoNotReceived)) {
+    body.securityGuardPickupCityID = null;
+    body.securityGuardPickupCity = null;
+    body.securityGuardPickupAddress = null;
+    body.securityGuardPickupAddressDetails = null;
+    body.securityGuardPickupAddressLatLong = null;
+    body.securityGuardPickupIsTimeNotConfirmed = false;
+    const pickupSchedule = this.computeDefaultGuardPickupSchedule(body);
+    if (pickupSchedule) {
+      body.securityGuardPickupDate = pickupSchedule.date;
+      body.securityGuardPickupTime = pickupSchedule.time;
+      body.securityGuardPickupDateString = pickupSchedule.dateString;
+      body.securityGuardPickupTimeString = pickupSchedule.timeString;
+    }
+    const pickupPriority = Number(body.pickupPriorityOrder ?? 0);
+    if (pickupPriority > 0) {
+      body.securityGuardPickupStopOrderPriority = pickupPriority - 1;
+    }
+  }
+
+  if (this.toReservationBool(body.securityGuardDropOffInfoNotReceived)) {
+    body.securityGuardDropOffCityID = null;
+    body.securityGuardDropOffCity = null;
+    body.securityGuardDropOffAddress = null;
+    body.securityGuardDropOffAddressDetails = null;
+    body.securityGuardDropOffAddressLatLong = null;
+    body.securityGuardDropOffIsTimeNotConfirmed = false;
+    const dropSchedule = this.computeDefaultGuardDropOffSchedule(body);
+    if (dropSchedule) {
+      body.securityGuardDropOffDate = dropSchedule.date;
+      body.securityGuardDropOffTime = dropSchedule.time;
+      body.securityGuardDropOffDateString = dropSchedule.dateString;
+      body.securityGuardDropOffTimeString = dropSchedule.timeString;
+    }
+    const dropPriority = Number(body.dropOffPriorityOrder ?? 0);
+    if (dropPriority > 0) {
+      body.securityGuardDropOffStopOrderPriority = dropPriority + 1;
+    }
+  }
+}
+
+isSecurityGuardEnabled(): boolean {
+  return this.toReservationBool(this.advanceTableForm?.get('doesThisReservationContainSecurityGuard')?.value);
+}
+
+private combinePassengerDateAndTime(datePart: unknown, timePart: unknown): Date | null {
+  if (datePart == null || datePart === '') {
+    return null;
+  }
+  const combined = new Date(datePart as string | number | Date);
+  if (Number.isNaN(combined.getTime())) {
+    return null;
+  }
+  if (timePart != null && timePart !== '') {
+    const time = new Date(timePart as string | number | Date);
+    if (!Number.isNaN(time.getTime())) {
+      combined.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), time.getMilliseconds());
+    }
+  } else {
+    combined.setHours(0, 0, 0, 0);
+  }
+  return combined;
+}
+
+private computeDefaultGuardPickupSchedule(body: Record<string, unknown>): {
+  date: Date;
+  time: Date;
+  dateString: string;
+  timeString: string;
+} | null {
+  const passengerPickup = this.combinePassengerDateAndTime(body.pickupDate, body.pickupTime);
+  if (!passengerPickup) {
+    return null;
+  }
+  const sgPickup = new Date(passengerPickup);
+  if (body.pickupTime != null && body.pickupTime !== '') {
+    sgPickup.setHours(sgPickup.getHours() - 2);
+  }
+  const dateOnly = new Date(sgPickup);
+  dateOnly.setHours(0, 0, 0, 0);
+  return {
+    date: dateOnly,
+    time: sgPickup,
+    dateString: this._generalService.getTimeApplicable(dateOnly),
+    timeString: this._generalService.getTimeApplicable(sgPickup),
+  };
+}
+
+private computeDefaultGuardDropOffSchedule(body: Record<string, unknown>): {
+  date: Date;
+  time: Date;
+  dateString: string;
+  timeString: string;
+} | null {
+  const passengerDrop = this.combinePassengerDateAndTime(body.dropOffDate, body.dropOffTime);
+  if (!passengerDrop) {
+    return null;
+  }
+  const sgDrop = new Date(passengerDrop);
+  if (body.dropOffTime != null && body.dropOffTime !== '') {
+    sgDrop.setHours(sgDrop.getHours() + 2);
+  }
+  const dateOnly = new Date(sgDrop);
+  dateOnly.setHours(0, 0, 0, 0);
+  return {
+    date: dateOnly,
+    time: sgDrop,
+    dateString: this._generalService.getTimeApplicable(dateOnly),
+    timeString: this._generalService.getTimeApplicable(sgDrop),
+  };
 }
 
 private normalizeCustomerFieldValue(value: unknown): string {
@@ -3544,6 +3694,7 @@ private setupSecurityGuardFieldValidators(): void {
     if (yes) {
       detailsControl.enable({ emitEvent: false });
     } else {
+      detailsControl.setValue(null, { emitEvent: false });
       detailsControl.disable({ emitEvent: false });
     }
   };

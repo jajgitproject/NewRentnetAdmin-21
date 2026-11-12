@@ -160,6 +160,104 @@ export class ReservationService
     return this.httpClient.post<any>(this.GA_API_URL , advanceTable);
   }
 
+  private combinePassengerDateAndTime(datePart: unknown, timePart: unknown): Date | null {
+    if (datePart == null || datePart === '') {
+      return null;
+    }
+    const combined = new Date(datePart as string | number | Date);
+    if (Number.isNaN(combined.getTime())) {
+      return null;
+    }
+    if (timePart != null && timePart !== '') {
+      const time = new Date(timePart as string | number | Date);
+      if (!Number.isNaN(time.getTime())) {
+        combined.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), time.getMilliseconds());
+      }
+    } else {
+      combined.setHours(0, 0, 0, 0);
+    }
+    return combined;
+  }
+
+  private applyDefaultGuardPickupScheduleToPayload(advanceTable: any): void {
+    const passengerPickup = this.combinePassengerDateAndTime(advanceTable.pickupDate, advanceTable.pickupTime);
+    if (!passengerPickup) {
+      return;
+    }
+    const sgPickup = new Date(passengerPickup);
+    if (advanceTable.pickupTime != null && advanceTable.pickupTime !== '') {
+      sgPickup.setHours(sgPickup.getHours() - 2);
+    }
+    const dateOnly = new Date(sgPickup);
+    dateOnly.setHours(0, 0, 0, 0);
+    advanceTable.securityGuardPickupDate = dateOnly;
+    advanceTable.securityGuardPickupTime = sgPickup;
+    advanceTable.securityGuardPickupDateString = this.generalService.getTimeApplicable(dateOnly);
+    advanceTable.securityGuardPickupTimeString = this.generalService.getTimeApplicable(sgPickup);
+    const pickupPriority = Number(advanceTable.pickupPriorityOrder ?? 0);
+    if (pickupPriority > 0) {
+      advanceTable.securityGuardPickupStopOrderPriority = pickupPriority - 1;
+    }
+  }
+
+  private applyDefaultGuardDropOffScheduleToPayload(advanceTable: any): void {
+    const passengerDrop = this.combinePassengerDateAndTime(advanceTable.dropOffDate, advanceTable.dropOffTime);
+    if (!passengerDrop) {
+      return;
+    }
+    const sgDrop = new Date(passengerDrop);
+    if (advanceTable.dropOffTime != null && advanceTable.dropOffTime !== '') {
+      sgDrop.setHours(sgDrop.getHours() + 2);
+    }
+    const dateOnly = new Date(sgDrop);
+    dateOnly.setHours(0, 0, 0, 0);
+    advanceTable.securityGuardDropOffDate = dateOnly;
+    advanceTable.securityGuardDropOffTime = sgDrop;
+    advanceTable.securityGuardDropOffDateString = this.generalService.getTimeApplicable(dateOnly);
+    advanceTable.securityGuardDropOffTimeString = this.generalService.getTimeApplicable(sgDrop);
+    const dropPriority = Number(advanceTable.dropOffPriorityOrder ?? 0);
+    if (dropPriority > 0) {
+      advanceTable.securityGuardDropOffStopOrderPriority = dropPriority + 1;
+    }
+  }
+
+  private clearSecurityGuardPayloadFields(advanceTable: any): void {
+    if (!advanceTable) {
+      return;
+    }
+    advanceTable.doesThisReservationContainSecurityGuard = false;
+    advanceTable.securityGuardDetails = null;
+    advanceTable.securityGuardID = null;
+    advanceTable.securityGuard = null;
+    advanceTable.securityGuardEmail = null;
+    advanceTable.securityGuardMobile = null;
+    advanceTable.securityGuardInfoNotReceived = false;
+    advanceTable.securityGuardPickupCityID = null;
+    advanceTable.securityGuardPickupCity = null;
+    advanceTable.securityGuardPickupDate = null;
+    advanceTable.securityGuardPickupTime = null;
+    advanceTable.securityGuardPickupDateString = null;
+    advanceTable.securityGuardPickupTimeString = null;
+    advanceTable.securityGuardPickupAddress = null;
+    advanceTable.securityGuardPickupAddressDetails = null;
+    advanceTable.securityGuardPickupAddressLatLong = null;
+    advanceTable.securityGuardPickupStopOrderPriority = null;
+    advanceTable.securityGuardPickupInfoNotReceived = false;
+    advanceTable.securityGuardPickupIsTimeNotConfirmed = false;
+    advanceTable.securityGuardDropOffCityID = null;
+    advanceTable.securityGuardDropOffCity = null;
+    advanceTable.securityGuardDropOffDate = null;
+    advanceTable.securityGuardDropOffTime = null;
+    advanceTable.securityGuardDropOffDateString = null;
+    advanceTable.securityGuardDropOffTimeString = null;
+    advanceTable.securityGuardDropOffAddress = null;
+    advanceTable.securityGuardDropOffAddressDetails = null;
+    advanceTable.securityGuardDropOffAddressLatLong = null;
+    advanceTable.securityGuardDropOffStopOrderPriority = null;
+    advanceTable.securityGuardDropOffInfoNotReceived = false;
+    advanceTable.securityGuardDropOffIsTimeNotConfirmed = false;
+  }
+
   private normalizeSecurityGuardPayload(advanceTable: any): void {
     if (!advanceTable) {
       return;
@@ -212,6 +310,45 @@ export class ReservationService
     normalizeDateField('securityGuardDropOffDate', 'securityGuardDropOffDateString');
     normalizeTimeField('securityGuardPickupTime', 'securityGuardPickupTimeString');
     normalizeTimeField('securityGuardDropOffTime', 'securityGuardDropOffTimeString');
+
+    if (!toBool(advanceTable.doesThisReservationContainSecurityGuard)) {
+      this.clearSecurityGuardPayloadFields(advanceTable);
+      return;
+    }
+
+    if (typeof advanceTable.securityGuardDetails === 'string') {
+      const trimmed = advanceTable.securityGuardDetails.trim();
+      advanceTable.securityGuardDetails = trimmed.length > 0 ? trimmed.slice(0, 500) : null;
+    } else if (advanceTable.securityGuardDetails === '' || advanceTable.securityGuardDetails === undefined) {
+      advanceTable.securityGuardDetails = null;
+    }
+
+    if (toBool(advanceTable.securityGuardInfoNotReceived)) {
+      advanceTable.securityGuardID = null;
+      advanceTable.securityGuard = null;
+      advanceTable.securityGuardEmail = null;
+      advanceTable.securityGuardMobile = null;
+    }
+
+    if (toBool(advanceTable.securityGuardPickupInfoNotReceived)) {
+      advanceTable.securityGuardPickupCityID = null;
+      advanceTable.securityGuardPickupCity = null;
+      advanceTable.securityGuardPickupAddress = null;
+      advanceTable.securityGuardPickupAddressDetails = null;
+      advanceTable.securityGuardPickupAddressLatLong = null;
+      advanceTable.securityGuardPickupIsTimeNotConfirmed = false;
+      this.applyDefaultGuardPickupScheduleToPayload(advanceTable);
+    }
+
+    if (toBool(advanceTable.securityGuardDropOffInfoNotReceived)) {
+      advanceTable.securityGuardDropOffCityID = null;
+      advanceTable.securityGuardDropOffCity = null;
+      advanceTable.securityGuardDropOffAddress = null;
+      advanceTable.securityGuardDropOffAddressDetails = null;
+      advanceTable.securityGuardDropOffAddressLatLong = null;
+      advanceTable.securityGuardDropOffIsTimeNotConfirmed = false;
+      this.applyDefaultGuardDropOffScheduleToPayload(advanceTable);
+    }
   }
 
   private preserveSoftCappingBypassFields(advanceTable: any): void {

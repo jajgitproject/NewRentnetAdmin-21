@@ -48,7 +48,8 @@
     <mat-card-content>
       <div class="row">
         <div class="col-xl-12 mb-2">
-          <mat-checkbox formControlName="securityGuardPickupInfoNotReceived">
+          <mat-checkbox formControlName="securityGuardPickupInfoNotReceived"
+            (change)="onSgPickupInfoNotReceived($event.checked)">
             Security Guard Pick Up Info Not Received
           </mat-checkbox>
         </div>
@@ -120,7 +121,8 @@
     <mat-card-content>
       <div class="row">
         <div class="col-xl-12 mb-2">
-          <mat-checkbox formControlName="securityGuardDropOffInfoNotReceived">
+          <mat-checkbox formControlName="securityGuardDropOffInfoNotReceived"
+            (change)="onSgDropOffInfoNotReceived($event.checked)">
             Security Guard Drop off Info Not Received
           </mat-checkbox>
         </div>

@@ -102,7 +102,7 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
     this.form.get('doesThisReservationContainSecurityGuard')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((yes) => {
-        if (yes === true) {
+        if (this.isYes(yes)) {
           const hasExisting = this.hasExistingSecurityGuardData();
           if (!hasExisting) {
             this.applyDefaultGuardTimes();
@@ -132,53 +132,103 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
   private watchPassengerTimesForDefaults(): void {
     ['pickupDate', 'pickupTime', 'dropOffDate', 'dropOffTime'].forEach((key) => {
       this.form.get(key)?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-        if (this.visible && !this.form.get('securityGuardPickupDate')?.value) {
+        if (!this.visible) {
+          return;
+        }
+        const pickupInr = this.form.get('securityGuardPickupInfoNotReceived')?.value === true;
+        const dropInr = this.form.get('securityGuardDropOffInfoNotReceived')?.value === true;
+        if (pickupInr) {
+          this.applyDefaultGuardPickupSchedule(true);
+        }
+        if (dropInr) {
+          this.applyDefaultGuardDropOffSchedule(true);
+        }
+        if (!pickupInr && !dropInr && !this.hasExistingSecurityGuardData()) {
           this.applyDefaultGuardTimes();
         }
       });
     });
   }
 
+  private combineDateAndTime(datePart: unknown, timePart: unknown): Date | null {
+    if (datePart == null || datePart === '') {
+      return null;
+    }
+    const combined = new Date(datePart);
+    if (Number.isNaN(combined.getTime())) {
+      return null;
+    }
+    if (timePart != null && timePart !== '') {
+      const time = new Date(timePart);
+      if (!Number.isNaN(time.getTime())) {
+        combined.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), time.getMilliseconds());
+      }
+    } else {
+      combined.setHours(0, 0, 0, 0);
+    }
+    return combined;
+  }
+
+  private toDateOnly(value: Date): Date {
+    const dateOnly = new Date(value);
+    dateOnly.setHours(0, 0, 0, 0);
+    return dateOnly;
+  }
+
   applyDefaultGuardTimes(): void {
+    this.applyDefaultGuardPickupSchedule(true);
+    this.applyDefaultGuardDropOffSchedule(true);
+    if (this.form.get('securityGuardDropOffInfoNotReceived')?.value !== true) {
+      this.applyDefaultGuardDropOffFromPickup();
+    }
+  }
+
+  applyDefaultGuardPickupSchedule(includeStopPriority = false): void {
     const pickupDate = this.form.get('pickupDate')?.value;
     const pickupTime = this.form.get('pickupTime')?.value;
+    const passengerPickup = this.combineDateAndTime(pickupDate, pickupTime);
+    if (!passengerPickup) {
+      return;
+    }
+    const sgPickup = new Date(passengerPickup);
+    if (pickupTime) {
+      sgPickup.setHours(sgPickup.getHours() - 2);
+    }
+    this.form.patchValue({
+      securityGuardPickupDate: this.toDateOnly(sgPickup),
+      securityGuardPickupTime: sgPickup,
+    }, { emitEvent: false });
+
+    if (includeStopPriority) {
+      const pickupPriority = Number(this.form.get('pickupPriorityOrder')?.value || 0);
+      if (pickupPriority > 0) {
+        this.form.patchValue({ securityGuardPickupStopOrderPriority: pickupPriority - 1 }, { emitEvent: false });
+      }
+    }
+  }
+
+  applyDefaultGuardDropOffSchedule(includeStopPriority = false): void {
     const dropDate = this.form.get('dropOffDate')?.value;
     const dropTime = this.form.get('dropOffTime')?.value;
+    const passengerDropOff = this.combineDateAndTime(dropDate, dropTime);
+    if (!passengerDropOff) {
+      return;
+    }
+    const sgDrop = new Date(passengerDropOff);
+    if (dropTime) {
+      sgDrop.setHours(sgDrop.getHours() + 2);
+    }
+    this.form.patchValue({
+      securityGuardDropOffDate: this.toDateOnly(sgDrop),
+      securityGuardDropOffTime: sgDrop,
+    }, { emitEvent: false });
 
-    if (pickupDate) {
-      const sgPickupDate = new Date(pickupDate);
-      const sgPickupTime = pickupTime ? new Date(pickupTime) : new Date(pickupDate);
-      if (pickupTime) {
-        sgPickupTime.setHours(sgPickupTime.getHours() - 2);
+    if (includeStopPriority) {
+      const dropPriority = Number(this.form.get('dropOffPriorityOrder')?.value || 0);
+      if (dropPriority > 0) {
+        this.form.patchValue({ securityGuardDropOffStopOrderPriority: dropPriority + 1 }, { emitEvent: false });
       }
-      this.form.patchValue({
-        securityGuardPickupDate: sgPickupDate,
-        securityGuardPickupTime: sgPickupTime,
-      }, { emitEvent: false });
     }
-
-    if (dropDate) {
-      const sgDropDate = new Date(dropDate);
-      const sgDropTime = dropTime ? new Date(dropTime) : new Date(dropDate);
-      if (dropTime) {
-        sgDropTime.setHours(sgDropTime.getHours() + 2);
-      }
-      this.form.patchValue({
-        securityGuardDropOffDate: sgDropDate,
-        securityGuardDropOffTime: sgDropTime,
-      }, { emitEvent: false });
-    }
-
-    const pickupPriority = Number(this.form.get('pickupPriorityOrder')?.value || 0);
-    const dropPriority = Number(this.form.get('dropOffPriorityOrder')?.value || 0);
-    if (pickupPriority > 0) {
-      this.form.patchValue({ securityGuardPickupStopOrderPriority: pickupPriority - 1 }, { emitEvent: false });
-    }
-    if (dropPriority > 0) {
-      this.form.patchValue({ securityGuardDropOffStopOrderPriority: dropPriority + 1 }, { emitEvent: false });
-    }
-
-    this.applyDefaultGuardDropOffFromPickup();
   }
 
   showGuardContactFields(): boolean {
@@ -272,22 +322,69 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
     }
   }
 
+  private isYes(value: unknown): boolean {
+    return value === true || value === 1 || value === '1' || value === 'true';
+  }
+
   private clearGuardFields(): void {
-    const keys = [
-      'securityGuardID', 'securityGuard', 'securityGuardEmail', 'securityGuardMobile',
-      'securityGuardInfoNotReceived',
-      'securityGuardPickupCityID', 'securityGuardPickupCity', 'securityGuardPickupDate', 'securityGuardPickupTime',
-      'securityGuardPickupAddress', 'securityGuardPickupAddressDetails', 'securityGuardPickupAddressLatLong',
-      'securityGuardPickupInfoNotReceived', 'securityGuardPickupIsTimeNotConfirmed',
-      'securityGuardDropOffCityID', 'securityGuardDropOffCity', 'securityGuardDropOffDate', 'securityGuardDropOffTime',
-      'securityGuardDropOffAddress', 'securityGuardDropOffAddressDetails', 'securityGuardDropOffAddressLatLong',
-      'securityGuardDropOffInfoNotReceived', 'securityGuardDropOffIsTimeNotConfirmed',
-    ];
-    const patch: Record<string, unknown> = {};
-    keys.forEach((k) => { patch[k] = k.includes('NotReceived') || k.includes('IsTimeNotConfirmed') ? false : ''; });
-    patch.securityGuardID = null;
+    this.clearPersonnelFields(false);
+    this.clearPickupFields(false);
+    this.clearDropOffFields(false);
+    this.form.patchValue({
+      securityGuardInfoNotReceived: false,
+      securityGuardPickupInfoNotReceived: false,
+      securityGuardDropOffInfoNotReceived: false,
+    }, { emitEvent: false });
+  }
+
+  private clearPersonnelFields(keepInfoNotReceivedFlag: boolean): void {
     this.selectedGuard = null;
+    const patch: Record<string, unknown> = {
+      securityGuardID: null,
+      securityGuard: null,
+      securityGuardEmail: null,
+      securityGuardMobile: null,
+    };
+    if (!keepInfoNotReceivedFlag) {
+      patch.securityGuardInfoNotReceived = false;
+    }
     this.form.patchValue(patch, { emitEvent: false });
+  }
+
+  private clearPickupFields(keepInfoNotReceivedFlag: boolean): void {
+    this.form.patchValue({
+      securityGuardPickupCityID: null,
+      securityGuardPickupCity: null,
+      securityGuardPickupAddress: null,
+      securityGuardPickupAddressDetails: null,
+      securityGuardPickupAddressLatLong: null,
+      securityGuardPickupIsTimeNotConfirmed: false,
+      ...(keepInfoNotReceivedFlag ? {} : {
+        securityGuardPickupDate: null,
+        securityGuardPickupTime: null,
+        securityGuardPickupStopOrderPriority: null,
+        securityGuardPickupInfoNotReceived: false,
+      }),
+    }, { emitEvent: false });
+    this.form.get('securityGuardPickupTime')?.enable({ emitEvent: false });
+  }
+
+  private clearDropOffFields(keepInfoNotReceivedFlag: boolean): void {
+    this.form.patchValue({
+      securityGuardDropOffCityID: null,
+      securityGuardDropOffCity: null,
+      securityGuardDropOffAddress: null,
+      securityGuardDropOffAddressDetails: null,
+      securityGuardDropOffAddressLatLong: null,
+      securityGuardDropOffIsTimeNotConfirmed: false,
+      ...(keepInfoNotReceivedFlag ? {} : {
+        securityGuardDropOffDate: null,
+        securityGuardDropOffTime: null,
+        securityGuardDropOffStopOrderPriority: null,
+        securityGuardDropOffInfoNotReceived: false,
+      }),
+    }, { emitEvent: false });
+    this.form.get('securityGuardDropOffTime')?.enable({ emitEvent: false });
   }
 
   initGuardDropdown(): void {
@@ -376,13 +473,21 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
 
   onGuardInfoNotReceived(checked: boolean): void {
     if (checked) {
-      this.selectedGuard = null;
-      this.form.patchValue({
-        securityGuardID: null,
-        securityGuard: '',
-        securityGuardEmail: '',
-        securityGuardMobile: '',
-      });
+      this.clearPersonnelFields(true);
+    }
+  }
+
+  onSgPickupInfoNotReceived(checked: boolean): void {
+    if (checked) {
+      this.clearPickupFields(true);
+      this.applyDefaultGuardPickupSchedule(true);
+    }
+  }
+
+  onSgDropOffInfoNotReceived(checked: boolean): void {
+    if (checked) {
+      this.clearDropOffFields(true);
+      this.applyDefaultGuardDropOffSchedule(true);
     }
   }
 
