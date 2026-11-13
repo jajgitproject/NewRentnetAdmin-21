@@ -28,6 +28,7 @@ import { AdvanceService } from '../advance/advance.service';
 import { FormDialogRPComponent } from './dialogs/form-dialog/form-dialog.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
+import { ReservationStopDetailsModule } from '../reservationStopDetails/reservationStopDetails.module';
 @NgModule({
   declarations: [
     PassengerDetailsComponent,
@@ -57,7 +58,8 @@ import { DeleteDialogComponent } from './dialogs/delete/delete.component';
     MatToolbarModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MyUploadModule
+    MyUploadModule,
+    ReservationStopDetailsModule
   ],
   exports: [PassengerDetailsComponent, FormDialogRPComponent],
   providers: [PassengerDetailsService,AdvanceService]

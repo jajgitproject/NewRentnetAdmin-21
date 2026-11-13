@@ -54,6 +54,8 @@ export class StopDetailsComponent implements OnInit {
   dropOffData = [];
   pickUpData = [];
   enRouteData = [];
+  securityGuardPickUpData = [];
+  securityGuardDropOffData = [];
   reservationStopID: any;
   //reservationID!: number;
 
@@ -85,13 +87,18 @@ export class StopDetailsComponent implements OnInit {
 
   openPickupDropEnroute(formValue: any)
   {
+    const stopType = (formValue.reservationStopType || '').toLowerCase();
     let formTitle = '';
-    if(formValue.reservationStopType?.toLowerCase() === 'pickup') {
-      formTitle = 'Pickup Details';
-    } else if(formValue.reservationStopType?.toLowerCase() === 'dropoff') {
-      formTitle = 'Dropoff Details';
-    } else if(formValue.reservationStopType?.toLowerCase() === 'enroute') {
+    if (stopType === 'pickup') {
+      formTitle = 'Primary Passenger Pickup Details';
+    } else if (stopType === 'dropoff') {
+      formTitle = 'Primary Passenger Drop Off Details';
+    } else if (stopType === 'enroute') {
       formTitle = 'Enroute Details';
+    } else if (stopType === 'securityguardpickup') {
+      formTitle = 'Security Guard Pickup Details';
+    } else if (stopType === 'securityguarddropoff') {
+      formTitle = 'Security Guard Drop Off Details';
     }
     const dialogRef = this.dialog.open(FormDialogReservationStopDetailsComponent, 
       {
@@ -144,16 +151,24 @@ export class StopDetailsComponent implements OnInit {
 
   loadData()
   {
-    this.pickUpData = []; this.dropOffData = []; this.enRouteData = [];
+    this.pickUpData = [];
+    this.dropOffData = [];
+    this.enRouteData = [];
+    this.securityGuardPickUpData = [];
+    this.securityGuardDropOffData = [];
     this.stopDetailsService.getReservationStopDetails(this.reservationID).subscribe((res: any) => {
       res?.forEach(element => {
-        if(element.reservationStopType === 'Pickup') {
-          this.pickUpData.push(element);        
-        } else if(element.reservationStopType === 'Enroute') {
+        const stopType = (element.reservationStopType || '').toLowerCase();
+        if (stopType === 'pickup') {
+          this.pickUpData.push(element);
+        } else if (stopType === 'enroute') {
           this.enRouteData.push(element);
-        } else if(element.reservationStopType === 'Dropoff') {
+        } else if (stopType === 'dropoff') {
           this.dropOffData.push(element);
-          
+        } else if (stopType === 'securityguardpickup') {
+          this.securityGuardPickUpData.push(element);
+        } else if (stopType === 'securityguarddropoff') {
+          this.securityGuardDropOffData.push(element);
         }
       });
     }, (error: HttpErrorResponse) => {

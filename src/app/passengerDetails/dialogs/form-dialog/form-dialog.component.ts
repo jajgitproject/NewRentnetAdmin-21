@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
@@ -14,6 +14,7 @@ import { ReservationPassenger } from '../../passengerDetails.model';
 import { PassengerDetailsService } from '../../passengerDetails.service';
 import { CustomerPersonDropDown } from 'src/app/customerPerson/customerPersonDropDown.model';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FormDialogReservationStopDetailsComponent } from '../../../reservationStopDetails/dialogs/form-dialog/form-dialog.component';
 
 @Component({
   standalone: false,
@@ -57,6 +58,7 @@ export class FormDialogRPComponent implements OnInit
   public advanceTableService: PassengerDetailsService,
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
+    private dialog: MatDialog,
   public _generalService:GeneralService)
   {
         // Set the defaults
@@ -239,15 +241,40 @@ showNotification(colorName, text, placementFrom, placementAlign) {
        }
   }
 
+  refreshStopDropdowns(): void {
+    this.InitPickupStop();
+    this.InitDropOffStop();
+  }
+
+  openAddNewStop(): void {
+    const seedDate =
+      this.advanceTable?.pickupDate
+      ?? this.passengerDetailsData?.[0]?.pickupDate
+      ?? new Date();
+    const dialogRef = this.dialog.open(FormDialogReservationStopDetailsComponent, {
+      width: '50%',
+      data: {
+        action: 'add',
+        reservationID: this.reservationID,
+        status: this.status,
+        advanceTable: [{ pickupDate: seedDate }],
+      },
+    });
+    dialogRef.afterClosed().subscribe(() => {
+      this.refreshStopDropdowns();
+    });
+  }
+
   InitPickupStop(){
     this._generalService.getPickupStop(this.reservationID).subscribe(
       data=>
       {
-        this.ReservationStopList=data;
+        this.ReservationStopList=data ?? [];
         this.advanceTableForm.controls['reservationPickupStop'].setValidators([Validators.required,this.PickupStopValidator(this.ReservationStopList)]);
         this.advanceTableForm.controls['reservationPickupStop'].updateValueAndValidity();
+        const currentPickup = this.advanceTableForm.controls['reservationPickupStop'].value || '';
         this.filteredOptions = this.advanceTableForm.controls['reservationPickupStop'].valueChanges.pipe(
-          startWith(""),
+          startWith(currentPickup),
           map(value => this._filter(value || ''))
         ); 
       });
@@ -292,10 +319,11 @@ showNotification(colorName, text, placementFrom, placementAlign) {
     this._generalService.getPickupStop(this.reservationID).subscribe(
       data=>
       {
-        this.ReservationDropOffStopList=data;
+        this.ReservationDropOffStopList=data ?? [];
         this.advanceTableForm.controls['reservationDropoffStop'].setValidators([this.DropOffStopValidator(this.ReservationDropOffStopList)]);
+        const currentDropOff = this.advanceTableForm.controls['reservationDropoffStop'].value || '';
         this.filteredDropOffOptions = this.advanceTableForm.controls['reservationDropoffStop'].valueChanges.pipe(
-          startWith(""),
+          startWith(currentDropOff),
           map(value => this._filterDropOffStop(value || ''))
         ); 
       });

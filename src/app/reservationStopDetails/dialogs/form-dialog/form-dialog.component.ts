@@ -128,7 +128,7 @@ export class FormDialogReservationStopDetailsComponent {
     private _generalService: GeneralService,) {
     // Set the defaults
     this.action = data.action;
-    this.priorityValues = Array.from({ length: 100 }, (_, i) => i + 1);
+    this.priorityValues = Array.from({ length: 101 }, (_, i) => i);
     if (this.action === 'edit') {
       this.dialogTitle = data.dialogTitle !== undefined ? data.dialogTitle : 'Add More Stops';
       this.advanceTable = data.advanceTable;
@@ -146,15 +146,6 @@ export class FormDialogReservationStopDetailsComponent {
         this.advanceTableForm.get('reservationStopTime').enable();
       }
     
-      if(this.dialogTitle === "Dropoff Details")
-      {
-        this.advanceTableForm.get('reservationStopDate').disable();
-        this.advanceTableForm.get('reservationStopTime').disable();
-        this.advanceTableForm.get('city').disable();
-        this.advanceTableForm.get('reservationStopOrderPriority').enable();
-        this.advanceTableForm.get('reservationStopAddress').disable();
-        this.advanceTableForm.get('reservationStopAddressDetails').disable();
-      }
     } 
     else 
     {
@@ -197,19 +188,10 @@ export class FormDialogReservationStopDetailsComponent {
     this.fetchExistingPriorities();
     if(this.action === 'edit')
     {
-      var value = this.advanceTable.reservationStopAddressLatLong.replace(
-        '(',
-        ''
-      );
-      value = value.replace(')', '');
-      var lat = value.split(' ')[2];
-      var long = value.split(' ')[1];
-
-      this.advanceTableForm.patchValue({reservationStopAddressLatLong:lat
-        +
-         ',' +
-         long
-     });
+      const normalizedGeo = this.normalizeSavedAddressLatLong(this.advanceTable?.reservationStopAddressLatLong);
+      if (normalizedGeo) {
+        this.advanceTableForm.patchValue({ reservationStopAddressLatLong: normalizedGeo });
+      }
     }
    
   }
@@ -595,8 +577,15 @@ export class FormDialogReservationStopDetailsComponent {
     let requestPayload = this.advanceTableForm.getRawValue();
     requestPayload.reservationID = this.reservationID;
     this.advanceTableForm.patchValue({isTimeNotConfirmed:this.isTNCSelected});
-    //requestPayload.reservationStopSpotID = this.data.advanceTable.reservationStopSpotID;
+    requestPayload.isTimeNotConfirmed = this.isTNCSelected;
     requestPayload.reservationStopType = this.data.advanceTable.reservationStopType;
+    requestPayload.activationStatus = this.data.advanceTable.activationStatus !== false;
+    requestPayload.reservationStopSpotTypeID = requestPayload.reservationStopSpotTypeID || 0;
+    requestPayload.reservationStopSpotID = requestPayload.reservationStopSpotID || 0;
+    const normalizedGeo = this.normalizeSavedAddressLatLong(requestPayload.reservationStopAddressLatLong);
+    if (normalizedGeo) {
+      requestPayload.reservationStopAddressLatLong = normalizedGeo;
+    }
     this.advanceTableService.update(requestPayload)
     .subscribe(
       response => 
@@ -887,6 +876,48 @@ export class FormDialogReservationStopDetailsComponent {
     this.advanceTableForm.patchValue({ reservationStopSpotType: option.spotType });
     this.advanceTableForm.patchValue({ reservationStopSpotID: option.geoPointID });
     this.advanceTableForm.patchValue({ reservationStopSpot: option.spot });
+  }
+
+  private normalizeSavedAddressLatLong(raw: unknown): string | null {
+    const text = String(raw ?? '').trim();
+    if (!text) {
+      return null;
+    }
+
+    if (text.includes(',') && !text.toUpperCase().includes('POINT')) {
+      const parts = text.split(',').map((part) => part.trim());
+      if (parts.length >= 2) {
+        const normalized = `${parts[0]},${parts[1]}`;
+        if (this.isValidLatLong(normalized)) {
+          return normalized;
+        }
+      }
+    }
+
+    const cleaned = text.replace(/[()]/g, '').trim();
+    const pointParts = cleaned.split(/\s+/).filter(Boolean);
+    if (pointParts.length >= 3 && pointParts[0].toUpperCase() === 'POINT') {
+      const lng = pointParts[1];
+      const lat = pointParts[2];
+      const normalized = `${lat},${lng}`;
+      if (this.isValidLatLong(normalized)) {
+        return normalized;
+      }
+    }
+
+    return null;
+  }
+
+  private isValidLatLong(value: string): boolean {
+    const parts = value.split(',').map((part) => part.trim());
+    if (parts.length < 2) {
+      return false;
+    }
+    const lat = Number(parts[0]);
+    const lng = Number(parts[1]);
+    return Number.isFinite(lat) && Number.isFinite(lng)
+      && lat >= -90 && lat <= 90
+      && lng >= -180 && lng <= 180;
   }
 
   onTimeInput(event: any): void {

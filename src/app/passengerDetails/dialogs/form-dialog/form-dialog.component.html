@@ -113,6 +113,7 @@
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" *ngIf="saveDisabled" [type]="submit" [disabled]="!advanceTableForm.valid || buttonDisabled"  (click)="confirmAdd()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button type="button" mat-raised-button color="accent" (click)="openAddNewStop()" [disabled]="buttonDisabled" tabindex="-1">Add New Stop</button>
                         <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
                     </div>
                 </div>

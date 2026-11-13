@@ -430,6 +430,14 @@ advanceTableIN: InternalNoteDetails | null;
   locationOutIntervalInMinutes: number;
   IsAlloted:boolean = false;
 canCreateReservation: boolean;
+  /** Saved drop-off from API on edit; keep until user changes pickup/package. */
+  private persistedDropOffFromServer: {
+    dropOffDate: any;
+    dropOffTime: any;
+    etrDate?: any;
+    etrTime?: any;
+  } | null = null;
+  private dropOffAutoCalcAllowed = true;
   constructor(
     public httpClient: HttpClient,
     private dialog: MatDialog,
@@ -1361,6 +1369,7 @@ toArray<T>(value: any): T[] {
 
         this.reservationDataSource = data;
         this.advanceTable = this.reservationDataSource[0];
+        this.capturePersistedDropOffFromServer();
         console.log(this.advanceTable);
         const reservationSourceMissingOnLoad = this.isEmptyText(this.advanceTable?.reservationSource);
         const normalizedReservationSource = reservationSourceMissingOnLoad ? 'Email' : this.advanceTable.reservationSource;
@@ -1494,11 +1503,18 @@ toArray<T>(value: any): T[] {
         });
         this.selectedCustomerCategory = (this.advanceTable.customerCategory || '').trim();
 
-        //Drop Off Details
-        this.advanceTableForm.patchValue({etrDate:this.advanceTable.etrDate});
-        this.advanceTableForm.patchValue({etrTime:this.advanceTable.etrTime});
-        this.advanceTableForm.patchValue({dropOffDate:this.advanceTable.dropOffDate});
-        this.advanceTableForm.patchValue({dropOffTime:this.advanceTable.dropOffTime});
+        //Drop Off Details (use coerced dates so pickers show DB values, not package defaults)
+        const persistedDropOffTime = this.coerceReservationDropOffDateTime(
+          this.advanceTable.dropOffDate,
+          this.advanceTable.dropOffTime,
+        );
+        this.advanceTableForm.patchValue({
+          etrDate: this.coerceApiDate(this.advanceTable.etrDate),
+          etrTime: this.coerceReservationDropOffDateTime(this.advanceTable.etrDate, this.advanceTable.etrTime)
+            ?? this.coerceApiDateTime(this.advanceTable.etrTime),
+          dropOffDate: this.coerceApiDate(this.advanceTable.dropOffDate),
+          dropOffTime: persistedDropOffTime,
+        }, { emitEvent: false });
         this.advanceTableForm.patchValue({dropOffCityID:this.advanceTable.dropOffCityID});
         this.advanceTableForm.patchValue({dropOffCity:this.advanceTable.dropOffCity});
         this.advanceTableForm.patchValue({dropOffAddress:this.advanceTable.dropOffAddress});
@@ -1565,6 +1581,9 @@ toArray<T>(value: any): T[] {
           this.reservationDataSource = null;
         } finally {
        this.isLoadingdata = false;
+       this.reapplyPersistedDropOffFromServerIfNeeded();
+       setTimeout(() => this.reapplyPersistedDropOffFromServerIfNeeded(), 0);
+       setTimeout(() => this.reapplyPersistedDropOffFromServerIfNeeded(), 750);
        if (this.isPickupCorrectionView()) {
          this.finishPickupCorrectionInit();
        }
@@ -3153,7 +3172,7 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
   
   getPackageTypeID(packageTypeID: any,packageType:any) {
-   
+    this.markDropOffScheduleForAutoRecalc();
     this.packageTypeID=packageTypeID;
     this.packageType=packageType;
     this.advanceTableForm.patchValue({packageTypeID:this.packageTypeID});
@@ -3165,6 +3184,10 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   //----------DropOFFDate-------------
 
   changeDropOffDate(PackageType:any): void {
+    if (this.shouldPreservePersistedDropOffOnAutoCalc()) {
+      this.reapplyPersistedDropOffFromServerIfNeeded();
+      return;
+    }
     if (PackageType !== 'Local Rate') {
       this.advanceTableForm.controls['dropOffDate']?.setValue('');
 
@@ -3226,6 +3249,7 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
   }
   
   getPackageID(packageID: any) {
+    this.markDropOffScheduleForAutoRecalc();
     this.packageID=packageID;
     this.advanceTableForm.patchValue({packageID:this.packageID});
     // `this.advanceTable` is undefined in new-reservation mode; guard every
@@ -3830,6 +3854,15 @@ private coerceApiDateTime(value: unknown): Date | null {
   }
   const parsed = moment(value);
   return parsed.isValid() ? parsed.toDate() : null;
+}
+
+/** Drop-off time from API is often separate date + time columns; merge for the datetime picker. */
+private coerceReservationDropOffDateTime(dropOffDate: unknown, dropOffTime: unknown): Date | null {
+  const combined = this.combinePassengerDateAndTime(dropOffDate, dropOffTime);
+  if (combined) {
+    return combined;
+  }
+  return this.coerceApiDateTime(dropOffTime) ?? this.coerceApiDate(dropOffDate);
 }
 
 private normalizeSavedAddressLatLong(raw: unknown): string | null {
@@ -5125,6 +5158,10 @@ private patchDropOffAddress(res: any) {
 
   locationTimeSet(event)
   {
+    // Match onPickupDateChange: do not re-enable package-hour drop-off while loadData is binding saved values.
+    if (!this.isLoadingdata) {
+      this.markDropOffScheduleForAutoRecalc();
+    }
     if(this.action==='edit')
     {
       if( this.locationOutIntervalInMinutes !== 0)
@@ -5146,8 +5183,12 @@ private patchDropOffAddress(res: any) {
         const locOutDateTime=new Date(combinedDateTime);
         this.advanceTableForm.patchValue({locationOutDate:locOutDateTime});
         this.advanceTableForm.patchValue({locationOutTime:locOutDateTime});
-      }  
-      this.getETRDropOffTime();    
+      }
+      if (!this.shouldPreservePersistedDropOffOnAutoCalc()) {
+        this.getETRDropOffTime();
+      } else {
+        this.reapplyPersistedDropOffFromServerIfNeeded();
+      }
     }
     else
     {
@@ -5171,7 +5212,11 @@ private patchDropOffAddress(res: any) {
         this.advanceTableForm.patchValue({locationOutDate:locOutDateTime});
         this.advanceTableForm.patchValue({locationOutTime:locOutDateTime});
       }
-      this.getETRDropOffTime();
+      if (!this.shouldPreservePersistedDropOffOnAutoCalc()) {
+        this.getETRDropOffTime();
+      } else {
+        this.reapplyPersistedDropOffFromServerIfNeeded();
+      }
     } 
   }
 
@@ -5186,6 +5231,10 @@ private patchDropOffAddress(res: any) {
 
   ETRDropoffDateSet(packageType:any)
   {
+    if (this.shouldPreservePersistedDropOffOnAutoCalc()) {
+      this.reapplyPersistedDropOffFromServerIfNeeded();
+      return;
+    }
     if(packageType === 'Outstation Lumpsum Rate' || packageType === 'Outstation OneWay Trip Rate' || packageType === 'Outstation Round Trip Rate')
     {
       this.advanceTableForm.controls['dropOffDate'].setValue('');
@@ -5326,6 +5375,9 @@ private patchDropOffAddress(res: any) {
     var date = event.split('/');
     var endDate = date[2] + '-' + date[1] + '-' + date[0];
     this.pickupDate = event;
+    if (!this.isLoadingdata) {
+      this.markDropOffScheduleForAutoRecalc();
+    }
     this.refreshReservationCustomerAlerts();
     // if (this.action === 'edit') {
     //   this._generalService.GetContractIDBasedOnDate(this.advanceTable.customerID, endDate).subscribe(
@@ -5423,8 +5475,10 @@ private patchDropOffAddress(res: any) {
               // In edit mode getETRDropOffTime() runs synchronously during
               // loadData() before this async contract lookup completes, so
               // the original call is aborted by the guard; trigger it again
-              // here once all the inputs are finally available.
-              this.getETRDropOffTime();
+              // here once all the inputs are finally available (not on edit reopen with saved drop-off).
+              if (!this.shouldPreservePersistedDropOffOnAutoCalc()) {
+                this.getETRDropOffTime();
+              }
             });
           } 
           else
@@ -6225,7 +6279,48 @@ private patchDropOffAddress(res: any) {
   // if it contains a usable hour count, sets Drop-off Date / Drop-off
   // Time / ETR Time = Pickup + hours. No-op when any required piece is
   // missing so we never stamp garbage into the form.
+  private capturePersistedDropOffFromServer(): void {
+    if (!this.shouldUseEditPrefill() || !this.advanceTable) {
+      this.persistedDropOffFromServer = null;
+      this.dropOffAutoCalcAllowed = true;
+      return;
+    }
+    this.persistedDropOffFromServer = {
+      dropOffDate: this.advanceTable.dropOffDate,
+      dropOffTime: this.advanceTable.dropOffTime,
+      etrDate: this.advanceTable.etrDate,
+      etrTime: this.advanceTable.etrTime,
+    };
+    // On reopen, always prefer DB drop-off until the user changes pickup/package/time.
+    this.dropOffAutoCalcAllowed = false;
+  }
+
+  private shouldPreservePersistedDropOffOnAutoCalc(): boolean {
+    return this.shouldUseEditPrefill() && !this.dropOffAutoCalcAllowed;
+  }
+
+  private markDropOffScheduleForAutoRecalc(): void {
+    this.dropOffAutoCalcAllowed = true;
+  }
+
+  private reapplyPersistedDropOffFromServerIfNeeded(): void {
+    if (!this.shouldPreservePersistedDropOffOnAutoCalc() || !this.persistedDropOffFromServer) {
+      return;
+    }
+    const persisted = this.persistedDropOffFromServer;
+    this.advanceTableForm.patchValue({
+      dropOffDate: this.coerceApiDate(persisted.dropOffDate),
+      dropOffTime: this.coerceReservationDropOffDateTime(persisted.dropOffDate, persisted.dropOffTime),
+      etrDate: this.coerceApiDate(persisted.etrDate),
+      etrTime: this.coerceReservationDropOffDateTime(persisted.etrDate, persisted.etrTime)
+        ?? this.coerceApiDateTime(persisted.etrTime),
+    }, { emitEvent: false });
+  }
+
   private applyLocalPackageDropOff(pickupDateMoment: moment.Moment | null, pickupTimeMoment: moment.Moment | null): void {
+    if (this.shouldPreservePersistedDropOffOnAutoCalc()) {
+      return;
+    }
     if (!pickupDateMoment || !pickupDateMoment.isValid()) { return; }
     if (!pickupTimeMoment || !pickupTimeMoment.isValid()) { return; }
 
@@ -6275,6 +6370,11 @@ private patchDropOffAddress(res: any) {
 
   getETRDropOffTime()
   {
+    if (this.shouldPreservePersistedDropOffOnAutoCalc()) {
+      this.reapplyPersistedDropOffFromServerIfNeeded();
+      return;
+    }
+
     // Prefer live form values, then local state, then the loaded reservation
     // record (edit mode). This lets the call succeed whether the user is
     // editing an existing reservation or filling a fresh one, in any order.
@@ -6322,6 +6422,10 @@ private patchDropOffAddress(res: any) {
     this.reservationService.getTimeForDropoffTime(packageID,pickupTime,pickupDate,contractID,vehicleID,cityID).subscribe(
     (data:any)=>
     {
+      if (this.shouldPreservePersistedDropOffOnAutoCalc()) {
+        this.reapplyPersistedDropOffFromServerIfNeeded();
+        return;
+      }
       if (!data) { return; }
       if(data.packageType === 'Local On Demand' || data.packageType === 'Long Term Rental' || data.packageType === 'Outstation Lumpsum' || data.packageType === 'Outstation OneWay Trip' || data.packageType === 'Outstation Round Trip')
       {
