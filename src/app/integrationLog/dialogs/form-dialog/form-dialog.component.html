@@ -34,12 +34,16 @@
   <!-- 🔥 Data -->
   <ng-container *ngIf="filteredData.length > 0; else noData">
 
-  <div *ngFor="let item of filteredData">
+  <div *ngFor="let item of filteredData; let i = index">
 
       <div class="card mb-4">
 
         <!-- 🔥 Header -->
         <div class="card-header-custom">
+
+          <div class="status-block" *ngIf="selectedTab === 'GETOTP'">
+            <span class="status-label">{{ getOtpCallLabel(item, i) }}</span>
+          </div>
 
           <div class="status-block">
             <span class="status-label">Status:</span>

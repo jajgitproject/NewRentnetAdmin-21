@@ -23,10 +23,11 @@ export class FormDialogComponentIL {
   reservationID: number;
   latestEvents: any = {};
   filteredData: any[] = [];
-  
+  private readonly multiLogTabs = new Set(['GETOTP']);
 
   tabs = [
     { key: 'ACCEPT', label: 'Confirmation' },
+    { key: 'GETOTP', label: 'OTP' },
     { key: 'DriverAssignment', label: 'Allotment' },
     { key: 'startDuty', label: 'LocationOut' },
     { key: 'arrived', label: 'Reached' },
@@ -58,25 +59,79 @@ export class FormDialogComponentIL {
 
 
  getTabStatusClass(tabKey: string) {
+  const key = tabKey.toUpperCase();
+  const entry = this.latestEvents[key];
 
-  const item = this.latestEvents[tabKey.toUpperCase()];
-
-  if (!item) {
+  if (!entry) {
     return 'tab-default';
   }
 
-  return item.eventStatus === 'Success'
-    ? 'tab-success'
-    : 'tab-failure';
+  if (this.multiLogTabs.has(key) && Array.isArray(entry)) {
+    if (entry.length === 0) {
+      return 'tab-default';
+    }
+
+    if (entry.some((row) => row.eventStatus !== 'Success')) {
+      return 'tab-failure';
+    }
+
+    return 'tab-success';
+  }
+
+  return entry.eventStatus === 'Success' ? 'tab-success' : 'tab-failure';
 }
 
 updateFilteredData() {
+  const key = this.selectedTab.toUpperCase();
+  const entry = this.latestEvents[key];
 
-  const item =
-    this.latestEvents[this.selectedTab.toUpperCase()];
+  if (this.multiLogTabs.has(key)) {
+    this.filteredData = Array.isArray(entry) ? [...entry] : [];
+    return;
+  }
 
-  this.filteredData = item ? [item] : [];
+  this.filteredData = entry ? [entry] : [];
 }
+
+  getOtpCallLabel(item: any, index: number): string {
+    const phase = this.inferGetOtpPhase(item?.request);
+    if (phase) {
+      return phase;
+    }
+
+    if (this.filteredData.length > 1) {
+      return 'OTP call ' + (index + 1);
+    }
+
+    return 'OTP';
+  }
+
+  private inferGetOtpPhase(request: any): string | null {
+    if (!request) {
+      return null;
+    }
+
+    const riders = Array.isArray(request) ? request : [request];
+    if (riders.length === 0) {
+      return null;
+    }
+
+    const first = riders[0];
+    if (!first || typeof first !== 'object') {
+      return null;
+    }
+
+    const signIn = first.signInOtp ?? first.singInOtp;
+    if (signIn === null || signIn === undefined || signIn === '') {
+      return 'Start trip';
+    }
+
+    if (Array.isArray(request)) {
+      return 'Accept';
+    }
+
+    return null;
+  }
 
   getStatusClass(status: string) {
     return status === 'Success' ? 'text-success' : 'text-danger';
@@ -131,6 +186,18 @@ buildLatestEvents() {
   this.advanceTable.forEach(item => {
 
     const key = item.eventName?.toUpperCase();
+    if (!key) {
+      return;
+    }
+
+    if (this.multiLogTabs.has(key)) {
+      if (!Array.isArray(this.latestEvents[key])) {
+        this.latestEvents[key] = [];
+      }
+
+      this.latestEvents[key].push(item);
+      return;
+    }
 
     if (
       !this.latestEvents[key] ||
@@ -139,6 +206,13 @@ buildLatestEvents() {
       this.latestEvents[key] = item;
     }
 
+  });
+
+  this.multiLogTabs.forEach((multiKey) => {
+    const rows = this.latestEvents[multiKey];
+    if (Array.isArray(rows)) {
+      rows.sort((a, b) => a.apiIntegrationLogID - b.apiIntegrationLogID);
+    }
   });
 
   this.selectedTab = 'ACCEPT';
