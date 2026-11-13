@@ -55,9 +55,19 @@
           <h3 class="bc-section-title">Passenger Details</h3>
           <div class="bc-passenger-card" *ngFor="let passenger of passengerDetailsList; index as i">
             <h4 class="bc-passenger-title">{{ getPassengerDisplayName(passenger, i) }}</h4>
-            <div class="bc-passenger-row">
-              <div class="bc-label">Gender</div>
-              <div class="bc-value">{{ displayOrDash(passenger.integrationRequestPassengerGender) }}</div>
+            <div class="bc-passenger-meta-grid">
+              <div class="bc-passenger-meta-item">
+                <span class="bc-label">Gender</span>
+                <span class="bc-value">{{ displayOrDash(passenger.integrationRequestPassengerGender) }}</span>
+              </div>
+              <div class="bc-passenger-meta-item">
+                <span class="bc-label">Mobile</span>
+                <span class="bc-value">{{ displayOrDash(passenger.integrationRequestPassengerMobile) }}</span>
+              </div>
+              <div class="bc-passenger-meta-item">
+                <span class="bc-label">Email</span>
+                <span class="bc-value">{{ displayOrDash(passenger.integrationRequestPassengerEmail) }}</span>
+              </div>
             </div>
             <div class="bc-passenger-trip-grid">
               <div class="bc-passenger-trip-col">
