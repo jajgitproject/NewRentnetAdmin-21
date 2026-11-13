@@ -112,6 +112,26 @@
             </div>
         </div>
 
+        <div class="bc-section" *ngIf="customerDetails">
+          <h3 class="bc-section-title">Requester Details</h3>
+          <div class="bc-passenger-card">
+            <div class="bc-passenger-meta-grid">
+              <div class="bc-passenger-meta-item">
+                <span class="bc-label">Requester Name</span>
+                <span class="bc-value">{{ displayOrNa(requesterDetails?.requesterName) }}</span>
+              </div>
+              <div class="bc-passenger-meta-item">
+                <span class="bc-label">Requester Mobile</span>
+                <span class="bc-value">{{ displayOrNa(requesterDetails?.requesterMobile) }}</span>
+              </div>
+              <div class="bc-passenger-meta-item">
+                <span class="bc-label">Requester Email</span>
+                <span class="bc-value">{{ displayOrNa(requesterDetails?.requesterEmail) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="bc-section" *ngIf="hasAnyAdditionalInfo || enrouteStops.length">
           <h3 class="bc-section-title" *ngIf="hasAnyAdditionalInfo">Additional Information</h3>
           <div class="bc-additional-grid" *ngIf="hasAnyAdditionalInfo">

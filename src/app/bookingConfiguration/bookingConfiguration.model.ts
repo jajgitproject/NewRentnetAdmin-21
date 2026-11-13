@@ -106,6 +106,19 @@ export class BookingConfigurationStopDetails {
 }
 
 
+export class BookingConfigurationRequesterDetails {
+  requesterName: string;
+  requesterMobile: string;
+  requesterEmail: string;
+
+  constructor(details?) {
+    const row = details || {};
+    this.requesterName = row.requesterName || '';
+    this.requesterMobile = row.requesterMobile || '';
+    this.requesterEmail = row.requesterEmail || '';
+  }
+}
+
 export class BookingConfigurationPassengerDetails {
   integrationRequestPassengerID : number;
   integrationRequestPassenger : string;

@@ -33,9 +33,14 @@ export class BookingConfigurationService {
     return this.httpClient.get(this.API_URL +"/StopDetails/"+BookingID);
   }
 
-  getPassengerDetails(BookingID:number):  Observable<any> 
+  getPassengerDetails(BookingID:number):  Observable<any>
   {
     return this.httpClient.get(this.API_URL +"/PassengerDetails/"+BookingID);
+  }
+
+  getRequesterDetails(travelRequestNo: string): Observable<any> {
+    const encoded = encodeURIComponent(travelRequestNo || '');
+    return this.httpClient.get(this.API_URL + '/RequesterDetails/' + encoded);
   }
 
   getIntegrationCustomerSpecificFields(BookingID:number): Observable<any>

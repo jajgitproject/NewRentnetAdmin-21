@@ -19,7 +19,7 @@ import { BookingConfigurationService } from './bookingConfiguration.service';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import moment from 'moment';
 import { ActivatedRoute, Router } from '@angular/router';
-import { B2cDataDetails, BookingConfigurationCustomerDetails, BookingConfigurationPassengerDetails, BookingConfigurationStopDetails, BookingPackageVehcileDetails, Reservation } from './bookingConfiguration.model';
+import { B2cDataDetails, BookingConfigurationCustomerDetails, BookingConfigurationPassengerDetails, BookingConfigurationRequesterDetails, BookingConfigurationStopDetails, BookingPackageVehcileDetails, Reservation } from './bookingConfiguration.model';
 import { PackageTypeDropDown } from '../packageType/packageTypeDropDown.model';
 import { PackageDropDown } from '../package/packageDropDown.model';
 import { CitiesDropDown } from '../organizationalEntity/citiesDropDown.model';
@@ -59,6 +59,7 @@ export class BookingConfigurationComponent implements OnInit {
   b2cDetails: B2cDataDetails | null;
   stopDetailsList: BookingConfigurationStopDetails[] | null;
   passengerDetailsList: BookingConfigurationPassengerDetails[] | null;
+  requesterDetails: BookingConfigurationRequesterDetails | null = null;
   integrationCustomFields: { fieldName: string; fieldValue: string }[] = [];
   packageVehcileDetailsList: BookingPackageVehcileDetails | null;
 
@@ -412,11 +413,37 @@ toggleStopFold() {
           this.getSalesManager(this.customerDetails.customerID);
           this.getCustomerKam(this.customerDetails.customerID);
           this.GetPassengerDetails();
+          this.GetRequesterDetails();
           this.GetIntegrationCustomerSpecificFields();
           this.refreshReservationStops();
         },
-        (error: HttpErrorResponse) => { this.customerDetails = null; }
+        (error: HttpErrorResponse) => {
+          this.customerDetails = null;
+          this.requesterDetails = null;
+        }
       );
+  }
+
+  public GetRequesterDetails() {
+    const travelRequestNo =
+      this.customerDetails?.customerTravelRequestNumber?.trim()
+      || this.customerDetails?.trn?.trim()
+      || '';
+    if (!travelRequestNo) {
+      this.requesterDetails = new BookingConfigurationRequesterDetails();
+      return;
+    }
+
+    this.bookingConfigurationService.getRequesterDetails(travelRequestNo).subscribe({
+      next: (data) => {
+        this.requesterDetails = data
+          ? new BookingConfigurationRequesterDetails(data)
+          : new BookingConfigurationRequesterDetails();
+      },
+      error: () => {
+        this.requesterDetails = new BookingConfigurationRequesterDetails();
+      }
+    });
   }
 
   public GetIntegrationCustomerSpecificFields() {
@@ -2187,6 +2214,14 @@ OnDropOffGeoLocationClick(option:any)
     }
     const text = String(value).trim();
     return text !== '' && text !== '--';
+  }
+
+  displayOrNa(value: string | number | null | undefined): string {
+    if (value === null || value === undefined) {
+      return 'N/A';
+    }
+    const text = String(value).trim();
+    return text === '' ? 'N/A' : text;
   }
 
   get hasAnyAdditionalInfo(): boolean {
