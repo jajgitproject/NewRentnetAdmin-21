@@ -133,6 +133,8 @@ export class IncidenceMISComponent implements OnInit, OnDestroy {
   searchVehicleID = 0;
   searchDispatchLocationID = 0;
   searchIncidenceTypeID = 0;
+  searchReservationID = '';
+  searchDutySlipID = '';
   searchIncidenceFromDate: any = '';
   searchIncidenceToDate: any = '';
 
@@ -277,6 +279,8 @@ export class IncidenceMISComponent implements OnInit, OnDestroy {
     this.searchVehicleID = 0;
     this.searchDispatchLocationID = 0;
     this.searchIncidenceTypeID = 0;
+    this.searchReservationID = '';
+    this.searchDutySlipID = '';
     this.searchIncidenceFromDate = '';
     this.searchIncidenceToDate = '';
     this.PageNumber = 0;
@@ -585,7 +589,9 @@ export class IncidenceMISComponent implements OnInit, OnDestroy {
       searchDispatchLocationID: this.searchDispatchLocationID || 0,
       searchIncidenceFromDate: this.searchIncidenceFromDate ? moment(this.searchIncidenceFromDate).format('MMM DD yyyy') : '',
       searchIncidenceToDate: this.searchIncidenceToDate ? moment(this.searchIncidenceToDate).format('MMM DD yyyy') : '',
-      searchIncidenceTypeID: this.searchIncidenceTypeID || 0
+      searchIncidenceTypeID: this.searchIncidenceTypeID || 0,
+      searchReservationID: (this.searchReservationID || '').trim(),
+      searchDutySlipID: (this.searchDutySlipID || '').trim()
     };
   }
 

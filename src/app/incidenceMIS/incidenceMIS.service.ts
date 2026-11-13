@@ -29,6 +29,8 @@ export class IncidenceMISService {
       searchIncidenceFromDate: criteria.searchIncidenceFromDate || null,
       searchIncidenceToDate: criteria.searchIncidenceToDate || null,
       searchIncidenceTypeID: criteria.searchIncidenceTypeID || 0,
+      searchReservationID: criteria.searchReservationID || null,
+      searchDutySlipID: criteria.searchDutySlipID || null,
       pageNumber: 0,
       orderByColumn: criteria.orderByColumn || 'IncidenceID',
       order: criteria.order || 'Descending'
@@ -49,6 +51,8 @@ export class IncidenceMISService {
       searchIncidenceFromDate: criteria.searchIncidenceFromDate || null,
       searchIncidenceToDate: criteria.searchIncidenceToDate || null,
       searchIncidenceTypeID: criteria.searchIncidenceTypeID || 0,
+      searchReservationID: criteria.searchReservationID || null,
+      searchDutySlipID: criteria.searchDutySlipID || null,
       pageNumber,
       orderByColumn: criteria.orderByColumn || 'IncidenceID',
       order: criteria.order || 'Descending'

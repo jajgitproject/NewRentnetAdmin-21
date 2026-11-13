@@ -125,6 +125,22 @@
 
                     <div class="col-md-3">
                       <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Reservation ID</mat-label>
+                        <input type="text" matInput [(ngModel)]="searchReservationID" placeholder="e.g. 27349, 27481">
+                        <mat-hint>Comma-separated for multiple values</mat-hint>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Duty Slip ID</mat-label>
+                        <input type="text" matInput [(ngModel)]="searchDutySlipID" placeholder="e.g. 14053, 14109">
+                        <mat-hint>Comma-separated for multiple values</mat-hint>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline" class="w-100">
                         <mat-label>Dispatch Location</mat-label>
                         <mat-select [(ngModel)]="searchDispatchLocationID">
                           <mat-option [value]="0">All</mat-option>

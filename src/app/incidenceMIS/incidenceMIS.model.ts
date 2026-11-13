@@ -96,6 +96,8 @@ export interface IncidenceMISSearchCriteria {
   searchIncidenceFromDate?: string;
   searchIncidenceToDate?: string;
   searchIncidenceTypeID?: number;
+  searchReservationID?: string;
+  searchDutySlipID?: string;
   pageNumber?: number;
   orderByColumn?: string;
   order?: string;
