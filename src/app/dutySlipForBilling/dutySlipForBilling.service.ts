@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { GeneralService } from '../general/general.service';
 import { BillingHistory } from './dutySlipForBilling.model';
@@ -313,9 +313,11 @@ export class DutySlipForBillingService
     return Number.isFinite(n) ? n : null;
     }
 
- PostDataGPS(dutySlipID:any,RegistrationNumber:any):  Observable<any> 
+ PostDataGPS(dutySlipID:any,RegistrationNumber:any,pickupDate:string,dropOffDate:string):  Observable<any> 
   { 
-    let userID=this.generalService.getUserID();
-    return this.httpClient.get(this.API_URL_GPS+'/'+dutySlipID + '/'+RegistrationNumber);
+    const params = new HttpParams()
+      .set('pickupDate', pickupDate)
+      .set('dropOffDate', dropOffDate);
+    return this.httpClient.get(this.API_URL_GPS+'/'+dutySlipID + '/'+RegistrationNumber, { params });
   }
 }

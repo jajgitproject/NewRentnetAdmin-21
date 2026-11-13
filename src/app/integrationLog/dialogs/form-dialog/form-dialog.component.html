@@ -45,6 +45,10 @@
             <span class="status-label">{{ getOtpCallLabel(item, i) }}</span>
           </div>
 
+          <div class="status-block" *ngIf="selectedTab === 'attendance'">
+            <span class="status-label">{{ getAttendanceLabel(item) }}</span>
+          </div>
+
           <div class="status-block">
             <span class="status-label">Status:</span>
             <span [ngClass]="getStatusClass(item.eventStatus)">

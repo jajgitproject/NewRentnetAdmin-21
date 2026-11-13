@@ -243,6 +243,33 @@
 
         <form class="register-form quick-search-panel" [formGroup]="advanceTableForm" (ngSubmit)="submit">
           <div class="bc-panel-body">
+          <div class="row" *ngIf="isInfosysBooking()">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+              <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                <mat-label>Customer <span class="bc-required">*</span></mat-label>
+                <input matInput [formControl]="infosysCustomerControl" [matAutocomplete]="autoInfosys"
+                  #infosysCustomerTrigger="matAutocompleteTrigger"
+                  (input)="onInfosysCustomerInput($any($event.target).value)"
+                  (blur)="onInfosysCustomerBlur()" />
+                <mat-autocomplete #autoInfosys="matAutocomplete" [displayWith]="displayInfosysCustomer"
+                  (optionSelected)="onInfosysCustomerSelected($event.option.value)">
+                  <mat-option *ngFor="let option of infosysCustomerOptions" [value]="option">
+                    {{ option.customerName }}<span *ngIf="option.integrationCode"> ({{ option.integrationCode }})</span>
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-hint>Type at least 3 characters</mat-hint>
+                <mat-error *ngIf="infosysCustomerControl.hasError('required')">
+                  Customer is required
+                </mat-error>
+                <mat-error *ngIf="infosysCustomerControl.hasError('notSelected')">
+                  Select a customer from the list
+                </mat-error>
+              </mat-form-field>
+              <div class="bc-field-error" *ngIf="infosysCustomerSearchError">
+                {{ infosysCustomerSearchError }}
+              </div>
+            </div>
+          </div>
           <div class="row">
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
@@ -366,6 +393,9 @@
                 <input matInput [owlDateTimeTrigger]="date2" [owlDateTime]="date2" formControlName="pickupDateTime" />
                 <mat-icon matSuffix [owlDateTimeTrigger]="date2" class="date-icon disabled-icon">today</mat-icon>
                   <owl-date-time #date2></owl-date-time>
+                  <mat-error *ngIf="advanceTableForm.get('pickupDateTime')?.hasError('required')">
+                    Pickup date and time are required
+                  </mat-error>
                   </mat-form-field>
             </div>
                 </div>
@@ -411,6 +441,9 @@
                   </div>
               </ng-template>
           </div>
+          <div class="bc-field-error" *ngIf="showInfosysCoordinateError('pickup')">
+            Pickup latitude and longitude are required. Select the pickup address from the list.
+          </div>
 
           <div class="row">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
@@ -428,6 +461,9 @@
                 <input matInput [owlDateTimeTrigger]="date3" [owlDateTime]="date3" formControlName="dropOffDateTime" />
                 <mat-icon matSuffix [owlDateTimeTrigger]="date3" class="date-icon disabled-icon">today</mat-icon>
                     <owl-date-time #date3></owl-date-time>
+                    <mat-error *ngIf="advanceTableForm.get('dropOffDateTime')?.hasError('required')">
+                      Drop date and time are required
+                    </mat-error>
                     </mat-form-field>
             </div>
                 </div>
@@ -473,6 +509,9 @@
                         </div>
                     </div>
                 </ng-template>
+          </div>
+          <div class="bc-field-error" *ngIf="showInfosysCoordinateError('drop')">
+            Drop latitude and longitude are required. Select the drop address from the list.
           </div>
 
           <div class="row">

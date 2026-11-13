@@ -2973,7 +2973,10 @@ onChange() {
         Swal.fire('', 'Please fill all date and time fields.', 'warning');
         return;
       }
-      this.dutySlipForBillingService.PostDataGPS(this.advanceTableClosingOne.closingDutySlipModel.dutySlipID,this.RegistrationNumber).subscribe
+      const form = this.advanceTableForm.getRawValue();
+      const pickupDate = moment(form.pickUpDateForBilling).format('YYYY-MM-DD');
+      const dropOffDate = moment(form.dropOffDateForBilling).format('YYYY-MM-DD');
+      this.dutySlipForBillingService.PostDataGPS(this.advanceTableClosingOne.closingDutySlipModel.dutySlipID,this.RegistrationNumber,pickupDate,dropOffDate).subscribe
       (
         data => 
           {

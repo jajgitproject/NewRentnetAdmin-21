@@ -21,7 +21,7 @@ export class IntegrationLogDetailComponent implements OnInit {
   reservationID: number;
   latestEvents: any = {};
   filteredData: any[] = [];
-  private readonly multiLogTabs = new Set(['GETOTP']);
+  private readonly multiLogTabs = new Set(['GETOTP', 'ATTENDANCE']);
 
   tabs = [
     { key: 'ACCEPT', label: 'Confirmation' },
@@ -30,6 +30,7 @@ export class IntegrationLogDetailComponent implements OnInit {
     { key: 'startDuty', label: 'LocationOut' },
     { key: 'arrived', label: 'Reached' },
     { key: 'startTrip', label: 'Pickup' },
+    { key: 'attendance', label: 'Attendance' },
     { key: 'Tracking', label: 'Tracking' },
     { key: 'endTrip', label: 'DropOff' },
     { key: 'endDuty', label: 'CloseDuty' },
@@ -139,6 +140,13 @@ updateFilteredData() {
     }
 
     return null;
+  }
+
+  getAttendanceLabel(item: any): string {
+    const request = item?.request;
+    const eventName = request?.eventName || 'Attendance';
+    const rider = request?.rider?.name || request?.rider?.email || '';
+    return rider ? eventName + ' - ' + rider : eventName;
   }
 
   getStatusClass(status: string) {

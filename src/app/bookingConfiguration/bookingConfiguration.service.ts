@@ -23,6 +23,15 @@ export class BookingConfigurationService {
     return this.httpClient.get(this.API_URL +"/CustomerDetails/"+BookingID);
   }
 
+  searchInfosysCustomers(prefix: string): Observable<any[]> {
+    const params = new HttpParams().set('prefix', prefix || '');
+    return this.httpClient.get<any[]>(this.API_URL + '/InfosysCustomers', { params });
+  }
+
+  getInfosysCustomerMappings(customerId: number): Observable<any[]> {
+    return this.httpClient.get<any[]>(this.API_URL + '/InfosysCustomerMappings/' + customerId);
+  }
+
   getB2CDetails(BookingID:number):  Observable<any> 
   {
     return this.httpClient.get(this.API_URL +"/B2CDetails/"+BookingID);
