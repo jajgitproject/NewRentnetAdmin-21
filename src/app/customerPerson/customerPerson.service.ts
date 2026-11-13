@@ -128,6 +128,7 @@ export class CustomerPersonService
   {
     advanceTable.customerPersonID=-1;
     advanceTable.userID=this.generalService.getUserID();
+    this.applyIsSecurityGuardBeforeSave(advanceTable);
      if(advanceTable.primaryMobile==="")
     {
       advanceTable.primaryMobile=null;
@@ -158,6 +159,7 @@ export class CustomerPersonService
   update(advanceTable: CustomerPerson)
   {
     advanceTable.userID=this.generalService.getUserID();
+    this.applyIsSecurityGuardBeforeSave(advanceTable);
      if(advanceTable.primaryMobile==="")
     {
       advanceTable.primaryMobile=null;
@@ -188,5 +190,29 @@ export class CustomerPersonService
   {
     let userID = this.generalService.getUserID();
     return this.httpClient.delete(this.API_URL + '/'+ customerPersonID  + '/'+ userID);
+  }
+
+  applyIsSecurityGuardBeforeSave(advanceTable: any): void {
+    const coerced = this.coerceIsSecurityGuardToBool(
+      advanceTable?.isSecurityGuard ?? advanceTable?.IsSecurityGuard
+    );
+    advanceTable.isSecurityGuard = coerced;
+    advanceTable.IsSecurityGuard = coerced;
+  }
+
+  coerceIsSecurityGuardToBool(value: any): boolean | null {
+    if (value === true || value === false) {
+      return value;
+    }
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    if (value === 'Yes' || value === 'yes' || value === 'true' || value === 'True' || value === 1 || value === '1') {
+      return true;
+    }
+    if (value === 'No' || value === 'no' || value === 'false' || value === 'False' || value === 0 || value === '0') {
+      return false;
+    }
+    return null;
   }
 }

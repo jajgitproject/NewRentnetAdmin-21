@@ -742,6 +742,9 @@ export class FormDialogComponentCustomerPerson
       sendEmail: [this.advanceTable.sendEmail, [Validators.required]],
       employeeCode: [this.advanceTable.employeeCode],
       costCenter: [this.advanceTable.costCenter],
+      isSecurityGuard: [this.toIsSecurityGuardSelectValue(
+        this.advanceTable?.isSecurityGuard ?? this.advanceTable?.IsSecurityGuard
+      )],
       customerDesignationID: [this.advanceTable.customerDesignationID],
       customerDesignation: [this.advanceTable.customerDesignation],
       customerDepartmentID: [this.advanceTable.customerDepartmentID],
@@ -972,9 +975,13 @@ public Post(): void {
   }
 
   // Call service
+  const isSecurityGuard = this.resolveIsSecurityGuardValue();
+  const { isSecurityGuard: _ignoredIsSecurityGuard, ...formRest } = this.advanceTableForm.getRawValue();
   const payload = {
-  ...this.advanceTableForm.getRawValue(),
+  ...formRest,
   oldRentNetID: this.getOldRentNetID(),
+  isSecurityGuard,
+  IsSecurityGuard: isSecurityGuard,
   // Booking New Passenger popup: do not send welcome credentials email
   skipWelcomeEmail: this.someAction === 'CP',
   reservationID: Number(this.reservationID) > 0 ? Number(this.reservationID) : null
@@ -1051,9 +1058,13 @@ public Post(): void {
     this.advanceTableForm.patchValue({primaryMobile:primaryMobile});
     this.advanceTableForm.patchValue({secondaryMobile1:secondaryMobile1});
     this.advanceTableForm.patchValue({secondaryMobile2:secondaryMobile2});
+     const isSecurityGuard = this.resolveIsSecurityGuardValue();
+     const { isSecurityGuard: _ignoredIsSecurityGuard, ...formRest } = this.advanceTableForm.getRawValue();
      const payload = {
-  ...this.advanceTableForm.getRawValue(),
+  ...formRest,
   oldRentNetID: this.getOldRentNetID(),
+  isSecurityGuard,
+  IsSecurityGuard: isSecurityGuard,
   reservationID: Number(this.reservationID) > 0 ? Number(this.reservationID) : null
 };
     this.advanceTableService.update(payload)  
@@ -1336,6 +1347,37 @@ private getOldRentNetID(): number {
 
   return Number(value);
 }
+
+  private toIsSecurityGuardSelectValue(value: unknown): 'Yes' | 'No' | null {
+    const normalized = this.normalizeIsSecurityGuard(value);
+    if (normalized === true) {
+      return 'Yes';
+    }
+    if (normalized === false) {
+      return 'No';
+    }
+    return null;
+  }
+
+  private normalizeIsSecurityGuard(value: unknown): boolean | null {
+    if (value === true || value === false) {
+      return value;
+    }
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    if (value === 1 || value === '1' || value === 'true' || value === 'True' || value === 'yes' || value === 'Yes') {
+      return true;
+    }
+    if (value === 0 || value === '0' || value === 'false' || value === 'False' || value === 'no' || value === 'No') {
+      return false;
+    }
+    return null;
+  }
+
+  private resolveIsSecurityGuardValue(): boolean | null {
+    return this.normalizeIsSecurityGuard(this.advanceTableForm.get('isSecurityGuard')?.value);
+  }
 
   applyQuickAddHiddenDefaults(): void {
     if (!this.isReservationQuickAdd) {
