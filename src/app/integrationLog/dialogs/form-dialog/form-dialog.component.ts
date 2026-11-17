@@ -137,7 +137,7 @@ updateFilteredData() {
   getAttendanceLabel(item: any): string {
     const request = item?.request;
     const eventName = request?.eventName || 'Attendance';
-    const rider = request?.rider?.name || request?.rider?.email || '';
+    const rider = request?.uniqueRiderEmail || request?.rider?.name || request?.rider?.email || '';
     return rider ? eventName + ' - ' + rider : eventName;
   }
 

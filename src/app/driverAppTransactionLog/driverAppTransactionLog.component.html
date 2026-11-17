@@ -1,0 +1,224 @@
+<section class="content br-page">
+  <div class="container-fluid">
+    <div class="br-header">
+      <div class="br-header-left">
+        <ul class="br-breadcrumb">
+          <li>
+            <a routerLink="/dashboard/main">Home</a>
+            <span class="br-breadcrumb-sep">&gt;</span>
+            <span>Admin</span>
+            <span class="br-breadcrumb-sep">&gt;</span>
+            <span>{{ crumb }}</span>
+          </li>
+        </ul>
+        <h2 class="br-title">{{ title }}</h2>
+      </div>
+      <button type="button" class="br-collapse-btn" (click)="toggleFilters()">
+        {{ filtersCollapsed ? 'Expand Filters' : 'Collapse Filters' }}
+        <mat-icon>{{ filtersCollapsed ? 'expand_more' : 'expand_less' }}</mat-icon>
+      </button>
+    </div>
+
+    <div class="br-filter-card" *ngIf="!filtersCollapsed">
+      <div class="br-filter-bar">
+        <mat-form-field class="br-field br-field-date" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Requested</mat-label>
+          <mat-date-range-input [rangePicker]="rangePicker">
+            <input matStartDate [(ngModel)]="fromDate" placeholder="From" />
+            <input matEndDate [(ngModel)]="toDate" placeholder="To" />
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconPrefix [for]="rangePicker"></mat-datepicker-toggle>
+          <mat-date-range-picker #rangePicker></mat-date-range-picker>
+        </mat-form-field>
+
+        <mat-form-field class="br-field" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="status">
+            <mat-option value="All">All</mat-option>
+            <mat-option value="Success">Success</mat-option>
+            <mat-option value="Failure">Failure</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field *ngIf="kind === 'billing'" class="br-field br-field-event" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Event</mat-label>
+          <mat-select [(ngModel)]="eventName">
+            <mat-option *ngFor="let event of billingEvents" [value]="event.value">{{ event.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field *ngIf="kind === 'api'" class="br-field br-field-event" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Event</mat-label>
+          <input matInput [(ngModel)]="eventName" placeholder="Action name" />
+        </mat-form-field>
+
+        <mat-form-field class="br-field br-field-sm" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Duty slip</mat-label>
+          <input matInput [(ngModel)]="dutySlipId" />
+        </mat-form-field>
+
+        <mat-form-field class="br-field br-field-sm" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Reservation</mat-label>
+          <input matInput [(ngModel)]="reservationId" />
+        </mat-form-field>
+
+        <mat-form-field class="br-field br-field-sm" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Driver</mat-label>
+          <input matInput [(ngModel)]="driverId" />
+        </mat-form-field>
+      </div>
+
+      <div class="br-filter-actions">
+        <button mat-flat-button color="primary" class="br-btn-search" type="button" (click)="search()">
+          <mat-icon>search</mat-icon>
+          Search
+        </button>
+        <button mat-stroked-button type="button" class="br-btn-reset" (click)="reset()">
+          <mat-icon>refresh</mat-icon>
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <div class="br-table-card">
+      <div class="br-table-toolbar">
+        <div class="br-table-toolbar-spacer"></div>
+        <span class="br-booking-count">{{ rangeLabel }}</span>
+      </div>
+
+      <div class="br-empty-state" *ngIf="loading">
+        <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
+        <p>Loading logs</p>
+      </div>
+
+      <div class="br-empty-state" *ngIf="!loading && loadError">
+        <p>The log could not be loaded. Search again.</p>
+      </div>
+
+      <div class="br-empty-state" *ngIf="!loading && !loadError && !rows.length">
+        <p>No records found</p>
+      </div>
+
+      <div class="br-table-wrap" *ngIf="!loading && !loadError && rows.length">
+        <mat-table [dataSource]="rows" class="br-table mat-elevation-z0">
+          <ng-container matColumnDef="requestedAt">
+            <mat-header-cell *matHeaderCellDef>Time</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.requestedAt ? (row.requestedAt | date:'dd/MM/yyyy h:mm:ss a') : '—' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="eventName">
+            <mat-header-cell *matHeaderCellDef>Event</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ eventLabel(row.eventName) }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="httpMethod">
+            <mat-header-cell *matHeaderCellDef>Method</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.httpMethod || '—' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="dutySlipID">
+            <mat-header-cell *matHeaderCellDef>Duty slip</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.dutySlipID || '—' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="reservationID">
+            <mat-header-cell *matHeaderCellDef>Reservation</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.reservationID || '—' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="driverID">
+            <mat-header-cell *matHeaderCellDef>Driver</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.driverID || '—' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="httpStatusCode">
+            <mat-header-cell *matHeaderCellDef>HTTP</mat-header-cell>
+            <mat-cell *matCellDef="let row">{{ row.httpStatusCode || '—' }}</mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="apiStatus">
+            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <span class="br-status-pill" [ngClass]="row.apiStatus === 'Success' ? 'br-status-success' : 'br-status-failure'">
+                {{ row.apiStatus || 'Failure' }}
+              </span>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="errorMessage">
+            <mat-header-cell *matHeaderCellDef>Error</mat-header-cell>
+            <mat-cell *matCellDef="let row" [matTooltip]="row.errorMessage || ''">{{ shortError(row.errorMessage) }}</mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="columns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: columns;" class="br-click-row" (click)="open(row)"></mat-row>
+        </mat-table>
+      </div>
+
+      <div class="br-pagination" *ngIf="!loading && totalCount">
+        <button mat-stroked-button color="primary" type="button" (click)="previous()" [disabled]="page === 1">Previous</button>
+        <span class="br-page-label">Page {{ page }}</span>
+        <button mat-stroked-button color="primary" type="button" (click)="next()" [disabled]="!hasNext">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="log-backdrop" *ngIf="drawerOpen" (click)="closeDrawer()"></div>
+  <aside class="log-drawer" *ngIf="drawerOpen">
+    <div class="log-drawer-head">
+      <div>
+        <h3>{{ detail ? eventLabel(detail.eventName) : 'Log detail' }}</h3>
+        <p *ngIf="detail">{{ detail.requestedAt | date:'dd/MM/yyyy h:mm:ss a' }}</p>
+      </div>
+      <button mat-icon-button type="button" (click)="closeDrawer()" aria-label="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="log-drawer-body" *ngIf="detailLoading">
+      <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+    </div>
+
+    <div class="log-drawer-body" *ngIf="detailError">
+      <p>This row could not be loaded.</p>
+    </div>
+
+    <div class="log-drawer-body" *ngIf="detail && !detailLoading">
+      <div class="log-meta">
+        <span class="br-status-pill" [ngClass]="detail.apiStatus === 'Success' ? 'br-status-success' : 'br-status-failure'">
+          {{ detail.apiStatus || 'Failure' }}
+        </span>
+        <span class="log-method">{{ detail.httpMethod || '—' }}</span>
+        <span>{{ detail.httpStatusCode || '—' }}</span>
+      </div>
+
+      <p class="log-url">{{ detail.apiUrl || '—' }}</p>
+      <p class="log-error" *ngIf="detail.errorMessage">{{ detail.errorMessage }}</p>
+
+      <dl class="log-facts">
+        <div><dt>Duty slip</dt><dd>{{ detail.dutySlipID || '—' }}</dd></div>
+        <div><dt>Reservation</dt><dd>{{ detail.reservationID || '—' }}</dd></div>
+        <div><dt>Driver</dt><dd>{{ detail.driverID || '—' }}</dd></div>
+        <div><dt>Responded</dt><dd>{{ detail.respondedAt ? (detail.respondedAt | date:'dd/MM/yyyy h:mm:ss a') : '—' }}</dd></div>
+      </dl>
+
+      <div class="log-token">
+        <span>Token</span>
+        <code>{{ maskedToken(detail.authToken) }}</code>
+        <button mat-button type="button" *ngIf="detail.authToken" (click)="showToken = !showToken">
+          {{ showToken ? 'Hide' : 'Show' }}
+        </button>
+      </div>
+
+      <button mat-stroked-button type="button" class="log-headers-btn" (click)="showHeaders = !showHeaders">
+        {{ showHeaders ? 'Hide headers' : 'Headers' }}
+      </button>
+      <pre class="log-payload" *ngIf="showHeaders">{{ detail.requestHeaders || '—' }}</pre>
+
+      <h4>Request</h4>
+      <pre class="log-payload">{{ pretty(detail.requestPayload) }}</pre>
+      <h4>Response</h4>
+      <pre class="log-payload">{{ pretty(detail.responsePayload) }}</pre>
+    </div>
+  </aside>
+</section>

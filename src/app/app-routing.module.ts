@@ -4111,6 +4111,22 @@ const routes: Routes = [
       },
 
       {
+        path: 'driverAppBillingLog',
+        loadChildren: () =>
+          import('./driverAppBillingLog/driverAppBillingLog.module').then(
+            (m) => m.DriverAppBillingLogModule
+          )
+      },
+
+      {
+        path: 'driverAppApiLog',
+        loadChildren: () =>
+          import('./driverAppApiLog/driverAppApiLog.module').then(
+            (m) => m.DriverAppApiLogModule
+          )
+      },
+
+      {
         path: 'cdpBookingRequest',
         loadChildren: () =>
           import('./cdpBookingRequest/cdpBookingRequest.module').then(

@@ -320,6 +320,26 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+      {
+        path: 'driverAppBillingLog',
+        title: 'Driver App Billing Log',
+        moduleName: 'driverAppBillingLog',
+        icon: 'fas fa-file-invoice-dollar',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
+        path: 'driverAppApiLog',
+        title: 'Driver App API Log',
+        moduleName: 'driverAppApiLog',
+        icon: 'fas fa-mobile-alt',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
 
       {
         path: 'cdpBookingRequest',
