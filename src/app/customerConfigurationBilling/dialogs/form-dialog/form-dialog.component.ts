@@ -274,8 +274,29 @@ export class FormDialogComponent
     this.advanceTableForm.patchValue({image:this.ImagePath})
   }
 
+  private syncFixBillingBranchIdFromName(): void {
+  const branchName = (this.advanceTableForm.getRawValue().fixBillingBranch || '').trim();
+  if (!branchName || !this.OrganizationalEntitiesList?.length) {
+    return;
+  }
+  const match = this.OrganizationalEntitiesList.find(
+    (b) => b.organizationalEntityName.toLowerCase() === branchName.toLowerCase()
+  );
+  if (match?.organizationalEntityID) {
+    this.advanceTableForm.patchValue({ fixBillingBranchID: match.organizationalEntityID });
+  }
+  }
+
   openSaveDialog()
   {
+    this.syncFixBillingBranchIdFromName();
+    const billingBranchId = Number(this.advanceTableForm.getRawValue().fixBillingBranchID) || 0;
+    if (!billingBranchId) {
+      const branchControl = this.advanceTableForm.controls['fixBillingBranch'];
+      branchControl.setErrors({ ...(branchControl.errors || {}), billingBranchInvalid: true });
+      branchControl.markAsTouched();
+      return;
+    }
     const dialogRef = this.dialog.open(SaveDialogComponent, 
     {
       data:
@@ -283,11 +304,11 @@ export class FormDialogComponent
         advanceTableForm:this.advanceTableForm,
         customerID:this.CustomerID,
         ecoCompanyID:this.advanceTableForm.value.ecoCompanyID,
-        fixBillingBranchID:this.advanceTableForm.value.fixBillingBranchID,
+        fixBillingBranchID:this.advanceTableForm.getRawValue().fixBillingBranchID,
         dialogRef:this.dialogRef,
         saveDisabled:this.saveDisabled,
         action:this.action,
-        advanceTable:this.data.advanceTable
+        advanceTable: this.action === 'edit' ? this.advanceTable : this.data.advanceTable
       } 
     });
   }

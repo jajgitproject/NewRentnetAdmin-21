@@ -66,9 +66,11 @@ export class SaveDialogComponent
       fixBillingBranchID,
       misRequired: this.coerceBoolean(raw.misRequired, false),
       useOnlyAppDataForBilling: this.coerceBoolean(raw.useOnlyAppDataForBilling, false),
+      triggerBillingFromApp: this.coerceBoolean(raw.triggerBillingFromApp, false),
       mapMandatoryWithDutySlip: this.coerceBoolean(raw.mapMandatoryWithDutySlip, false),
       runningDetailsMandatoryWithDutySlip: this.coerceBoolean(raw.runningDetailsMandatoryWithDutySlip, false),
       useDataFromAppToPrintOnDutySlip: this.coerceBoolean(raw.useDataFromAppToPrintOnDutySlip, false),
+      isSEZCustomer: null,
       runningDetailsSource: raw.runningDetailsSource || 'App',
       activationStatus: this.coerceBoolean(raw.activationStatus, true),
     });
@@ -77,7 +79,11 @@ export class SaveDialogComponent
   public Put(): void
   {
     this.dialogRef.close();
-    this.prepareFormForSave(this.data.advanceTable.customerID);
+    const customerId =
+      this.data.advanceTable?.customerID ??
+      this.data.advanceTableForm.getRawValue().customerID ??
+      this.data.customerID;
+    this.prepareFormForSave(customerId);
     
     this.advanceTableService.update(this.data.advanceTableForm.getRawValue())  
     .subscribe(
