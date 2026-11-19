@@ -31,6 +31,7 @@ import {
   isEmployeeDropdownSelection,
   isEmployeeExited,
 } from 'src/app/shared/employee-dropdown-display.util';
+import Swal from 'sweetalert2';
 
 @Component({
   standalone: false,
@@ -664,20 +665,34 @@ this.syncDateOfLeavingForEmploymentStatus(this.advanceTableForm.get('employmentS
 checkDuplicateMobile() {
   const mobile = this.advanceTableForm.get('mobile').value;
 
-  if (mobile) {
-    this._generalService.DuplicateMobile(mobile).subscribe(response => {
-      if (response.isDuplicate) 
-      {
-        this.advanceTableForm.get('mobile').setErrors({ duplicate: true });
-      }
-      else 
-      {
-        if (this.advanceTableForm.get('mobile').hasError('duplicate')) 
-        {
-          this.advanceTableForm.get('mobile').setErrors(null);
+  if (mobile && this.action === 'add') {
+    const phone1 = this.advanceTableForm.get('countryCodes')?.value || '+91';
+    const countryCode = String(phone1).split('+')[1] || '91';
+    const mobileForLookup = `${countryCode}-${mobile}`;
+    this._generalService.DuplicateMobile(mobileForLookup).subscribe(
+      response => {
+        if (response?.isDuplicate) {
+          this.advanceTableForm.get('mobile').setErrors({ duplicate: true });
+        } else {
+          const control = this.advanceTableForm.get('mobile');
+          if (control?.hasError('duplicate')) {
+            const errors = { ...control.errors };
+            delete errors.duplicate;
+            control.setErrors(Object.keys(errors).length ? errors : null);
+          }
+        }
+      },
+      () => {
+        const control = this.advanceTableForm.get('mobile');
+        if (control?.hasError('duplicate')) {
+          const errors = { ...control.errors };
+          delete errors.duplicate;
+          control.setErrors(Object.keys(errors).length ? errors : null);
         }
       }
-    });
+    );
+  } else if (this.advanceTableForm.get('mobile').hasError('duplicate')) {
+    this.advanceTableForm.get('mobile').setErrors(null);
   }
 }
 
@@ -857,6 +872,9 @@ dateOfLeaving: [
     .subscribe(
     response => 
     {
+      if (this.handleDuplicateActiveMobileResponse(response)) {
+        return;
+      }
       this.responseEmployeeId = response;
       this.isButtonVisible=true;
         this.dialogRef.close();
@@ -891,6 +909,9 @@ dateOfLeaving: [
     .subscribe(
     response => 
     {
+      if (this.handleDuplicateActiveMobileResponse(response)) {
+        return;
+      }
      
       this.isButtonVisible=true;
       this.dialogRef.close();    
@@ -917,6 +938,42 @@ dateOfLeaving: [
        {
           this.Post();
        }
+  }
+
+  private handleDuplicateActiveMobileResponse(response: any): boolean {
+    const status = response?.activationStatus || '';
+    if (response?.success === false && String(status).startsWith('Duplicate:')) {
+      const message = String(status).replace(/^Duplicate:\s*/, '')
+        || 'Already exists an active employee with the same mobile number.';
+      this.showDuplicateActiveMobileAlert(message);
+      this.restoreMobileFieldAfterSave();
+      this.saveDisabled = true;
+      return true;
+    }
+    if (response?.success === false) {
+      const message = String(status || 'Unable to save employee. Please try again.');
+      this.showDuplicateActiveMobileAlert(message);
+      this.restoreMobileFieldAfterSave();
+      this.saveDisabled = true;
+      return true;
+    }
+    return false;
+  }
+
+  private showDuplicateActiveMobileAlert(message: string): void {
+    Swal.fire({
+      title: 'Alert',
+      text: message,
+      icon: 'error',
+      confirmButtonText: 'OK',
+    });
+  }
+
+  private restoreMobileFieldAfterSave(): void {
+    const mobileValue = this.advanceTableForm?.get('mobile')?.value;
+    if (typeof mobileValue === 'string' && mobileValue.includes('-')) {
+      this.advanceTableForm?.patchValue({ mobile: mobileValue.split('-')[1] });
+    }
   }
   // OnEmployeeChangeGetcurrencies()
   // {

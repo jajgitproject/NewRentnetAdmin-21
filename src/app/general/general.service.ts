@@ -1367,7 +1367,10 @@ GetCitiessAl(): Observable<CityDropDown[]> {
   }
 
   DuplicateMobile(Mobile:string): Observable<MobileEmailModel>{
-    return this.http.get<MobileEmailModel>(this.BaseURL + "employee/checkDuplicateMobile/" + Mobile);
+    return this.http.get<MobileEmailModel>(
+      this.BaseURL + "employee/checkDuplicateMobile",
+      { params: { mobile: Mobile } }
+    );
   }
 nameEmailDuplicateMobile(payload: {
   name: string;
