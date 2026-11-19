@@ -1223,8 +1223,8 @@
               </div>
               <br />
               <!--**************************Start*********************-->
-              <div class="accordion-content" style="height:50px" #topScroll (scroll)="syncScroll($event, 'top')">
-                <div class="cp-grid-header-row" style="margin-left: 23px;width: 255%;">
+              <div class="accordion-content cp-grid-header-scroll" #topScroll (scroll)="syncScroll($event, 'top')">
+                <div class="cp-grid-header-row" style="margin-left: 23px;width: 265%;">
                   <span style="
                       font-size: 12px;
                       text-align: left;
@@ -1266,6 +1266,21 @@
                       [ngClass]="{'fa-arrow-up': sortColumn === 'locationOutTime' && sortDirection === 'asc',
                                                 'fa-arrow-down': sortColumn === 'locationOutTime' && sortDirection === 'desc'}"></i>
                   </span>
+
+                  <span class="cp-sg-schedule-column" style="
+                      font-size: 12px;
+                      text-align: left;
+                      width: 100px;
+                      float: left;cursor: pointer;" (click)="sortByColumnName('securityGuardPickupDate')"
+                    [ngClass]="{'active-sort': sortColumn === 'securityGuardPickupDate'}">
+                    <b>Security Guard Pickup Date
+                      <br />
+                      /Releasing Date
+                    </b>
+                    <i class="fas"
+                      [ngClass]="{'fa-arrow-up': sortColumn === 'securityGuardPickupDate' && sortDirection === 'asc',
+                                                'fa-arrow-down': sortColumn === 'securityGuardPickupDate' && sortDirection === 'desc'}"></i>
+                  </span>
                   
                   <span style="
                       font-size: 12px;
@@ -1273,7 +1288,7 @@
                       width: 100px;
                       float: left;cursor: pointer;" (click)="sortByColumnName('pickupDate')"
                     [ngClass]="{'active-sort': sortColumn === 'pickupDate'}">
-                    <b>Pickup Date
+                    <b>Guest Pickup Date
                       <br />
                       /Releasing Date
                     </b>
@@ -1677,7 +1692,7 @@
                   style="overflow-x: auto; max-width: 100%">
                   <mat-accordion displayMode="flat" [multi]="false" class="mat-table">
                     <!--**************************Start*********************-->
-                    <mat-expansion-panel style="width: 255%" *ngFor="let data of reservationHeaderInfo; let i = index"
+                    <mat-expansion-panel style="width: 265%" *ngFor="let data of reservationHeaderInfo; let i = index"
                       #resExpPanel="matExpansionPanel"
                       (expandedChange)="onCpReservationExpandedChange($event, resExpPanel)"
                       [ngClass]="{ 'striped-header-odd': i % 2 !== 0, 'striped-header-even': i % 2 === 0 }">
@@ -1833,12 +1848,37 @@
                             
                           </span>
 
+                          <span class="cp-sg-schedule-column"
+                            [class.cp-sg-schedule-column--na-only]="!hasSecurityGuardPickupOrReleasingDate(data)"
+                            style="font-size: 12px;text-align: left;width: 100px;float: left;">
+                            <ng-container *ngIf="hasSecurityGuardPickupOrReleasingDate(data); else sgScheduleNa">
+                              <ng-container *ngIf="data.securityGuardPickupDate; else sgPickupNa">
+                                {{ data.securityGuardPickupDate | date : 'dd-MMM-yy' }}
+                                <ng-container *ngIf="isSecurityGuardPickupTimeTnc(data); else sgPickupHasTime"> TNC</ng-container>
+                                <ng-template #sgPickupHasTime>
+                                  {{ data.securityGuardPickupTime | date : 'H:mm' }}
+                                </ng-template>
+                                <br />
+                              </ng-container>
+                              <ng-template #sgPickupNa><span class="cp-sg-na">NA</span><br /></ng-template>
+                              <ng-container *ngIf="data.securityGuardDropOffDate; else sgDropNa">
+                                {{ data.securityGuardDropOffDate | date : 'dd-MMM-yy' }}
+                                <ng-container *ngIf="isSecurityGuardDropOffTimeTnc(data); else sgDropHasTime"> TNC</ng-container>
+                                <ng-template #sgDropHasTime>
+                                  {{ data.securityGuardDropOffTime | date : 'H:mm' }}
+                                </ng-template>
+                              </ng-container>
+                              <ng-template #sgDropNa><span class="cp-sg-na">NA</span></ng-template>
+                            </ng-container>
+                            <ng-template #sgScheduleNa><span class="cp-sg-na">NA</span></ng-template>
+                          </span>
+
                           <span style="font-size: 12px;text-align: left;width: 100px;float: left;">
                             {{ data.pickupDate | date : 'dd-MMM-yy' }}
                             {{ data.pickupTime ? (data.pickupTime | date : 'H:mm') : 'TNC' }}
                             <br />
                             {{ data.dropOffDate | date : 'dd-MMM-yy' }}
-                            <!--{{ data.dropOffTime | date : 'H:mm' }} -->
+                            {{ data.dropOffTime ? (data.dropOffTime | date : 'H:mm') : '' }}
                           </span>
 
                           <span style="

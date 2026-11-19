@@ -1351,6 +1351,41 @@ export class ControlPanelDesignComponent implements OnInit {
     });
   }
 
+  hasSecurityGuardPickupOrReleasingDate(item: any): boolean {
+    if (!this.hasSecurityGuard(item)) {
+      return false;
+    }
+    const pickup =
+      item?.securityGuardPickupDate ?? item?.SecurityGuardPickupDate;
+    const dropOff =
+      item?.securityGuardDropOffDate ?? item?.SecurityGuardDropOffDate;
+    return !!(pickup || dropOff);
+  }
+
+  isSecurityGuardPickupTimeTnc(item: any): boolean {
+    const notConfirmed =
+      item?.securityGuardPickupIsTimeNotConfirmed ??
+      item?.SecurityGuardPickupIsTimeNotConfirmed;
+    if (notConfirmed === true || notConfirmed === 'true' || notConfirmed === 1) {
+      return true;
+    }
+    const time =
+      item?.securityGuardPickupTime ?? item?.SecurityGuardPickupTime;
+    return !time;
+  }
+
+  isSecurityGuardDropOffTimeTnc(item: any): boolean {
+    const notConfirmed =
+      item?.securityGuardDropOffIsTimeNotConfirmed ??
+      item?.SecurityGuardDropOffIsTimeNotConfirmed;
+    if (notConfirmed === true || notConfirmed === 'true' || notConfirmed === 1) {
+      return true;
+    }
+    const time =
+      item?.securityGuardDropOffTime ?? item?.SecurityGuardDropOffTime;
+    return !time;
+  }
+
   public loadData(reservationID:any,index:number) {
     this._controlPanelDesignService.getReservationDetails(reservationID).subscribe(
         (data: ControlPanelData) => 

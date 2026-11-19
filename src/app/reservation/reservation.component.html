@@ -1107,7 +1107,8 @@
                     [customerID]="customerID"
                     [reservationID]="reservationID"
                     [cityList]="CityList"
-                    [dropOffCityList]="DropOffCityList">
+                    [dropOffCityList]="DropOffCityList"
+                    (locationOutAnchorChange)="recalculateLocationOutFromPickupAnchor()">
                 </app-security-guard-section>
 
                 <br>

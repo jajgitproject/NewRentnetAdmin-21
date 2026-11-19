@@ -192,8 +192,8 @@ export class ReservationService
     dateOnly.setHours(0, 0, 0, 0);
     advanceTable.securityGuardPickupDate = dateOnly;
     advanceTable.securityGuardPickupTime = sgPickup;
-    advanceTable.securityGuardPickupDateString = this.generalService.getTimeApplicable(dateOnly);
-    advanceTable.securityGuardPickupTimeString = this.generalService.getTimeApplicable(sgPickup);
+    advanceTable.securityGuardPickupDateString = formatDate(dateOnly, 'yyyy-MM-dd', 'en-IN');
+    advanceTable.securityGuardPickupTimeString = formatDate(sgPickup, 'HH:mm:ss', 'en-IN');
     const pickupPriority = Number(advanceTable.pickupPriorityOrder ?? 0);
     if (pickupPriority > 0) {
       advanceTable.securityGuardPickupStopOrderPriority = pickupPriority - 1;
@@ -213,8 +213,8 @@ export class ReservationService
     dateOnly.setHours(0, 0, 0, 0);
     advanceTable.securityGuardDropOffDate = dateOnly;
     advanceTable.securityGuardDropOffTime = sgDrop;
-    advanceTable.securityGuardDropOffDateString = this.generalService.getTimeApplicable(dateOnly);
-    advanceTable.securityGuardDropOffTimeString = this.generalService.getTimeApplicable(sgDrop);
+    advanceTable.securityGuardDropOffDateString = formatDate(dateOnly, 'yyyy-MM-dd', 'en-IN');
+    advanceTable.securityGuardDropOffTimeString = formatDate(sgDrop, 'HH:mm:ss', 'en-IN');
     const dropPriority = Number(advanceTable.dropOffPriorityOrder ?? 0);
     if (dropPriority > 0) {
       advanceTable.securityGuardDropOffStopOrderPriority = dropPriority + 1;
@@ -288,29 +288,6 @@ export class ReservationService
     advanceTable.securityGuardPickupStopOrderPriority = toNonNegativeInt(advanceTable.securityGuardPickupStopOrderPriority);
     advanceTable.securityGuardDropOffStopOrderPriority = toNonNegativeInt(advanceTable.securityGuardDropOffStopOrderPriority);
 
-    const normalizeDateField = (dateKey: string, stringKey: string): void => {
-      if (advanceTable[dateKey] === '' || advanceTable[dateKey] === undefined) {
-        advanceTable[dateKey] = null;
-        advanceTable[stringKey] = null;
-      } else if (advanceTable[dateKey] != null) {
-        advanceTable[stringKey] = this.generalService.getTimeApplicable(advanceTable[dateKey]);
-      }
-    };
-
-    const normalizeTimeField = (timeKey: string, stringKey: string): void => {
-      if (advanceTable[timeKey] === '' || advanceTable[timeKey] === undefined) {
-        advanceTable[timeKey] = null;
-        advanceTable[stringKey] = null;
-      } else if (advanceTable[timeKey] != null) {
-        advanceTable[stringKey] = this.generalService.getTimeApplicable(advanceTable[timeKey]);
-      }
-    };
-
-    normalizeDateField('securityGuardPickupDate', 'securityGuardPickupDateString');
-    normalizeDateField('securityGuardDropOffDate', 'securityGuardDropOffDateString');
-    normalizeTimeField('securityGuardPickupTime', 'securityGuardPickupTimeString');
-    normalizeTimeField('securityGuardDropOffTime', 'securityGuardDropOffTimeString');
-
     if (!toBool(advanceTable.doesThisReservationContainSecurityGuard)) {
       this.clearSecurityGuardPayloadFields(advanceTable);
       return;
@@ -333,22 +310,109 @@ export class ReservationService
     if (toBool(advanceTable.securityGuardPickupInfoNotReceived)) {
       advanceTable.securityGuardPickupCityID = null;
       advanceTable.securityGuardPickupCity = null;
+      advanceTable.securityGuardPickupDate = null;
+      advanceTable.securityGuardPickupTime = null;
+      advanceTable.securityGuardPickupDateString = null;
+      advanceTable.securityGuardPickupTimeString = null;
       advanceTable.securityGuardPickupAddress = null;
       advanceTable.securityGuardPickupAddressDetails = null;
       advanceTable.securityGuardPickupAddressLatLong = null;
+      advanceTable.securityGuardPickupStopOrderPriority = null;
       advanceTable.securityGuardPickupIsTimeNotConfirmed = false;
-      this.applyDefaultGuardPickupScheduleToPayload(advanceTable);
     }
 
     if (toBool(advanceTable.securityGuardDropOffInfoNotReceived)) {
       advanceTable.securityGuardDropOffCityID = null;
       advanceTable.securityGuardDropOffCity = null;
+      advanceTable.securityGuardDropOffDate = null;
+      advanceTable.securityGuardDropOffTime = null;
+      advanceTable.securityGuardDropOffDateString = null;
+      advanceTable.securityGuardDropOffTimeString = null;
       advanceTable.securityGuardDropOffAddress = null;
       advanceTable.securityGuardDropOffAddressDetails = null;
       advanceTable.securityGuardDropOffAddressLatLong = null;
+      advanceTable.securityGuardDropOffStopOrderPriority = null;
       advanceTable.securityGuardDropOffIsTimeNotConfirmed = false;
-      this.applyDefaultGuardDropOffScheduleToPayload(advanceTable);
     }
+
+    this.alignSecurityGuardScheduleFieldsForSave(advanceTable);
+  }
+
+  /** Merge SG date + time pickers and emit stable yyyy-MM-dd / HH:mm:ss strings (avoid UTC JSON skew). */
+  private alignSecurityGuardScheduleFieldsForSave(advanceTable: any): void {
+    const pickupInr = advanceTable.securityGuardPickupInfoNotReceived === true
+      || advanceTable.securityGuardPickupInfoNotReceived === 'true'
+      || advanceTable.securityGuardPickupInfoNotReceived === 1;
+    const dropInr = advanceTable.securityGuardDropOffInfoNotReceived === true
+      || advanceTable.securityGuardDropOffInfoNotReceived === 'true'
+      || advanceTable.securityGuardDropOffInfoNotReceived === 1;
+    if (!pickupInr) {
+      this.alignOneSecurityGuardStopSchedule(
+        advanceTable,
+        'securityGuardPickupDate',
+        'securityGuardPickupTime',
+        'securityGuardPickupDateString',
+        'securityGuardPickupTimeString',
+        advanceTable.securityGuardPickupIsTimeNotConfirmed === true,
+      );
+    }
+    if (!dropInr) {
+      this.alignOneSecurityGuardStopSchedule(
+        advanceTable,
+        'securityGuardDropOffDate',
+        'securityGuardDropOffTime',
+        'securityGuardDropOffDateString',
+        'securityGuardDropOffTimeString',
+        advanceTable.securityGuardDropOffIsTimeNotConfirmed === true,
+      );
+    }
+  }
+
+  private alignOneSecurityGuardStopSchedule(
+    advanceTable: any,
+    dateKey: string,
+    timeKey: string,
+    dateStringKey: string,
+    timeStringKey: string,
+    timeNotConfirmed: boolean,
+  ): void {
+    if (advanceTable[dateKey] === '' || advanceTable[dateKey] === undefined) {
+      advanceTable[dateKey] = null;
+      advanceTable[dateStringKey] = null;
+    }
+    if (advanceTable[timeKey] === '' || advanceTable[timeKey] === undefined) {
+      advanceTable[timeKey] = null;
+    }
+
+    if (timeNotConfirmed) {
+      advanceTable[timeKey] = null;
+      advanceTable[timeStringKey] = null;
+      if (advanceTable[dateKey] != null) {
+        const dateOnly = advanceTable[dateKey] instanceof Date
+          ? advanceTable[dateKey]
+          : new Date(advanceTable[dateKey]);
+        if (!Number.isNaN(dateOnly.getTime())) {
+          const midnight = new Date(dateOnly);
+          midnight.setHours(0, 0, 0, 0);
+          advanceTable[dateKey] = midnight;
+          advanceTable[dateStringKey] = formatDate(midnight, 'yyyy-MM-dd', 'en-IN');
+        }
+      }
+      return;
+    }
+
+    const combined = this.combinePassengerDateAndTime(advanceTable[dateKey], advanceTable[timeKey]);
+    if (!combined) {
+      advanceTable[timeStringKey] = null;
+      return;
+    }
+
+    const dateOnly = new Date(combined);
+    dateOnly.setHours(0, 0, 0, 0);
+    advanceTable[dateKey] = dateOnly;
+    advanceTable[timeKey] = combined;
+    advanceTable[dateStringKey] = formatDate(dateOnly, 'yyyy-MM-dd', 'en-IN');
+    advanceTable[timeStringKey] = formatDate(combined, 'HH:mm:ss', 'en-IN');
   }
 
   private preserveSoftCappingBypassFields(advanceTable: any): void {

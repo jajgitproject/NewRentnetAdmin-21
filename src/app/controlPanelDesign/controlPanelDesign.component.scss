@@ -145,11 +145,30 @@ $cp-grid-column-padding: 12px;
   line-height: 1.45;
 }
 
+/* Top synced header strip: grow with multi-line column titles; horizontal scroll only. */
+.cp-grid-header-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  height: auto;
+  min-height: 72px;
+}
+
 :host ::ng-deep .cp-reservation-dblclick > span {
   box-sizing: border-box;
   padding-left: $cp-grid-column-padding;
   padding-right: $cp-grid-column-padding;
   line-height: 1.45;
+}
+
+.cp-sg-schedule-column .cp-sg-na {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
+:host ::ng-deep .cp-reservation-dblclick > span.cp-sg-schedule-column--na-only {
+  text-align: center;
 }
 
 :host ::ng-deep .accordion-container .mat-expansion-panel-header {

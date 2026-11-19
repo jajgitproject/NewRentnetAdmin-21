@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -47,6 +47,8 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
   @Input() reservationID: number;
   @Input() cityList: any[] = [];
   @Input() dropOffCityList: any[] = [];
+  /** Parent recalculates location-out from SG pickup (or guest fallback). */
+  @Output() locationOutAnchorChange = new EventEmitter<void>();
 
   guardList: any[] = [];
   filteredGuardOptions: Observable<any[]>;
@@ -86,6 +88,21 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
     this.watchPassengerTimesForDefaults();
     this.watchGuardSelectionInput();
     this.watchPickupAddressMirrorToDropOff();
+    this.watchSecurityGuardPickupForLocationOut();
+  }
+
+  private notifyLocationOutAnchorChange(): void {
+    this.locationOutAnchorChange.emit();
+  }
+
+  private watchSecurityGuardPickupForLocationOut(): void {
+    ['securityGuardPickupDate', 'securityGuardPickupTime'].forEach((key) => {
+      this.form.get(key)?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+        if (this.visible) {
+          this.notifyLocationOutAnchorChange();
+        }
+      });
+    });
   }
 
   ngOnDestroy(): void {
@@ -108,10 +125,12 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
             this.applyDefaultGuardTimes();
           }
           this.initGuardDropdown();
+          this.notifyLocationOutAnchorChange();
           return;
         }
 
         this.clearGuardFields();
+        this.notifyLocationOutAnchorChange();
       });
   }
 
@@ -130,22 +149,27 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
   }
 
   private watchPassengerTimesForDefaults(): void {
+    const onPassengerScheduleChange = (key: string) => {
+      if (!this.visible) {
+        return;
+      }
+      const pickupInr = this.form.get('securityGuardPickupInfoNotReceived')?.value === true;
+      const dropInr = this.form.get('securityGuardDropOffInfoNotReceived')?.value === true;
+      if (pickupInr || dropInr || this.hasExistingSecurityGuardData()) {
+        return;
+      }
+      // Drop-off is often auto-filled from location-out / ETR. Re-running full
+      // guard defaults (including location-out anchor) on those events freezes the UI.
+      if (key === 'pickupDate' || key === 'pickupTime') {
+        this.applyDefaultGuardTimes();
+      } else if (key === 'dropOffDate' || key === 'dropOffTime') {
+        this.applyDefaultGuardDropOffSchedule(true);
+      }
+    };
+
     ['pickupDate', 'pickupTime', 'dropOffDate', 'dropOffTime'].forEach((key) => {
       this.form.get(key)?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-        if (!this.visible) {
-          return;
-        }
-        const pickupInr = this.form.get('securityGuardPickupInfoNotReceived')?.value === true;
-        const dropInr = this.form.get('securityGuardDropOffInfoNotReceived')?.value === true;
-        if (pickupInr) {
-          this.applyDefaultGuardPickupSchedule(true);
-        }
-        if (dropInr) {
-          this.applyDefaultGuardDropOffSchedule(true);
-        }
-        if (!pickupInr && !dropInr && !this.hasExistingSecurityGuardData()) {
-          this.applyDefaultGuardTimes();
-        }
+        onPassengerScheduleChange(key);
       });
     });
   }
@@ -198,6 +222,7 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
       securityGuardPickupDate: this.toDateOnly(sgPickup),
       securityGuardPickupTime: sgPickup,
     }, { emitEvent: false });
+    this.notifyLocationOutAnchorChange();
 
     if (includeStopPriority) {
       const pickupPriority = Number(this.form.get('pickupPriorityOrder')?.value || 0);
@@ -355,16 +380,14 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
     this.form.patchValue({
       securityGuardPickupCityID: null,
       securityGuardPickupCity: null,
+      securityGuardPickupDate: null,
+      securityGuardPickupTime: null,
+      securityGuardPickupStopOrderPriority: null,
       securityGuardPickupAddress: null,
       securityGuardPickupAddressDetails: null,
       securityGuardPickupAddressLatLong: null,
       securityGuardPickupIsTimeNotConfirmed: false,
-      ...(keepInfoNotReceivedFlag ? {} : {
-        securityGuardPickupDate: null,
-        securityGuardPickupTime: null,
-        securityGuardPickupStopOrderPriority: null,
-        securityGuardPickupInfoNotReceived: false,
-      }),
+      ...(keepInfoNotReceivedFlag ? {} : { securityGuardPickupInfoNotReceived: false }),
     }, { emitEvent: false });
     this.form.get('securityGuardPickupTime')?.enable({ emitEvent: false });
   }
@@ -373,16 +396,14 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
     this.form.patchValue({
       securityGuardDropOffCityID: null,
       securityGuardDropOffCity: null,
+      securityGuardDropOffDate: null,
+      securityGuardDropOffTime: null,
+      securityGuardDropOffStopOrderPriority: null,
       securityGuardDropOffAddress: null,
       securityGuardDropOffAddressDetails: null,
       securityGuardDropOffAddressLatLong: null,
       securityGuardDropOffIsTimeNotConfirmed: false,
-      ...(keepInfoNotReceivedFlag ? {} : {
-        securityGuardDropOffDate: null,
-        securityGuardDropOffTime: null,
-        securityGuardDropOffStopOrderPriority: null,
-        securityGuardDropOffInfoNotReceived: false,
-      }),
+      ...(keepInfoNotReceivedFlag ? {} : { securityGuardDropOffInfoNotReceived: false }),
     }, { emitEvent: false });
     this.form.get('securityGuardDropOffTime')?.enable({ emitEvent: false });
   }
@@ -480,14 +501,13 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
   onSgPickupInfoNotReceived(checked: boolean): void {
     if (checked) {
       this.clearPickupFields(true);
-      this.applyDefaultGuardPickupSchedule(true);
     }
+    this.notifyLocationOutAnchorChange();
   }
 
   onSgDropOffInfoNotReceived(checked: boolean): void {
     if (checked) {
       this.clearDropOffFields(true);
-      this.applyDefaultGuardDropOffSchedule(true);
     }
   }
 
@@ -498,6 +518,7 @@ export class SecurityGuardSectionComponent implements OnInit, OnDestroy {
     } else {
       this.form.get('securityGuardPickupTime')?.enable({ emitEvent: false });
     }
+    this.notifyLocationOutAnchorChange();
   }
 
   onSgDropOffTnc(checked: boolean): void {

@@ -41,6 +41,7 @@ import { SavedAddressComponent } from './dialogs/saved-address/saved-address.com
 import { KamPickupAddressHistoryDialogComponent } from './dialogs/kam-pickup-address-history-dialog/kam-pickup-address-history-dialog.component';
 import { SoftCappingBypassDialogComponent } from './dialogs/soft-capping-bypass-dialog/soft-capping-bypass-dialog.component';
 import moment from 'moment';
+import { formatDate } from '@angular/common';
 import { ReservationCustomerDetails } from '../general/reservationCustomerDetailsDropDown.model';
 import { CustomerReservationFields } from './customerReservationField.model';
 import { ModeOfPaymentDropDown } from '../supplierContract/modeOfPaymentDropDown.model';
@@ -1125,41 +1126,29 @@ private applySecurityGuardConditionalClears(body: Record<string, unknown>): void
   if (this.toReservationBool(body.securityGuardPickupInfoNotReceived)) {
     body.securityGuardPickupCityID = null;
     body.securityGuardPickupCity = null;
+    body.securityGuardPickupDate = null;
+    body.securityGuardPickupTime = null;
+    body.securityGuardPickupDateString = null;
+    body.securityGuardPickupTimeString = null;
     body.securityGuardPickupAddress = null;
     body.securityGuardPickupAddressDetails = null;
     body.securityGuardPickupAddressLatLong = null;
+    body.securityGuardPickupStopOrderPriority = null;
     body.securityGuardPickupIsTimeNotConfirmed = false;
-    const pickupSchedule = this.computeDefaultGuardPickupSchedule(body);
-    if (pickupSchedule) {
-      body.securityGuardPickupDate = pickupSchedule.date;
-      body.securityGuardPickupTime = pickupSchedule.time;
-      body.securityGuardPickupDateString = pickupSchedule.dateString;
-      body.securityGuardPickupTimeString = pickupSchedule.timeString;
-    }
-    const pickupPriority = Number(body.pickupPriorityOrder ?? 0);
-    if (pickupPriority > 0) {
-      body.securityGuardPickupStopOrderPriority = pickupPriority - 1;
-    }
   }
 
   if (this.toReservationBool(body.securityGuardDropOffInfoNotReceived)) {
     body.securityGuardDropOffCityID = null;
     body.securityGuardDropOffCity = null;
+    body.securityGuardDropOffDate = null;
+    body.securityGuardDropOffTime = null;
+    body.securityGuardDropOffDateString = null;
+    body.securityGuardDropOffTimeString = null;
     body.securityGuardDropOffAddress = null;
     body.securityGuardDropOffAddressDetails = null;
     body.securityGuardDropOffAddressLatLong = null;
+    body.securityGuardDropOffStopOrderPriority = null;
     body.securityGuardDropOffIsTimeNotConfirmed = false;
-    const dropSchedule = this.computeDefaultGuardDropOffSchedule(body);
-    if (dropSchedule) {
-      body.securityGuardDropOffDate = dropSchedule.date;
-      body.securityGuardDropOffTime = dropSchedule.time;
-      body.securityGuardDropOffDateString = dropSchedule.dateString;
-      body.securityGuardDropOffTimeString = dropSchedule.timeString;
-    }
-    const dropPriority = Number(body.dropOffPriorityOrder ?? 0);
-    if (dropPriority > 0) {
-      body.securityGuardDropOffStopOrderPriority = dropPriority + 1;
-    }
   }
 }
 
@@ -1205,8 +1194,8 @@ private computeDefaultGuardPickupSchedule(body: Record<string, unknown>): {
   return {
     date: dateOnly,
     time: sgPickup,
-    dateString: this._generalService.getTimeApplicable(dateOnly),
-    timeString: this._generalService.getTimeApplicable(sgPickup),
+    dateString: formatDate(dateOnly, 'yyyy-MM-dd', 'en-IN'),
+    timeString: formatDate(sgPickup, 'HH:mm:ss', 'en-IN'),
   };
 }
 
@@ -1229,8 +1218,8 @@ private computeDefaultGuardDropOffSchedule(body: Record<string, unknown>): {
   return {
     date: dateOnly,
     time: sgDrop,
-    dateString: this._generalService.getTimeApplicable(dateOnly),
-    timeString: this._generalService.getTimeApplicable(sgDrop),
+    dateString: formatDate(dateOnly, 'yyyy-MM-dd', 'en-IN'),
+    timeString: formatDate(sgDrop, 'HH:mm:ss', 'en-IN'),
   };
 }
 
@@ -1477,7 +1466,10 @@ toArray<T>(value: any): T[] {
           securityGuardPickupCityID: this.advanceTable.securityGuardPickupCityID || null,
           securityGuardPickupCity: this.advanceTable.securityGuardPickupCity || '',
           securityGuardPickupDate: this.coerceApiDate(this.advanceTable.securityGuardPickupDate),
-          securityGuardPickupTime: this.coerceApiDateTime(this.advanceTable.securityGuardPickupTime),
+          securityGuardPickupTime: this.coerceSecurityGuardScheduleDateTime(
+            this.advanceTable.securityGuardPickupDate,
+            this.advanceTable.securityGuardPickupTime,
+          ),
           securityGuardPickupAddress: this.advanceTable.securityGuardPickupAddress || '',
           securityGuardPickupAddressLatLong: sgPickupGeo,
           securityGuardPickupAddressDetails: this.advanceTable.securityGuardPickupAddressDetails || '',
@@ -1485,7 +1477,10 @@ toArray<T>(value: any): T[] {
           securityGuardPickupInfoNotReceived: this.toReservationBool(this.advanceTable.securityGuardPickupInfoNotReceived),
           securityGuardPickupIsTimeNotConfirmed: this.toReservationBool(this.advanceTable.securityGuardPickupIsTimeNotConfirmed),
           securityGuardDropOffDate: this.coerceApiDate(this.advanceTable.securityGuardDropOffDate),
-          securityGuardDropOffTime: this.coerceApiDateTime(this.advanceTable.securityGuardDropOffTime),
+          securityGuardDropOffTime: this.coerceSecurityGuardScheduleDateTime(
+            this.advanceTable.securityGuardDropOffDate,
+            this.advanceTable.securityGuardDropOffTime,
+          ),
           securityGuardDropOffCityID: this.advanceTable.securityGuardDropOffCityID || null,
           securityGuardDropOffCity: this.advanceTable.securityGuardDropOffCity || '',
           securityGuardDropOffAddress: this.advanceTable.securityGuardDropOffAddress || '',
@@ -3724,6 +3719,77 @@ private setupSecurityGuardFieldValidators(): void {
   };
   syncDetailsEnabled(guardControl.value);
   guardControl.valueChanges.subscribe((value) => syncDetailsEnabled(value));
+  this.setupLocationOutAnchorWatchers();
+}
+
+/** Recalc location-out when security guard pickup (or guard on/off) changes. */
+private setupLocationOutAnchorWatchers(): void {
+  const keys = [
+    'doesThisReservationContainSecurityGuard',
+    'securityGuardPickupDate',
+    'securityGuardPickupTime',
+    'securityGuardPickupInfoNotReceived',
+    'securityGuardPickupIsTimeNotConfirmed',
+  ];
+  keys.forEach((key) => {
+    this.advanceTableForm.get(key)?.valueChanges.subscribe(() => {
+      if (this.isLoadingdata) {
+        return;
+      }
+      this.recalculateLocationOutFromPickupAnchor();
+    });
+  });
+}
+
+/**
+ * Location out = anchor pickup datetime minus customer interval (or 90 min).
+ * Anchor: SG pickup date + time when guard is on and pickup info is received; else guest pickup.
+ */
+private resolveLocationOutAnchorDateTime(fallbackGuestTime?: unknown): Date | null {
+  const raw = this.advanceTableForm.getRawValue() as Record<string, unknown>;
+
+  const pickupInr = this.toReservationBool(raw.securityGuardPickupInfoNotReceived);
+  if (this.isSecurityGuardEnabled() && !pickupInr && !this.isEmptyValue(raw.securityGuardPickupDate)) {
+    const sgTnc = this.toReservationBool(raw.securityGuardPickupIsTimeNotConfirmed);
+    const sgTime = sgTnc ? null : raw.securityGuardPickupTime;
+    if (sgTnc || !this.isEmptyValue(sgTime)) {
+      const sgAnchor = this.combinePassengerDateAndTime(raw.securityGuardPickupDate, sgTime);
+      if (sgAnchor) {
+        return sgAnchor;
+      }
+    }
+  }
+
+  let guestTime = raw.pickupTime;
+  if (this.isEmptyValue(guestTime) && fallbackGuestTime != null && fallbackGuestTime !== '') {
+    guestTime = fallbackGuestTime;
+  }
+  return this.combinePassengerDateAndTime(raw.pickupDate, guestTime);
+}
+
+recalculateLocationOutFromPickupAnchor(fallbackGuestTime?: unknown): void {
+  if (!this.isLoadingdata) {
+    this.markDropOffScheduleForAutoRecalc();
+  }
+  const anchor = this.resolveLocationOutAnchorDateTime(fallbackGuestTime);
+  if (!anchor || Number.isNaN(anchor.getTime())) {
+    return;
+  }
+  const intervalMinutes =
+    this.locationOutIntervalInMinutes !== 0 && this.locationOutIntervalInMinutes != null
+      ? this.locationOutIntervalInMinutes
+      : 90;
+  const locOutDateTime = new Date(anchor);
+  locOutDateTime.setMinutes(locOutDateTime.getMinutes() - intervalMinutes);
+  this.advanceTableForm.patchValue({
+    locationOutDate: locOutDateTime,
+    locationOutTime: locOutDateTime,
+  }, { emitEvent: false });
+  if (!this.shouldPreservePersistedDropOffOnAutoCalc()) {
+    this.getETRDropOffTime();
+  } else {
+    this.reapplyPersistedDropOffFromServerIfNeeded();
+  }
 }
 
 private applyCustomerCategoryFromRow(row: CustomerCustomerGroupDropDown | undefined): void {
@@ -3863,6 +3929,15 @@ private coerceReservationDropOffDateTime(dropOffDate: unknown, dropOffTime: unkn
     return combined;
   }
   return this.coerceApiDateTime(dropOffTime) ?? this.coerceApiDate(dropOffDate);
+}
+
+/** Security guard stores date and time in separate DB columns; merge for pickers on reopen. */
+private coerceSecurityGuardScheduleDateTime(stopDate: unknown, stopTime: unknown): Date | null {
+  const combined = this.combinePassengerDateAndTime(stopDate, stopTime);
+  if (combined) {
+    return combined;
+  }
+  return this.coerceApiDateTime(stopTime) ?? this.coerceApiDate(stopDate);
 }
 
 private normalizeSavedAddressLatLong(raw: unknown): string | null {
@@ -5158,66 +5233,7 @@ private patchDropOffAddress(res: any) {
 
   locationTimeSet(event)
   {
-    // Match onPickupDateChange: do not re-enable package-hour drop-off while loadData is binding saved values.
-    if (!this.isLoadingdata) {
-      this.markDropOffScheduleForAutoRecalc();
-    }
-    if(this.action==='edit')
-    {
-      if( this.locationOutIntervalInMinutes !== 0)
-      {
-        const pickupDate = new Date(this.advanceTableForm.value.pickupDate);
-        const eventTime = new Date(this.advanceTableForm.value.pickupTime);
-        const combinedDateTime = new Date(pickupDate.getFullYear(), pickupDate.getMonth(), pickupDate.getDate(), eventTime.getHours(), eventTime.getMinutes());
-        combinedDateTime.setMinutes(combinedDateTime.getMinutes() - this.locationOutIntervalInMinutes);
-        const locOutDateTime=new Date(combinedDateTime);
-        this.advanceTableForm.patchValue({locationOutDate:locOutDateTime});
-        this.advanceTableForm.patchValue({locationOutTime:locOutDateTime});
-      }
-      else
-      {
-        const pickupDate = new Date(this.advanceTableForm.value.pickupDate);
-        const eventTime = new Date(this.advanceTableForm.value.pickupTime);
-        const combinedDateTime = new Date(pickupDate.getFullYear(), pickupDate.getMonth(), pickupDate.getDate(), eventTime.getHours(), eventTime.getMinutes());
-        combinedDateTime.setMinutes(combinedDateTime.getMinutes() - 90);
-        const locOutDateTime=new Date(combinedDateTime);
-        this.advanceTableForm.patchValue({locationOutDate:locOutDateTime});
-        this.advanceTableForm.patchValue({locationOutTime:locOutDateTime});
-      }
-      if (!this.shouldPreservePersistedDropOffOnAutoCalc()) {
-        this.getETRDropOffTime();
-      } else {
-        this.reapplyPersistedDropOffFromServerIfNeeded();
-      }
-    }
-    else
-    {
-      if( this.locationOutIntervalInMinutes !== 0)
-      {
-        const pickupDate = new Date(this.advanceTableForm.value.pickupDate);
-        const eventTime = new Date(this.advanceTableForm.value.pickupTime);
-        const combinedDateTime = new Date(pickupDate.getFullYear(), pickupDate.getMonth(), pickupDate.getDate(), eventTime.getHours(), eventTime.getMinutes());
-        combinedDateTime.setMinutes(combinedDateTime.getMinutes() - this.locationOutIntervalInMinutes);
-        const locOutDateTime=new Date(combinedDateTime);
-        this.advanceTableForm.patchValue({locationOutDate:locOutDateTime});
-        this.advanceTableForm.patchValue({locationOutTime:locOutDateTime});
-      }
-      else
-      {
-        const pickupDate = new Date(this.advanceTableForm.value.pickupDate);
-        const eventTime = new Date(event.getTime());
-        const combinedDateTime = new Date(pickupDate.getFullYear(), pickupDate.getMonth(), pickupDate.getDate(), eventTime.getHours(), eventTime.getMinutes());
-        combinedDateTime.setMinutes(combinedDateTime.getMinutes() - 90);
-        const locOutDateTime=new Date(combinedDateTime);        
-        this.advanceTableForm.patchValue({locationOutDate:locOutDateTime});
-        this.advanceTableForm.patchValue({locationOutTime:locOutDateTime});
-      }
-      if (!this.shouldPreservePersistedDropOffOnAutoCalc()) {
-        this.getETRDropOffTime();
-      } else {
-        this.reapplyPersistedDropOffFromServerIfNeeded();
-      }
-    } 
+    this.recalculateLocationOutFromPickupAnchor(event);
   }
 
   SetDropOffDate()
@@ -6353,9 +6369,10 @@ private patchDropOffAddress(res: any) {
     const dropOff = combined.clone().add(hours, 'hours');
     const dropOffDateStr = dropOff.format('YYYY-MM-DD');
 
-    this.advanceTableForm.patchValue({ dropOffDate: dropOffDateStr });
-    this.advanceTableForm.patchValue({ dropOffTime: dropOff.toDate() });
-    this.advanceTableForm.patchValue({ etrTime: dropOff.toDate() });
+    this.advanceTableForm.patchValue(
+      { dropOffDate: dropOffDateStr, dropOffTime: dropOff.toDate(), etrTime: dropOff.toDate() },
+      { emitEvent: false }
+    );
   }
 
   // Extracts the hour count from a package label. Handles shapes like
@@ -6429,30 +6446,32 @@ private patchDropOffAddress(res: any) {
       if (!data) { return; }
       if(data.packageType === 'Local On Demand' || data.packageType === 'Long Term Rental' || data.packageType === 'Outstation Lumpsum' || data.packageType === 'Outstation OneWay Trip' || data.packageType === 'Outstation Round Trip')
       {
-        this.advanceTableForm.controls['dropOffTime'].setValue('');
-        this.advanceTableForm.controls['etrTime'].setValue('');
+        this.advanceTableForm.controls['dropOffTime'].setValue('', { emitEvent: false });
+        this.advanceTableForm.controls['etrTime'].setValue('', { emitEvent: false });
       }
       else
       {
         var timeBasedOnPackage = data.dropOffTime;
         var DropOffDate = data.dropOffDate;
+        const etrPatch: Record<string, unknown> = {};
         if (DropOffDate) {
-          this.advanceTableForm.patchValue({dropOffDate:DropOffDate});
+          etrPatch.dropOffDate = DropOffDate;
         }
-
         if (timeBasedOnPackage) {
           const parsed = moment(timeBasedOnPackage, 'HH:mm');
           if (parsed.isValid()) {
-            this.advanceTableForm.patchValue({dropOffTime: parsed.toDate()});
+            etrPatch.dropOffTime = parsed.toDate();
           }
         }
-
         var etrTime = data.etrTime;
         if (etrTime) {
           const parsedEtr = moment(etrTime, 'HH:mm');
           if (parsedEtr.isValid()) {
-            this.advanceTableForm.patchValue({etrTime: parsedEtr.toDate()});
+            etrPatch.etrTime = parsedEtr.toDate();
           }
+        }
+        if (Object.keys(etrPatch).length > 0) {
+          this.advanceTableForm.patchValue(etrPatch, { emitEvent: false });
         }
       }
     },
@@ -6818,14 +6837,31 @@ private canThisRoleCreateBackDateBooking(): boolean {
     });
   }
 
+  /** Null/blank day cap = no limit; 0 = no bookings allowed that day. */
+  private parseCappingCap(data: any): number | null {
+    const raw = data?.cap ?? data?.Cap;
+    if (raw == null || raw === '') {
+      return null;
+    }
+    const cap = Number(raw);
+    return Number.isFinite(cap) ? cap : null;
+  }
+
   /** @returns true when save / selection may proceed; false when hard capping blocks the booking. */
   private handleReservationCappingResponse(data: any, vehicleID: any, clearVehicleOnBlock: boolean): boolean {
     if (!data) {
       return true;
     }
-    this.bookingCount = data.bookingCount;
-    this.cap = data.cap;
-    if (this.cap === 0) {
+    const cap = this.parseCappingCap(data);
+    const bookingCount = Number(data.bookingCount ?? data.BookingCount ?? 0);
+    this.bookingCount = bookingCount;
+    this.cap = cap;
+
+    if (cap == null) {
+      return true;
+    }
+
+    if (cap === 0) {
       Swal.fire({
         title: '',
         text: `No cars can be provided for ${this.customer} on the selected date (capping is zero).`,
@@ -6836,8 +6872,10 @@ private canThisRoleCreateBackDateBooking(): boolean {
       }
       return false;
     }
-    if (this.cap != null && this.cap > 0 && this.bookingCount >= this.cap) {
-      this.showReservationCappingLimitSwal(this.bookingCount, this.cap, vehicleID);
+
+    const projected = bookingCount + 1;
+    if (projected > cap) {
+      this.showReservationCappingLimitSwal(bookingCount, cap, vehicleID);
       if (clearVehicleOnBlock) {
         this.clearVehicleAfterCappingBlock();
       }
@@ -6855,9 +6893,12 @@ private canThisRoleCreateBackDateBooking(): boolean {
     if (!data) {
       return false;
     }
-    const cap = data.cap ?? data.Cap;
-    if (cap == null || cap <= 0) {
+    const cap = this.parseCappingCap(data);
+    if (cap == null) {
       return false;
+    }
+    if (cap === 0) {
+      return true;
     }
     return this.getProjectedSoftBookingCount(data) > cap;
   }
