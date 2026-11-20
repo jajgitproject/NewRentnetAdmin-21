@@ -137,13 +137,52 @@ export class FormDialogComponent {
     return !isWhitespace ? null : { whitespace: true };
   }
 
+  private getCustomerName(customer: any): string {
+    return (customer?.customerName ?? customer?.CustomerName ?? '').toString().trim();
+  }
+
+  private getCustomerCode(customer: any): string {
+    if (!customer) {
+      return '';
+    }
+    const tally = customer.tallyCustomerID ?? customer.TallyCustomerID;
+    if (tally !== null && tally !== undefined && tally !== '' && tally !== 0 && tally !== '0') {
+      return tally.toString();
+    }
+    return (customer.customerIdentityNumber ?? customer.CustomerIdentityNumber ?? '').toString().trim();
+  }
+
+  getCustomerDropdownLabel(customer: CustomerDropDown): string {
+    const name = this.getCustomerName(customer);
+    const code = this.getCustomerCode(customer);
+    return code ? `${name} ## ${code}` : name;
+  }
+
+  getCustomerDisplayValue(customer: CustomerDropDown): string {
+    const name = this.getCustomerName(customer);
+    const code = this.getCustomerCode(customer);
+    return code ? `${name}##${code}` : name;
+  }
+
+  private getCustomerNameForSearch(value: any): string {
+    const raw = (value || '').toString().trim();
+    if (!raw) {
+      return raw;
+    }
+    return raw.split('##')[0].trim();
+  }
+
   customerValidator(customerList: any[]): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) {
         return { customerTypeInvalid: true };
       }
-      const value = control.value.toLowerCase();
-      const match = customerList.some((customer) => customer.customerName.toLowerCase() === value);
+      const value = control.value.toString().toLowerCase();
+      const match = customerList.some(
+        (customer) =>
+          this.getCustomerName(customer).toLowerCase() === value
+          || this.getCustomerDisplayValue(customer).toLowerCase() === value
+      );
       return match ? null : { customerTypeInvalid: true };
     };
   }
@@ -162,7 +201,7 @@ export class FormDialogComponent {
   }
 
   InitCustomer() {
-    const prefix = this.advanceTableForm.get('customerName').value;
+    const prefix = this.getCustomerNameForSearch(this.advanceTableForm.get('customerName').value);
     if (!prefix || prefix.length < 3) {
       this.CustomerList = [];
       return;
@@ -201,11 +240,26 @@ export class FormDialogComponent {
   }
 
   private _filterCustomers(value: string): any {
-    const filterValue = value.toLowerCase();
+    const filterValue = this.getCustomerNameForSearch(value).toLowerCase();
     if (filterValue.length < 3) {
       return [];
     }
-    return (this.CustomerList || []).filter((data) => data.customerName.toLowerCase().includes(filterValue));
+    return (this.CustomerList || []).filter((data) => {
+      const code = this.getCustomerCode(data).toLowerCase();
+      return this.getCustomerName(data).toLowerCase().includes(filterValue)
+        || code.includes(filterValue)
+        || this.getCustomerDisplayValue(data).toLowerCase().includes(filterValue);
+    });
+  }
+
+  onCustomerAutocompleteSelected(event: { option: { value: string } }): void {
+    const displayValue = event?.option?.value;
+    const customer = (this.CustomerList || []).find(
+      (c) => this.getCustomerDisplayValue(c) === displayValue
+    );
+    if (customer) {
+      this.onCustomerSelected(customer);
+    }
   }
 
   onCustomerSelected(customer: CustomerDropDown) {
@@ -216,7 +270,7 @@ export class FormDialogComponent {
     this.CustomerID = customer.customerID;
     this.advanceTableForm.patchValue({
       customerID: customer.customerID,
-      customerName: customer.customerName,
+      customerName: this.getCustomerDisplayValue(customer),
       stateID: 0,
       stateName: ''
     });

@@ -19,11 +19,10 @@
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Customer</mat-label>
                         <input type="text" matInput formControlName="customerName" [matAutocomplete]="customerAuto" (keyup)="InitCustomer()">
-                        <mat-autocomplete #customerAuto="matAutocomplete">
+                        <mat-autocomplete #customerAuto="matAutocomplete" (optionSelected)="onCustomerAutocompleteSelected($event)">
                             <mat-option *ngFor="let option of filteredCustomerOptions | async"
-                                [value]="option.customerName"
-                                (click)="onCustomerSelected(option)">
-                                {{option.customerName}}
+                                [value]="getCustomerDisplayValue(option)">
+                                {{ getCustomerDropdownLabel(option) }}
                             </mat-option>
                         </mat-autocomplete>
                         <mat-error *ngIf="advanceTableForm.controls['customerName'].hasError('required')">
