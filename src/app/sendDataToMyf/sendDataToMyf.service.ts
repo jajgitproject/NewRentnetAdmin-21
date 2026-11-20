@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { GeneralService } from '../general/general.service';
 
 @Injectable()
@@ -39,6 +39,7 @@ export class SendDataToMyfService {
     toDate: string,
     dutySlipIds: string,
     reservationIds: string,
+    customerId: number,
     myfStatus: string,
     gtrackStatus: string,
     pageNumber: number,
@@ -51,6 +52,7 @@ export class SendDataToMyfService {
       + '/' + this.toRouteParam(toDate)
       + '/' + this.toIdList(dutySlipIds)
       + '/' + this.toIdList(reservationIds)
+      + '/' + (customerId > 0 ? customerId : 'null')
       + '/' + this.toRouteParam(myfStatus)
       + '/' + this.toRouteParam(gtrackStatus)
       + '/' + pageNumber
@@ -58,6 +60,16 @@ export class SendDataToMyfService {
       + '/' + encodeURIComponent(order || 'Descending')
       + '/' + pageSize;
     return this.httpClient.get(url);
+  }
+
+  customers(prefix: string): Observable<any[]> {
+    const text = String(prefix || '').trim();
+    if (text.length < 3) {
+      return of([]);
+    }
+    return this.httpClient.get<any[]>(
+      this.generalService.BaseURL + 'Customer/ForDropDownPrefix/' + encodeURIComponent(text)
+    );
   }
 
   payload(dutySlipId: number, channel: string, kind: string): Observable<any> {

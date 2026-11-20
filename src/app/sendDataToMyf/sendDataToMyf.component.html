@@ -41,6 +41,13 @@
           <mat-datepicker #toPicker></mat-datepicker>
         </mat-form-field>
         <mat-form-field appearance="outline">
+          <mat-label>Customer name</mat-label>
+          <input matInput [matAutocomplete]="customerAuto" [ngModel]="customerSearch" (ngModelChange)="onCustomerInput($event)" placeholder="Type 3 characters" />
+          <mat-autocomplete #customerAuto="matAutocomplete" class="vendor-closing-customer-panel" panelWidth="720px" (optionSelected)="selectCustomer($event.option.value)">
+            <mat-option *ngFor="let option of customerOptions" [value]="option.label">{{ option.label }}</mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
           <mat-label>Duty slip IDs</mat-label>
           <input matInput [(ngModel)]="searchDutySlip" placeholder="101, 102, 103" />
         </mat-form-field>

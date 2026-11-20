@@ -114,6 +114,7 @@ export class BookingConfigurationComponent implements OnInit {
   saveAttempted = false;
   private infosysCustomerBlurred = false;
   private infosysSearchSeq = 0;
+  private infosysSearchTimer: any;
   @ViewChild('infosysCustomerTrigger') infosysCustomerTrigger: MatAutocompleteTrigger;
   BookingID: any;
   returnUrl = '/bookingRequest';
@@ -172,7 +173,6 @@ export class BookingConfigurationComponent implements OnInit {
      googleAdressesDropOff:[''],
     customerGroupID:[''],
     customerID:['' ],
-    customerIntegrationMappingID:[null],
     primaryBookerID:[''],
     salesExecutive:[''],
     salesExecutiveID:[''],
@@ -991,8 +991,7 @@ private extractTime(dateTime: Date): Date {
       this.advanceTableForm.patchValue({
         customerID: this.selectedInfosysMapping.customerID,
         customerGroupID: this.selectedInfosysMapping.customerGroupID,
-        customerTypeID: this.selectedInfosysMapping.customerTypeID,
-        customerIntegrationMappingID: this.selectedInfosysMapping.customerIntegrationMappingID
+        customerTypeID: this.selectedInfosysMapping.customerTypeID
       });
     }
     const payload: any = this.advanceTableForm.getRawValue();
@@ -2358,9 +2357,7 @@ OnDropOffGeoLocationClick(option:any)
     if (typeof value === 'string') {
       return value;
     }
-    const name = value.customerName || '';
-    const code = value.integrationCode ? ` (${value.integrationCode})` : '';
-    return `${name}${code}`.trim();
+    return String(value.customerName || '').trim();
   };
 
   onInfosysCustomerInput(value: string): void {
@@ -2375,13 +2372,19 @@ OnDropOffGeoLocationClick(option:any)
     }
     this.infosysCustomerSearchError = '';
     this.selectedInfosysMapping = null;
-    this.advanceTableForm.patchValue({ customerIntegrationMappingID: null });
     this.infosysCustomerControl.updateValueAndValidity();
+    if (this.infosysSearchTimer) {
+      clearTimeout(this.infosysSearchTimer);
+    }
     if (text.length < 3) {
       this.infosysCustomerOptions = [];
       return;
     }
 
+    this.infosysSearchTimer = setTimeout(() => this.loadInfosysCustomers(text), 300);
+  }
+
+  private loadInfosysCustomers(text: string): void {
     const seq = ++this.infosysSearchSeq;
     this.bookingConfigurationService.searchInfosysCustomers(text).subscribe(
       (rows) => {
@@ -2419,8 +2422,7 @@ OnDropOffGeoLocationClick(option:any)
     this.advanceTableForm.patchValue({
       customerID: option.customerID,
       customerGroupID: option.customerGroupID,
-      customerTypeID: option.customerTypeID,
-      customerIntegrationMappingID: option.customerIntegrationMappingID
+      customerTypeID: option.customerTypeID
     });
     this.infosysCustomerControl.updateValueAndValidity();
     this.getSalesManager(option.customerID);

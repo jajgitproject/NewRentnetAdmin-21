@@ -13,6 +13,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { SendDataToMyfComponent } from './sendDataToMyf.component';
 import { SendDataToMyfRoutingModule } from './sendDataToMyf-routing.module';
 import { SendDataToMyfService } from './sendDataToMyf.service';
@@ -34,7 +35,8 @@ import { MyfPayloadDialogComponent } from './myf-payload-dialog.component';
     MatDatepickerModule,
     MatNativeDateModule,
     MatSnackBarModule,
-    MatDialogModule
+    MatDialogModule,
+    MatAutocompleteModule
   ],
   providers: [SendDataToMyfService]
 })

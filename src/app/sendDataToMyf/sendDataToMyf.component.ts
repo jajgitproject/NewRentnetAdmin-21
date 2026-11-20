@@ -61,6 +61,9 @@ export class SendDataToMyfComponent implements OnInit, OnDestroy {
   searchToDate: Date = myfToday();
   searchDutySlip = '';
   searchReservation = '';
+  customerSearch = '';
+  customerId = 0;
+  customerOptions: any[] = [];
   searchMyfStatus = 'All';
   searchGTrackStatus = 'All';
   statusOptions = ['All', 'Unprocessed', 'Successful', 'Failed', 'Processing'];
@@ -68,6 +71,7 @@ export class SendDataToMyfComponent implements OnInit, OnDestroy {
   batchStatus = { successful: 0, failed: 0, pending: 0, running: false };
   private batchIds: number[] = [];
   private pollTimer: any;
+  private customerTimer: any;
   private readonly pageStateKey = 'sendDataToMyf.pageState';
 
   constructor(
@@ -103,6 +107,9 @@ export class SendDataToMyfComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.saveSearch();
     this.stopPoll();
+    if (this.customerTimer) {
+      clearTimeout(this.customerTimer);
+    }
   }
 
   searchData(): void {
@@ -110,10 +117,34 @@ export class SendDataToMyfComponent implements OnInit, OnDestroy {
     this.loadData();
   }
 
+  onCustomerInput(value: string): void {
+    const text = String(value || '');
+    this.customerSearch = text;
+    if (this.customerTimer) {
+      clearTimeout(this.customerTimer);
+    }
+    const selected = this.customerOptions.find((option) => option.label === text);
+    this.customerId = selected ? selected.customerID : 0;
+    if (text.trim().length < 3) {
+      this.customerOptions = [];
+      return;
+    }
+    this.customerTimer = setTimeout(() => this.loadCustomers(text.trim()), 300);
+  }
+
+  selectCustomer(label: string): void {
+    const option = (this.customerOptions || []).find((item) => item.label === label);
+    this.customerId = option ? option.customerID : 0;
+    this.customerSearch = label || '';
+  }
+
   refresh(): void {
     this.pageNumber = 0;
     this.searchDutySlip = '';
     this.searchReservation = '';
+    this.customerSearch = '';
+    this.customerId = 0;
+    this.customerOptions = [];
     this.searchMyfStatus = 'All';
     this.searchGTrackStatus = 'All';
     this.searchFromDate = myfToday();
@@ -132,6 +163,7 @@ export class SendDataToMyfComponent implements OnInit, OnDestroy {
       toDate,
       this.searchDutySlip,
       this.searchReservation,
+      this.customerId,
       this.searchMyfStatus,
       this.searchGTrackStatus,
       this.pageNumber,
@@ -399,6 +431,8 @@ export class SendDataToMyfComponent implements OnInit, OnDestroy {
         searchToDate: this.formatDate(this.searchToDate),
         searchDutySlip: this.searchDutySlip,
         searchReservation: this.searchReservation,
+        customerSearch: this.customerSearch,
+        customerId: this.customerId,
         searchMyfStatus: this.searchMyfStatus,
         searchGTrackStatus: this.searchGTrackStatus,
         pageNumber: this.pageNumber,
@@ -432,6 +466,8 @@ export class SendDataToMyfComponent implements OnInit, OnDestroy {
       }
       this.searchDutySlip = saved.searchDutySlip || '';
       this.searchReservation = saved.searchReservation || '';
+      this.customerSearch = saved.customerSearch || '';
+      this.customerId = Number(saved.customerId) || 0;
       this.searchMyfStatus = saved.searchMyfStatus || 'All';
       this.searchGTrackStatus = saved.searchGTrackStatus || 'All';
       this.pageNumber = Number(saved.pageNumber) || 0;
@@ -440,6 +476,24 @@ export class SendDataToMyfComponent implements OnInit, OnDestroy {
       this.hasSearched = !!saved.hasSearched;
     } catch (e) {
     }
+  }
+
+  private loadCustomers(prefix: string): void {
+    this.sendDataToMyfService.customers(prefix).subscribe({
+      next: (customers) => {
+        this.customerOptions = (customers || []).map((customer) => {
+          const name = String(customer?.customerName || customer?.CustomerName || '').trim();
+          const tally = Number(customer?.tallyCustomerID || customer?.TallyCustomerID || 0);
+          return {
+            customerID: customer?.customerID || customer?.CustomerID || 0,
+            label: tally > 0 ? name + ' (' + tally + ')' : name
+          };
+        }).filter((option) => option.customerID > 0 && option.label);
+      },
+      error: () => {
+        this.customerOptions = [];
+      }
+    });
   }
 
   private stopPoll(): void {
