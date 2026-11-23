@@ -243,6 +243,7 @@
 
         <form class="register-form quick-search-panel" [formGroup]="advanceTableForm" (ngSubmit)="submit">
           <div class="bc-panel-body">
+          <!-- Infosys customer picker is turned off.
           <div class="row" *ngIf="isInfosysBooking()">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
               <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
@@ -270,6 +271,7 @@
               </div>
             </div>
           </div>
+          -->
           <div class="row">
             <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
                 <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
@@ -441,9 +443,11 @@
                   </div>
               </ng-template>
           </div>
+          <!-- Infosys pickup coordinate message is turned off.
           <div class="bc-field-error" *ngIf="showInfosysCoordinateError('pickup')">
             Pickup latitude and longitude are required. Select the pickup address from the list.
           </div>
+          -->
 
           <div class="row">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
@@ -510,9 +514,11 @@
                     </div>
                 </ng-template>
           </div>
+          <!-- Infosys drop coordinate message is turned off.
           <div class="bc-field-error" *ngIf="showInfosysCoordinateError('drop')">
             Drop latitude and longitude are required. Select the drop address from the list.
           </div>
+          -->
 
           <div class="row">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">

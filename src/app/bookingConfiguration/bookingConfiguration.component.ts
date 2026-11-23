@@ -393,15 +393,16 @@ toggleStopFold() {
         );
           let dropOffDateTime = null;
           let resolvedDropOffTime24 = '';
-          if (this.isInfosysBooking()) {
-            if (!this.isMissingDate(this.customerDetails.dropOffDate) && dropOffTime24) {
-              dropOffDateTime = this.mergeDateAndTimeFromStrings(
-                this.customerDetails.dropOffDate,
-                dropOffTime24
-              );
-              resolvedDropOffTime24 = dropOffTime24;
-            }
-          } else {
+          // Infosys-only drop date handling is turned off. Use the normal drop date path.
+          // if (this.isInfosysBooking()) {
+          //   if (!this.isMissingDate(this.customerDetails.dropOffDate) && dropOffTime24) {
+          //     dropOffDateTime = this.mergeDateAndTimeFromStrings(
+          //       this.customerDetails.dropOffDate,
+          //       dropOffTime24
+          //     );
+          //     resolvedDropOffTime24 = dropOffTime24;
+          //   }
+          // } else {
             const dropOffDateSource = this.isMissingDate(this.customerDetails.dropOffDate)
               ? this.customerDetails.pickupDate
               : this.customerDetails.dropOffDate;
@@ -413,7 +414,7 @@ toggleStopFold() {
             if (this.isMissingDate(dropOffDateTime) && pickupDateTime) {
               dropOffDateTime = pickupDateTime;
             }
-          }
+          // }
           this.advanceTableForm.patchValue({customerID:this.customerDetails.customerID});
           this.bookerID = this.customerDetails.primaryBookerID;
           this.advanceTableForm.patchValue({primaryBookerID:this.customerDetails.primaryBookerID});
@@ -440,8 +441,8 @@ toggleStopFold() {
           this.GetRequesterDetails();
           this.GetIntegrationCustomerSpecificFields();
           this.refreshReservationStops();
-          this.applyInfosysFieldRules();
-          this.prefillInfosysCustomer();
+          // this.applyInfosysFieldRules();
+          // this.prefillInfosysCustomer();
         },
         (error: HttpErrorResponse) => {
           this.customerDetails = null;
@@ -903,11 +904,11 @@ private extractTime(dateTime: Date): Date {
       return;
     }
     this.saveAttempted = true;
-    if (this.isInfosysBooking()) {
-      this.infosysCustomerControl.markAsTouched();
-      this.infosysCustomerControl.updateValueAndValidity();
-    }
-    if (this.advanceTableForm.invalid || (this.isInfosysBooking() && this.infosysCustomerControl.invalid)) {
+    // if (this.isInfosysBooking()) {
+    //   this.infosysCustomerControl.markAsTouched();
+    //   this.infosysCustomerControl.updateValueAndValidity();
+    // }
+    if (this.advanceTableForm.invalid) {
       this.advanceTableForm.markAllAsTouched();
       return;
     }
@@ -987,13 +988,13 @@ private extractTime(dateTime: Date): Date {
     }
     this.pickupCityID = pickupCityId;
     this.advanceTableForm.patchValue({ pickupCityID: pickupCityId });
-    if (this.isInfosysBooking() && this.selectedInfosysMapping) {
-      this.advanceTableForm.patchValue({
-        customerID: this.selectedInfosysMapping.customerID,
-        customerGroupID: this.selectedInfosysMapping.customerGroupID,
-        customerTypeID: this.selectedInfosysMapping.customerTypeID
-      });
-    }
+    // if (this.isInfosysBooking() && this.selectedInfosysMapping) {
+    //   this.advanceTableForm.patchValue({
+    //     customerID: this.selectedInfosysMapping.customerID,
+    //     customerGroupID: this.selectedInfosysMapping.customerGroupID,
+    //     customerTypeID: this.selectedInfosysMapping.customerTypeID
+    //   });
+    // }
     const payload: any = this.advanceTableForm.getRawValue();
     payload.pickupCityID = pickupCityId;
     payload.kamID = this.normalizeOptionalInt(payload.kamID);
