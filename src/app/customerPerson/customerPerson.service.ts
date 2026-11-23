@@ -124,10 +124,28 @@ export class CustomerPersonService
     }
     return this.httpClient.get(this.API_URL+ "/" +SearchCustomer + "/" +SearchName + '/'+SearchPrimary + '/'+SearchBilling + '/'+SearchMobile + '/'+CustomerGroupID + '/' + SearchActivationStatus +'/' + PageNumber +  '/'+coloumName+'/'+sortType);
   }
+  private coerceCustomerPersonIdFields(payload: any): void {
+    const toInt = (value: any, fallback = 0): number => {
+      if (value === null || value === undefined || value === '') {
+        return fallback;
+      }
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    };
+    payload.customerPersonID = toInt(payload.customerPersonID, -1);
+    payload.customerGroupID = toInt(payload.customerGroupID);
+    payload.customerID = toInt(payload.customerID);
+    payload.salutationID = toInt(payload.salutationID);
+    payload.customerDesignationID = toInt(payload.customerDesignationID);
+    payload.customerDepartmentID = toInt(payload.customerDepartmentID);
+    payload.userID = toInt(payload.userID, this.generalService.getUserID());
+  }
+
   add(advanceTable: CustomerPerson) 
   {
     advanceTable.customerPersonID=-1;
     advanceTable.userID=this.generalService.getUserID();
+    this.coerceCustomerPersonIdFields(advanceTable);
     this.applyIsSecurityGuardBeforeSave(advanceTable);
      if(advanceTable.primaryMobile==="")
     {
@@ -159,6 +177,7 @@ export class CustomerPersonService
   update(advanceTable: CustomerPerson)
   {
     advanceTable.userID=this.generalService.getUserID();
+    this.coerceCustomerPersonIdFields(advanceTable);
     this.applyIsSecurityGuardBeforeSave(advanceTable);
      if(advanceTable.primaryMobile==="")
     {

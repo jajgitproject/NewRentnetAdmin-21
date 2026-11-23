@@ -918,13 +918,26 @@ public Post(): void {
   };
 
   // Patch formatted phone numbers only if needed
+  const resolvedSalutationId =
+    this.salutationID ??
+    this.advanceTableForm.get('salutationID')?.value ??
+    this.advanceTable?.salutationID;
+  const resolvedCustomerId =
+    this.customerID ??
+    this.advanceTableForm.get('customerID')?.value ??
+    this.advanceTable?.customerID;
+  const resolvedCustomerGroupId =
+    this.CustomerGroupID ??
+    this.advanceTableForm.get('customerGroupID')?.value ??
+    this.advanceTable?.customerGroupID;
+
   this.advanceTableForm.patchValue({
     primaryMobile: formatPhone('countryCode', 'primaryMobile'),
     secondaryMobile1: formatPhone('countryCodes', 'secondaryMobile1'),
     secondaryMobile2: formatPhone('mobileCode', 'secondaryMobile2'),
-    customerGroupID: this.CustomerGroupID,
-    salutationID: this.salutationID,
-    customerID: this.customerID
+    customerGroupID: resolvedCustomerGroupId,
+    salutationID: resolvedSalutationId,
+    customerID: resolvedCustomerId
   });
 
   // Reservation quick-add: CP = passenger, CB = booker
@@ -996,6 +1009,8 @@ public Post(): void {
         return;
       }
 
+      this.isSaving = false;
+
       if (this.someAction === 'CP' || this.someAction === 'CB') {
         this.dialogRef.close({
           customerPersonID: response.customerPersonID,
@@ -1004,7 +1019,7 @@ public Post(): void {
       } else {
         this.dialogRef.close();
       }
-       this._generalService.sendUpdate('CustomerPersonUpdate:CustomerPersonView:Success');//To Send Updates  
+       this._generalService.sendUpdate('CustomerPersonCreate:CustomerPersonView:Success');//To Send Updates  
          {
           this.saveDisabled = true;
             this.showNotification(
@@ -1021,15 +1036,24 @@ public Post(): void {
     //   }
     // },
     error: (error) => {
+      const apiMessage =
+        (typeof error?.error === 'string' && error.error.trim()) ||
+        error?.error?.message ||
+        error?.message ||
+        '';
       if (error.error?.isDuplicate) {
         this.showNotification('snackbar-warning', error.error.message || 'Duplicate record found', 'bottom', 'center');
+      } else if (apiMessage) {
+        this.showNotification('snackbar-danger', apiMessage, 'bottom', 'center');
       } else if (this.someAction === 'CP' || this.someAction === 'CB') {
-        this.saveDisabled = true;
+        this.showNotification('snackbar-danger', 'Operation Failed.....!!!', 'bottom', 'center');
+      } else {
         this.showNotification('snackbar-danger', 'Operation Failed.....!!!', 'bottom', 'center');
       }
 
       this._generalService.sendUpdate('CustomerPersonAll:CustomerPersonView:Failure');
       this.saveDisabled = true;
+      this.isSaving = false;
     }
   });
 }
