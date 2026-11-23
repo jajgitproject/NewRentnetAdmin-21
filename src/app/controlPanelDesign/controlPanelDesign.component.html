@@ -1760,6 +1760,13 @@
                                   style="font-size: 11px;">
                               {{ mopLabel }}
                             </span>
+                            <br *ngIf="hasSettledRateImp(data)">
+                            <span *ngIf="hasSettledRateImp(data)"
+                                  matTooltip="Settled Rate"
+                                  matTooltipShowDelay="200"
+                                  style="font-size: 11px;">
+                              Settled Rate
+                            </span>
                             <br>
                             
                             <span *ngIf="data.specialInstruction !== null" [matTooltip]="getSpecialInstructions(data.specialInstruction)"> SI </span>

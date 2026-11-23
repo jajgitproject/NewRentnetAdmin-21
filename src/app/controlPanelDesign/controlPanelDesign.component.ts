@@ -3351,6 +3351,15 @@ openDropOffByExectiveGPS(item: any)
     return v ? `Mode of Payment: ${v}` : null;
   }
 
+  hasSettledRateImp(row: any): boolean {
+    return (
+      row?.hasSettledRate === true ||
+      row?.hasSettledRate === 1 ||
+      row?.hasSettledRate === '1' ||
+      row?.HasSettledRate === true
+    );
+  }
+
   private getControlPanelMessagingHeaderDisplay(row: any): {
     successBadges: string[];
     failedBadges: string[];

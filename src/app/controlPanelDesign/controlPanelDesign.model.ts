@@ -34,6 +34,7 @@ export class ControlPanelHeaderDetails {
   tripTo:string;
   newCustomer:boolean;
   hasActiveUpsell?: boolean;
+  hasSettledRate?: boolean;
   modeOfPayment?: string;
   
   
@@ -56,6 +57,10 @@ export class ControlPanelHeaderDetails {
     this.tripTo = controlPanelHeaderDetails.tripTo;
     this.newCustomer = controlPanelHeaderDetails.newCustomer;
     this.hasActiveUpsell = controlPanelHeaderDetails.hasActiveUpsell;
+    this.hasSettledRate =
+      controlPanelHeaderDetails.hasSettledRate === true ||
+      controlPanelHeaderDetails.hasSettledRate === 'true' ||
+      controlPanelHeaderDetails.HasSettledRate === true;
     this.modeOfPayment = controlPanelHeaderDetails.modeOfPayment || '';
   }
 }
