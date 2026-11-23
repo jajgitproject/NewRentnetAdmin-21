@@ -9,7 +9,8 @@
             (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" (click)="fileInput.click()">
             <mat-icon class="upload-icon">cloud_upload</mat-icon>
             <p>Drag and drop files here or <span>browse</span></p>
-            <input type="file" #fileInput multiple (change)="onFileSelected($event)" style="display: none;">
+            <p class="upload-allowed-hint">Allowed: .pdf, .jpeg, .jpg, .png</p>
+            <input type="file" #fileInput multiple accept=".pdf,.jpeg,.jpg,.png" (change)="onFileSelected($event)" style="display: none;">
         </div>
 
         <div class="file-list-preview" *ngIf="files.length > 0">

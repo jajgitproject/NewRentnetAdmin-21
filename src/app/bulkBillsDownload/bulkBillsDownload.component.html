@@ -891,7 +891,8 @@
                   </div>
                 </div>
                 <div class="upload-file-row">
-                  <input #uploadFileInput type="file" [attr.multiple]="uploadMode === 'bulk' ? '' : null" (change)="onFilesSelected($event)" />
+                  <input #uploadFileInput type="file" accept=".pdf" [attr.multiple]="uploadMode === 'bulk' ? '' : null" (change)="onFilesSelected($event)" />
+                  <div class="upload-allowed-hint">Allowed: .pdf</div>
                   <span class="upload-file-name" *ngIf="selectedFileLabel">{{ selectedFileLabel }}</span>
                 </div>
                 <div class="upload-action-row">

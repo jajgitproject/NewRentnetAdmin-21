@@ -1,7 +1,8 @@
-
-        <input type="file" #file placeholder="Choose file" (change)="uploadFile(file.files)" style="display:none;">
-        <button type="button" (click)="file.click()">
-          <span class="material-icons">file_upload</span>
-          
-        </button>       
-    
+<input type="file" #file [accept]="accept" placeholder="Choose file" (change)="uploadFile(file.files)" style="display:none;">
+<button type="button" (click)="file.click()">
+  <span class="material-icons">file_upload</span>
+</button>
+<span class="upload-allowed-hint">{{ allowedHint }}</span>
+<span *ngIf="message" [class.upload-error]="messageType === 'error'" [class.upload-success]="messageType === 'success'">
+  {{ message }}
+</span>

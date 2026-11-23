@@ -6,7 +6,8 @@
         <div class="hover-text">Upload</div>
         <div class="background"></div>
       </label>
-      <input id="tableFileInput" type='file' (change)="onSelectFile($event)">
+      <input id="tableFileInput" type='file' accept=".pdf,.jpeg,.jpg,.png" (change)="onSelectFile($event)">
+      <div class="upload-allowed-hint">Allowed: .pdf, .jpeg, .jpg, .png</div>
       <div class="modalTitle">
         {{dialogTitle}}
       </div>

@@ -38,11 +38,11 @@
 
               <div class="attachments-area m-t-20">
                 <div class="file-upload-wrapper">
-                  <input type="file" #fileInput hidden multiple>
+                  <input type="file" #fileInput hidden multiple accept=".pdf,.jpeg,.jpg,.png">
                   <button type="button" mat-stroked-button color="primary" (click)="fileInput.click()">
                     <mat-icon>attach_file</mat-icon> Attach Files
                   </button>
-                  <span class="m-l-10 text-muted">Max size: 25MB</span>
+                  <span class="m-l-10 text-muted">Allowed: .pdf, .jpeg, .jpg, .png · Max size: 25MB</span>
                 </div>
               </div>
 

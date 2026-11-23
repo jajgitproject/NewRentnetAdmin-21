@@ -353,7 +353,7 @@
                   <input type="file" class="d-none" accept=".jpg,.jpeg,.png,.pdf" (change)="onFileSelected('FuelSlip', $event)" />
                   <i class="fas fa-cloud-upload-alt fa-2x upload-icon"></i>
                   <p class="upload-title mb-1">Click to upload fuel slip</p>
-                  <p class="small text-muted mb-0">JPG, PNG, PDF — up to 5 MB</p>
+                  <p class="small text-muted mb-0">Allowed: .pdf, .jpeg, .jpg, .png — up to 5 MB</p>
                 </label>
                 <div class="doc-preview" *ngIf="fuelSlipDoc">
                   <img *ngIf="fuelSlipPreviewUrl && isImageDoc(fuelSlipDoc)" [src]="fuelSlipPreviewUrl" alt="" class="upload-thumb" />
@@ -373,7 +373,7 @@
                   <input type="file" class="d-none" accept=".jpg,.jpeg,.png" (change)="onFileSelected('Odometer', $event)" />
                   <i class="fas fa-camera fa-2x upload-icon"></i>
                   <p class="upload-title mb-1">Click to upload odometer photo</p>
-                  <p class="small text-muted mb-0">JPG, PNG — up to 5 MB</p>
+                  <p class="small text-muted mb-0">Allowed: .jpeg, .jpg, .png — up to 5 MB</p>
                 </label>
                 <div class="doc-preview" *ngIf="odometerDoc">
                   <img *ngIf="odometerPreviewUrl" [src]="odometerPreviewUrl" alt="" class="upload-thumb" />

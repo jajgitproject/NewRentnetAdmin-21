@@ -8,6 +8,7 @@ import { FeedBackAttachment } from '../../feedBackAttachment.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
+import { UPLOAD_ALLOWED_HINT, isAllowedUploadFileName } from '../../../general/upload-allowed';
 import { FeedBackAttachmentDropDown } from '../../feedBackAttachmentDropDown.model';
 // import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import moment from 'moment';
@@ -144,6 +145,14 @@ export class tripFeedBackAttachmentFormDialogComponent {
     const files = input?.files;
     if (!files?.length) {
       this.selectedAttachmentFile = null;
+      return;
+    }
+    if (!isAllowedUploadFileName(files[0].name)) {
+      this.selectedAttachmentFile = null;
+      if (input) {
+        input.value = '';
+      }
+      this.snackBar.open(UPLOAD_ALLOWED_HINT, '', { duration: 3500, verticalPosition: 'bottom', horizontalPosition: 'center' });
       return;
     }
     this.selectedAttachmentFile = files[0];

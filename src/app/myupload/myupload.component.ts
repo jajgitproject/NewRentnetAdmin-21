@@ -1,7 +1,13 @@
 // @ts-nocheck
-import { Component, OnInit, Input, Output, EventEmitter, ɵNOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { HttpEventType, HttpClient } from '@angular/common/http';
 import { GeneralService } from '../general/general.service';
+import {
+  UPLOAD_ACCEPT,
+  UPLOAD_ALLOWED_HINT,
+  isAllowedUploadFileName,
+} from '../general/upload-allowed';
+
 @Component({
   standalone: false,
   selector: 'app-myupload',
@@ -12,12 +18,13 @@ export class MyUploadComponent implements OnInit {
   public progress: number;
   public message: string;
   public messageType: '' | 'success' | 'error' = '';
+  public readonly allowedHint = UPLOAD_ALLOWED_HINT;
   private readonly sampleFileName = 'TollParking_2026-10-30.jpg';
   @Input() buttonText = 'Upload File';
   @Input() compact = false;
-  @Input() accept = '';
+  @Input() accept = UPLOAD_ACCEPT;
   @Output() public onUploadFinished = new EventEmitter();
-  constructor(private http: HttpClient, public _generalService:GeneralService) { }
+  constructor(private http: HttpClient, public _generalService: GeneralService) { }
   ngOnInit() {
   }
   public uploadFile = (files) => {
@@ -28,6 +35,13 @@ export class MyUploadComponent implements OnInit {
     this.messageType = '';
     this.progress = 0;
     let fileToUpload = <File>files[0];
+
+    if (!isAllowedUploadFileName(fileToUpload.name)) {
+      this.message = UPLOAD_ALLOWED_HINT + '. Sample file name: ' + this.sampleFileName;
+      this.messageType = 'error';
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', fileToUpload, fileToUpload.name);
 
@@ -49,10 +63,9 @@ export class MyUploadComponent implements OnInit {
         error =>
         {
           const reason = (error?.error?.message || 'File upload was blocked.').toString();
-          this.message = reason + ' Sample file name: ' + this.sampleFileName;
+          this.message = reason + ' ' + UPLOAD_ALLOWED_HINT + '. Sample file name: ' + this.sampleFileName;
           this.messageType = 'error';
         }
     );
   }
 }
-

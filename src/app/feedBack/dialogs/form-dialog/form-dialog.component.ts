@@ -7,6 +7,7 @@ import { FeedBack } from '../../feedBack.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
+import { UPLOAD_ALLOWED_HINT, isAllowedUploadFileName } from '../../../general/upload-allowed';
 import { FeedBackDropDown } from '../../feedBackDropDown.model';
 // import { CurrencyDropDown } from 'src/app/general/currencyDropDown.model';
 import moment from 'moment';
@@ -496,6 +497,20 @@ export class FormDialogComponent {
       this.pendingAttachmentFile = null;
       this.pendingAttachmentPreviewUrl = '';
       this.pendingAttachmentFileName = '';
+      return;
+    }
+    if (!isAllowedUploadFileName(files[0].name)) {
+      this.pendingAttachmentFile = null;
+      this.pendingAttachmentPreviewUrl = '';
+      this.pendingAttachmentFileName = '';
+      if (input) {
+        input.value = '';
+      }
+      this.snackBar.open(UPLOAD_ALLOWED_HINT, '', {
+        duration: 3500,
+        verticalPosition: 'bottom',
+        horizontalPosition: 'center',
+      });
       return;
     }
     this.pendingAttachmentFile = files[0];

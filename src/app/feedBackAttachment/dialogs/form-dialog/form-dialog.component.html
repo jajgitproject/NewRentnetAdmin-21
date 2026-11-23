@@ -24,8 +24,9 @@
                         <img [src]="ImagePath" class="table " style="height: 80px; width: auto;">
                     </a>
                     <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
-                        <input type="file" accept="image/*" class="upload-input"
+                        <input type="file" accept=".pdf,.jpeg,.jpg,.png" class="upload-input"
                             (change)="onAttachmentFileSelected($event)">
+                        <div class="upload-allowed-hint">Allowed: .pdf, .jpeg, .jpg, .png</div>
                     </div>
                 </div>
             </div>

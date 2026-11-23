@@ -264,7 +264,8 @@
           </div>
           <div class="body">
             <p *ngFor="let file of attachments"><a [href]="fileUrl(file.ticketAttachmentID)" target="_blank">{{ file.fileName }}</a> — {{ file.uploadedBy }}</p>
-            <input type="file" accept="image/*" (change)="onFile($event)" />
+            <input type="file" accept=".pdf,.jpeg,.jpg,.png" (change)="onFile($event)" />
+            <div class="upload-allowed-hint">Allowed: .pdf, .jpeg, .jpg, .png</div>
           </div>
         </div>
       </div>

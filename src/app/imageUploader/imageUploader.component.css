@@ -4,3 +4,23 @@
     margin-left: 15px;
     line-height: 36px;
 }
+
+.upload-allowed-hint {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 11px;
+    color: #666;
+    vertical-align: middle;
+}
+
+.upload-error {
+    color: #c0392b;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+.upload-success {
+    color: #28a745;
+    margin-left: 8px;
+    font-weight: bold;
+}

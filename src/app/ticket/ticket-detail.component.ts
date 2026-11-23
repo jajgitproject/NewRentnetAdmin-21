@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TicketService } from './ticket.service';
+import { UPLOAD_ALLOWED_HINT, isAllowedUploadFileName } from '../general/upload-allowed';
 
 @Component({
   standalone: false,
@@ -164,6 +165,13 @@ export class TicketDetailComponent implements OnInit {
   onFile(event: any): void {
     const file = event?.target?.files?.[0];
     if (!file) {
+      return;
+    }
+    if (!isAllowedUploadFileName(file.name)) {
+      this.snack.open(UPLOAD_ALLOWED_HINT, 'Close', { duration: 4000 });
+      if (event?.target) {
+        event.target.value = '';
+      }
       return;
     }
     this.tickets.upload(this.ticketId, file).subscribe(

@@ -105,7 +105,8 @@
         </div>
 
         <div class="pending-attachment-row">
-          <input type="file" accept="image/*" (change)="onPendingAttachmentSelected($event)">
+          <input type="file" accept=".pdf,.jpeg,.jpg,.png" (change)="onPendingAttachmentSelected($event)">
+          <div class="upload-allowed-hint">Allowed: .pdf, .jpeg, .jpg, .png</div>
           <span *ngIf="pendingAttachmentFileName" class="pending-attachment-name">{{ pendingAttachmentFileName }}</span>
           <button mat-stroked-button type="button" *ngIf="pendingAttachmentFile" (click)="clearPendingAttachment()">Remove</button>
           <img *ngIf="pendingAttachmentPreviewUrl" [src]="pendingAttachmentPreviewUrl" alt="Pending attachment preview" class="pending-attachment-preview">
