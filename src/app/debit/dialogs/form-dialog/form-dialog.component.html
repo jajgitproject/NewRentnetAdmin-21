@@ -1,0 +1,169 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">{{dialogTitle}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="onNoClick()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="advanceTableForm">
+            <div *ngIf="showIncidenceContext" class="row">
+                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Incidence ID</mat-label>
+                        <input matInput [value]="advanceTable.incidenceID" readonly />
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Duty Slip ID</mat-label>
+                        <input matInput [value]="advanceTable.dutySlipID" readonly />
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Reservation ID</mat-label>
+                        <input matInput [value]="advanceTable.reservationID" readonly />
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Driver</mat-label>
+                        <input type="text" matInput [formControl]="driverPicker" [matAutocomplete]="autoDriver" />
+                        <mat-autocomplete #autoDriver="matAutocomplete" [displayWith]="displayDriver.bind(this)">
+                            <mat-option *ngFor="let opt of driverOptions$ | async" [value]="opt">
+                                {{ opt.displayLabel }}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Supplier</mat-label>
+                        <input type="text" matInput [formControl]="supplierPicker" [matAutocomplete]="autoSupplier" />
+                        <mat-autocomplete #autoSupplier="matAutocomplete" [displayWith]="displaySupplier.bind(this)">
+                            <mat-option *ngFor="let opt of supplierOptions$ | async" [value]="opt" (onSelectionChange)="onSupplierSelected(opt)">
+                                {{ opt.supplierName }}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Registration Number</mat-label>
+                        <input type="text" matInput [formControl]="inventoryPicker" [matAutocomplete]="autoInventory" />
+                        <mat-autocomplete #autoInventory="matAutocomplete" [displayWith]="displayInventory.bind(this)">
+                            <mat-option *ngFor="let opt of inventoryOptions$ | async" [value]="opt" (onSelectionChange)="onInventorySelected(opt)">
+                                {{ opt.registrationNumber }}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Date</mat-label>
+                        <input matInput [matDatepicker]="picker" formControlName="date" />
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Location</mat-label>
+                        <input type="text" matInput [formControl]="locationPicker" [matAutocomplete]="autoLocation" required />
+                        <mat-autocomplete #autoLocation="matAutocomplete" [displayWith]="displayLocation.bind(this)">
+                            <mat-option *ngFor="let opt of locationOptions$ | async" [value]="opt" (onSelectionChange)="onLocationSelected(opt)">
+                                {{ opt.organizationalEntityName }}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="advanceTableForm.get('locationID').hasError('required')">
+                            Location is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2" *ngIf="!readOnly">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Debit Type</mat-label>
+                        <mat-select formControlName="debitTypeID" required>
+                            <mat-option *ngFor="let dt of debitTypeOptions" [value]="dt.debitTypeID">
+                                {{ dt.debitType }} ({{ dt.debitTypeAmount }})
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="advanceTableForm.get('debitTypeID').hasError('required')">
+                            Debit type is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2" *ngIf="readOnly">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Debit Type</mat-label>
+                        <input matInput [value]="advanceTable.debitType" readonly />
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Amount</mat-label>
+                        <input matInput type="number" step="0.01" formControlName="amount" required />
+                        <mat-error *ngIf="advanceTableForm.get('amount').hasError('required')">
+                            Amount is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Narration</mat-label>
+                        <textarea matInput formControlName="narration" maxlength="500" rows="2" required></textarea>
+                        <mat-error *ngIf="advanceTableForm.get('narration').hasError('required')">
+                            Narration is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="action === 'edit' && !readOnly">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Activation Status</mat-label>
+                        <mat-select formControlName="activationStatus">
+                            <mat-option [value]="true">Active</mat-option>
+                            <mat-option [value]="false">Deleted</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div *ngIf="readOnly" class="alert alert-warning">
+                This debit is linked to an incidence debit type and can only be viewed on this page.
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" *ngIf="saveDisabled && !readOnly"
+                            [disabled]="!advanceTableForm.valid" type="button" (click)="confirmAdd()">Save</button>
+                        <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-raised-button color="warn" type="button" (click)="onNoClick()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

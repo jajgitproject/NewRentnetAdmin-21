@@ -438,6 +438,20 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+
+      {
+        path: 'debit',
+        title: 'Debits',
+        pageKey: 'Debits',
+        moduleName: 'debit',
+        alternateAccessPageKeys: ['debit', 'Debits'],
+        visibleWhenHasPageAccess: ['debitType', 'Debit Type'],
+        icon: 'fas fa-money-bill-wave',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
       
       // {
       //   path: 'dailyReport',

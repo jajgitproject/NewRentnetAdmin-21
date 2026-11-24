@@ -1,0 +1,70 @@
+<div class="addContainer debit-log-dialog">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 font-17">
+                        Debit Logs
+                        <span class="debit-id-label" *ngIf="data?.debitID">(Debit #{{ data.debitID }})</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button type="button" (click)="close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content>
+        <div class="log-body">
+            <div class="log-loading" *ngIf="isLoading">
+                <mat-spinner diameter="36"></mat-spinner>
+            </div>
+
+            <div *ngIf="!isLoading && !rows.length" class="alert alert-primary log-empty">
+                No log records found for this debit.
+            </div>
+
+            <div class="log-entries" *ngIf="!isLoading && rows.length">
+                <div class="log-entry" *ngFor="let row of rows" [class.expanded]="expandedLogId === row.debitLogID">
+                    <div class="log-entry-header" (click)="toggleExpanded(row.debitLogID)">
+                        <div class="log-entry-summary">
+                            <span class="crud-badge" [ngClass]="'crud-' + (row.crudType || '').toLowerCase()">
+                                {{ row.crudType || '—' }}
+                            </span>
+                            <span class="log-datetime">{{ row.actionDateTimeDisplay }}</span>
+                            <span class="log-user" *ngIf="userDisplay(row) !== '—'">By {{ userDisplay(row) }}</span>
+                        </div>
+                        <mat-icon class="expand-icon">
+                            {{ expandedLogId === row.debitLogID ? 'expand_less' : 'expand_more' }}
+                        </mat-icon>
+                    </div>
+
+                    <div class="log-entry-detail" *ngIf="expandedLogId === row.debitLogID">
+                        <table class="detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let field of row.recordFields">
+                                    <td>{{ field.label }}</td>
+                                    <td>{{ field.value || '—' }}</td>
+                                </tr>
+                                <tr *ngIf="!row.recordFields.length">
+                                    <td colspan="2">No field details recorded.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="example-button-row" *ngIf="!isLoading">
+                <button mat-raised-button color="primary" type="button" (click)="close()">Close</button>
+            </div>
+        </div>
+    </mat-dialog-content>
+</div>
