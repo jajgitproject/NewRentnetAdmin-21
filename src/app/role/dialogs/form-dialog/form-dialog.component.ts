@@ -2,7 +2,13 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { RoleService } from '../../role.service';
-import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
+import { AbstractControl, FormControl, ValidationErrors, Validators, FormGroup, FormBuilder} from '@angular/forms';
+
+/** Yes/No mat-select: only empty/unset is invalid; explicit false is allowed. */
+function requiredBoolSelect(control: AbstractControl): ValidationErrors | null {
+  const v = control.value;
+  return v === true || v === false ? null : { required: true };
+}
 import { Role } from '../../role.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
@@ -22,7 +28,8 @@ export class FormDialogComponent
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTable: Role;
-  
+  compareBoolean = (a: boolean, b: boolean): boolean => a === b;
+
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
   @Inject(MAT_DIALOG_DATA) public data: any,
@@ -57,36 +64,62 @@ export class FormDialogComponent
       : '';
   }
   
+  private normalizeBoolForSelect(value: any): boolean | '' {
+    if (value === true || value === false) {
+      return value;
+    }
+    if (value === 1 || value === '1' || value === 'true' || value === 'True') {
+      return true;
+    }
+    if (value === 0 || value === '0' || value === 'false' || value === 'False') {
+      return false;
+    }
+    return '';
+  }
+
+  private normalizeBoolWithDefault(value: any, defaultValue: boolean): boolean {
+    const normalized = this.normalizeBoolForSelect(value);
+    return normalized === '' ? defaultValue : normalized;
+  }
+
+  /** On edit, unset/null permissions default to No so the form can save with existing data. */
+  private boolSelectValue(modelValue: any): boolean | '' {
+    if (this.action === 'edit') {
+      return this.normalizeBoolWithDefault(modelValue, false);
+    }
+    return this.normalizeBoolForSelect(modelValue);
+  }
+
   createContactForm(): FormGroup 
   {
+    const boolReq = requiredBoolSelect;
+    const roleId = this.advanceTable.roleID;
     return this.fb.group(
     {
-      roleID: [this.advanceTable.roleID],
+      roleID: [roleId],
       role: [this.advanceTable.role,Validators.required],
       roleFor: [this.advanceTable.roleFor,Validators.required],
       remark : [this.advanceTable.remark],
-      canCreateReservation: [this.advanceTable.canCreateReservation, Validators.required],
-      activationStatus: [this.advanceTable.activationStatus],
-      isThisAKeyAccountManagerRole: [this.advanceTable.isThisAKeyAccountManagerRole, Validators.required],
-      canThisRoleCreateBackDateBooking: [this.advanceTable.canThisRoleCreateBackDateBooking, Validators.required],
-      canThisRoleCreateBillOnClosingScreen: [this.advanceTable.canThisRoleCreateBillOnClosingScreen, Validators.required],
-      canThisRoleViewBillOnClosingScreen: [this.advanceTable.canThisRoleViewBillOnClosingScreen, Validators.required],
-      canThisRoleDoGoodForBillingOnClosingScreen: [this.advanceTable.canThisRoleDoGoodForBillingOnClosingScreen, Validators.required],
-      canThisRoleViewDummyInvoice: [this.advanceTable.canThisRoleViewDummyInvoice, Validators.required],
-      canActAsContractTariffAuditor: [this.advanceTable.canActAsContractTariffAuditor, Validators.required],
-      canActAsContractTariffVerifier: [this.advanceTable.canActAsContractTariffVerifier, Validators.required],
-      canResetOdometer: [this.advanceTable.canResetOdometer, Validators.required],
-      canDeleteFuelEntry: [this.advanceTable.canDeleteFuelEntry, Validators.required],
-      canFindFuelEntry: [this.advanceTable.canFindFuelEntry, Validators.required],
-      canCloseIncident: [this.advanceTable.canCloseIncident, Validators.required],
-      canCancelBackDateAllotment: [this.advanceTable.canCancelBackDateAllotment, Validators.required],
-      canCancelBackDateReservation: [this.advanceTable.canCancelBackDateReservation, Validators.required],
-      canReactivateBackDateReservation: [this.advanceTable.canReactivateBackDateReservation, Validators.required],
-      canEditDSAfterGoodForBilling: [this.advanceTable.canEditDSAfterGoodForBilling, Validators.required],
-      canEditAutoBilling: [this.advanceTable.canEditAutoBilling === true || this.advanceTable.canEditAutoBilling === false ? this.advanceTable.canEditAutoBilling : false, Validators.required],
-      canBypassOTP: [this.advanceTable.canBypassOTP === true || this.advanceTable.canBypassOTP === false
-        ? this.advanceTable.canBypassOTP
-        : false, Validators.required]
+      canCreateReservation: [this.boolSelectValue(this.advanceTable.canCreateReservation), boolReq],
+      activationStatus: [this.advanceTable.activationStatus ?? true],
+      isThisAKeyAccountManagerRole: [this.boolSelectValue(this.advanceTable.isThisAKeyAccountManagerRole), boolReq],
+      canThisRoleCreateBackDateBooking: [this.boolSelectValue(this.advanceTable.canThisRoleCreateBackDateBooking), boolReq],
+      canThisRoleCreateBillOnClosingScreen: [this.boolSelectValue(this.advanceTable.canThisRoleCreateBillOnClosingScreen), boolReq],
+      canThisRoleViewBillOnClosingScreen: [this.boolSelectValue(this.advanceTable.canThisRoleViewBillOnClosingScreen), boolReq],
+      canThisRoleDoGoodForBillingOnClosingScreen: [this.boolSelectValue(this.advanceTable.canThisRoleDoGoodForBillingOnClosingScreen), boolReq],
+      canThisRoleViewDummyInvoice: [this.boolSelectValue(this.advanceTable.canThisRoleViewDummyInvoice), boolReq],
+      canActAsContractTariffAuditor: [this.boolSelectValue(this.advanceTable.canActAsContractTariffAuditor), boolReq],
+      canActAsContractTariffVerifier: [this.boolSelectValue(this.advanceTable.canActAsContractTariffVerifier), boolReq],
+      canResetOdometer: [this.boolSelectValue(this.advanceTable.canResetOdometer), boolReq],
+      canDeleteFuelEntry: [this.boolSelectValue(this.advanceTable.canDeleteFuelEntry), boolReq],
+      canFindFuelEntry: [this.boolSelectValue(this.advanceTable.canFindFuelEntry), boolReq],
+      canCloseIncident: [this.boolSelectValue(this.advanceTable.canCloseIncident), boolReq],
+      canCancelBackDateAllotment: [this.boolSelectValue(this.advanceTable.canCancelBackDateAllotment), boolReq],
+      canCancelBackDateReservation: [this.boolSelectValue(this.advanceTable.canCancelBackDateReservation), boolReq],
+      canReactivateBackDateReservation: [this.boolSelectValue(this.advanceTable.canReactivateBackDateReservation), boolReq],
+      canEditDSAfterGoodForBilling: [this.boolSelectValue(this.advanceTable.canEditDSAfterGoodForBilling), boolReq],
+      canEditAutoBilling: [this.normalizeBoolWithDefault(this.advanceTable.canEditAutoBilling, false), boolReq],
+      canBypassOTP: [this.normalizeBoolWithDefault(this.advanceTable.canBypassOTP, false), boolReq]
     });
   }
   submit() 
@@ -99,9 +132,17 @@ export class FormDialogComponent
   }
   private getRolePayload(): any {
     const raw = this.advanceTableForm.getRawValue();
-    const toBool = (v: any) => v === true || v === 'true' || v === 1 || v === '1';
+    const toBool = (v: any) => {
+      if (v === false || v === 'false' || v === 0 || v === '0') {
+        return false;
+      }
+      return v === true || v === 'true' || v === 1 || v === '1';
+    };
+    const roleId = Number(raw.roleID ?? this.advanceTable.roleID);
     return {
       ...raw,
+      roleID: roleId,
+      RoleID: roleId,
       canCreateReservation: toBool(raw.canCreateReservation),
       activationStatus: toBool(raw.activationStatus),
       isThisAKeyAccountManagerRole: toBool(raw.isThisAKeyAccountManagerRole),

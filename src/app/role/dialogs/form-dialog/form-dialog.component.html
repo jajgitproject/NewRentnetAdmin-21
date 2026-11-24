@@ -287,7 +287,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Can Close Incident</mat-label>
-                        <mat-select formControlName="canCloseIncident">
+                        <mat-select formControlName="canCloseIncident" [compareWith]="compareBoolean">
                             <mat-option value="">--Select--</mat-option>
                             <mat-option [value]="true">Yes</mat-option>
                             <mat-option [value]="false">No</mat-option>
@@ -303,7 +303,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Can Cancel Back Date Allotment</mat-label>
-                        <mat-select formControlName="canCancelBackDateAllotment">
+                        <mat-select formControlName="canCancelBackDateAllotment" [compareWith]="compareBoolean">
                             <mat-option value="">--Select--</mat-option>
                             <mat-option [value]="true">Yes</mat-option>
                             <mat-option [value]="false">No</mat-option>
@@ -316,7 +316,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Can Cancel Back Date Reservation</mat-label>
-                        <mat-select formControlName="canCancelBackDateReservation">
+                        <mat-select formControlName="canCancelBackDateReservation" [compareWith]="compareBoolean">
                             <mat-option value="">--Select--</mat-option>
                             <mat-option [value]="true">Yes</mat-option>
                             <mat-option [value]="false">No</mat-option>
@@ -332,7 +332,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
                         <mat-label>Can Reactivate Back Date Reservation</mat-label>
-                        <mat-select formControlName="canReactivateBackDateReservation">
+                        <mat-select formControlName="canReactivateBackDateReservation" [compareWith]="compareBoolean">
                             <mat-option value="">--Select--</mat-option>
                             <mat-option [value]="true">Yes</mat-option>
                             <mat-option [value]="false">No</mat-option>

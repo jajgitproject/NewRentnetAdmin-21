@@ -28,7 +28,7 @@ export class Role {
 
   constructor(role) {
     {
-       this.roleID = role.roleID ?? role.id ?? -1;
+       this.roleID = role.roleID ?? role.RoleID ?? role.id ?? role.Id ?? -1;
        this.role = role.role || '';
        this.roleFor = role.roleFor || '';
        this.remark = role.remark  || '';
@@ -46,10 +46,18 @@ export class Role {
        this.canResetOdometer = role.canResetOdometer ?? role.CanResetOdometer ?? '';
        this.canDeleteFuelEntry = role.canDeleteFuelEntry ?? role.CanDeleteFuelEntry ?? '';
        this.canFindFuelEntry = role.canFindFuelEntry ?? role.CanFindFuelEntry ?? '';
-       this.canCloseIncident = role.canCloseIncident ?? role.CanCloseIncident ?? '';
-       this.canCancelBackDateAllotment = role.canCancelBackDateAllotment ?? role.CanCancelBackDateAllotment ?? '';
-       this.canCancelBackDateReservation = role.canCancelBackDateReservation ?? role.CanCancelBackDateReservation ?? '';
-       this.canReactivateBackDateReservation = role.canReactivateBackDateReservation ?? role.CanReactivateBackDateReservation ?? '';
+       this.canCloseIncident = Role.toBoolOrEmpty(
+         role.canCloseIncident ?? role.CanCloseIncident
+       );
+       this.canCancelBackDateAllotment = Role.toBoolOrEmpty(
+         role.canCancelBackDateAllotment ?? role.CanCancelBackDateAllotment
+       );
+       this.canCancelBackDateReservation = Role.toBoolOrEmpty(
+         role.canCancelBackDateReservation ?? role.CanCancelBackDateReservation
+       );
+       this.canReactivateBackDateReservation = Role.toBoolOrEmpty(
+         role.canReactivateBackDateReservation ?? role.CanReactivateBackDateReservation
+       );
        this.canEditDSAfterGoodForBilling = Role.toBoolOrEmpty(
          role.canEditDSAfterGoodForBilling ?? role.CanEditDSAfterGoodForBilling
        );
