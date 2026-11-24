@@ -428,7 +428,10 @@ export const ROUTES: RouteInfo[] = [
       {
         path: 'debitType',
         title: 'Debit Type',
+        pageKey: 'Debit Type',
         moduleName: 'debitType',
+        alternateAccessPageKeys: ['debitType', 'Debit Type'],
+        visibleWhenHasPageAccess: ['role', 'Role'],
         icon: 'fas fa-tachometer-alt',
         class: '',
         groupTitle: false,

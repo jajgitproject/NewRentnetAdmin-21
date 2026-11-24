@@ -38,6 +38,30 @@ export function routeAccessNormalizedKeys(route: RouteInfo): string[] {
   return Array.from(keys);
 }
 
+function linkedPageAccessGranted(
+  route: RouteInfo,
+  accessPages: { page: string }[]
+): boolean {
+  const linked = route.visibleWhenHasPageAccess || [];
+  return linked.some((name) =>
+    accessPages.some((p) => p.page === normalizeMenuPageKey(name))
+  );
+}
+
+export function routeHasMenuAccess(
+  route: RouteInfo,
+  accessPages: { page: string }[]
+): boolean {
+  if (route.groupTitle || route.alwaysAccessible) {
+    return true;
+  }
+  const keys = routeAccessNormalizedKeys(route);
+  if (keys.some((key) => accessPages.some((p) => p.page === key))) {
+    return true;
+  }
+  return linkedPageAccessGranted(route, accessPages);
+}
+
 export function buildAccessPagesArrayFromApi(
   data: any[]
 ): { page: string; pageID: number }[] {
@@ -96,8 +120,7 @@ export function applyMenuAccessRecursive(
         r.isAccess = true;
         continue;
       }
-      const keys = routeAccessNormalizedKeys(r);
-      r.isAccess = keys.some((key) => accessPagesArray.some((p) => p.page === key));
+      r.isAccess = routeHasMenuAccess(r, accessPagesArray);
     }
   }
 }
@@ -136,12 +159,5 @@ export function routePageAllowed(
   routeNode: RouteInfo,
   accessPages: { page: string }[]
 ): boolean {
-  if (routeNode.groupTitle || routeNode.alwaysAccessible) {
-    return true;
-  }
-  const keys = routeAccessNormalizedKeys(routeNode);
-  if (!keys.length) {
-    return false;
-  }
-  return keys.some((key) => accessPages.some((p) => p.page === key));
+  return routeHasMenuAccess(routeNode, accessPages);
 }

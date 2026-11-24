@@ -15,5 +15,7 @@ export interface RouteInfo {
   isAccess: boolean;
   /** When true, the item is shown without a matching Page / RolePageMapping row. */
   alwaysAccessible?: boolean;
+  /** Show this route when the user has access to any of these other pages (e.g. debitType with Role). */
+  visibleWhenHasPageAccess?: string[];
 }
 
