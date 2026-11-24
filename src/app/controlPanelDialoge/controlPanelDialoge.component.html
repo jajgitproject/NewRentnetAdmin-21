@@ -143,6 +143,13 @@
                   <b><button class="BoldButton" mat-button (click)="emailInfo(item)">
                       Email format
                     </button></b><br />
+                  <ng-container *ngIf="hasAutoClosure(item)">
+                    <b matTooltip="Duty has been autoclosed"
+                       matTooltipPosition="above"
+                       matTooltipShowDelay="200"
+                       class="cp-auto-closure-label">AutoClosure</b><br />
+                    <label class="TDValue">Yes</label><br />
+                  </ng-container>
 
                 </td>
                 <td class="TDValue col-lg-1 col-md-1 col-sm-1 col-xs-1">

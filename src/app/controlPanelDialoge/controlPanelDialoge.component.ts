@@ -449,6 +449,11 @@ export class ControlPanelDialogeComponent {
     return this.getPrimaryGuestPassenger(item)?.gender === 'Female';
   }
 
+  hasAutoClosure(item: any): boolean {
+    const flag = item?.autoClosure ?? item?.AutoClosure;
+    return flag === true || flag === 'true' || flag === 1;
+  }
+
   private prefetchKamSummaries(list: any[]): void {
     this.kamSummaryByCustomerId = {};
     this.kamRowsByCustomerId = {};
