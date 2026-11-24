@@ -1,12 +1,15 @@
 <div *ngFor="let data of toArray(advanceTableSRD);index as i">
-<div class="row" style="margin-left: 20px;margin-top: 20px;">
+<div class="row" style="margin-left: 20px;margin-top: 20px;" *ngIf="!readOnly">
     <!-- <a style="cursor: pointer;color: #007bff;" (click)="editSettledRate(i)">
         Settled Rate {{i+1}} - Edit - Delete</a> -->
         <a style="cursor: pointer; color: #007bff;">
-            Settled Rate {{i + 1}} -
+            Settled Rate {{ i + 1 }} -
             <span style="cursor: pointer; color: #007bff;" (click)="editSettledRate(i)">Edit</span> -
             <span style="cursor: pointer; color: #007bff;" (click)="deleteItem(i)">Delete</span>
         </a>
+</div>
+<div class="row" style="margin-left: 20px;margin-top: 20px;" *ngIf="readOnly">
+        <b>Settled Rate {{ i + 1 }}</b>
 </div>
 <div class="row" style="margin-left: 20px;margin-top: 20px;">
     <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
@@ -51,7 +54,7 @@
 </div>
 
 <div class="row" style="margin-left: 20px;margin-top: 20px;">
-    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!readOnly">
         <span>
             <b>
                 Base Fare
@@ -89,6 +92,16 @@
         </span>
         <br/>
         <span>{{data.packageHour}}</span>
+    </div>
+
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="readOnly">
+        <span>
+            <b>
+                Fuel Surcharge
+            </b>                   
+        </span>
+        <br/>
+        <span>{{data.fuelSurcharge === true ? 'Yes' : 'No'}}</span>
     </div>
 </div>
 
@@ -227,7 +240,7 @@
         <span>{{data.fgrKm ?? '-'}}</span>
     </div>
 
-    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2">
+    <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 mb-2" *ngIf="!readOnly">
         <span>
             <b>
                 Fuel Surcharge

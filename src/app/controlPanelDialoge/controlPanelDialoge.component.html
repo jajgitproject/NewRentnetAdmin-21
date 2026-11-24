@@ -978,7 +978,12 @@
                   </mat-menu>
                   <br *ngIf="upsellStatus?.isAuthorized" />
 
-
+                  <b class="settled-rate-row" *ngIf="hasB2cResNo(item)">
+                    <button type="button" class="BoldButton" mat-button (click)="openSettledRateDialog()">
+                      Settled Rate
+                    </button>
+                  </b>
+                  <br *ngIf="hasB2cResNo(item)" />
 
                   <!-- <b>
                                     <br>

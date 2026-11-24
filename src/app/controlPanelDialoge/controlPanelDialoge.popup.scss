@@ -435,7 +435,8 @@
   .incidence-row,
   .feedback-row,
   .track-on-map-row,
-  .upsell-row {
+  .upsell-row,
+  .settled-rate-row {
     display: grid !important;
     grid-template-columns: max-content 18px !important;
     grid-template-rows: var(--cp-row-lh) !important;
@@ -470,6 +471,7 @@
   .feedback-row .BoldButton,
   .track-on-map-row .BoldButton,
   .upsell-row .BoldButton,
+  .settled-rate-row .BoldButton,
   .life-cycle-status-row .BoldButton {
     grid-column: 1 !important;
     grid-row: 1 !important;
@@ -584,6 +586,10 @@
   .upsell-row .BoldButton:not(.upsold-label) .mdc-button__label {
     color: #000 !important;
     font-weight: 700 !important;
+  }
+
+  .upsell-row ~ .settled-rate-row {
+    margin-top: 6px !important;
   }
 
   /* After .BoldButton + column rules: Reservation Group label in grid col 1 */
