@@ -30,7 +30,7 @@ export class MisMyFormatComponent implements OnInit {
 
   availableFields: string[] = [];
   selectedFields: string[] = [];
-  maxFields = 100;
+  maxFields = 50;
   hasFormat = false;
   loading = false;
   saving = false;
@@ -71,7 +71,7 @@ export class MisMyFormatComponent implements OnInit {
         return;
       }
       if (this.selectedFields.length >= this.maxFields) {
-        this.snackBar.open('You cannot select more than 100 fields.', '', {
+        this.snackBar.open(`You cannot select more than ${this.maxFields} fields.`, '', {
           duration: 2500,
           verticalPosition: 'bottom',
           horizontalPosition: 'center',
@@ -103,7 +103,7 @@ export class MisMyFormatComponent implements OnInit {
     }
 
     if (this.selectedFields.length > this.maxFields) {
-      this.snackBar.open('You cannot select more than 100 fields.', '', {
+      this.snackBar.open(`You cannot select more than ${this.maxFields} fields.`, '', {
         duration: 2500,
         verticalPosition: 'bottom',
         horizontalPosition: 'center',
@@ -219,7 +219,7 @@ export class MisMyFormatComponent implements OnInit {
       this.availableFields = available;
     }
 
-    this.maxFields = dto?.maxFields || dto?.MaxFields || this.maxFields || 100;
+    this.maxFields = dto?.maxFields || dto?.MaxFields || this.maxFields || 50;
 
     const serverHasFormat = !!(dto?.hasFormat || dto?.HasFormat) && selected.length > 0;
     if (serverHasFormat) {
