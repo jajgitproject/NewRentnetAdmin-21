@@ -60,6 +60,8 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
   SearchDuty = '';
   SearchBillDateFrom: FormControl = new FormControl(null);
   SearchBillToDate: FormControl = new FormControl(null);
+  SearchBillSummaryDateFrom: FormControl = new FormControl(null);
+  SearchBillSummaryToDate: FormControl = new FormControl(null);
   SearchPaidStatus: FormControl = new FormControl('All');
 
   CustomerGroupList: CustomerGroupDropDown[] = [];
@@ -129,6 +131,8 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     this.SearchDuty = '';
     this.SearchBillDateFrom.setValue(null);
     this.SearchBillToDate.setValue(null);
+    this.SearchBillSummaryDateFrom.setValue(null);
+    this.SearchBillSummaryToDate.setValue(null);
     this.SearchPaidStatus.setValue('All');
   }
 
@@ -152,6 +156,8 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       SearchDuty: this.SearchDuty || '',
       SearchBillFromDate: this.formatSearchDate(this.SearchBillDateFrom?.value),
       SearchBillToDate: this.formatSearchDate(this.SearchBillToDate?.value),
+      SearchBillSummaryFromDate: this.formatSearchDate(this.SearchBillSummaryDateFrom?.value),
+      SearchBillSummaryToDate: this.formatSearchDate(this.SearchBillSummaryToDate?.value),
       SearchPaidStatus: this.normalizeSelect(this.SearchPaidStatus?.value)
     };
   }
@@ -190,6 +196,12 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     const billDateRangeError = this.validateBillDateRange();
     if (billDateRangeError) {
       this.showNotification('snackbar-danger', billDateRangeError, 'bottom', 'center');
+      return;
+    }
+
+    const billSummaryDateRangeError = this.validateBillSummaryDateRange();
+    if (billSummaryDateRangeError) {
+      this.showNotification('snackbar-danger', billSummaryDateRangeError, 'bottom', 'center');
       return;
     }
 
@@ -330,8 +342,15 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     return this.hasValidDate(this.SearchBillDateFrom?.value) && this.hasValidDate(this.SearchBillToDate?.value);
   }
 
+  isBillSummaryDateSearchActive(): boolean {
+    return this.hasValidDate(this.SearchBillSummaryDateFrom?.value)
+      && this.hasValidDate(this.SearchBillSummaryToDate?.value);
+  }
+
   isPickupDateRequired(): boolean {
-    return !this.isDutySlipIdSearchActive() && !this.isBillDateSearchActive();
+    return !this.isDutySlipIdSearchActive()
+      && !this.isBillDateSearchActive()
+      && !this.isBillSummaryDateSearchActive();
   }
 
   openDatePicker(picker: { open?: () => void }, disabled = false) {
@@ -342,10 +361,10 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
   }
 
   validatePickupDateRange(): string | null {
-    if (this.isDutySlipIdSearchActive() || this.isBillDateSearchActive()) {
+    if (this.isDutySlipIdSearchActive() || this.isBillDateSearchActive() || this.isBillSummaryDateSearchActive()) {
       if (this.hasValidDate(this.SearchFromDate) || this.hasValidDate(this.SearchToDate)) {
         if (!this.hasValidDate(this.SearchFromDate) || !this.hasValidDate(this.SearchToDate)) {
-          return 'Please select both Pickup Date From and Pickup Date To, or leave both blank when using bill dates.';
+          return 'Please select both Pickup Date From and Pickup Date To, or leave both blank when using bill or bill summary dates.';
         }
       } else {
         return null;
@@ -397,6 +416,29 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     return null;
   }
 
+  validateBillSummaryDateRange(): string | null {
+    const fromValue = this.SearchBillSummaryDateFrom?.value;
+    const toValue = this.SearchBillSummaryToDate?.value;
+    if (!this.hasValidDate(fromValue) && !this.hasValidDate(toValue)) {
+      return null;
+    }
+
+    if (!this.hasValidDate(fromValue) || !this.hasValidDate(toValue)) {
+      return 'Please select both Bill Summary From Date and Bill Summary To Date.';
+    }
+
+    const fromDate = moment(fromValue).startOf('day');
+    const toDate = moment(toValue).startOf('day');
+    if (!fromDate.isValid() || !toDate.isValid()) {
+      return 'Please enter valid bill summary dates.';
+    }
+    if (toDate.isBefore(fromDate)) {
+      return 'Bill Summary To Date cannot be earlier than Bill Summary From Date.';
+    }
+
+    return null;
+  }
+
   hasAdditionalSearchFilters(): boolean {
     return this.isSearchValueSet(this.SearchCustomerGroup?.value)
       || this.isSearchValueSet(this.SearchCustomer?.value)
@@ -412,6 +454,8 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
       || this.isSearchValueSet(this.SearchDuty)
       || this.hasValidDate(this.SearchBillDateFrom?.value)
       || this.hasValidDate(this.SearchBillToDate?.value)
+      || this.hasValidDate(this.SearchBillSummaryDateFrom?.value)
+      || this.hasValidDate(this.SearchBillSummaryToDate?.value)
       || this.isSearchValueSet(this.SearchPaidStatus?.value);
   }
 

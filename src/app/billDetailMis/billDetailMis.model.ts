@@ -18,6 +18,8 @@ export class SearchCriteria {
   SearchDuty: string;
   SearchBillFromDate: string;
   SearchBillToDate: string;
+  SearchBillSummaryFromDate: string;
+  SearchBillSummaryToDate: string;
   SearchPaidStatus: string;
   PageNumber?: number;
   Order?: string;
