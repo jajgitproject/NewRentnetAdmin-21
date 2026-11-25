@@ -11,6 +11,7 @@ import { SearchCriteria } from './billDetailMis.model';
 import { BillDetailMisService } from './billDetailMis.service';
 import { extractExportErrorMessage, exportJobAcceptedSnackbarMessage, exportSearchButtonLabel, formatExportElapsedTime, IN_FLIGHT_EXPORT_MESSAGE, isExportJobCancelled, isExportJobNotFoundError, loadPersistedExportJobId, markExportDumpStarted, persistExportJobId } from '../general/export-job.helper';
 import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
+import { MisMyFormatComponent } from '../shared/mis-my-format/mis-my-format.component';
 import { CustomerDropDown } from '../customer/customerDropDown.model';
 import { CustomerGroupDropDown } from '../customerGroup/customerGroupDropDown.model';
 import { SupplierTypeDropDownModel } from '../supplierType/supplierType.model';
@@ -37,7 +38,9 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
   exportJobStartedAt: number | null = null;
   private exportPollSub?: Subscription;
   private readonly exportJobPageKey = 'billDetailMis';
+  hasMyFormat = false;
   @ViewChild(StoredMisExportsComponent) storedExports?: StoredMisExportsComponent;
+  @ViewChild(MisMyFormatComponent) myFormatPanel?: MisMyFormatComponent;
   readonly maxPickupDateRangeDays = 15;
   IsKAMRole = false;
 
@@ -153,7 +156,32 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
     };
   }
 
+  onMyFormatReady(ready: boolean): void {
+    this.hasMyFormat = !!ready;
+  }
+
+  private myFormatGateMessage(): string {
+    return this.myFormatPanel?.hasUnsavedSelection
+      ? 'Save My Format before searching.'
+      : 'First choose fields';
+  }
+
+  onSearchPanelOpened(panel: any): void {
+    if (this.hasMyFormat) {
+      return;
+    }
+    if (panel) {
+      panel.expanded = false;
+    }
+    this.showNotification('snackbar-danger', this.myFormatGateMessage(), 'bottom', 'center');
+  }
+
   SearchData() {
+    if (!this.hasMyFormat) {
+      this.showNotification('snackbar-danger', this.myFormatGateMessage(), 'bottom', 'center');
+      return;
+    }
+
     if (this.exportJobRunning) {
       this.showNotification('snackbar-danger', IN_FLIGHT_EXPORT_MESSAGE, 'bottom', 'center');
       return;

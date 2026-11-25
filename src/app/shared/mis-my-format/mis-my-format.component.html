@@ -1,0 +1,32 @@
+<mat-accordion class="duty-register-search-accordion mis-my-format-accordion">
+  <mat-expansion-panel class="duty-register-inline-search-panel" [(expanded)]="panelExpanded">
+    <mat-expansion-panel-header>
+      <mat-panel-title>{{ panelTitle }}</mat-panel-title>
+      <mat-panel-description>{{ selectedCount }} / {{ maxFields }} selected</mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <div class="mis-my-format-body" *ngIf="!loading">
+      <p class="mis-my-format-hint">
+        Choose the fields for your report (maximum {{ maxFields }}). There is no Select All.
+        Save before using Quick Search.
+      </p>
+      <div class="mis-my-format-grid">
+        <label class="mis-my-format-item" *ngFor="let field of availableFields">
+          <mat-checkbox
+            [checked]="isChecked(field)"
+            [disabled]="!isChecked(field) && !canCheckMore()"
+            (change)="toggle(field, $event.checked)">
+            {{ field }}
+          </mat-checkbox>
+        </label>
+      </div>
+      <div class="mis-my-format-actions">
+        <button mat-raised-button color="primary" type="button" (click)="save()" [disabled]="saving || selectedCount < 1">
+          {{ saving ? 'Saving…' : 'Save' }}
+        </button>
+        <span class="mis-my-format-count">{{ selectedCount }} / {{ maxFields }}</span>
+      </div>
+    </div>
+    <div class="mis-my-format-body" *ngIf="loading">Loading fields…</div>
+  </mat-expansion-panel>
+</mat-accordion>

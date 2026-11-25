@@ -1,0 +1,32 @@
+.mis-my-format-hint {
+  margin: 0 0 12px;
+  color: #546e7a;
+  font-size: 13px;
+}
+
+.mis-my-format-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 12px;
+  max-height: 360px;
+  overflow: auto;
+  padding: 4px 0 12px;
+}
+
+.mis-my-format-item {
+  display: block;
+  margin: 0;
+  font-size: 13px;
+}
+
+.mis-my-format-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.mis-my-format-count {
+  font-weight: 600;
+  color: #37474f;
+}

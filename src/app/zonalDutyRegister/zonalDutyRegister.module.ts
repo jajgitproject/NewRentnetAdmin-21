@@ -29,6 +29,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
+import { MisMyFormatComponent } from '../shared/mis-my-format/mis-my-format.component';
 @NgModule({
   declarations: [
     ZonalDutyRegisterComponent,
@@ -38,6 +39,7 @@ import { StoredMisExportsComponent } from '../general/stored-mis-exports.compone
     FormsModule,
     ReactiveFormsModule,
     ZonalDutyRegisterRoutingModule,
+    MisMyFormatComponent,
     MatTableModule,
     MatPaginatorModule,
     MatFormFieldModule,
