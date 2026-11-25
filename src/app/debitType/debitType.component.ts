@@ -29,6 +29,7 @@ import { FormControl } from '@angular/forms';
 export class DebitTypeComponent implements OnInit {
   displayedColumns = [
     'DebitType',
+    'DebitTypeFor',
     'DebitTypeAmount',
     'status',
     'actions'

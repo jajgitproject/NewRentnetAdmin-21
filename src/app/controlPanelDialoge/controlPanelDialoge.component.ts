@@ -111,6 +111,7 @@ import { CancelUpsellDialogComponent } from '../reservationUpsell/dialogs/cancel
 import { UpsellDeclineLogDialogComponent } from '../reservationUpsell/dialogs/upsell-decline-log-dialog/upsell-decline-log-dialog.component';
 import { UpsellHistoryDialogComponent } from '../reservationUpsell/dialogs/upsell-history-dialog/upsell-history-dialog.component';
 import { ReservationUpsellStatus } from '../reservationUpsell/reservationUpsell.model';
+import { SettledRateViewDialogComponent } from '../settledRateDetails/dialogs/view-dialog/settled-rate-view-dialog.component';
 
 @Component({
   standalone: false,
@@ -410,6 +411,22 @@ export class ControlPanelDialogeComponent {
     });
   }
 
+  hasB2cResNo(item: any): boolean {
+    const detail = (item?.reservationSourceDetail ?? item?.ReservationSourceDetail ?? '')
+      .toString()
+      .trim();
+    return detail.length > 0;
+  }
+
+  openSettledRateDialog(): void {
+    this.dialog.open(SettledRateViewDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: { reservationID: this.reservationID }
+    });
+  }
+
   getPrimaryGuestPassenger(item: any): { importance?: string; gender?: string } | null {
     const passengers = item?.passengerDetails;
     if (passengers?.length) {
@@ -430,6 +447,11 @@ export class ControlPanelDialogeComponent {
 
   isFemaleTraveller(item: any): boolean {
     return this.getPrimaryGuestPassenger(item)?.gender === 'Female';
+  }
+
+  hasAutoClosure(item: any): boolean {
+    const flag = item?.autoClosure ?? item?.AutoClosure;
+    return flag === true || flag === 'true' || flag === 1;
   }
 
   private prefetchKamSummaries(list: any[]): void {

@@ -5,7 +5,7 @@ import { FormControl, Validators, FormGroup, FormBuilder} from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
-import { DebitTypeModel } from '../../debitType.model';
+import { DebitTypeModel, DEBIT_TYPE_FOR_OPTIONS } from '../../debitType.model';
 import { DebitTypeService } from '../../debitType.service';
 
 @Component({
@@ -23,7 +23,8 @@ export class FormDialogComponent
   dialogTitle: string;
   advanceTableForm: FormGroup;
   advanceTable: DebitTypeModel;
-  saveDisabled:boolean=true; 
+  saveDisabled:boolean=true;
+  readonly debitTypeForOptions = DEBIT_TYPE_FOR_OPTIONS;
 
   constructor(
   public dialogRef: MatDialogRef<FormDialogComponent>, 
@@ -44,6 +45,7 @@ export class FormDialogComponent
       this.dialogTitle = 'Debit Type';
       this.advanceTable = new DebitTypeModel({});
       this.advanceTable.activationStatus=true;
+      this.advanceTable.debitTypeFor = 'Both';
     }
     this.advanceTableForm = this.createContactForm();
   }
@@ -53,8 +55,9 @@ export class FormDialogComponent
     return this.fb.group(
     {
       debitTypeID: [this.advanceTable.debitTypeID],
-      debitType: [this.advanceTable.debitType],
-      debitTypeAmount: [this.advanceTable.debitTypeAmount],
+      debitType: [this.advanceTable.debitType, Validators.required],
+      debitTypeAmount: [this.advanceTable.debitTypeAmount, Validators.required],
+      debitTypeFor: [this.advanceTable.debitTypeFor || 'Both', Validators.required],
       activationStatus: [this.advanceTable.activationStatus],
     });
   }

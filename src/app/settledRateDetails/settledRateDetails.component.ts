@@ -31,6 +31,9 @@ export class SettledRateDetailsComponent implements OnInit {
   @Input() advanceTableSRD: SettledRateDetails[] = [];
   @Input() reservationID
   @Input() status;
+  @Input() readOnly = false;
+  /** When true, parent supplies advanceTableSRD; skip API load (e.g. Control Panel view dialog). */
+  @Input() disableAutoLoad = false;
   @Output() sectionDataChanged = new EventEmitter<void>();
   advanceTable: SettledRateDetails | null;
   advanceTableForm: FormGroup;
@@ -56,8 +59,15 @@ export class SettledRateDetailsComponent implements OnInit {
   contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
   ngOnInit() {
-    this.loadData();
-    this.SubscribeUpdateService();
+    if (!this.disableAutoLoad) {
+      this.loadData();
+    } else {
+      const rows = this.toArray<SettledRateDetails>(this.advanceTableSRD);
+      this.PackageType = rows.length > 0 ? rows[0].packageType : '';
+    }
+    if (!this.readOnly) {
+      this.SubscribeUpdateService();
+    }
   }
   formControl = new FormControl('', 
   [

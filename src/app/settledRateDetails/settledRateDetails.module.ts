@@ -29,12 +29,14 @@ import { FormDialogSRDComponent } from './dialogs/form-dialog/form-dialog.compon
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
+import { SettledRateViewDialogComponent } from './dialogs/view-dialog/settled-rate-view-dialog.component';
 
 @NgModule({
   declarations: [
     SettledRateDetailsComponent,
     FormDialogSRDComponent,
-    DeleteDialogComponent
+    DeleteDialogComponent,
+    SettledRateViewDialogComponent
   ],
   imports: [
     MatAutocompleteModule,
@@ -63,7 +65,7 @@ import { DeleteDialogComponent } from './dialogs/delete/delete.component';
     MatProgressSpinnerModule,
     MyUploadModule
   ],
-  exports: [SettledRateDetailsComponent, FormDialogSRDComponent],
+  exports: [SettledRateDetailsComponent, FormDialogSRDComponent, SettledRateViewDialogComponent],
   providers: [SettledRateDetailsService,AdvanceService]
 })
 export class SettledRateDetailsModule {}

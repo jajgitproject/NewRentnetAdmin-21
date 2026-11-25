@@ -98,6 +98,12 @@
                                         {{row.debitType}}</mat-cell>
                                 </ng-container>
 
+                                <ng-container matColumnDef="DebitTypeFor">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Debit Type For</mat-header-cell>
+                                    <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                                        {{ row.debitTypeFor || 'Both' }}</mat-cell>
+                                </ng-container>
+
                                 <ng-container matColumnDef="DebitTypeAmount">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Amount</mat-header-cell>
                                     <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
