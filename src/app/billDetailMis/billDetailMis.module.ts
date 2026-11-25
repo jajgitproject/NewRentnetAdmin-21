@@ -12,6 +12,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { StoredMisExportsComponent } from '../general/stored-mis-exports.component';
+import { MisMyFormatComponent } from '../shared/mis-my-format/mis-my-format.component';
 import { BillDetailMisRoutingModule } from './billDetailMis-routing.module';
 import { BillDetailMisComponent } from './billDetailMis.component';
 import { BillDetailMisService } from './billDetailMis.service';
@@ -23,6 +24,7 @@ import { BillDetailMisService } from './billDetailMis.service';
     FormsModule,
     ReactiveFormsModule,
     BillDetailMisRoutingModule,
+    MisMyFormatComponent,
     MatFormFieldModule,
     MatInputModule,
     MatSnackBarModule,

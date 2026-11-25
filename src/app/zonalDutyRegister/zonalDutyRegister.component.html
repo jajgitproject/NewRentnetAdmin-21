@@ -23,8 +23,13 @@
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="card">
                     <div class="body">
+                        <app-mis-my-format
+                          apiSegment="zonaldutyRegister"
+                          (formatReadyChange)="onMyFormatReady($event)">
+                        </app-mis-my-format>
+                        <br/>
                         <mat-accordion class="zonal-duty-register-search-accordion">
-                            <mat-expansion-panel class="zonal-duty-register-inline-search-panel" [expanded]="true">
+                            <mat-expansion-panel #quickSearchPanel class="zonal-duty-register-inline-search-panel" [expanded]="false" (opened)="onSearchPanelOpened(quickSearchPanel)">
                                 <mat-expansion-panel-header>
                                     <mat-panel-title>
                                        Quick Search
@@ -50,7 +55,7 @@
                         
                         <br/>
                         <mat-accordion class="zonal-duty-register-search-accordion">
-                            <mat-expansion-panel class="zonal-duty-register-inline-search-panel" [expanded]="false">
+                            <mat-expansion-panel #advanceSearchPanel class="zonal-duty-register-inline-search-panel" [expanded]="false" (opened)="onSearchPanelOpened(advanceSearchPanel)">
                                 <mat-expansion-panel-header>
                                     <mat-panel-title>
                                        Advance Search
