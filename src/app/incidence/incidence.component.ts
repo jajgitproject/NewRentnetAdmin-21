@@ -188,6 +188,9 @@ export class IncidenceComponent implements OnInit {
           driverID: row.driverID,
           driverName: row.driverName,
           supplierID: row.supplierID || row.inventorySupplierID,
+          transferedLocationID:
+            row.transferedLocationID || row.dispatchLocationID,
+          dispatchLocationID: row.dispatchLocationID,
           organizationalEntityName: row.organizationalEntityName,
           customerPersonID:
             row.passengerID ||

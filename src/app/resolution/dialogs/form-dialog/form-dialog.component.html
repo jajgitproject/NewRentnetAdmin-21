@@ -30,7 +30,7 @@
                 <div class="status-display">
                   <strong style="font-size: 10px;">Reservation No.</strong>
                   <br />
-                  <span style="font-size: 10px;">{{dataSource[0]?.reservationID}}</span>
+                  <span style="font-size: 10px;">{{ dataSource[0]?.reservationID || reservationID || '—' }}</span>
                 </div>
               </div>
 
@@ -38,7 +38,7 @@
                 <div class="status-display">
                   <strong style="font-size: 10px;">Duty Slip No.</strong>
                   <br />
-                  <span style="font-size: 10px;">{{dataSource[0]?.dutySlipID}}</span>
+                  <span style="font-size: 10px;">{{ dataSource[0]?.dutySlipID || dutySlipID || '—' }}</span>
                 </div>
               </div>
 
@@ -62,7 +62,7 @@
                 <div class="status-display">
                   <strong style="font-size: 10px;">Car Reg.No.</strong>
                   <br />
-                  <span style="font-size: 10px;">{{registrationNumber || data?.item?.registrationNumber}}</span>
+                  <span style="font-size: 10px;">{{ registrationNumber || data?.item?.registrationNumber || '—' }}</span>
                 </div>
               </div>
 
@@ -70,7 +70,7 @@
                 <div class="status-display">
                   <strong style="font-size: 10px;">Driver</strong>
                   <br />
-                  <span style="font-size: 10px;">{{driverName || data?.item?.driverName}}</span>
+                  <span style="font-size: 10px;">{{ driverName || data?.item?.driverName || '—' }}</span>
                 </div>
               </div>
             </div>
@@ -591,6 +591,56 @@
 
 
         </ng-container>
+      </mat-card>
+
+      <mat-card class="m-t-10" *ngIf="action === 'edit'">
+        <div class="font-weight-bold p-b-10">Driver Debit (Incidence Resolution)</div>
+        <p class="text-muted" style="font-size: 11px; margin-bottom: 8px;">
+          Driver debit is optional. Leave blank to save resolution only. Clearing fields and saving does not delete an existing debit — use Remove driver debit.
+        </p>
+        <div class="row" *ngIf="hasActiveIncidenceDebit">
+          <div class="col-xl-12 mb-2">
+            <button mat-stroked-button color="warn" type="button"
+              [disabled]="debitRemoveInProgress"
+              (click)="removeIncidenceDebit()">
+              Remove driver debit
+            </button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Debit Type</mat-label>
+              <mat-select formControlName="debitTypeID">
+                <mat-option *ngFor="let dt of debitTypeOptions" [value]="dt.debitTypeID">
+                  {{ dt.debitType }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Amount</mat-label>
+              <input matInput type="number" min="0.01" step="0.01" formControlName="debitAmount" />
+            </mat-form-field>
+          </div>
+          <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Debit Date</mat-label>
+              <input matInput [value]="advanceTableForm.get('closureDate')?.value | date:'dd/MM/yyyy'" disabled />
+              <mat-hint>Uses resolution closure date</mat-hint>
+            </mat-form-field>
+          </div>
+          <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+              <mat-label>Narration</mat-label>
+              <textarea matInput rows="2" maxlength="500" formControlName="debitNarration"></textarea>
+              <mat-error *ngIf="advanceTableForm.get('debitNarration').hasError('maxlength')">
+                Narration cannot exceed 500 characters
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
       </mat-card>
 
       <br>

@@ -452,6 +452,20 @@ export const ROUTES: RouteInfo[] = [
         submenu: [],
         isAccess: false
       },
+
+      {
+        path: 'debitMIS',
+        title: 'Debit MIS',
+        pageKey: 'Debit MIS',
+        moduleName: 'debitMIS',
+        alternateAccessPageKeys: ['debitMIS', 'Debit MIS'],
+        visibleWhenHasPageAccess: ['debit', 'Debits'],
+        icon: 'fas fa-table',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
       
       // {
       //   path: 'dailyReport',

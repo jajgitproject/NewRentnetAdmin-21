@@ -27,6 +27,7 @@ import { MyUploadModule } from '../myupload/myupload.module';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { resolutionFormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angular-datetime-picker';
+import { DebitService } from '../debit/debit.service';
 @NgModule({
   declarations: [
     ResolutionComponent,
@@ -61,7 +62,7 @@ import { OwlDateTimeModule, OwlNativeDateTimeModule } from '@danielmoncada/angul
     MyUploadModule
   ],
   exports: [resolutionFormDialogComponent],
-  providers: [ResolutionService]
+  providers: [ResolutionService, DebitService]
 })
 export class ResolutionModule {}
 

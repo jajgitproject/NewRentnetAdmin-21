@@ -1433,6 +1433,14 @@ const routes: Routes = [
       },
 
       {
+        path: 'debitMIS',
+        loadChildren: () =>
+          import('./debitMis/debitMis.module').then(
+            (m) => m.DebitMisModule
+          )
+      },
+
+      {
         path: 'passToSupplier',
         loadChildren: () =>
           import('./passToSupplier/passToSupplier.module').then(

@@ -70,6 +70,29 @@ export class DebitService {
     return this.httpClient.get<any[]>(`${this.API_URL}/debitTypesForScreen`);
   }
 
+  getDebitTypesForIncidenceScreen(): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.API_URL}/debitTypesForIncidenceScreen`);
+  }
+
+  getAllDebitTypesForMIS(): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.API_URL}/debitTypesForMIS`);
+  }
+
+  getByIncidenceId(incidenceId: number): Observable<DebitModel> {
+    return this.httpClient.get<DebitModel>(`${this.API_URL}/byIncidence/${incidenceId}`);
+  }
+
+  saveFromIncidenceResolution(data: any) {
+    return this.httpClient.post<any>(`${this.API_URL}/fromIncidenceResolution`, this.toApiPayload(data));
+  }
+
+  deleteFromIncidenceResolution(debitId: number, incidenceId: number): Observable<any> {
+    const userID = this.generalService.getUserID();
+    return this.httpClient.delete(
+      `${this.API_URL}/fromIncidenceResolution/${debitId}/${incidenceId}/${userID}`
+    );
+  }
+
   searchDrivers(prefix: string): Observable<any[]> {
     return this.httpClient.get<any[]>(`${this.API_URL}/drivers/${encodeURIComponent(prefix)}`);
   }

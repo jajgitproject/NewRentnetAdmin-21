@@ -9,7 +9,7 @@ import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
 import { Observable, of, Subject } from 'rxjs';
 import { DutySlipDropDown } from '../../dutySlipDropDown.model';
-import { catchError, map, startWith } from 'rxjs/operators';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 import { EmployeeDropDown } from 'src/app/employee/employeeDropDown.model';
 import { EmployeesDropDown } from 'src/app/feedBack/employeeDropDown.model';
 import { ActivatedRoute } from '@angular/router';
@@ -20,6 +20,7 @@ import moment from 'moment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ControlPanelDesignService } from '../../../controlPanelDesign/controlPanelDesign.service';
+import { DebitService } from '../../../debit/debit.service';
 
 @Component({
   standalone: false,
@@ -118,6 +119,10 @@ export class resolutionFormDialogComponent {
   filteredResponsible1Options: Observable<any[]> = new Observable();
   supplierID: any;
   carVendor: any;
+  incidenceDebitID = 0;
+  hasActiveIncidenceDebit = false;
+  debitRemoveInProgress = false;
+  debitTypeOptions: any[] = [];
   verifyDutyStatusAndCacellationStatus: string;
   isSaveAllowed: boolean = false;
   constructor(
@@ -130,6 +135,7 @@ export class resolutionFormDialogComponent {
     private controlPanelService: ControlPanelDesignService,
     // private authService: AuthService ,// Inject the AuthService
 
+    private debitService: DebitService,
     public _generalService: GeneralService) {
     this.reservationID = data?.reservationID || data?.item?.reservationID;
 this.dutySlipID = data?.dutySlipID || data?.item?.dutySlipID;
@@ -139,14 +145,21 @@ this.issueCategoryID = data?.item?.issueCategoryID;
 this.customerID = data?.customerID || data?.item?.customerID;
 this.customerName = data?.customerName || data?.item?.customerName;
 
-this.driverID = data?.item?.driverID || data?.driverID;
+const advanceRow = data?.advanceTable || {};
+this.driverID =
+  data?.driverID ||
+  advanceRow.driverID ||
+  data?.item?.driverID;
 this.driverName =
   data?.driverName ||
+  advanceRow.driverName ||
   data?.item?.driverName ||
   data?.item?.DriverName;
 
 this.supplierID =
   data?.supplierID ||
+  advanceRow.supplierID ||
+  advanceRow.inventorySupplierID ||
   data?.item?.supplierID ||
   data?.item?.inventorySupplierID;
 this.carVendor =
@@ -154,8 +167,16 @@ this.carVendor =
   data?.item?.supplierName ||
   data?.item?.SupplierName;
 
-this.registrationNumber = data?.registrationNumber || data?.item?.registrationNumber;
-this.inventoryID = data?.inventoryID || data?.item?.inventoryID;
+this.registrationNumber =
+  data?.registrationNumber ||
+  advanceRow.registrationNumber ||
+  data?.item?.registrationNumber;
+this.inventoryID =
+  data?.inventoryID ||
+  advanceRow.inventoryID ||
+  data?.item?.inventoryID;
+this.dispatchLocationID =
+  advanceRow.dispatchLocationID || data?.item?.dispatchLocationID;
 
 this.organizationalEntityName =
     data?.organizationalEntityName ||
@@ -163,10 +184,15 @@ this.organizationalEntityName =
     data?.item?.organizationalEntityName;
 
 this.transferedLocationID =
-    data?.item?.transferedLocationID;
+  data?.transferedLocationID ||
+  data?.item?.transferedLocationID ||
+  advanceRow.transferedLocationID ||
+  advanceRow.dispatchLocationID ||
+  data?.item?.serviceLocationID;
 
 this.incidenceID =
     data?.incidenceID ||
+    advanceRow.incidenceID ||
     data?.item?.incidenceID;
 
 this.CustomerPersonID =
@@ -190,7 +216,8 @@ this.action = data?.action;
 
   this.dialogTitle = 'Incidence Resolution';
 
-  this.advanceTable = data.item || data.advanceTable || {};
+  // Prefer incidence row; `item` is often reservation context from /incidence.
+  this.advanceTable = data.advanceTable || data.item || {};
 
 }
 else {
@@ -281,7 +308,12 @@ else {
     this.advanceTableForm.controls['openedByEmployeeDepartment'].disable();
     this.advanceTableForm.controls['openDate'].disable();
     this.advanceTableForm.controls['openTime'].disable();
+    const summaryFallback = this.getIncidenceSummaryFallback();
+    if (summaryFallback) {
+      this.dataSource = [summaryFallback];
+    }
     this.loadData();
+    this.initIncidenceDebitTypes();
   }
 
   ngOnChanges(): void {
@@ -340,7 +372,10 @@ else {
       responsible4Value: [''],
       responsible4ID: [0 || ''],
       followUpAction : [''],
-      reminderDateForFollowUp : ['']
+      reminderDateForFollowUp : [''],
+      debitTypeID: [''],
+      debitAmount: [''],
+      debitNarration: ['', Validators.maxLength(500)],
     });
   }
 
@@ -362,9 +397,18 @@ else {
     }
   }
   public Put(): void {
-    
     this.advanceTableForm.patchValue({incidenceID: this.incidenceID});
-    let requestObject = this.advanceTableForm.getRawValue();
+    const rawBeforeSave = this.advanceTableForm.getRawValue();
+    if (this.shouldSaveIncidenceDebit()) {
+      const debitValidation = this.validateDebitSectionForSave(rawBeforeSave);
+      if (debitValidation) {
+        this.showNotification('snackbar-danger', debitValidation, 'bottom', 'center');
+        this.saveDisabled = true;
+        return;
+      }
+    }
+
+    let requestObject = rawBeforeSave;
     ['responsible1', 'responsible2', 'responsible3', 'responsible4'].forEach((responsible, index) => {
       const option = this.advanceTableForm.get(`${responsible}Option`).value;
       const id = this.advanceTableForm.get(`${responsible}ID`).value;
@@ -381,15 +425,38 @@ else {
     this.advanceTableService.update(requestObject)
       .subscribe(
         response => {
-          // this.loadData();
-          this.showNotification(
-            'snackbar-success',
-            'Resolution Update...!!!',
-            'bottom',
-            'center'
+          if (!this.shouldSaveIncidenceDebit()) {
+            this.showNotification(
+              'snackbar-success',
+              'Resolution Update...!!!',
+              'bottom',
+              'center'
+            );
+            this.saveDisabled = true;
+            this.dialogRef.close(response);
+            return;
+          }
+
+          this.saveIncidenceDebit(
+            () => {
+              this.showNotification(
+                'snackbar-success',
+                'Resolution and driver debit saved.',
+                'bottom',
+                'center'
+              );
+              this.saveDisabled = true;
+              this.dialogRef.close(response);
+            },
+            (debitMessage) => {
+              const msg =
+                typeof debitMessage === 'string' && debitMessage.trim()
+                  ? debitMessage
+                  : 'Resolution saved but driver debit failed.';
+              this.showNotification('snackbar-danger', msg, 'bottom', 'center');
+              this.saveDisabled = true;
+            }
           );
-          this.saveDisabled = true;
-          this.dialogRef.close(response);
         },
         error => {
           this.showNotification(
@@ -835,6 +902,46 @@ else {
     });
   }
 
+  /** Row for the read-only summary card when API data is not ready yet. */
+  private getIncidenceSummaryFallback(): any | null {
+    const fromAdvance =
+      this.data?.advanceTable?.incidenceID != null
+        ? this.data.advanceTable
+        : null;
+    const fromItem =
+      this.data?.item?.incidenceID != null ? this.data.item : null;
+    const base =
+      fromAdvance ||
+      fromItem ||
+      (this.incidenceID ? { incidenceID: this.incidenceID } : null);
+
+    if (!base) {
+      return null;
+    }
+
+    return {
+      ...base,
+      incidenceID: base.incidenceID ?? this.incidenceID,
+      reservationID: base.reservationID || this.reservationID,
+      dutySlipID: base.dutySlipID || this.dutySlipID,
+      driverID: base.driverID || this.driverID,
+      supplierID: base.supplierID || this.supplierID,
+      inventoryID: base.inventoryID || this.inventoryID,
+      dispatchLocationID:
+        base.dispatchLocationID ||
+        this.dispatchLocationID ||
+        this.transferedLocationID,
+      transferedLocationID:
+        base.transferedLocationID ||
+        this.transferedLocationID ||
+        base.dispatchLocationID,
+      customerName: base.customerName || this.customerName,
+      customerPersonName: base.customerPersonName || this.customerPersonName,
+      registrationNumber: base.registrationNumber || this.registrationNumber,
+      driverName: base.driverName || this.driverName,
+    };
+  }
+
   public loadData() {
     const targetIncidenceID =
       this.incidenceID ||
@@ -851,13 +958,22 @@ else {
       return;
     }
 
+    this.reservationID = this.pickPositiveInt(
+      this.reservationID,
+      this.data?.reservationID,
+      this.data?.advanceTable?.reservationID,
+      this.data?.advanceTable?.ReservationID,
+      this.data?.item?.reservationID,
+      this.data?.item?.ReservationID
+    );
+
     if (!this.reservationID) {
-      this.showNotification(
-        'snackbar-danger',
-        'Reservation ID is required to open resolution.',
-        'bottom',
-        'center'
-      );
+      const fallback = this.getIncidenceSummaryFallback();
+      if (fallback) {
+        this.dataSource = [fallback];
+        this.patchResolutionFromRow(fallback);
+      }
+      this.loadIncidenceDebitForIncidence();
       return;
     }
 
@@ -866,10 +982,10 @@ else {
         data => {
           const rows = Array.isArray(data) ? data : [];
           if (!rows.length) {
-            // Fall back to the row passed into the dialog so the page still renders.
-            if (this.data?.item?.incidenceID) {
-              this.dataSource = [this.data.item];
-              this.patchResolutionFromRow(this.data.item);
+            const fallback = this.getIncidenceSummaryFallback();
+            if (fallback) {
+              this.dataSource = [fallback];
+              this.patchResolutionFromRow(fallback);
             } else {
               this.dataSource = [];
             }
@@ -888,10 +1004,10 @@ else {
               'bottom',
               'center'
             );
-            // Keep template (*ngIf dataSource[0]) working with the opened row.
-            if (this.data?.item?.incidenceID) {
-              this.dataSource = [this.data.item];
-              this.patchResolutionFromRow(this.data.item);
+            const fallback = this.getIncidenceSummaryFallback();
+            if (fallback) {
+              this.dataSource = [fallback];
+              this.patchResolutionFromRow(fallback);
             } else {
               this.dataSource = rows;
             }
@@ -907,9 +1023,10 @@ else {
 
         (error: HttpErrorResponse) => {
           console.error('Error fetching data:', error);
-          if (this.data?.item?.incidenceID) {
-            this.dataSource = [this.data.item];
-            this.patchResolutionFromRow(this.data.item);
+          const fallback = this.getIncidenceSummaryFallback();
+          if (fallback) {
+            this.dataSource = [fallback];
+            this.patchResolutionFromRow(fallback);
           } else {
             this.dataSource = [];
           }
@@ -964,7 +1081,21 @@ else {
     this.advanceTableForm.patchValue({ followUpAction: selected?.followUpAction });
     this.advanceTableForm.patchValue({ reminderDateForFollowUp: selected?.reminderDateForFollowUp });
 
-    this.driverID = selected.driverID || this.driverID;
+    this.dispatchLocationID =
+      selected.dispatchLocationID ||
+      selected.DispatchLocationID ||
+      this.dispatchLocationID;
+    this.transferedLocationID =
+      selected.transferedLocationID ||
+      selected.dispatchLocationID ||
+      selected.DispatchLocationID ||
+      this.transferedLocationID;
+    this.dutySlipID = selected.dutySlipID || selected.DutySlipID || this.dutySlipID;
+    this.reservationID =
+      selected.reservationID || selected.ReservationID || this.reservationID;
+    this.inventoryID =
+      selected.inventoryID || selected.InventoryID || this.inventoryID;
+    this.driverID = selected.driverID || selected.DriverID || this.driverID;
     this.driverName = selected.driverName || this.driverName;
     this.supplierID = selected.supplierID || this.supplierID;
     this.carVendor =
@@ -979,6 +1110,403 @@ else {
 
     this.bindResponsibleData();
     this.ImagePath = selected.reportEvidenceDoc;
+    this.loadIncidenceDebitForIncidence();
+  }
+
+  private initIncidenceDebitTypes(): void {
+    this.debitService.getDebitTypesForIncidenceScreen().subscribe(
+      (list) => {
+        this.debitTypeOptions = Array.isArray(list) ? list : [];
+        const debitTypeControl = this.advanceTableForm.get('debitTypeID');
+        if (debitTypeControl && !debitTypeControl['_incidenceDebitTypeHook']) {
+          debitTypeControl['_incidenceDebitTypeHook'] = true;
+          debitTypeControl.valueChanges.subscribe((debitTypeId) => {
+            const match = this.debitTypeOptions.find(
+              (x) => Number(x.debitTypeID) === Number(debitTypeId)
+            );
+            if (match != null && match.debitTypeAmount != null) {
+              this.advanceTableForm.patchValue(
+                { debitAmount: match.debitTypeAmount },
+                { emitEvent: false }
+              );
+            }
+          });
+        }
+      },
+      () => {
+        this.debitTypeOptions = [];
+      }
+    );
+  }
+
+  private loadIncidenceDebitForIncidence(): void {
+    const incidenceId = Number(this.incidenceID);
+    if (!incidenceId) {
+      return;
+    }
+
+    this.debitService
+      .getByIncidenceId(incidenceId)
+      .pipe(catchError(() => of(null)))
+      .subscribe((row) => {
+        if (!row) {
+          return;
+        }
+
+        const active =
+          row.activationStatus !== false && row.ActivationStatus !== false;
+        if (!active) {
+          this.incidenceDebitID = 0;
+          this.hasActiveIncidenceDebit = false;
+          return;
+        }
+
+        this.incidenceDebitID = Number(row.debitID ?? row.DebitID) || 0;
+        this.hasActiveIncidenceDebit = this.incidenceDebitID > 0;
+        this.advanceTableForm.patchValue({
+          debitTypeID: row.debitTypeID ?? row.DebitTypeID ?? '',
+          debitAmount: row.amount ?? row.Amount ?? '',
+          debitNarration: row.narration ?? row.Narration ?? '',
+        });
+      });
+  }
+
+  clearIncidenceDebitForm(): void {
+    this.incidenceDebitID = 0;
+    this.hasActiveIncidenceDebit = false;
+    this.advanceTableForm.patchValue({
+      debitTypeID: '',
+      debitAmount: '',
+      debitNarration: '',
+    });
+  }
+
+  removeIncidenceDebit(): void {
+    if (!this.hasActiveIncidenceDebit || !this.incidenceDebitID) {
+      return;
+    }
+
+    const incidenceId = Number(this.incidenceID);
+    if (!incidenceId) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Remove the driver debit linked to this incidence? The debit will be soft-deleted and logged; resolution will stay saved.'
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    this.debitRemoveInProgress = true;
+    this.debitService
+      .deleteFromIncidenceResolution(this.incidenceDebitID, incidenceId)
+      .subscribe(
+        () => {
+          this.clearIncidenceDebitForm();
+          this.showNotification(
+            'snackbar-success',
+            'Driver debit removed.',
+            'bottom',
+            'center'
+          );
+          this.debitRemoveInProgress = false;
+        },
+        (err: HttpErrorResponse) => {
+          const apiMsg =
+            typeof err?.error === 'string'
+              ? err.error
+              : err?.error?.message || err?.message;
+          this.showNotification(
+            'snackbar-danger',
+            apiMsg || 'Could not remove driver debit.',
+            'bottom',
+            'center'
+          );
+          this.debitRemoveInProgress = false;
+        }
+      );
+  }
+
+  private rowId(row: any, camelKey: string, pascalKey?: string): number {
+    if (!row) {
+      return 0;
+    }
+    const pascal = pascalKey || camelKey.charAt(0).toUpperCase() + camelKey.slice(1);
+    return this.pickPositiveInt(row[camelKey], row[pascal]);
+  }
+
+  private pickPositiveInt(...values: any[]): number {
+    for (const value of values) {
+      const n = Number(value);
+      if (!isNaN(n) && n > 0) {
+        return n;
+      }
+    }
+    return 0;
+  }
+
+  private resolveDebitTripContext(): {
+    incidenceID: number;
+    dutySlipID: number;
+    reservationID: number;
+    driverID: number;
+    supplierID: number;
+    inventoryID: number;
+    locationID: number;
+  } {
+    const raw = this.advanceTableForm?.getRawValue?.() || {};
+    const row =
+      this.getSelectedIncidenceRow() ||
+      this.dataSource?.[0] ||
+      this.getIncidenceSummaryFallback() ||
+      {};
+    const advance = this.data?.advanceTable || {};
+    const item = this.data?.item || {};
+
+    return {
+      incidenceID: this.pickPositiveInt(
+        this.incidenceID,
+        raw.incidenceID,
+        this.rowId(row, 'incidenceID'),
+        this.rowId(advance, 'incidenceID'),
+        this.data?.incidenceID
+      ),
+      dutySlipID: this.pickPositiveInt(
+        this.dutySlipID,
+        this.rowId(row, 'dutySlipID'),
+        raw.dutySlipNumber,
+        this.rowId(advance, 'dutySlipID')
+      ),
+      reservationID: this.pickPositiveInt(
+        this.reservationID,
+        this.rowId(row, 'reservationID'),
+        raw.reservationID,
+        this.rowId(advance, 'reservationID'),
+        item.reservationID
+      ),
+      driverID: this.pickPositiveInt(
+        this.driverID,
+        this.rowId(row, 'driverID'),
+        this.rowId(advance, 'driverID'),
+        item.driverID,
+        this.data?.driverID
+      ),
+      supplierID: this.pickPositiveInt(
+        this.supplierID,
+        this.rowId(row, 'supplierID'),
+        this.rowId(row, 'inventorySupplierID'),
+        this.rowId(advance, 'supplierID'),
+        this.rowId(advance, 'inventorySupplierID'),
+        item.supplierID,
+        item.inventorySupplierID,
+        this.data?.supplierID
+      ),
+      inventoryID: this.pickPositiveInt(
+        this.inventoryID,
+        this.rowId(row, 'inventoryID'),
+        this.rowId(advance, 'inventoryID'),
+        item.inventoryID,
+        this.data?.inventoryID
+      ),
+      locationID: this.pickPositiveInt(
+        this.transferedLocationID,
+        this.rowId(row, 'transferedLocationID'),
+        this.rowId(row, 'dispatchLocationID'),
+        this.rowId(advance, 'transferedLocationID'),
+        this.rowId(advance, 'dispatchLocationID'),
+        this.dispatchLocationID,
+        item.transferedLocationID,
+        item.serviceLocationID
+      ),
+    };
+  }
+
+  private hasMinimumDebitTripContext(ctx: ReturnType<typeof this.resolveDebitTripContext>): boolean {
+    return !!ctx.incidenceID;
+  }
+
+  private enrichDebitContextFromReservation(
+    ctx: ReturnType<typeof this.resolveDebitTripContext>
+  ) {
+    const reservationId = ctx.reservationID || Number(this.reservationID);
+    if (!reservationId) {
+      return of(ctx);
+    }
+
+    return this.controlPanelService.getReservationDetails(reservationId).pipe(
+      map((rows) => {
+        const r = Array.isArray(rows) ? rows[0] : rows;
+        if (!r) {
+          return ctx;
+        }
+        return {
+          ...ctx,
+          reservationID:
+            ctx.reservationID ||
+            this.pickPositiveInt(r.reservationID, r.ReservationID),
+          driverID:
+            ctx.driverID || this.pickPositiveInt(r.driverID, r.DriverID),
+          supplierID:
+            ctx.supplierID ||
+            this.pickPositiveInt(
+              r.supplierID,
+              r.inventorySupplierID,
+              r.SupplierID,
+              r.InventorySupplierID
+            ),
+          inventoryID:
+            ctx.inventoryID ||
+            this.pickPositiveInt(r.inventoryID, r.InventoryID),
+          locationID:
+            ctx.locationID ||
+            this.pickPositiveInt(
+              r.transferedLocationID,
+              r.serviceLocationID,
+              r.ServiceLocationID,
+              r.TransferedLocationID
+            ),
+        };
+      }),
+      catchError(() => of(ctx))
+    );
+  }
+
+  private closureDateForDebitApi(closureDate: any): string {
+    if (!closureDate) {
+      return 'null';
+    }
+    try {
+      const d =
+        closureDate instanceof Date ? closureDate : new Date(closureDate);
+      if (!isNaN(d.getTime())) {
+        return formatDate(d, 'yyyy-MM-dd', 'en-GB');
+      }
+    } catch (e) {
+      /* ignore */
+    }
+    return 'null';
+  }
+
+  private isDebitSectionEmpty(): boolean {
+    const raw = this.advanceTableForm.getRawValue();
+    const hasType = Number(raw.debitTypeID) > 0;
+    const hasAmount = Number(raw.debitAmount) > 0;
+    const hasNarration = (raw.debitNarration || '').trim().length > 0;
+    return !hasType && !hasAmount && !hasNarration;
+  }
+
+  private shouldSaveIncidenceDebit(): boolean {
+    return this.action === 'edit' && !this.isDebitSectionEmpty();
+  }
+
+  private validateDebitSectionForSave(raw: any): string | null {
+    const hasType = Number(raw.debitTypeID) > 0;
+    const hasAmount = Number(raw.debitAmount) > 0;
+    const narration = (raw.debitNarration || '').trim();
+    const hasNarration = narration.length > 0;
+
+    if (!hasType) {
+      return 'Debit type is required when saving a driver debit.';
+    }
+    if (!hasAmount || Number(raw.debitAmount) < 0.01) {
+      return 'Amount is required when saving a driver debit.';
+    }
+    if (!hasNarration) {
+      return 'Narration is required when saving a driver debit.';
+    }
+    if (narration.length > 500) {
+      return 'Narration cannot exceed 500 characters.';
+    }
+
+    const narrationControl = this.advanceTableForm.get('debitNarration');
+    if (narrationControl?.invalid) {
+      return 'Driver debit fields are invalid.';
+    }
+    return null;
+  }
+
+  private saveIncidenceDebit(onSuccess: () => void, onError: (message: string) => void): void {
+    if (this.action !== 'edit') {
+      onSuccess();
+      return;
+    }
+
+    const raw = this.advanceTableForm.getRawValue();
+    const debitValidation = this.validateDebitSectionForSave(raw);
+    if (debitValidation) {
+      onError(debitValidation);
+      return;
+    }
+
+    const buildPayload = (ctx: ReturnType<typeof this.resolveDebitTripContext>) => ({
+      debitID: this.incidenceDebitID > 0 ? this.incidenceDebitID : -1,
+      incidenceID: ctx.incidenceID,
+      dutySlipID: ctx.dutySlipID > 0 ? ctx.dutySlipID : null,
+      reservationID: ctx.reservationID > 0 ? ctx.reservationID : null,
+      driverID: ctx.driverID > 0 ? ctx.driverID : null,
+      supplierID: ctx.supplierID > 0 ? ctx.supplierID : null,
+      inventoryID: ctx.inventoryID > 0 ? ctx.inventoryID : null,
+      locationID: ctx.locationID,
+      debitTypeID: Number(raw.debitTypeID),
+      amount: Number(raw.debitAmount),
+      narration: (raw.debitNarration || '').trim(),
+      date: raw.closureDate,
+    });
+
+    const postDebit = (ctx: ReturnType<typeof this.resolveDebitTripContext>) => {
+      if (!this.hasMinimumDebitTripContext(ctx)) {
+        onError('Driver debit could not be saved: incidence is required.');
+        return;
+      }
+
+      this.debitService.saveFromIncidenceResolution(buildPayload(ctx)).subscribe(
+        (res) => {
+          const savedId = Number(res?.debitID ?? res?.DebitID);
+          if (savedId > 0) {
+            this.incidenceDebitID = savedId;
+            this.hasActiveIncidenceDebit = true;
+          }
+          onSuccess();
+        },
+        (err: HttpErrorResponse) => {
+          const apiMsg =
+            typeof err?.error === 'string'
+              ? err.error
+              : err?.error?.message || err?.message;
+          onError(apiMsg || 'Driver debit save failed.');
+        }
+      );
+    };
+
+    let ctx = this.resolveDebitTripContext();
+    const dateString = this.closureDateForDebitApi(raw.closureDate);
+
+    of(ctx)
+      .pipe(
+        switchMap((baseCtx) => {
+          const needsDriverAssoc =
+            (!baseCtx.supplierID || !baseCtx.inventoryID) && baseCtx.driverID > 0;
+          if (!needsDriverAssoc) {
+            return of(baseCtx);
+          }
+          return this.debitService.getDriverInventory(baseCtx.driverID, dateString).pipe(
+            catchError(() => of(null)),
+            map((assoc) => {
+              if (!assoc) {
+                return baseCtx;
+              }
+              return {
+                ...baseCtx,
+                supplierID: baseCtx.supplierID || Number(assoc.supplierID) || 0,
+                inventoryID: baseCtx.inventoryID || Number(assoc.inventoryID) || 0,
+              };
+            })
+          );
+        }),
+        switchMap((enrichedCtx) => this.enrichDebitContextFromReservation(enrichedCtx))
+      )
+      .subscribe((finalCtx) => postDebit(finalCtx));
   }
   private getSelectedIncidenceRow(): any {
     const targetIncidenceID =
@@ -1014,16 +1542,31 @@ else {
   }
 
   private loadReservationContextIfMissing(): void {
+    this.reservationID = this.pickPositiveInt(
+      this.reservationID,
+      this.data?.reservationID,
+      this.data?.advanceTable?.reservationID,
+      this.data?.item?.reservationID
+    );
+
     const needsCustomer = !this.customerName;
     const needsDriver = !this.driverName || !this.driverID;
     const needsReg = !this.registrationNumber;
-    const needsSupplier = !this.carVendor || !this.supplierID;
+    const needsSupplier = !this.supplierID;
+    const needsInventory = !this.inventoryID;
     const needsGuest = !this.customerPersonName || !this.CustomerPersonID;
-    const needsLocation = !this.transferedLocationID;
+    const needsLocation =
+      !this.transferedLocationID && !this.dispatchLocationID;
 
     if (
       !this.reservationID ||
-      (!needsCustomer && !needsDriver && !needsReg && !needsSupplier && !needsGuest && !needsLocation)
+      (!needsCustomer &&
+        !needsDriver &&
+        !needsReg &&
+        !needsSupplier &&
+        !needsInventory &&
+        !needsGuest &&
+        !needsLocation)
     ) {
       return;
     }
@@ -1159,11 +1702,15 @@ else {
   }
 
   private getTransferedLocationIdForSearch(): number {
-    return Number(
-      this.transferedLocationID ||
-      this.data?.item?.transferedLocationID ||
-      this.getSelectedIncidenceRow()?.transferedLocationID ||
-      0
+    const row = this.getSelectedIncidenceRow() || {};
+    return this.pickPositiveInt(
+      this.transferedLocationID,
+      row.transferedLocationID,
+      row.dispatchLocationID,
+      this.data?.advanceTable?.dispatchLocationID,
+      this.dispatchLocationID,
+      this.data?.item?.transferedLocationID,
+      this.data?.item?.serviceLocationID
     );
   }
 
@@ -1543,8 +2090,16 @@ private syncReservationResponsibleContext(): void {
   this.supplierID =
     this.supplierID ||
     row.supplierID ||
+    row.inventorySupplierID ||
+    this.data?.advanceTable?.supplierID ||
     this.data?.item?.supplierID ||
     this.data?.item?.inventorySupplierID;
+  if (!this.transferedLocationID) {
+    this.transferedLocationID =
+      row.transferedLocationID ||
+      row.dispatchLocationID ||
+      this.data?.advanceTable?.dispatchLocationID;
+  }
   this.carVendor =
     this.carVendor ||
     row.supplierName ||
