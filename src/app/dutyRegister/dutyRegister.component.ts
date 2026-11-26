@@ -631,9 +631,12 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
 
         const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
         this.triggerCsvDownload(blob, fileName);
+        this.exportJobStartedAt = null;
+        this.exportElapsedLabel = '0s';
         this.dutyRegisterService.getExportJobStatus(this.exportJobId).subscribe(
           (status) => {
             this.exportJobStatus = status;
+            this.exportElapsedLabel = formatExportElapsedTime(this.exportJobStartedAt, this.exportJobStatus);
           },
           () => {}
         );

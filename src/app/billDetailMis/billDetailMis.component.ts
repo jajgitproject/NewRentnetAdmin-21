@@ -278,6 +278,7 @@ export class BillDetailMisComponent implements OnInit, OnDestroy {
 
         const fileName = this.exportJobStatus?.fileName ?? this.exportJobStatus?.FileName;
         this.triggerCsvDownload(blob, fileName);
+        this.exportJobStartedAt = null;
       },
       async (error) => {
         this.exportJobDownloading = false;

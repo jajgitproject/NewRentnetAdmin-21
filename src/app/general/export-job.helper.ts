@@ -64,12 +64,41 @@ export function isExportJobRunning(status: any): boolean {
   return current === 'pending' || current === 'running';
 }
 
+function isExportJobTerminal(status: any): boolean {
+  const current = getExportJobStatusName(status);
+  return current === 'completed' || current === 'failed' || current === 'cancelled';
+}
+
+function parseExportCompletedOnMs(status: any): number | null {
+  const raw = status?.completedOn ?? status?.CompletedOn;
+  if (raw == null || raw === '') {
+    return null;
+  }
+
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return raw;
+  }
+
+  const ms = Date.parse(String(raw));
+  return Number.isFinite(ms) ? ms : null;
+}
+
 export function formatExportElapsedTime(startedAt: number | null, status: any): string {
-  if (isExportJobPending(status) || !startedAt) {
+  // After Download CSV we clear startedAt while keeping terminal status → show 0s.
+  if (!startedAt) {
+    return isExportJobTerminal(status) ? '0s' : '—';
+  }
+
+  if (isExportJobPending(status)) {
     return '—';
   }
 
-  const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+  let endMs = Date.now();
+  if (!isExportJobRunning(status) || isExportJobTerminal(status)) {
+    endMs = parseExportCompletedOnMs(status) ?? endMs;
+  }
+
+  const elapsedSeconds = Math.max(0, Math.floor((endMs - startedAt) / 1000));
   const minutes = Math.floor(elapsedSeconds / 60);
   const seconds = elapsedSeconds % 60;
   return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
