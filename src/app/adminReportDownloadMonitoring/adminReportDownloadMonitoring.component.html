@@ -1,0 +1,113 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <h2>Admin Report Download Monitoring</h2>
+    </div>
+
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <div class="filters-row">
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Report Type</mat-label>
+                <mat-select [(ngModel)]="reportTypeFilter" name="reportTypeFilter">
+                  <mat-option *ngFor="let opt of reportTypeOptions" [value]="opt.value">
+                    {{ opt.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Queue Status</mat-label>
+                <mat-select [(ngModel)]="statusFilter" name="statusFilter">
+                  <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">
+                    {{ opt.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <button mat-raised-button color="primary" type="button" (click)="search()" [disabled]="loading">
+                Search
+              </button>
+              <button mat-stroked-button type="button" (click)="refresh()" [disabled]="loading">
+                Refresh
+              </button>
+            </div>
+
+            <mat-progress-bar *ngIf="loading && !loaded" mode="indeterminate"></mat-progress-bar>
+
+            <p class="empty-msg" *ngIf="loaded && !jobs.length">
+              No export jobs match the selected filters.
+            </p>
+
+            <div class="table-wrap" *ngIf="jobs.length">
+              <table class="monitor-table">
+                <thead>
+                  <tr>
+                    <th>User Name</th>
+                    <th>Report Type</th>
+                    <th>Field Count</th>
+                    <th>Request Date/Time</th>
+                    <th>Queue Status</th>
+                    <th>Suspended By</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let job of pagedJobs">
+                    <td>{{ getUserName(job) }}</td>
+                    <td>{{ getReportType(job) }}</td>
+                    <td>{{ getFieldCount(job) }}</td>
+                    <td>{{ formatDate(getCreatedOn(job)) }}</td>
+                    <td>
+                      <span
+                        class="status-chip"
+                        [class.queued]="getStatus(job) === 'Queued'"
+                        [class.processing]="getStatus(job) === 'Processing'"
+                        [class.failed]="getStatus(job) === 'Failed'"
+                        [class.cancelled]="getStatus(job) === 'Cancelled'"
+                      >
+                        {{ getStatus(job) }}
+                      </span>
+                    </td>
+                    <td>{{ getSuspendedBy(job) }}</td>
+                    <td class="actions-cell">
+                      <button
+                        mat-stroked-button
+                        color="warn"
+                        type="button"
+                        (click)="cancelQueue(job)"
+                        [disabled]="!canCancel(job) || cancellingJobId === getJobId(job)"
+                      >
+                        Cancel Queue
+                      </button>
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="showFields(job)"
+                        [disabled]="fieldsJobId === getJobId(job)"
+                      >
+                        Show Fields
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <mat-paginator
+                [length]="jobs.length"
+                [pageIndex]="pageIndex"
+                [pageSize]="pageSize"
+                [pageSizeOptions]="pageSizeOptions"
+                [showFirstLastButtons]="true"
+                (page)="onPage($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

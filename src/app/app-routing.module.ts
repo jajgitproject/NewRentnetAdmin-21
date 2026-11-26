@@ -3313,6 +3313,21 @@ const routes: Routes = [
       },
 
       {
+        path: 'adminReportDownloadMonitoring',
+        loadChildren: () =>
+          import('./adminReportDownloadMonitoring/adminReportDownloadMonitoring.module').then(
+            (m) => m.AdminReportDownloadMonitoringModule
+          ),
+        data: {
+          requiredPageKey: 'Admin Report Download Monitoring',
+          alternatePageKeys: [
+            'adminReportDownloadMonitoring',
+            'Admin Report Download Monitoring'
+          ]
+        }
+      },
+
+      {
         path: 'appBillingReceipt',
         loadChildren: () =>
           import('./appBillingReceipt/appBillingReceipt.module').then(

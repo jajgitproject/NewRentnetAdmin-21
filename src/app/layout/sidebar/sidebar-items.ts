@@ -1701,6 +1701,21 @@ export const ROUTES: RouteInfo[] = [
         isAccess: false
       },
       {
+        path: 'adminReportDownloadMonitoring',
+        title: 'Admin Report Download Monitoring',
+        pageKey: 'Admin Report Download Monitoring',
+        moduleName: 'adminReportDownloadMonitoring',
+        alternateAccessPageKeys: [
+          'adminReportDownloadMonitoring',
+          'Admin Report Download Monitoring'
+        ],
+        icon: 'fas fa-tasks',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+      {
         path: 'appBillingReceipt',
         title: 'App Billing Receipt',
         pageKey: 'App Billing Receipt',

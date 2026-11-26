@@ -73,7 +73,7 @@ export class MisMyFormatComponent implements OnInit {
         return;
       }
       if (this.selectedFields.length >= this.maxFields) {
-        this.snackBar.open('You cannot select more than 100 fields.', '', {
+        this.snackBar.open('You cannot select more than ' + this.maxFields + ' fields.', '', {
           duration: 2500,
           verticalPosition: 'bottom',
           horizontalPosition: 'center',
@@ -105,7 +105,7 @@ export class MisMyFormatComponent implements OnInit {
     }
 
     if (this.selectedFields.length > this.maxFields) {
-      this.snackBar.open('You cannot select more than 100 fields.', '', {
+      this.snackBar.open('You cannot select more than ' + this.maxFields + ' fields.', '', {
         duration: 2500,
         verticalPosition: 'bottom',
         horizontalPosition: 'center',
