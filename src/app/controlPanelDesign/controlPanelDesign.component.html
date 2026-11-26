@@ -1764,8 +1764,17 @@
                             <span *ngIf="hasSettledRateImp(data)"
                                   matTooltip="Settled Rate"
                                   matTooltipShowDelay="200"
-                                  style="font-size: 11px;">
+                                  style="font-size: 11px; cursor: pointer;"
+                                  (click)="openSettledRateDialog(data.reservationID); $event.stopPropagation()">
                               Settled Rate
+                            </span>
+                            <br *ngIf="hasAutoClosure(data)">
+                            <span *ngIf="hasAutoClosure(data)"
+                                  matTooltip="Duty has been autoclosed"
+                                  matTooltipPosition="below"
+                                  matTooltipShowDelay="200"
+                                  style="font-size: 11px;">
+                              Autoclosure : Yes
                             </span>
                             <br>
                             

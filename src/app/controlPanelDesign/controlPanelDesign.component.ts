@@ -123,6 +123,7 @@ import { DutyPostPickUPCallModel } from '../dutyPostPickUPCall/dutyPostPickUPCal
 import { DutyPostFormDialogComponent } from '../dutyPostPickUPCall/dialogs/form-dialog/form-dialog.component';
 import { SoftToHardDialogComponent } from '../cancelAllotment/dialogs/softToHard-Dialog/softToHard-Dialog.component';
 import { ControlPanelDialogeComponent } from '../controlPanelDialoge/controlPanelDialoge.component';
+import { SettledRateViewDialogComponent } from '../settledRateDetails/dialogs/view-dialog/settled-rate-view-dialog.component';
 import { formatDate } from '@angular/common';
 import { OrganizationalEntityDropDown} from '../organizationalEntityMessage/organizationalEntityDropDown.model';
 import { SpecialInstructionDialogComponent } from '../specialInstruction/dialogs/special-instruction-dialog/special-instruction-dialog.component';
@@ -3358,6 +3359,20 @@ openDropOffByExectiveGPS(item: any)
       row?.hasSettledRate === '1' ||
       row?.HasSettledRate === true
     );
+  }
+
+  hasAutoClosure(row: any): boolean {
+    const flag = row?.autoClosure ?? row?.AutoClosure;
+    return flag === true || flag === 'true' || flag === 1;
+  }
+
+  openSettledRateDialog(reservationID: number): void {
+    this.dialog.open(SettledRateViewDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: { reservationID },
+    });
   }
 
   private getControlPanelMessagingHeaderDisplay(row: any): {

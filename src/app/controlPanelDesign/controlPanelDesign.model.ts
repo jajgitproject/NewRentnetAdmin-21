@@ -36,6 +36,7 @@ export class ControlPanelHeaderDetails {
   hasActiveUpsell?: boolean;
   hasSettledRate?: boolean;
   modeOfPayment?: string;
+  autoClosure?: boolean;
   
   
   constructor(controlPanelHeaderDetails) {
@@ -62,6 +63,14 @@ export class ControlPanelHeaderDetails {
       controlPanelHeaderDetails.hasSettledRate === 'true' ||
       controlPanelHeaderDetails.HasSettledRate === true;
     this.modeOfPayment = controlPanelHeaderDetails.modeOfPayment || '';
+    const autoClosureFlag =
+      controlPanelHeaderDetails.autoClosure ?? controlPanelHeaderDetails.AutoClosure;
+    this.autoClosure =
+      autoClosureFlag === true || autoClosureFlag === 'true' || autoClosureFlag === 1
+        ? true
+        : autoClosureFlag === false || autoClosureFlag === 'false' || autoClosureFlag === 0
+          ? false
+          : undefined;
   }
 }
 
