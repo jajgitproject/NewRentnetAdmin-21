@@ -74,9 +74,6 @@ export class IncidenceMIS {
   responsible4CustomerPerson: string;
   incidenceEmailAcknowledged?: boolean;
   feedbackEmailAcknowledged?: boolean;
-  debitTypeID?: number;
-  debitType: string;
-  debitAmount?: number;
 
   constructor(data: Partial<IncidenceMIS> = {}) {
     Object.assign(this, data);

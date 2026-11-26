@@ -586,32 +586,6 @@
             </div> -->
           </div>
 
-          <!-- <div class="row">
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                <mat-label>Debit Type</mat-label>
-                <input required type="text" matInput formControlName="debitType" [matAutocomplete]="auto90">
-                <mat-autocomplete #auto90="matAutocomplete" (optionSelected)="OnDebitTypeSelect($event.option.value)">
-                  <mat-option *ngFor="let option of filteredDebitTypeOptions | async" [value]="option.debitType">
-                    {{option.debitType}}
-                  </mat-option>
-                </mat-autocomplete>
-                <mat-error *ngIf="advanceTableForm.controls['debitType']?.hasError('debitTypeInvalid')">
-                  Please select a Debit Type
-                </mat-error>
-              </mat-form-field>
-            </div>
-
-            <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
-              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
-                <mat-label>Debit Amount</mat-label>
-                <input matInput formControlName="debitAmount" required>
-                <mat-error *ngIf="advanceTableForm.get('debitAmount').hasError('required')">
-                  Debit Amount is required
-                </mat-error>
-              </mat-form-field>
-            </div>
-          </div> -->
 
 
 

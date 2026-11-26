@@ -112,7 +112,6 @@ import { DutySlipDropDown } from '../incidence/dutySlipDropDown.model';
 import { FuelTypeDropDwonModel } from '../fuelRate/fuelRate.model';
 import { DriverOfficialIdentityNumberDD } from './driverOfficialIdentityNumberDD.model';
 import { InventoryDropDown } from '../inventory/inventoryDropDown.model';
-import { DebitTypeModel } from '../resolution/resolution.model';
 import { AmenitieDropDown } from '../amenitie/amenitieDropDown.model';
 import { VendorContractCityTiersDropDown } from '../vendorOutStationRoundTripRate/vendorContractCityTiersDropDown.model';
 import { VendorContractCarCategoryDropDown } from '../vendorOutStationRoundTripRate/vendorContractCarCategoryDropDown.model';
@@ -2181,10 +2180,6 @@ getCustomerCategory(): Observable<CustomerCategoryDropDown[]>{
   }
    GetVehicleCategoryByVehicleID(vehicleID:number): Observable<VehicleCategoryDropDown[]> {
     return this.http.get<VehicleCategoryDropDown[]>(this.BaseURL + "vehicle/GetVehicleCategoryByVehicleID/" + vehicleID);
-  }
-
-  GetDebitTypes(): Observable<DebitTypeModel[]> {
-    return this.http.get<DebitTypeModel[]>(this.BaseURL + "incidenceEdit/DebitTypeForDropDown");
   }
 
   GetAmenities(): Observable<AmenitieDropDown[]> {

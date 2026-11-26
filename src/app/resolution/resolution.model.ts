@@ -106,9 +106,6 @@ export class Resolution {
   followUpAction : string;
   reminderDateForFollowUp: Date;
   reminderDateForFollowUpString : string;
-  debitTypeID : number;
-  debitType : string;
-  debitAmount:number;
   Responsible1GuestID:number;
   Responsible2GuestID:number;
   Responsible3GuestID:number;
@@ -177,27 +174,12 @@ export class Resolution {
     this.responsible4CustomerPersonID = incidence.responsible4CustomerPersonID || '';
     this.followUpAction = incidence.followUpAction || '';
     this.reminderDateForFollowUpString = incidence.reminderDateForFollowUpString || '';
-    this.debitTypeID = incidence.debitTypeID || '';
-    this.debitAmount = incidence.debitAmount || '';
     // this.responsible1GuestID = incidence.responsible1GuestID || 0;
     // this.responsible2GuestID = incidence.responsible2GuestID || 0;
     // this.responsible3GuestID = incidence.responsible3GuestID || 0;
     // this.responsible4GuestID = incidence.responsible4GuestID || 0;
     this.closureDate=new Date();
     this.closureTime=new Date();
-  }
-}
-
-
-export class DebitTypeModel{
-  debitTypeID : number;
-  debitType :string;
-  debitTypeAmount : number
-
-  constructor(debitTypeModel) {
-    this.debitTypeID = debitTypeModel.debitTypeID || '';
-    this.debitType = debitTypeModel.debitType || '';
-    this.debitTypeAmount = debitTypeModel.debitTypeAmount || '';
   }
 }
 

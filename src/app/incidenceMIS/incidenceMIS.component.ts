@@ -81,9 +81,7 @@ export class IncidenceMISComponent implements OnInit, OnDestroy {
     'responsible4Employee',
     'responsible4CustomerPerson',
     'incidenceEmailAcknowledged',
-    'feedbackEmailAcknowledged',
-    'debitType',
-    'debitAmount'
+    'feedbackEmailAcknowledged'
   ];
 
   columnTitleMap = {
@@ -113,9 +111,7 @@ export class IncidenceMISComponent implements OnInit, OnDestroy {
     // customerSalesManager: 'Customer Sales Manager',
     incidenceType: 'Issue Related To',
     incidenceEmailAcknowledged: 'Incidence Email Acknowledged',
-    feedbackEmailAcknowledged: 'Feedback Email Acknowledged',
-    debitType: 'Debit Type',
-    debitAmount: 'Debit Amount'
+    feedbackEmailAcknowledged: 'Feedback Email Acknowledged'
   };
 
   dataSource: IncidenceMIS[] = [];

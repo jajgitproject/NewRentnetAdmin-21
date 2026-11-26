@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { ResolutionService } from '../../resolution.service';
 import { FormControl, Validators, FormGroup, FormBuilder, AbstractControl, ValidatorFn, ValidationErrors } from '@angular/forms';
-import { DebitTypeModel, Resolution } from '../../resolution.model';
+import { Resolution } from '../../resolution.model';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { formatDate } from '@angular/common';
 import { GeneralService } from '../../../general/general.service';
@@ -82,8 +82,6 @@ export class resolutionFormDialogComponent {
   passengerList: any[] = [];
   showAutoComplete = false;
 
-  filteredDebitTypeOptions: Observable<DebitTypeModel[]> = of([]);
-  public DebitTypeList?: DebitTypeModel[] = [];
   // autoCompleteLabel: string = '';
   autoCompleteLabel1: string = 'Responsible1 Name';
   autoCompleteLabel2: string = 'Responsible2 Name';
@@ -120,7 +118,6 @@ export class resolutionFormDialogComponent {
   filteredResponsible1Options: Observable<any[]> = new Observable();
   supplierID: any;
   carVendor: any;
-  debitTypeID: any;
   verifyDutyStatusAndCacellationStatus: string;
   isSaveAllowed: boolean = false;
   constructor(
@@ -239,7 +236,6 @@ else {
     this.getOpenByEmployee();
     this.getClosedByEmployee();
     this.initCloseEmployee();
-    this.InitDebitType();
     const now = new Date();
     const currentDate = now.toISOString().split('T')[0];
     const currentTime = new Date(now).toISOString();
@@ -344,10 +340,7 @@ else {
       responsible4Value: [''],
       responsible4ID: [0 || ''],
       followUpAction : [''],
-      reminderDateForFollowUp : [''],
-      debitTypeID : [''],
-      debitType : [''],
-      debitAmount : ['']
+      reminderDateForFollowUp : ['']
     });
   }
 
@@ -970,9 +963,6 @@ else {
     this.advanceTableForm.patchValue({ closeByEmployeeName: selected?.closeByEmployeeName });
     this.advanceTableForm.patchValue({ followUpAction: selected?.followUpAction });
     this.advanceTableForm.patchValue({ reminderDateForFollowUp: selected?.reminderDateForFollowUp });
-    this.advanceTableForm.patchValue({ debitTypeID: selected?.debitTypeID });
-    this.advanceTableForm.patchValue({ debitType: selected?.debitType });
-    this.advanceTableForm.patchValue({ debitAmount: selected?.debitAmount });
 
     this.driverID = selected.driverID || this.driverID;
     this.driverName = selected.driverName || this.driverName;
@@ -1651,56 +1641,6 @@ if (validDate) {
 }
 }
 
-
-
-InitDebitType(){
-    this._generalService.GetDebitTypes().subscribe(
-      data=>
-      {
-        this.DebitTypeList=data;
-        // this.advanceTableForm.controls['debitType'].setValidators([Validators.required,
-        //   this.DebitTypeValidator(this.DebitTypeList)]);
-        this.advanceTableForm.controls['debitType'].updateValueAndValidity();
-        this.filteredDebitTypeOptions = this.advanceTableForm.controls['debitType'].valueChanges.pipe(
-          startWith(""),
-          map(value => this._filter(value || ''))
-        ); 
-      });
-  }
-  
-  private _filter(value: string): any {
-    const filterValue = value.toLowerCase();
-    return this.DebitTypeList.filter(
-      customer => 
-      {
-        return customer.debitType.toLowerCase().includes(filterValue);
-      });
-  }
-  OnDebitTypeSelect(selectedDebitType: string)
-  {
-    const DebitTypeName = this.DebitTypeList.find(
-      data => data.debitType === selectedDebitType
-    );
-    if (selectedDebitType) 
-    {
-      this.getTitles(DebitTypeName.debitTypeID,DebitTypeName.debitTypeAmount);
-    }
-  }  
-  getTitles(debitTypeID: any,amount : any)
- {
-    this.debitTypeID=debitTypeID;
-    this.advanceTableForm.patchValue({debitTypeID :this.debitTypeID});
-    this.advanceTableForm.patchValue({debitAmount :amount});
-  }
-
-  //-------------- Vehicle Category Validator -------------
-  DebitTypeValidator(DebitTypeList: any[]): ValidatorFn {
-    return (control: AbstractControl): ValidationErrors | null => {
-      const value = control.value?.toLowerCase();
-      const match = DebitTypeList.some(group => group.debitType.toLowerCase() === value);
-      return match ? null : { debitTypeInvalid: true };
-    };
-  }
 
 
   getClosedByEmployee() {
