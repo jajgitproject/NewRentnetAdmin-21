@@ -25,6 +25,7 @@
                     <div class="body">
                         <app-mis-my-format
                           apiSegment="zonaldutyRegister"
+                          [excludedFields]="zonalMyFormatExcludedFields"
                           (formatReadyChange)="onMyFormatReady($event)">
                         </app-mis-my-format>
                         <br/>

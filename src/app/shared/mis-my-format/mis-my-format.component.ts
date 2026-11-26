@@ -26,11 +26,13 @@ import { GeneralService } from '../../general/general.service';
 export class MisMyFormatComponent implements OnInit {
   @Input() apiSegment = '';
   @Input() panelTitle = 'My Format';
+  /** Field names that must never appear as My Format checkboxes (e.g. Zonal financial columns). */
+  @Input() excludedFields: string[] = [];
   @Output() formatReadyChange = new EventEmitter<boolean>();
 
   availableFields: string[] = [];
   selectedFields: string[] = [];
-  maxFields = 100;
+  maxFields = 50;
   hasFormat = false;
   loading = false;
   saving = false;
@@ -213,13 +215,15 @@ export class MisMyFormatComponent implements OnInit {
     const dto = data?.format || data?.Format || data || {};
     const available = dto?.availableFields || dto?.AvailableFields;
     const selectedRaw = dto?.selectedFields || dto?.SelectedFields;
-    const selected = Array.isArray(selectedRaw) ? selectedRaw.filter((f) => !!f) : [];
+    const selected = Array.isArray(selectedRaw)
+      ? selectedRaw.filter((f) => !!f && !this.isExcludedField(f))
+      : [];
 
     if (Array.isArray(available) && available.length > 0) {
-      this.availableFields = available;
+      this.availableFields = available.filter((f) => !!f && !this.isExcludedField(f));
     }
 
-    this.maxFields = dto?.maxFields || dto?.MaxFields || this.maxFields || 100;
+    this.maxFields = dto?.maxFields || dto?.MaxFields || this.maxFields || 50;
 
     const serverHasFormat = !!(dto?.hasFormat || dto?.HasFormat) && selected.length > 0;
     if (serverHasFormat) {
@@ -233,10 +237,23 @@ export class MisMyFormatComponent implements OnInit {
     if (replaceSelection && Array.isArray(selectedRaw)) {
       this.selectedFields = [];
       this.selectedLookup = new Set();
+    } else if (this.selectedFields.length > 0) {
+      this.selectedFields = this.selectedFields.filter((f) => !this.isExcludedField(f));
+      this.selectedLookup = new Set(this.selectedFields);
     }
 
     this.hasFormat = false;
     this.formatReadyChange.emit(false);
     return false;
+  }
+
+  private isExcludedField(field: string): boolean {
+    if (!field || !this.excludedFields?.length) {
+      return false;
+    }
+    const name = String(field).trim();
+    return this.excludedFields.some(
+      (ex) => !!ex && String(ex).trim().toLowerCase() === name.toLowerCase()
+    );
   }
 }

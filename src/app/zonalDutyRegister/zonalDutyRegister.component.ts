@@ -279,6 +279,15 @@ export class ZonalDutyRegisterComponent implements OnInit, OnDestroy {
   readonly maxPickupDateRangeDays = 15;
   formatSupplierDisplay = formatSupplierDisplay;
   readonly exportJobType = 'ZonalDutyRegisterExport';
+  readonly zonalMyFormatExcludedFields = [
+    'Revenue',
+    'Revenue with Expenses',
+    'Settled Rate',
+    'Final_bill_amount',
+    'Amount Charged',
+    'FGR',
+    'Duty_Amount'
+  ];
   IsKAMRole: any;
     
   
