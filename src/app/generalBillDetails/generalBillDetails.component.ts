@@ -196,6 +196,12 @@ private isInvoiceGstCharged(): boolean {
     return !!(this.shipToDetails?.shipToCompany);
   }
 
+  getCustomerGstNumber(): string {
+    const gst =
+      this.dataSource?.customerGSTNumber ?? this.dataSource?.CustomerGSTNumber;
+    return typeof gst === 'string' ? gst.trim() : '';
+  }
+
   getShipToCountryName(): string {
     return (
       this.shipToDetails?.countryName ||

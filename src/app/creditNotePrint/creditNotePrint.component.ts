@@ -21,6 +21,7 @@ import { CreditNotePrintService } from './creditNotePrint.service';
 })
 export class CreditNotePrintComponent implements OnInit {
   dataSource: any;
+  customerGstForPrint = '';
   sortingData: number;
   sortType: string;
   search : FormControl = new FormControl();
@@ -55,8 +56,8 @@ export class CreditNotePrintComponent implements OnInit {
    (
      data =>   
      {
+       this.applyCustomerGstDisplayRules(data);
        this.dataSource = data;
-       console.log(this.dataSource);
      },
      (error: HttpErrorResponse) => { this.dataSource = null;}
    );
@@ -76,6 +77,41 @@ export class CreditNotePrintComponent implements OnInit {
     window.print();
 
 }
+
+  private applyCustomerGstDisplayRules(data: any): void {
+    const gst = this.resolveCustomerGstNumber(data);
+    this.customerGstForPrint = gst;
+    if (!data) {
+      return;
+    }
+    data.printCustomerGSTNumber = gst || null;
+    data.PrintCustomerGSTNumber = gst || null;
+    if (data.invoiceCustomerModel) {
+      data.invoiceCustomerModel.customerGSTNumber = gst || null;
+      data.invoiceCustomerModel.CustomerGSTNumber = gst || null;
+    }
+  }
+
+  private resolveCustomerGstNumber(data: any): string {
+    if (!data) {
+      return '';
+    }
+    const invoiceCustomer = data.invoiceCustomerModel;
+    const fromInvoice = invoiceCustomer
+      ? String(
+          invoiceCustomer.customerGSTNumber ??
+            invoiceCustomer.CustomerGSTNumber ??
+            ''
+        ).trim()
+      : '';
+    const fromPrint = String(
+      data.printCustomerGSTNumber ?? data.PrintCustomerGSTNumber ?? ''
+    ).trim();
+    if (invoiceCustomer) {
+      return fromInvoice;
+    }
+    return fromPrint;
+  }
 }
 
 

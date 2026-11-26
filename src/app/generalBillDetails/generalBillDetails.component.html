@@ -149,7 +149,7 @@
         {{dataSource?.customerCountryName}}<br />
         <strong>State of Service:</strong> {{dataSource?.customerGSTStateName}},
         <strong>State Code:</strong> {{dataSource?.customerGSTStateCode}}<br />
-        <strong>GST/UIN:</strong> {{dataSource?.customerGSTNumber}}<br />
+        <strong>GST/UIN:</strong> {{ getCustomerGstNumber() }}<br />
         <strong>Guest Name:</strong> {{dataSource?.passengerName}}<br />
         <strong>Reverse Charge (Y/N):</strong> N
         <ng-container *ngIf="hasShipToDetails()">

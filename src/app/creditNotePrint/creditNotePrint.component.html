@@ -75,16 +75,29 @@
 
     /* Title */
 
-    .title {
-
-      text-align: center;
+    .title-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
       border: 2px solid #000;
       padding: 5px;
+      margin-bottom: 12px;
+    }
+
+    .title-text {
+      flex: 1;
+      text-align: center;
       font-size: 25px;
       font-weight: bold;
       letter-spacing: 1px;
-      margin-bottom: 12px;
+    }
 
+    .title-logo .invoice-logo {
+      width: 120px;
+      height: auto;
+      object-fit: contain;
+      display: block;
     }
 
     /* Header */
@@ -219,6 +232,7 @@
         zoom: 0.92; /* shrinks content slightly */
     }
 
+    .title-container,
     .header,
     .heading,
     table,
@@ -255,7 +269,7 @@
 
         <div class="title-text">CREDIT NOTE</div>
 
-        <div >
+        <div class="title-logo">
           <img class="invoice-logo" src="http://www.ecoserp.com/bill_printing/logo.jpg" alt="Logo" />
 
           <!-- <ng-container *ngIf="dataSource?.signedQRCode || dataSource?.invoiceModel?.signedQRCode; else noQR">
@@ -378,7 +392,7 @@
 
         <tr>
           <td><b>GST/UIN</b></td>
-          <td>{{dataSource?.printCustomerGSTNumber || dataSource?.invoiceCustomerModel?.customerGSTNumber}}</td>
+          <td>{{ customerGstForPrint }}</td>
         </tr>
       </table>
 
@@ -499,7 +513,7 @@
 
   </div>
   <div class="toolbar">
-    <button onclick="print()">🖨 Print Credit Note</button>
+    <button type="button" (click)="print()">🖨 Print Credit Note</button>
   </div>
 </body>
 
