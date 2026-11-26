@@ -61,6 +61,7 @@ export class FormDialogComponent
       updateDateTime: [this.advanceTable.updateDateTime],
       isGSTMandatoryWithReservation: [this.advanceTable.isGSTMandatoryWithReservation],
       sendDutySlipAfterDSVerification: [this.advanceTable.sendDutySlipAfterDSVerification === true],
+      customerGroupDomain: [this.advanceTable.customerGroupDomain, [Validators.maxLength(250)]],
     });
   }
 

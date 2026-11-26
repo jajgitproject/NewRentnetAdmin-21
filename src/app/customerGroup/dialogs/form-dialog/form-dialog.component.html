@@ -87,6 +87,15 @@
               </div>
               <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
+                    <label class="field-label">Customer Domain</label>
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <input matInput formControlName="customerGroupDomain" maxlength="250">
+                        <mat-error *ngIf="advanceTableForm.get('customerGroupDomain').hasError('maxlength')">
+                            Customer Domain cannot exceed 250 characters
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-3">
                     <label class="field-label">Activation Status</label>
                     <mat-form-field class="example-full-width" appearance="outline">
                             <mat-select formControlName="activationStatus">

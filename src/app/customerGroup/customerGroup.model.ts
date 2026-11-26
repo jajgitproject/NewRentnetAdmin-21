@@ -9,6 +9,7 @@ export class CustomerGroup {
    activationStatus: boolean;
    isGSTMandatoryWithReservation:boolean;
    sendDutySlipAfterDSVerification:boolean;
+   customerGroupDomain: string;
    updatedBy:number;
    userID:number;
    updateDateTime: Date;
@@ -23,6 +24,7 @@ export class CustomerGroup {
        this.activationStatus = customerGroup.activationStatus || '';
        this.isGSTMandatoryWithReservation = customerGroup.isGSTMandatoryWithReservation || '';
        this.sendDutySlipAfterDSVerification = customerGroup.sendDutySlipAfterDSVerification === true;
+       this.customerGroupDomain = customerGroup.customerGroupDomain || '';
        this.updatedBy=customerGroup.updatedBy || 10;
        this.updateDateTime = customerGroup.updateDateTime;
     }
