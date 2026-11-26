@@ -14,7 +14,7 @@ import { formatDate } from '@angular/common';
 })
 export class DebitMisComponent implements OnInit {
   displayedColumns = [
-    'dateString',
+    'debitDate',
     'debitID',
     'source',
     'incidenceID',
@@ -33,7 +33,7 @@ export class DebitMisComponent implements OnInit {
   ];
 
   columnTitles: Record<string, string> = {
-    dateString: 'Date',
+    debitDate: 'Date',
     debitID: 'Debit Ref. No.',
     source: 'Source',
     incidenceID: 'Incident ID',
@@ -51,14 +51,21 @@ export class DebitMisComponent implements OnInit {
     debitStatus: 'Debit Status',
   };
 
+  /** Columns rendered via *ngFor (excludes static debitDate column). */
+  get tableColumns(): string[] {
+    return this.displayedColumns.filter((c) => c !== 'debitDate');
+  }
+
   rows: DebitMisRow[] = [];
   totalAmount = 0;
   totalCount = 0;
   pageNumber = 0;
+  readonly pageSize = 50;
   sortColumn = 'DebitID';
   sortDirection = 'Descending';
   loading = false;
   exporting = false;
+  hasSearched = false;
 
   dateFrom: Date | null = null;
   dateTo: Date | null = null;
@@ -84,7 +91,6 @@ export class DebitMisComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDebitTypes();
-    this.search();
   }
 
   loadDebitTypes(): void {
@@ -141,6 +147,7 @@ export class DebitMisComponent implements OnInit {
   }
 
   search(): void {
+    this.hasSearched = true;
     this.loading = true;
     this.debitMisService.search(this.buildCriteria()).subscribe(
       (res) => {
@@ -173,7 +180,10 @@ export class DebitMisComponent implements OnInit {
     this.filterDriverMobile = '';
     this.filterIncidenceID = null;
     this.pageNumber = 0;
-    this.search();
+    this.hasSearched = false;
+    this.rows = [];
+    this.totalAmount = 0;
+    this.totalCount = 0;
   }
 
   exportExcel(): void {
@@ -200,12 +210,26 @@ export class DebitMisComponent implements OnInit {
     );
   }
 
+  previousPage(): void {
+    if (this.pageNumber > 0) {
+      this.pageNumber--;
+      this.search();
+    }
+  }
+
+  nextPage(): void {
+    if (this.rows.length >= this.pageSize) {
+      this.pageNumber++;
+      this.search();
+    }
+  }
+
   onSort(event: any): void {
     if (!event?.active) {
       return;
     }
     const map: Record<string, string> = {
-      dateString: 'Date',
+      debitDate: 'Date',
       debitID: 'DebitID',
       amount: 'Amount',
       location: 'Location',
@@ -216,6 +240,49 @@ export class DebitMisComponent implements OnInit {
     this.sortColumn = map[event.active] || 'DebitID';
     this.sortDirection = event.direction === 'asc' ? 'Ascending' : 'Descending';
     this.search();
+  }
+
+  formatDateCell(value: any): string {
+    if (value == null || value === '') {
+      return '';
+    }
+    const text = String(value).trim();
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(text)) {
+      return text;
+    }
+    if (/^\d{4}-\d{2}-\d{2}/.test(text)) {
+      const parts = text.substring(0, 10).split('-');
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    const d = value instanceof Date ? value : new Date(value);
+    if (isNaN(d.getTime())) {
+      return text;
+    }
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  cellText(row: DebitMisRow, col: string): string {
+    if (col === 'debitDate') {
+      const v = row?.debitDate ?? row?.dateString ?? this.formatDateCell(row?.date);
+      return (v && String(v).trim()) || '—';
+    }
+    if (col === 'amount') {
+      return row?.amount != null ? Number(row.amount).toFixed(2) : '—';
+    }
+    if (col === 'debitStatus') {
+      return row?.debitStatus || '—';
+    }
+    if (col === 'narration') {
+      return this.truncateText(row?.narration, 35);
+    }
+    if (col === 'createdOn') {
+      return row?.createdOn || '—';
+    }
+    const val = row?.[col];
+    return val != null && val !== '' ? String(val) : '—';
   }
 
   truncateText(value: string, maxLen = 35): string {

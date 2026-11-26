@@ -1,135 +1,90 @@
-.w-100
-  width: 100%
+$debit-mis-table-width: 1268px
 
-.ml-2
-  margin-left: 8px
+@mixin debit-mis-fixed-col($name, $width)
+  .mat-column-#{$name},
+  .mat-mdc-column-#{$name}
+    flex: 0 0 $width !important
+    width: $width !important
+    min-width: $width !important
+    max-width: $width !important
+    box-sizing: border-box
 
-.mb-3
-  margin-bottom: 1rem
+:host ::ng-deep .responsive_table .table-responsive
+  overflow-x: hidden
 
-.mb-2
-  margin-bottom: 0.5rem
+:host ::ng-deep .debit-mis-scroll.scrollable-table-container
+  overflow-x: hidden
+  overflow-y: auto
+  height: auto
+  max-height: 70vh
 
-.scrollable-table-container
-  overflow-x: auto
-  width: 100%
+.debit-mis-table-inner
+  width: $debit-mis-table-width
+  min-width: $debit-mis-table-width
+  overflow: visible
 
-:host ::ng-deep .debit-mis-table
-  min-width: 1580px
-  width: 100%
-  font-size: 9px
+:host ::ng-deep .debit-mis-table-inner .debit-mis-table.floating-header-table
+  width: $debit-mis-table-width !important
+  min-width: $debit-mis-table-width !important
+  max-width: $debit-mis-table-width !important
 
   .mat-header-row,
-  .mat-row
-    min-height: 30px
-    align-items: flex-start
-
-  .mat-header-cell
-    font-size: 9px
-    line-height: 1.2
-    padding: 3px 5px
+  .mat-row,
+  .mat-mdc-header-row,
+  .mat-mdc-row
+    width: $debit-mis-table-width !important
+    min-width: $debit-mis-table-width !important
+    max-width: $debit-mis-table-width !important
+    min-height: 26px !important
     box-sizing: border-box
-    align-self: stretch
 
-  .mat-cell
-    font-size: 8px
-    line-height: 1.15
-    padding: 2px 5px
+  .mat-header-cell,
+  .mat-cell,
+  .mat-mdc-header-cell,
+  .mat-mdc-cell
+    flex: 0 0 auto !important
     box-sizing: border-box
-    align-self: stretch
-
-  .header-text
-    display: block
+    padding: 2px 4px !important
+    font-size: 10px !important
+    line-height: 1.15 !important
     white-space: normal
     word-break: break-word
-    font-size: 9px
+    overflow-wrap: anywhere
+    vertical-align: top
+
+  .mat-header-cell,
+  .mat-mdc-header-cell
     font-weight: 600
 
-  .cell-text-full
-    display: block
-    width: 100%
+  .mat-sort-header-content
+    text-align: left
     white-space: normal
-    word-break: break-word
-    overflow: visible
+    line-height: 1.15
 
-  .narration-preview
+  .TDValue
     display: block
+    font-size: 10px
+    line-height: 1.15
     width: 100%
-    cursor: help
-    overflow: hidden
-    text-overflow: ellipsis
-    white-space: nowrap
 
-  .mat-column-dateString
-    flex: 0 0 74px
-    max-width: 74px
+  .badge
+    font-size: 9px
+    padding: 1px 5px
+    line-height: 1.2
 
-  .mat-column-debitID
-    flex: 0 0 68px
-    max-width: 68px
-
-  .mat-column-source
-    flex: 0 0 70px
-    max-width: 70px
-
-  .mat-column-incidenceID
-    flex: 0 0 68px
-    max-width: 68px
-
-  .mat-column-location
-    flex: 0 0 96px
-    max-width: 96px
-
-  .mat-column-supplierName
-    flex: 0 0 108px
-    max-width: 108px
-
-  .mat-column-supplierType
-    flex: 0 0 76px
-    max-width: 76px
-
-  .mat-column-driverName
-    flex: 0 0 100px
-    max-width: 100px
-
-  .mat-column-driverMobileNo
-    flex: 0 0 88px
-    max-width: 88px
-
-  .mat-column-carRegistrationNo
-    flex: 0 0 88px
-    max-width: 88px
-
-  .mat-column-debitType
-    flex: 0 0 104px
-    max-width: 104px
-
-  .mat-column-amount
-    flex: 0 0 76px
-    max-width: 76px
-    text-align: right
-
-    .cell-text
-      text-align: right
-
-  .mat-column-narration
-    flex: 0 0 120px
-    max-width: 120px
-
-  .mat-column-createdBy
-    flex: 0 0 92px
-    max-width: 92px
-
-  .mat-column-createdOn
-    flex: 0 0 108px
-    max-width: 108px
-
-  .mat-column-debitStatus
-    flex: 0 0 64px
-    max-width: 64px
-
-::ng-deep .mat-tooltip
-  font-size: 11px
-  max-width: 420px
-  white-space: pre-wrap
-  word-break: break-word
+  @include debit-mis-fixed-col(debitDate, 72px)
+  @include debit-mis-fixed-col(debitID, 64px)
+  @include debit-mis-fixed-col(source, 58px)
+  @include debit-mis-fixed-col(incidenceID, 58px)
+  @include debit-mis-fixed-col(location, 96px)
+  @include debit-mis-fixed-col(supplierName, 108px)
+  @include debit-mis-fixed-col(supplierType, 72px)
+  @include debit-mis-fixed-col(driverName, 96px)
+  @include debit-mis-fixed-col(driverMobileNo, 88px)
+  @include debit-mis-fixed-col(carRegistrationNo, 88px)
+  @include debit-mis-fixed-col(debitType, 100px)
+  @include debit-mis-fixed-col(amount, 68px)
+  @include debit-mis-fixed-col(narration, 112px)
+  @include debit-mis-fixed-col(createdBy, 88px)
+  @include debit-mis-fixed-col(createdOn, 108px)
+  @include debit-mis-fixed-col(debitStatus, 56px)

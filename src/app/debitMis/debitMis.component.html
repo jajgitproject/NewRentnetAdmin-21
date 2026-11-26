@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="block-header">
       <div class="row">
-        <div class="col-xs-12">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
           <ul class="breadcrumb breadcrumb-style">
             <li class="breadcrumb-item bcrumb-1">
               <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a> |
@@ -14,153 +14,207 @@
       </div>
     </div>
 
-    <mat-card class="mb-3">
-      <mat-accordion>
-        <mat-expansion-panel [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title>Filters</mat-panel-title>
-          </mat-expansion-panel-header>
-          <div class="row">
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Date From</mat-label>
-                <input matInput [matDatepicker]="df" [(ngModel)]="dateFrom">
-                <mat-datepicker-toggle matSuffix [for]="df"></mat-datepicker-toggle>
-                <mat-datepicker #df></mat-datepicker>
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Date To</mat-label>
-                <input matInput [matDatepicker]="dt" [(ngModel)]="dateTo">
-                <mat-datepicker-toggle matSuffix [for]="dt"></mat-datepicker-toggle>
-                <mat-datepicker #dt></mat-datepicker>
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Location</mat-label>
-                <input matInput [(ngModel)]="filterLocationName" />
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Supplier</mat-label>
-                <input matInput [(ngModel)]="filterSupplierName" (input)="onSupplierPrefix(filterSupplierName)" [matAutocomplete]="autoSup">
-                <mat-autocomplete #autoSup="matAutocomplete">
-                  <mat-option *ngFor="let s of supplierOptions" [value]="s.supplierName">{{ s.supplierName }}</mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Driver</mat-label>
-                <input matInput [(ngModel)]="filterDriverName" (input)="onDriverPrefix(filterDriverName)" [matAutocomplete]="autoDrv">
-                <mat-autocomplete #autoDrv="matAutocomplete">
-                  <mat-option *ngFor="let d of driverOptions" [value]="d.driverName || d.displayLabel">{{ d.driverName || d.displayLabel }}</mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Debit Type</mat-label>
-                <mat-select [(ngModel)]="filterDebitTypeID">
-                  <mat-option [value]="0">All</mat-option>
-                  <mat-option *ngFor="let t of debitTypeOptions" [value]="t.debitTypeID">
-                    {{ debitTypeLabel(t) }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Source</mat-label>
-                <mat-select [(ngModel)]="filterSource">
-                  <mat-option value="All">All</mat-option>
-                  <mat-option value="General">General</mat-option>
-                  <mat-option value="Incidence">Incidence</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Debit Status</mat-label>
-                <mat-select [(ngModel)]="filterStatus">
-                  <mat-option value="All">All</mat-option>
-                  <mat-option value="Active">Active</mat-option>
-                  <mat-option value="Deleted">Deleted</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Vehicle / Reg. No.</mat-label>
-                <input matInput [(ngModel)]="filterRegistrationNumber" />
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Driver Mobile</mat-label>
-                <input matInput [(ngModel)]="filterDriverMobile" />
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Incident ID</mat-label>
-                <input matInput type="number" [(ngModel)]="filterIncidenceID" />
-              </mat-form-field>
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <mat-accordion class="duty-register-search-accordion">
+              <mat-expansion-panel class="duty-register-inline-search-panel" [expanded]="true">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>Quick Search</mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <div class="duty-register-inline-search-body">
+                  <div class="duty-register-search quick-search-panel">
+                    <div class="row">
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Date From</mat-label>
+                          <input matInput [matDatepicker]="df" [(ngModel)]="dateFrom">
+                          <mat-datepicker-toggle matSuffix [for]="df"></mat-datepicker-toggle>
+                          <mat-datepicker #df></mat-datepicker>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Date To</mat-label>
+                          <input matInput [matDatepicker]="dt" [(ngModel)]="dateTo">
+                          <mat-datepicker-toggle matSuffix [for]="dt"></mat-datepicker-toggle>
+                          <mat-datepicker #dt></mat-datepicker>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Location</mat-label>
+                          <input matInput [(ngModel)]="filterLocationName" />
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Supplier</mat-label>
+                          <input matInput [(ngModel)]="filterSupplierName" (input)="onSupplierPrefix(filterSupplierName)" [matAutocomplete]="autoSup">
+                          <mat-autocomplete #autoSup="matAutocomplete">
+                            <mat-option *ngFor="let s of supplierOptions" [value]="s.supplierName">{{ s.supplierName }}</mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Driver</mat-label>
+                          <input matInput [(ngModel)]="filterDriverName" (input)="onDriverPrefix(filterDriverName)" [matAutocomplete]="autoDrv">
+                          <mat-autocomplete #autoDrv="matAutocomplete">
+                            <mat-option *ngFor="let d of driverOptions" [value]="d.driverName || d.displayLabel">{{ d.driverName || d.displayLabel }}</mat-option>
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Debit Type</mat-label>
+                          <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" [(ngModel)]="filterDebitTypeID">
+                            <mat-option [value]="0">All</mat-option>
+                            <mat-option *ngFor="let t of debitTypeOptions" [value]="t.debitTypeID">
+                              {{ debitTypeLabel(t) }}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Source</mat-label>
+                          <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" [(ngModel)]="filterSource">
+                            <mat-option value="All">All</mat-option>
+                            <mat-option value="General">General</mat-option>
+                            <mat-option value="Incidence">Incidence</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Debit Status</mat-label>
+                          <mat-select panelClass="control-panel-select-panel" [panelWidth]="null" [(ngModel)]="filterStatus">
+                            <mat-option value="All">All</mat-option>
+                            <mat-option value="Active">Active</mat-option>
+                            <mat-option value="Deleted">Deleted</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Vehicle / Reg. No.</mat-label>
+                          <input matInput [(ngModel)]="filterRegistrationNumber" />
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Driver Mobile</mat-label>
+                          <input matInput [(ngModel)]="filterDriverMobile" />
+                        </mat-form-field>
+                      </div>
+                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-2">
+                        <mat-form-field class="example-full-width cp-quick-search-field" appearance="fill" floatLabel="auto" subscriptSizing="dynamic">
+                          <mat-label>Incident ID</mat-label>
+                          <input matInput type="number" [(ngModel)]="filterIncidenceID" />
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="duty-register-inline-search-actions quick-search-actions">
+                    <button mat-raised-button color="primary" class="duty-register-search-button" (click)="pageNumber = 0; search()" [disabled]="loading">Search</button>
+                    &nbsp;&nbsp;
+                    <button mat-raised-button color="warn" class="duty-register-reset-button" (click)="resetFilters()" [disabled]="loading">Refresh</button>
+                    &nbsp;&nbsp;
+                    <button mat-raised-button color="accent" (click)="exportExcel()" [disabled]="exporting || loading">
+                      <mat-icon>download</mat-icon> Export Excel
+                    </button>
+                  </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+
+            <br />
+
+            <div class="responsive_table">
+              <div class="table-responsive">
+                <div class="materialTableHeader" *ngIf="hasSearched">
+                  <div class="row">
+                    <div style="width: 100%; padding: 6px 12px;">
+                      <span class="TDValueBold">Matching records: {{ totalCount }}</span>
+                      &nbsp;|&nbsp;
+                      <span class="TDValueBold">Total debit amount (filter): {{ totalAmount | number: '1.2-2' }}</span>
+                      <span class="TDValue" *ngIf="loading">&nbsp; — Searching…</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p *ngIf="!hasSearched; then idleBlock">This is not rendered</p>
+                <p *ngIf="hasSearched && !rows?.length; then thenBlock else elseBlock">This is not rendered</p>
+
+                <ng-template #idleBlock>
+                  <div class="alert alert-primary debit-mis-idle-hint" style="background-color:#E8E8E8; text-align: center;">
+                    Set filters and click Search to load Debit MIS records.
+                  </div>
+                </ng-template>
+
+                <ng-template #thenBlock>
+                  <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">No Records Found</div>
+                  <div class="body" *ngIf="pageNumber > 0">
+                    <div class="example-button-row">
+                      <button mat-raised-button color="primary" (click)="previousPage()">Previous</button>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #elseBlock>
+                  <div class="scrollable-table-container debit-mis-scroll">
+                    <div class="debit-mis-table-inner">
+                      <mat-table #table [dataSource]="rows" matSort class="mat-cell floating-header-table debit-mis-table" (matSortChange)="onSort($event)">
+                        <ng-container matColumnDef="debitDate">
+                          <mat-header-cell *matHeaderCellDef mat-sort-header>Date</mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                            <span class="TDValue">{{ row.debitDate || row.dateString || '—' }}</span>
+                          </mat-cell>
+                        </ng-container>
+
+                        <ng-container *ngFor="let col of tableColumns" [matColumnDef]="col">
+                          <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!['debitID','amount','location','supplierName','driverName','debitType'].includes(col)">
+                            {{ columnTitles[col] }}
+                          </mat-header-cell>
+                          <mat-cell *matCellDef="let row">
+                            <span *ngIf="col === 'debitStatus'" class="TDValue">
+                              <span [ngClass]="row.debitStatus === 'Active' ? 'badge badge-solid-green' : 'badge badge-solid-red'">
+                                {{ cellText(row, col) }}
+                              </span>
+                            </span>
+                            <span
+                              *ngIf="col === 'narration'"
+                              class="TDValue"
+                              [matTooltip]="row.narration"
+                              matTooltipPosition="above"
+                              [matTooltipDisabled]="!row.narration || row.narration.length <= 35">
+                              {{ cellText(row, col) }}
+                            </span>
+                            <span *ngIf="col !== 'debitStatus' && col !== 'narration'" class="TDValue">{{ cellText(row, col) }}</span>
+                          </mat-cell>
+                        </ng-container>
+
+                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                      </mat-table>
+                    </div>
+                  </div>
+
+                  <div class="body">
+                    <div class="example-button-row">
+                      <button mat-raised-button color="primary" (click)="previousPage()" [disabled]="pageNumber <= 0">Previous</button>
+                      <button mat-raised-button color="primary" (click)="nextPage()" [disabled]="rows.length < pageSize">Next</button>
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
             </div>
           </div>
-          <div class="row mt-2">
-            <div class="col-12">
-              <button mat-raised-button color="primary" (click)="pageNumber = 0; search()" [disabled]="loading">Search</button>
-              <button mat-stroked-button class="ml-2" (click)="resetFilters()" [disabled]="loading">Reset</button>
-              <button mat-raised-button color="accent" class="ml-2" (click)="exportExcel()" [disabled]="exporting || loading">
-                <mat-icon>download</mat-icon> Export Excel
-              </button>
-            </div>
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </mat-card>
-
-    <mat-card class="mb-2 p-3">
-      <strong>Summary:</strong>
-      {{ totalCount }} record(s) |
-      <strong>Total debit amount:</strong> {{ totalAmount | number: '1.2-2' }}
-    </mat-card>
-
-    <div class="card">
-      <div class="body">
-        <div class="scrollable-table-container" *ngIf="rows?.length; else noRows">
-          <mat-table class="debit-mis-table" [dataSource]="rows" matSort (matSortChange)="onSort($event)">
-            <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
-              <mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!['dateString','debitID','amount','location','supplierName','driverName','debitType'].includes(col)">
-                <span class="header-text">{{ columnTitles[col] }}</span>
-              </mat-header-cell>
-              <mat-cell *matCellDef="let row">
-                <ng-container [ngSwitch]="col">
-                  <span *ngSwitchCase="'amount'" class="cell-text cell-text-full">{{ row.amount | number: '1.2-2' }}</span>
-                  <span *ngSwitchCase="'incidenceID'" class="cell-text cell-text-full">{{ row.incidenceID || '—' }}</span>
-                  <span
-                    *ngSwitchCase="'narration'"
-                    class="cell-text narration-preview"
-                    [matTooltip]="row.narration"
-                    matTooltipPosition="above"
-                    [matTooltipDisabled]="!row.narration || row.narration.length <= 35">
-                    {{ truncateText(row.narration, 35) }}
-                  </span>
-                  <span *ngSwitchDefault class="cell-text cell-text-full">{{ row[col] || '—' }}</span>
-                </ng-container>
-              </mat-cell>
-            </ng-container>
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-          </mat-table>
         </div>
-        <ng-template #noRows>
-          <div class="alert alert-primary text-center">No records found</div>
-        </ng-template>
       </div>
     </div>
   </div>
