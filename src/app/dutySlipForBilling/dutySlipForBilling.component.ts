@@ -24,6 +24,7 @@ import { firstValueFrom } from 'rxjs';
 import { BillingHistory } from './dutySlipForBilling.model';
 import { ClosingModel } from '../clossingOne/clossingOne.model';
 import { ClosingDutySlipByDriverModel } from '../clossingOne/closingDutySlipByDriver.model';
+import { ClosingDutySlipByAppModel } from '../clossingOne/closingDutySlipByApp.model';
 import { Dispute } from '../dispute/dispute.model';
 import { ClossingOneService } from '../clossingOne/clossingOne.service';
 import { SummaryOfDutyData } from '../summaryOfDuty/summary-of-duty.model';
@@ -350,29 +351,30 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.patchFormFromAppModel({ useActualKm: true });
   }
 
+  /** Driver KM closure — raw odometer from DutySlipByApp (not Actual chain). */
   InitDriver(): void {
-    const driver = this.advanceTableClosingOne?.closingDutySlipByDriverModel;
-    if (this.hasUsableDriverData(driver)) {
-      this.patchFormFromDriverModel(driver);
+    const app = this.advanceTableClosingOne?.closingDutySlipByAppModel;
+    if (this.hasUsableAppData(app)) {
+      this.patchFormFromAppModel({ useActualKm: false });
       return;
     }
 
     if (!this.DutySlipID) {
-      this.showNoDriverDataWarning();
+      this.showNoAppDataWarning();
       return;
     }
-    this.clossingOneService.getTableDataForDriver(this.DutySlipID).subscribe({
+    this.clossingOneService.getTableDataForApp(this.DutySlipID).subscribe({
       next: (data) => {
         const row = Array.isArray(data) ? data[0] : data;
-        if (row && this.hasUsableDriverData(row)) {
-          this.advanceTableClosingOne.closingDutySlipByDriverModel = new ClosingDutySlipByDriverModel(row);
-          this.patchFormFromDriverModel(this.advanceTableClosingOne.closingDutySlipByDriverModel);
+        if (row && this.hasUsableAppData(row)) {
+          this.advanceTableClosingOne.closingDutySlipByAppModel = new ClosingDutySlipByAppModel(row);
+          this.patchFormFromAppModel({ useActualKm: false });
         } else {
-          this.showNoDriverDataWarning();
+          this.showNoAppDataWarning();
         }
       },
       error: () => {
-        this.showNoDriverDataWarning();
+        this.showNoAppDataWarning();
       },
     });
   }
@@ -561,12 +563,32 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
     this.onTimeSelection();
   }
     
+  /** Manual KM closure — odometer from DutySlipByDriver. */
   InitManual(): void {
-    this.patchBillingTripFieldsFromForBillingModel();
-    this.applyReportingFromPickupFallbackToForm();
-    this.onKeyUp();
-    this.applyRoundOffBillingTimes();
-    this.onTimeSelection();
+    const driver = this.advanceTableClosingOne?.closingDutySlipByDriverModel;
+    if (this.hasUsableDriverData(driver)) {
+      this.patchFormFromDriverModel(driver);
+      return;
+    }
+
+    if (!this.DutySlipID) {
+      this.showNoDriverDataWarning();
+      return;
+    }
+    this.clossingOneService.getTableDataForDriver(this.DutySlipID).subscribe({
+      next: (data) => {
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row && this.hasUsableDriverData(row)) {
+          this.advanceTableClosingOne.closingDutySlipByDriverModel = new ClosingDutySlipByDriverModel(row);
+          this.patchFormFromDriverModel(this.advanceTableClosingOne.closingDutySlipByDriverModel);
+        } else {
+          this.showNoDriverDataWarning();
+        }
+      },
+      error: () => {
+        this.showNoDriverDataWarning();
+      },
+    });
   }
 
   get isEInvoiceBlockingEdits(): boolean {
@@ -1127,6 +1149,8 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
       this.InitApp();
     } else if (closureType === 'GPS') {
       this.InitGPS();
+    } else if (closureType === 'Manual') {
+      this.InitManual();
     }
   }
 
@@ -1176,6 +1200,10 @@ export class DutySlipForBillingComponent implements OnInit, AfterViewInit, OnCha
 
   private showNoDriverDataWarning(): void {
     Swal.fire('', 'No driver KM data found for this duty.', 'warning');
+  }
+
+  private showNoAppDataWarning(): void {
+    Swal.fire('', 'No app KM data found for this duty.', 'warning');
   }
 
   private parseLatLongPair(latLong: string | null | undefined): { lat: string; long: string } | null {
