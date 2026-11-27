@@ -49,7 +49,6 @@ export class PrintDutySlipComponent {
   reservationInfo:any;
   totalDays: number;
   datetime: string;
-  totalKms: number = 0;
   TotalKMGSG: number = 0;
   
   constructor(
@@ -114,12 +113,6 @@ export class PrintDutySlipComponent {
           this.dataSource.customerSignatureImage = this.signatureDriverUrl || this.signatureProdUrl || this.signatureUatUrl;
         }
         this.applyDropAddressFromReservation();
-        // Total Kms in header uses totalRunningKM; totalKms is for Running Detail total row when distance column is shown.
-        if (this.dataSource?.showDistanceOnDutySlipPdf === true) {
-          this.totalKms = this.dataSource?.runningDetailsModels?.reduce((sum: number, item: any) => sum + Number(item.distance || 0), 0) ?? 0;
-        } else {
-          this.totalKms = 0;
-        }
         //this.getTime();
       },
       (error: HttpErrorResponse) => { this.dataSource = null});

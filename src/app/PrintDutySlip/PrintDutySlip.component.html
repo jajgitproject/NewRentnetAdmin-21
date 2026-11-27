@@ -270,15 +270,6 @@
                     <td>{{runningDetails?.end_GPS_location}}</td>
                     <td *ngIf="dataSource?.showDistanceOnDutySlipPdf === true">{{runningDetails?.distance}}</td>
                   </tr>
-
-                  <tr style="font-weight:bold; text-align:center;" *ngIf="dataSource?.showDistanceOnDutySlipPdf === true">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>Total</td>
-                    <td>{{totalKms}}</td>
-                  </tr>
                 </table>
 
                 <br />
