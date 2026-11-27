@@ -313,11 +313,19 @@ export class DutySlipForBillingService
     return Number.isFinite(n) ? n : null;
     }
 
- PostDataGPS(dutySlipID:any,RegistrationNumber:any,pickupDate:string,dropOffDate:string):  Observable<any> 
-  { 
-    const params = new HttpParams()
-      .set('pickupDate', pickupDate)
-      .set('dropOffDate', dropOffDate);
-    return this.httpClient.get(this.API_URL_GPS+'/'+dutySlipID + '/'+RegistrationNumber, { params });
+  PostDataGPS(
+    dutySlipID: any,
+    registrationNumber: any,
+    query: Record<string, string>
+  ): Observable<any> {
+    let params = new HttpParams();
+    Object.keys(query).forEach((key) => {
+      const value = query[key];
+      if (value != null && value !== '') {
+        params = params.set(key, value);
+      }
+    });
+    const reg = encodeURIComponent(String(registrationNumber ?? '').trim());
+    return this.httpClient.get(`${this.API_URL_GPS}/${dutySlipID}/${reg}`, { params });
   }
 }

@@ -2963,6 +2963,16 @@ onChange() {
   });
 }
 
+  private buildGpsFetchQueryParam(dateValue: any, timeValue: any): string | null {
+    const dateM = moment(dateValue);
+    if (!dateM.isValid()) {
+      return null;
+    }
+    const timeM = moment(timeValue, ['HH:mm', 'HH:mm:ss', 'h:mm A', moment.ISO_8601], true);
+    const timePart = timeM.isValid() ? timeM.format('HH:mm:ss') : '00:00:00';
+    return `${dateM.format('YYYY-MM-DD')}T${timePart}`;
+  }
+
  public PostDataGPS(event?: Event) 
     {
       if (event) {
@@ -2974,33 +2984,85 @@ onChange() {
         return;
       }
       const form = this.advanceTableForm.getRawValue();
-      const pickupDate = moment(form.pickUpDateForBilling).format('YYYY-MM-DD');
-      const dropOffDate = moment(form.dropOffDateForBilling).format('YYYY-MM-DD');
-      this.dutySlipForBillingService.PostDataGPS(this.advanceTableClosingOne.closingDutySlipModel.dutySlipID,this.RegistrationNumber,pickupDate,dropOffDate).subscribe
-      (
-        data => 
-          {
-         //this.disputeAdvanceTable = data;
-          this.showNotification(
-            'snackbar-success',
-            'GPS data updated.',
-            'bottom',
-            'center'
-          ); 
-          this.GetClosingData();
-          this.InitGPS();       
-        },
-        error =>
-        {
-          this.showNotification(
-            'snackbar-danger',
-            'Operation Failed.....!!!',
-            'bottom',
-            'center'
-          ); 
-        }  
-      // (error: HttpErrorResponse) => { this.disputeAdvanceTable = null;}
+      const query: Record<string, string> = {};
+      const locOut = this.buildGpsFetchQueryParam(
+        form.locationOutDateForBilling,
+        form.locationOutTimeForBilling
       );
+      const reporting = this.buildGpsFetchQueryParam(
+        form.reportingToGuestDateForBilling,
+        form.reportingToGuestTimeForBilling
+      );
+      const pickup = this.buildGpsFetchQueryParam(
+        form.pickUpDateForBilling,
+        form.pickUpTimeForBilling
+      );
+      const dropOff = this.buildGpsFetchQueryParam(
+        form.dropOffDateForBilling,
+        form.dropOffTimeForBilling
+      );
+      const locIn = this.buildGpsFetchQueryParam(
+        form.locationInDateForBilling,
+        form.locationInTimeForBilling
+      );
+      if (locOut) {
+        query.locationOutDate = locOut;
+        query.locationOutTime = locOut;
+      }
+      if (reporting) {
+        query.reportingToGuestDate = reporting;
+        query.reportingToGuestTime = reporting;
+      }
+      if (pickup) {
+        query.pickupDate = pickup;
+        query.pickUpTime = pickup;
+      }
+      if (dropOff) {
+        query.dropOffDate = dropOff;
+        query.dropOffTime = dropOff;
+      }
+      if (locIn) {
+        query.locationInDate = locIn;
+        query.locationInTime = locIn;
+      }
+      this.dutySlipForBillingService
+        .PostDataGPS(
+          this.advanceTableClosingOne.closingDutySlipModel.dutySlipID,
+          this.RegistrationNumber,
+          query
+        )
+        .subscribe({
+          next: (data) => {
+            const payload = data || {};
+            if (payload.success === false) {
+              Swal.fire('', payload.message || 'GPS update failed.', 'error');
+              return;
+            }
+            this.GetClosingData();
+            this.InitGPS();
+            if (payload.hasSegmentKm === false) {
+              Swal.fire(
+                '',
+                payload.message || 'GTrack returned no distance for this window.',
+                'warning'
+              );
+              return;
+            }
+            this.showNotification(
+              'snackbar-success',
+              payload.message || 'GPS data updated.',
+              'bottom',
+              'center'
+            );
+          },
+          error: (err) => {
+            const msg =
+              err?.error?.message ||
+              err?.error?.Message ||
+              'Operation Failed.....!!!';
+            Swal.fire('', msg, 'error');
+          },
+        });
     }
 
   canViewDummyInvoice(): boolean {
