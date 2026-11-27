@@ -3901,7 +3901,6 @@ const routes: Routes = [
         data: {
           requiredPageKey: 'Post Pickup Call MIS',
           alternatePageKeys: ['postPickupCallMis', 'Post Pickup Call MIS'],
-          skipRolePageGuard: true
         }
       },
 

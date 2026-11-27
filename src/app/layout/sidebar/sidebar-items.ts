@@ -1599,8 +1599,7 @@ export const ROUTES: RouteInfo[] = [
         class: '',
         groupTitle: false,
         submenu: [],
-        isAccess: false,
-        alwaysAccessible: true
+        isAccess: false
       },
       {        
         path: 'incidenceMIS',
