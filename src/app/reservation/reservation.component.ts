@@ -409,6 +409,9 @@ advanceTableIN: InternalNoteDetails | null;
   ReservationAlert: any;
   CustomerAlertMessageShow : boolean = false;
   CustomerAlertMessage: any;
+  SoldOutAlertShow: boolean = false;
+  SoldOutAlertMessage: string = '';
+  private lastSoldOutPopupKey: string = '';
   selectedPassengerData: any;
  
   CapMessageShow:boolean = false;
@@ -2203,11 +2206,109 @@ toArray<T>(value: any): T[] {
       this.ReasonMessageShow = false;
       this.ReservationAlertShow = false;
       this.CustomerAlertMessageShow = false;
+      this.SoldOutAlertShow = false;
+      this.SoldOutAlertMessage = '';
+      this.lastSoldOutPopupKey = '';
       return;
     }
     this.getStopReservationReason(customerID);
     this.getReservationAlertForCustomer(customerID);
     this.getAlerMessagetForCustomer(customerID);
+    this.checkCustomerCategorySoldOutAlert(true);
+  }
+
+  checkCustomerCategorySoldOutAlert(showPopup: boolean = true): void {
+    const customerID = this.resolveCustomerIdForAlerts();
+    const cityID = Number(this.cityID || this.advanceTableForm?.value?.pickupCityID || 0);
+    const packageTypeID = Number(this.packageTypeID || this.advanceTableForm?.value?.packageTypeID || 0);
+    const vehicleID = Number(this.vehicleID || this.advanceTableForm?.value?.vehicleID || 0);
+    const pickupDateTime = this.getReservationPickupDateTimeForSoldOut();
+
+    if (!customerID || !cityID || !packageTypeID || !vehicleID || !pickupDateTime) {
+      this.SoldOutAlertShow = false;
+      this.SoldOutAlertMessage = '';
+      this.lastSoldOutPopupKey = '';
+      return;
+    }
+
+    this.rervationGroupService
+      .checkCustomerCategorySoldOut(customerID, cityID, packageTypeID, vehicleID, pickupDateTime)
+      .subscribe(
+        (data: any) => {
+          const isSoldOut = !!(data && (data.isSoldOut === true || data.IsSoldOut === true));
+          const message =
+            (data && (data.message || data.Message)) ||
+            'This car is sold out for this customer category.';
+          if (isSoldOut) {
+            this.SoldOutAlertShow = true;
+            this.SoldOutAlertMessage = message;
+            const key =
+              customerID +
+              '|' +
+              cityID +
+              '|' +
+              packageTypeID +
+              '|' +
+              vehicleID +
+              '|' +
+              pickupDateTime;
+            if (showPopup && key !== this.lastSoldOutPopupKey) {
+              this.lastSoldOutPopupKey = key;
+              Swal.fire({
+                title: 'Sold Out',
+                text: message,
+                icon: 'warning'
+              });
+            }
+          } else {
+            this.SoldOutAlertShow = false;
+            this.SoldOutAlertMessage = '';
+            this.lastSoldOutPopupKey = '';
+          }
+        },
+        () => {
+          this.SoldOutAlertShow = false;
+          this.SoldOutAlertMessage = '';
+        }
+      );
+  }
+
+  private getReservationPickupDateTimeForSoldOut(): string {
+    const formVal = this.advanceTableForm?.value || {};
+    let datePart = '';
+    const pickupFromForm = formVal.pickupDate || this.pickupDate;
+    if (pickupFromForm) {
+      const m = moment(
+        pickupFromForm,
+        ['DD/MM/YYYY', 'DD/MM/yyyy', 'YYYY-MM-DD', moment.ISO_8601],
+        true
+      );
+      if (m.isValid()) {
+        datePart = m.format('YYYY-MM-DD');
+      } else {
+        const m2 = moment(pickupFromForm);
+        if (m2.isValid()) {
+          datePart = m2.format('YYYY-MM-DD');
+        }
+      }
+    }
+    if (!datePart) {
+      return '';
+    }
+
+    let timePart = '00:00';
+    const pickupTime = formVal.pickupTime || this.advanceTable?.pickupTime;
+    if (pickupTime) {
+      if (typeof pickupTime === 'string' && pickupTime.indexOf(':') >= 0) {
+        timePart = pickupTime.substring(0, 5);
+      } else {
+        const tm = moment(pickupTime);
+        if (tm.isValid()) {
+          timePart = tm.format('HH:mm');
+        }
+      }
+    }
+    return datePart + ' ' + timePart + ':00';
   }
 
   getStopReservationReason(customerID)
@@ -2696,6 +2797,7 @@ toArray<T>(value: any): T[] {
     // guard inside getETRDropOffTime skips the API call until every required
     // input is populated, so this is safe to call unconditionally.
     this.getETRDropOffTime();
+    this.checkCustomerCategorySoldOutAlert(true);
   }
 
    //------------DropOff City -----------------
@@ -3053,6 +3155,7 @@ toArray<T>(value: any): T[] {
     });
     this.getETRDropOffTime();
     this.GetReservationCapping(this.customerGroupID, this.customerID, this.pickupDate, this.cityID, this.packageTypeID, this.vehicleID);
+    this.checkCustomerCategorySoldOutAlert(true);
   }
 
   //------------ Type -----------------
@@ -3175,6 +3278,7 @@ DTValidator(PackageTypeList: any[]): ValidatorFn {
     this.ETRDropoffDateSet(packageType);
     this.changeDropOffDate(packageType);
     this.GetReservationCapping(this.customerGroupID,this.customerID,this.pickupDate,this.cityID,this.packageTypeID,this.vehicleID);
+    this.checkCustomerCategorySoldOutAlert(true);
   }
   //----------DropOFFDate-------------
 

@@ -94,7 +94,7 @@
             <mat-progress-spinner *ngIf="isLoadingdata" mode="indeterminate" diameter="30" strokeWidth="4"></mat-progress-spinner>
         </div>
         <div class="reservation-notices-stack mx-4"
-            *ngIf="ReasonMessageShow || ReservationAlertShow || CustomerAlertMessageShow || ReservationStatus === 'Cancelled'">
+            *ngIf="ReasonMessageShow || ReservationAlertShow || CustomerAlertMessageShow || SoldOutAlertShow || ReservationStatus === 'Cancelled'">
             <div *ngIf="ReasonMessageShow" class="reservation-notice reservation-notice--danger" role="alert">
                 <mat-icon class="reservation-notice__icon" aria-hidden="true">block</mat-icon>
                 <div class="reservation-notice__content">
@@ -103,6 +103,13 @@
                         Reservations for <strong>{{ customerName }}</strong> cannot be processed for the following reason:
                         {{ Reason }}
                     </p>
+                </div>
+            </div>
+            <div *ngIf="SoldOutAlertShow" class="reservation-notice reservation-notice--danger" role="alert">
+                <mat-icon class="reservation-notice__icon" aria-hidden="true">block</mat-icon>
+                <div class="reservation-notice__content">
+                    <div class="reservation-notice__title">Sold Out</div>
+                    <p class="reservation-notice__message">{{ SoldOutAlertMessage }}</p>
                 </div>
             </div>
             <div *ngIf="ReservationAlertShow" class="reservation-notice reservation-notice--warning" role="alert">

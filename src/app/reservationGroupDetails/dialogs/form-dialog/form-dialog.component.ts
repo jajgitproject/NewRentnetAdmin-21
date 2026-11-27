@@ -89,6 +89,8 @@ export class FormDialogComponent implements OnInit {
 
   FromToDate: string;
   ReasonMessageShow: boolean = false;
+  SoldOutAlertShow: boolean = false;
+  SoldOutAlertMessage: string = '';
   Reason: any;
   reservationBlocked: boolean = false;
   saveDisabled: boolean = true;

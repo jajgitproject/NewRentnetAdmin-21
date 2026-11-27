@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { Component, OnInit } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TicketService } from './ticket.service';
 
@@ -11,7 +12,11 @@ import { TicketService } from './ticket.service';
 export class TicketListComponent implements OnInit {
   actor: any = {};
   rows: any[] = [];
+  pagedRows: any[] = [];
   applications: any[] = [];
+  readonly pageSize = 25;
+  readonly pageSizeOptions = [25];
+  pageIndex = 0;
   filters: any = {
     status: '',
     priority: '',
@@ -49,6 +54,8 @@ export class TicketListComponent implements OnInit {
           return;
         }
         this.rows = data?.rows || [];
+        this.pageIndex = 0;
+        this.applyPage();
       },
       (error) => this.snack.open(this.tickets.errorMessage(error), 'Close', { duration: 4000 })
     );
@@ -69,6 +76,20 @@ export class TicketListComponent implements OnInit {
       applicationId: ''
     };
     this.search();
+  }
+
+  onPage(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.applyPage();
+  }
+
+  private applyPage(): void {
+    const maxPage = Math.max(0, Math.ceil(this.rows.length / this.pageSize) - 1);
+    if (this.pageIndex > maxPage) {
+      this.pageIndex = maxPage;
+    }
+    const start = this.pageIndex * this.pageSize;
+    this.pagedRows = this.rows.slice(start, start + this.pageSize);
   }
 
   mark(row: any): string {

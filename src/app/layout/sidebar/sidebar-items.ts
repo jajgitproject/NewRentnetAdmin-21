@@ -926,6 +926,28 @@ export const ROUTES: RouteInfo[] = [
       },
 
       {
+        path: 'cappingFacilityConfig',
+        title: 'Capping Facility Config',
+        moduleName: 'cappingFacilityConfig',
+        icon: 'fas fa-calendar-check',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
+        path: 'customerCategorySoldOutConfig',
+        title: 'Customer Category Sold-Out Config',
+        moduleName: 'customerCategorySoldOutConfig',
+        icon: 'fas fa-ban',
+        class: '',
+        groupTitle: false,
+        submenu: [],
+        isAccess: false
+      },
+
+      {
         path: 'customerMeeting',
         title: 'Customer Meeting',
         moduleName: 'customerMeeting',

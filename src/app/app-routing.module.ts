@@ -4058,6 +4058,22 @@ const routes: Routes = [
       },
 
       {
+        path: 'cappingFacilityConfig',
+        loadChildren: () =>
+          import('./cappingFacilityConfig/cappingFacilityConfig.module').then(
+            (m) => m.CappingFacilityConfigModule
+          )
+      },
+
+      {
+        path: 'customerCategorySoldOutConfig',
+        loadChildren: () =>
+          import('./customerCategorySoldOutConfig/customerCategorySoldOutConfig.module').then(
+            (m) => m.CustomerCategorySoldOutConfigModule
+          )
+      },
+
+      {
         path: 'sac',
         loadChildren: () =>
           import('./sac/sac.module').then(

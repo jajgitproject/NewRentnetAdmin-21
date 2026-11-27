@@ -121,7 +121,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let row of rows">
+                  <tr *ngFor="let row of pagedRows">
                     <td><a [routerLink]="['/ticket', row.ticketID]">{{ row.ticketNo }}</a></td>
                     <td>{{ row.title }}</td>
                     <td>{{ row.statusName }}</td>
@@ -142,6 +142,16 @@
                   </tr>
                 </tbody>
               </table>
+              <mat-paginator
+                *ngIf="rows.length > 0"
+                [length]="rows.length"
+                [pageIndex]="pageIndex"
+                [pageSize]="pageSize"
+                [pageSizeOptions]="pageSizeOptions"
+                [showFirstLastButtons]="true"
+                (page)="onPage($event)"
+              >
+              </mat-paginator>
             </div>
           </div>
         </div>

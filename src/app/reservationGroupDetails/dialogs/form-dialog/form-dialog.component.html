@@ -14,6 +14,13 @@
               {{ Reason }}
             </span>
           </div>
+          <div *ngIf="SoldOutAlertShow">
+            <span style="color: red; font-size: 15px">
+              Sold Out
+              <br />
+              {{ SoldOutAlertMessage }}
+            </span>
+          </div>
         </div>
       </div>
     </div>

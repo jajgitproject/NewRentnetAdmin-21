@@ -1,0 +1,152 @@
+<div class="addContainer">
+  <div class="modalHeader">
+    <div class="editRowModal">
+      <div class="modalHeader clearfix">
+        <div class="modal-about">
+          <div class="font-weight-bold p-t-5 font-17">{{ dialogTitle }}</div>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content>
+    <form class="register-form m-4" [formGroup]="advanceTableForm">
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Customer Category</mat-label>
+            <mat-select formControlName="customerCategoryID" required>
+              <mat-option *ngFor="let c of customerCategoryList" [value]="c.customerCategoryID || c.CustomerCategoryID">
+                {{ c.customerCategory || c.CustomerCategory }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="advanceTableForm.get('customerCategoryID')?.hasError('required')">
+              Customer Category is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>City</mat-label>
+            <mat-select formControlName="cityID" required>
+              <mat-option *ngFor="let c of cityList" [value]="c.geoPointID || c.GeoPointID">
+                {{ c.geoPointName || c.GeoPointName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="advanceTableForm.get('cityID')?.hasError('required')">
+              City is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Duty Type</mat-label>
+            <mat-select formControlName="packageTypeID" required>
+              <mat-option *ngFor="let p of packageTypeList" [value]="p.packageTypeID || p.PackageTypeID">
+                {{ p.packageType || p.PackageType }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="advanceTableForm.get('packageTypeID')?.hasError('required')">
+              Duty Type is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Vehicle Name</mat-label>
+            <mat-select formControlName="vehicleID" required>
+              <mat-option *ngFor="let v of vehicleList" [value]="v.vehicleID || v.VehicleID">
+                {{ v.vehicle || v.Vehicle }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="advanceTableForm.get('vehicleID')?.hasError('required')">
+              Vehicle Name is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>From Date</mat-label>
+            <input matInput [matDatepicker]="fromPicker" formControlName="fromDate" required />
+            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker></mat-datepicker>
+            <mat-error *ngIf="advanceTableForm.get('fromDate')?.hasError('required')">
+              From Date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>From Time</mat-label>
+            <input matInput type="time" formControlName="fromTime" required />
+            <mat-error *ngIf="advanceTableForm.get('fromTime')?.hasError('required')">
+              From Time is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>To Date</mat-label>
+            <input matInput [matDatepicker]="toPicker" formControlName="toDate" required />
+            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+            <mat-datepicker #toPicker></mat-datepicker>
+            <mat-error *ngIf="advanceTableForm.get('toDate')?.hasError('required')">
+              To Date is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>To Time</mat-label>
+            <input matInput type="time" formControlName="toTime" required />
+            <mat-error *ngIf="advanceTableForm.get('toTime')?.hasError('required')">
+              To Time is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+          <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+            <mat-label>Activation Status</mat-label>
+            <mat-select formControlName="activationStatus">
+              <mat-option [value]="true">Active</mat-option>
+              <mat-option [value]="false">Deleted</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+          <div class="example-button-row">
+            <button
+              mat-raised-button
+              color="primary"
+              [disabled]="!advanceTableForm.valid || isLoading"
+              (click)="submit()"
+              *ngIf="!isLoading"
+            >
+              Save
+            </button>
+            <mat-spinner *ngIf="isLoading" diameter="30"></mat-spinner>
+            <button mat-raised-button color="warn" (click)="onNoClick()" tabindex="-1">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

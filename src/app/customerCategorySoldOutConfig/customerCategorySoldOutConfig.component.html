@@ -1,0 +1,219 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">Customer Category Sold-Out Config</a>
+            </li>
+          </ul>
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Customer Category Sold-Out Config</h2>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <div class="responsive_table">
+              <div class="materialTableHeader">
+                <div class="row">
+                  <div class="modal fade" id="soldOutSearchModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Customer Category Sold-Out Config</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="row">
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Customer Category</mat-label>
+                                <mat-select [(value)]="SearchCustomerCategoryID">
+                                  <mat-option [value]="null">All</mat-option>
+                                  <mat-option
+                                    *ngFor="let c of customerCategoryList"
+                                    [value]="c.customerCategoryID || c.CustomerCategoryID"
+                                  >
+                                    {{ c.customerCategory || c.CustomerCategory }}
+                                  </mat-option>
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>City</mat-label>
+                                <mat-select [(value)]="SearchCityID">
+                                  <mat-option [value]="null">All</mat-option>
+                                  <mat-option *ngFor="let c of cityList" [value]="c.geoPointID || c.GeoPointID">
+                                    {{ c.geoPointName || c.GeoPointName }}
+                                  </mat-option>
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Duty Type</mat-label>
+                                <mat-select [(value)]="SearchPackageTypeID">
+                                  <mat-option [value]="null">All</mat-option>
+                                  <mat-option
+                                    *ngFor="let p of packageTypeList"
+                                    [value]="p.packageTypeID || p.PackageTypeID"
+                                  >
+                                    {{ p.packageType || p.PackageType }}
+                                  </mat-option>
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                              <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                                <mat-label>Vehicle Name</mat-label>
+                                <mat-select [(value)]="SearchVehicleID">
+                                  <mat-option [value]="null">All</mat-option>
+                                  <mat-option
+                                    *ngFor="let v of vehicleList"
+                                    [value]="v.vehicleID || v.VehicleID"
+                                  >
+                                    {{ v.vehicle || v.Vehicle }}
+                                  </mat-option>
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                              <mat-form-field class="example-full-width mb-3" appearance="outline" floatLabel="always">
+                                <mat-label>Activation Status</mat-label>
+                                <mat-select [(value)]="SearchActivationStatus">
+                                  <mat-option [value]="true">Active</mat-option>
+                                  <mat-option [value]="false">Deleted</mat-option>
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button mat-raised-button color="warn" type="button" (click)="clearFilters()" data-dismiss="modal">
+                            Clear
+                          </button>
+                          <button mat-raised-button color="primary" type="button" (click)="applyFilters()" data-dismiss="modal">
+                            Search
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="width: 70%; float:left; padding-top: 15px; padding-left: 22px;">
+                    <div *ngIf="selectedCustomerCategoryLabel" style="float: left; margin-right: 8px;">
+                      <b>Customer Category</b> : {{ selectedCustomerCategoryLabel }},
+                    </div>
+                    <div *ngIf="selectedCityLabel" style="float: left; margin-right: 8px;">
+                      <b>City</b> : {{ selectedCityLabel }},
+                    </div>
+                    <div *ngIf="selectedPackageTypeLabel" style="float: left; margin-right: 8px;">
+                      <b>Duty Type</b> : {{ selectedPackageTypeLabel }},
+                    </div>
+                    <div *ngIf="selectedVehicleLabel" style="float: left; margin-right: 8px;">
+                      <b>Vehicle Name</b> : {{ selectedVehicleLabel }},
+                    </div>
+                    <div style="float: left;">
+                      <b>Status</b> : {{ SearchActivationStatus ? 'Active' : 'Deleted' }}
+                    </div>
+                  </div>
+
+                  <div style="width: 30%; text-align:right;">
+                    <button
+                      mat-raised-button
+                      color="primary"
+                      data-dismiss="modal"
+                      data-toggle="modal"
+                      data-backdrop="false"
+                      data-target="#soldOutSearchModal"
+                    >
+                      Search
+                    </button>
+                    &nbsp;
+                    <button mat-mini-fab color="primary" (click)="addNew()">
+                      <mat-icon class="col-white">add</mat-icon>
+                    </button>
+                    &nbsp;
+                    <button mat-mini-fab color="primary" (click)="refresh()">
+                      <mat-icon class="col-white">refresh</mat-icon>
+                    </button>
+                    &nbsp;
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="isLoading" style="display:flex;justify-content:center;padding:24px;">
+                <mat-spinner diameter="36"></mat-spinner>
+              </div>
+
+              <ng-container *ngIf="!isLoading">
+                <div class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;" *ngIf="!dataSource?.length">
+                  No Records Found
+                </div>
+
+                <div class="scrollable-table-container" *ngIf="dataSource?.length">
+                  <table mat-table [dataSource]="dataSource" class="mat-cell floating-header-table full-width">
+                    <ng-container matColumnDef="customerCategory">
+                      <th mat-header-cell *matHeaderCellDef>Category</th>
+                      <td mat-cell *matCellDef="let row">{{ row.customerCategory }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="city">
+                      <th mat-header-cell *matHeaderCellDef>City</th>
+                      <td mat-cell *matCellDef="let row">{{ row.city }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="packageType">
+                      <th mat-header-cell *matHeaderCellDef>Duty Type</th>
+                      <td mat-cell *matCellDef="let row">{{ row.packageType }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="vehicle">
+                      <th mat-header-cell *matHeaderCellDef>Vehicle Name</th>
+                      <td mat-cell *matCellDef="let row">{{ row.vehicle }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="fromDateTimeString">
+                      <th mat-header-cell *matHeaderCellDef>From</th>
+                      <td mat-cell *matCellDef="let row">{{ row.fromDateTimeString || row.fromDateTime }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="toDateTimeString">
+                      <th mat-header-cell *matHeaderCellDef>To</th>
+                      <td mat-cell *matCellDef="let row">{{ row.toDateTimeString || row.toDateTime }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="activationStatus">
+                      <th mat-header-cell *matHeaderCellDef>Status</th>
+                      <td mat-cell *matCellDef="let row">{{ row.activationStatus ? 'Active' : 'Deleted' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell *matHeaderCellDef>Actions</th>
+                      <td mat-cell *matCellDef="let row">
+                        <button mat-icon-button color="accent" (click)="editCall(row)" title="Edit">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="deleteItem(row)" title="Delete">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                  </table>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

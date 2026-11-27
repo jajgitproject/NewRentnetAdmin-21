@@ -1,0 +1,129 @@
+<section class="content">
+  <div class="container-fluid">
+    <div class="block-header">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <ul>
+            <li class="breadcrumb-item bcrumb-1">
+              <a routerLink="/dashboard/main"><i class="fas fa-home"></i> Home</a>|
+              <a href="#" onClick="return false;">Admin</a>|
+              <a href="#" onClick="return false;">Capping Facility Config</a>
+            </li>
+          </ul>
+          <ul class="breadcrumb breadcrumb-style">
+            <li class="breadcrumb-item">
+              <h2>Capping Facility Config</h2>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body capping-facility-form">
+            <p class="hint">
+              Configure dates where capping is OFF. For those pickup dates, weekday reservation capping
+              and capping popups are skipped. Existing Customer / Customer Group weekday caps are unchanged.
+            </p>
+
+            <div class="row form-row">
+              <div class="col-md-5">
+                <mat-form-field class="example-full-width" appearance="outline" floatLabel="always">
+                  <mat-label>Add OFF date</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="picker"
+                    [formControl]="datePickerControl"
+                    (dateChange)="onDateSelected($event.value)"
+                    readonly
+                  />
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="selected-dates" *ngIf="selectedDates.length">
+              <div class="selected-header">
+                <label class="field-label">Selected OFF dates ({{ selectedDates.length }})</label>
+                <button mat-button type="button" color="warn" (click)="clearSelected()">Clear all</button>
+              </div>
+              <mat-chip-set>
+                <mat-chip
+                  *ngFor="let d of selectedDates"
+                  [removable]="true"
+                  (removed)="removeSelectedDate(d)"
+                >
+                  {{ formatDisplay(d) }}
+                  <button matChipRemove aria-label="Remove date">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+
+            <div class="actions">
+              <button
+                mat-raised-button
+                color="primary"
+                type="button"
+                [disabled]="isSaving || !selectedDates.length"
+                (click)="save()"
+                *ngIf="!isSaving"
+              >
+                Save OFF
+              </button>
+              <mat-spinner *ngIf="isSaving" diameter="30"></mat-spinner>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <div class="existing-header">
+              <h4>Configured OFF dates</h4>
+              <button mat-stroked-button type="button" (click)="loadExisting()" [disabled]="isLoading">
+                Refresh
+              </button>
+            </div>
+
+            <div *ngIf="isLoading" class="loading-wrap">
+              <mat-spinner diameter="36"></mat-spinner>
+            </div>
+
+            <div class="responsive_table" *ngIf="!isLoading">
+              <table mat-table [dataSource]="existingConfigs" class="mat-elevation-z0 full-width" *ngIf="existingConfigs.length; else emptyState">
+                <ng-container matColumnDef="configDateDisplay">
+                  <th mat-header-cell *matHeaderCellDef>Date</th>
+                  <td mat-cell *matCellDef="let row">{{ row.configDateDisplay || row.configDate }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let row">
+                    <button mat-icon-button color="warn" type="button" (click)="deleteConfig(row)" title="Remove">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              </table>
+
+              <ng-template #emptyState>
+                <p class="empty">No OFF date configs in the current range. Add dates above and Save OFF.</p>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -97,6 +97,29 @@ export class ReservationGroupService
   {
     return this.httpClient.get(this.API_URL_Reason + "/AlerMessagetForCustomer/" + CustomerID + '/' + FromToDate);
   }
+
+  checkCustomerCategorySoldOut(
+    customerID: number,
+    cityID: number,
+    packageTypeID: number,
+    vehicleID: number,
+    pickupDateTime: string
+  ): Observable<any> {
+    const encoded = encodeURIComponent(pickupDateTime || 'null');
+    return this.httpClient.get(
+      this.generalService.BaseURL +
+        'customerCategorySoldOutConfig/Check/' +
+        customerID +
+        '/' +
+        cityID +
+        '/' +
+        packageTypeID +
+        '/' +
+        vehicleID +
+        '/' +
+        encoded
+    );
+  }
 }
   
 
