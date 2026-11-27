@@ -1,0 +1,75 @@
+<div class="debit-voucher-toolbar no-print">
+  <button type="button" class="btn btn-primary debit-voucher-btn" (click)="print()">Print this page</button>
+  <button type="button" class="btn btn-outline-secondary debit-voucher-btn" (click)="backToDebitList()">Back to Debits</button>
+</div>
+
+<div class="debit-voucher-page" *ngIf="!loading && !error && voucher">
+  <div class="page">
+    <div class="frame">
+      <div class="company-name">ECOS (INDIA) MOBILITY &amp; HOSPITALITY LIMITED</div>
+      <div class="company-address">
+        Corporate Office: Bldg.# 238 (2nd Floor), Okhla Industrial Estate Phase-3, New Delhi- 110020.<br />
+        Phone (T): +91-11-4079-4079 | Fax (F): +91-11-41550515<br />
+        Email (E): info&#64;ecorentacar.com | Website (W): www.ecorentacar.com
+      </div>
+
+      <div class="title-bar">CASH PAYMENT</div>
+
+      <table class="voucher-meta" border="1" cellspacing="0" cellpadding="0">
+        <tbody>
+          <tr>
+            <td class="meta-label">Voucher No :</td>
+            <td class="meta-value">{{ voucher.debitID }}</td>
+          </tr>
+          <tr>
+            <td class="meta-label">Date :</td>
+            <td class="meta-value">{{ voucher.voucherDate }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="voucher-main">
+        <thead>
+          <tr>
+            <th class="particulars-head">
+              Particulars - Car No. {{ voucher.carNo }} - Supplier Name : {{ voucher.supplierName }}
+            </th>
+            <th class="amount-head">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="particulars-body">
+              <div>{{ voucher.particularsLine1 }}</div>
+              <div>{{ voucher.particularsLine2 }}</div>
+            </td>
+            <td class="amount-body">{{ voucher.amountDisplay }}</td>
+          </tr>
+          <tr class="total-row">
+            <td class="particulars-body amount-words"><strong>{{ voucher.amountWords }}</strong></td>
+            <td class="amount-body total">{{ voucher.amountDisplay }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="signatures">
+        <tr>
+          <td>Accountant</td>
+          <td>Account Manager</td>
+          <td>Director</td>
+        </tr>
+        <tr class="sign-name-row">
+          <td>{{ voucher.accountantName }}</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td colspan="3" class="received-line">Signature Cash Received By</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="debit-voucher-status no-print" *ngIf="loading">Loading debit voucher…</div>
+<div class="debit-voucher-status no-print error" *ngIf="!loading && error">{{ error }}</div>

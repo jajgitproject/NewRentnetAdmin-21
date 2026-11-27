@@ -1,0 +1,194 @@
+@page {
+  size: A4;
+  margin: 10mm;
+}
+
+.debit-voucher-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1200;
+  text-align: center;
+  padding: 12px 8px;
+  background: #d9d9d9;
+  pointer-events: auto;
+
+  .debit-voucher-btn {
+    margin: 0 6px;
+    min-width: 140px;
+  }
+}
+
+.debit-voucher-page {
+  background: #d9d9d9;
+  min-height: calc(100vh - 56px);
+  padding: 0 8px 24px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.page {
+  width: 210mm;
+  max-width: 100%;
+  margin: 0 auto;
+  background: #fff;
+  padding: 5mm;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+
+.frame {
+  border: 1px solid #000;
+  padding: 8mm 10mm;
+}
+
+.company-name {
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.company-address {
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-bottom: 12px;
+}
+
+.title-bar {
+  margin: 0 0 10px;
+  padding: 6px 0;
+  background: #00008b;
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.voucher-meta {
+  width: auto;
+  min-width: 220px;
+  max-width: 320px;
+  border-collapse: collapse;
+  border: 1px solid #000;
+  margin: 0 0 10px;
+  font-size: 12px;
+  text-align: left;
+
+  td {
+    border: 1px solid #000;
+    padding: 3px 10px;
+    vertical-align: middle;
+  }
+
+  .meta-label {
+    font-weight: bold;
+    white-space: nowrap;
+    width: 42%;
+  }
+
+  .meta-value {
+    width: 58%;
+    font-weight: normal;
+  }
+}
+
+.voucher-main {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 12px;
+
+  th,
+  td {
+    border: 1px solid #000;
+    vertical-align: top;
+    padding: 6px 8px;
+  }
+
+  .particulars-head {
+    text-align: left;
+    font-weight: bold;
+    width: 82%;
+  }
+
+  .amount-head {
+    text-align: center;
+    font-weight: bold;
+    width: 18%;
+  }
+
+  .amount-body {
+    text-align: right;
+    white-space: nowrap;
+
+    &.total {
+      font-weight: bold;
+    }
+  }
+
+  .total-row .amount-words {
+    margin: 0;
+  }
+
+  .extra-line {
+    margin-top: 6px;
+    font-size: 11px;
+  }
+}
+
+.signatures {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 4px;
+
+  td {
+    border: 1px solid #000;
+    text-align: center;
+    padding: 8px 6px;
+    vertical-align: top;
+    height: 48px;
+  }
+
+  .sign-name-row td {
+    height: auto;
+    font-size: 11px;
+    padding: 4px 6px 12px;
+  }
+
+  .received-line {
+    text-align: left;
+    padding-left: 12px;
+    font-size: 11px;
+  }
+}
+
+.debit-voucher-status {
+  text-align: center;
+  padding: 24px;
+  font-size: 14px;
+
+  &.error {
+    color: #c62828;
+  }
+}
+
+@media print {
+  .no-print,
+  .debit-voucher-toolbar {
+    display: none !important;
+  }
+
+  .debit-voucher-page {
+    background: #fff;
+    padding: 0;
+    min-height: auto;
+  }
+
+  .page {
+    box-shadow: none;
+    width: auto;
+    max-width: none;
+    padding: 0;
+  }
+}
