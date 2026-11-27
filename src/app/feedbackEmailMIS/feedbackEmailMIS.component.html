@@ -61,6 +61,7 @@
                             <mat-form-field appearance="outline" floatLabel="always" class="search-field">
                                 <mat-label>Email Sent Yes/No</mat-label>
                                 <mat-select [(ngModel)]="searchEmailSent">
+                                    <mat-option value="">All</mat-option>
                                     <mat-option value="Yes">Yes</mat-option>
                                     <mat-option value="No">No</mat-option>
                                 </mat-select>
@@ -126,20 +127,26 @@
                         <div class="responsive_table">
                             <div class="table-responsive">
                                 <div class="feedback-record-count">
-                                    {{ getRecordCount() }} {{ getRecordCount() === 1 ? 'record' : 'records' }} found
+                                    {{ getPageRangeLabel() || (getRecordCount() + ' ' + (getRecordCount() === 1 ? 'record' : 'records') + ' found') }}
                                 </div>
 
-                                <p *ngIf="!dataSource; then thenBlock2 else elseBlock2">
-                                    This is not rendered
+                                <p *ngIf="searchLoading" class="feedback-search-status">Loading records…</p>
+
+                                <p *ngIf="!searchLoading && !hasSearched" class="feedback-search-status">
+                                    Set filters and click Search to load records.
                                 </p>
 
-                                <ng-template #thenBlock2>
-                                    <div class="alert alert-primary"
-                                        style="background-color:#E8E8E8; text-align: center;">
-                                        No Records Found</div>
-                                </ng-template>
+                                <div *ngIf="!searchLoading && hasSearched && dataSource === null"
+                                    class="alert alert-danger" style="text-align: center;">
+                                    Could not load records. Check filters and try again.
+                                </div>
 
-                                <ng-template #elseBlock2>
+                                <div *ngIf="!searchLoading && hasSearched && dataSource !== null && getRecordCount() === 0"
+                                    class="alert alert-primary" style="background-color:#E8E8E8; text-align: center;">
+                                    No Records Found
+                                </div>
+
+                                <ng-container *ngIf="!searchLoading && dataSource !== null && getRecordCount() > 0">
                                     <div class="feedback-table-scroll">
                                     <div style="width: 200%;">
                                         <mat-table #table [dataSource]="dataSource" matSort class="mat-cell floating-header-table"
@@ -287,7 +294,15 @@
                                         </ng-template>
                                     </mat-menu>
 
-                                </ng-template>
+                                </ng-container>
+
+                                <mat-paginator *ngIf="hasSearched && !searchLoading && totalRecords > 0"
+                                    [length]="totalRecords"
+                                    [pageIndex]="PageNumber"
+                                    [pageSize]="pageSize"
+                                    [pageSizeOptions]="[100]"
+                                    (page)="onPageChange($event)">
+                                </mat-paginator>
                             </div>
                         </div>
                     </div>

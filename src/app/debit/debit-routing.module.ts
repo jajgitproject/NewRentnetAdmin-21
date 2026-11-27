@@ -6,8 +6,8 @@ import { DebitComponent } from './debit.component';
 const routes: Routes = [
   {
     path: '',
-    component: DebitComponent
-  }
+    component: DebitComponent,
+  },
 ];
 
 @NgModule({

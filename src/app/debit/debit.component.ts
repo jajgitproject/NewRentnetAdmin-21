@@ -102,31 +102,48 @@ export class DebitComponent implements OnInit, OnDestroy {
   }
 
   addNew() {
-    this.dialog.open(FormDialogComponent, {
+    const ref = this.dialog.open(FormDialogComponent, {
       width: '900px',
-      data: { action: 'add' }
+      data: { action: 'add' },
     });
+    ref.afterClosed().subscribe((result) => this.handleDebitDialogClosed(result));
   }
 
   editCall(row) {
     const debitId = row.debitID ?? row.DebitID;
     this.debitService.getById(debitId).subscribe(
       (detail) => {
-        this.dialog.open(FormDialogComponent, {
+        const ref = this.dialog.open(FormDialogComponent, {
           width: '900px',
           data: {
             advanceTable: detail || row,
-            action: 'edit'
-          }
+            action: 'edit',
+          },
         });
+        ref.afterClosed().subscribe((result) => this.handleDebitDialogClosed(result));
       },
       () => {
-        this.dialog.open(FormDialogComponent, {
+        const ref = this.dialog.open(FormDialogComponent, {
           width: '900px',
-          data: { advanceTable: row, action: 'edit' }
+          data: { advanceTable: row, action: 'edit' },
         });
+        ref.afterClosed().subscribe((result) => this.handleDebitDialogClosed(result));
       }
     );
+  }
+
+  openDebitVoucher(row: DebitModel): void {
+    const debitId = Number(row?.debitID ?? row?.DebitID ?? 0);
+    if (debitId <= 0) {
+      return;
+    }
+    window.open(`${window.location.origin}/#/debitVoucher/${debitId}`, '_blank');
+  }
+
+  private handleDebitDialogClosed(result: any): void {
+    if (result?.openVoucher && Number(result?.debitId) > 0) {
+      window.open(`${window.location.origin}/#/debitVoucher/${result.debitId}`, '_blank');
+    }
   }
 
   deleteItem(row) {

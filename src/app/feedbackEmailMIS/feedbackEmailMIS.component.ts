@@ -6,7 +6,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize, switchMap } from 'rxjs/operators';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -49,6 +49,11 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
 
 
   dataSource: FeedbackEmailMIS[] | null;
+  hasSearched = false;
+  searchLoading = false;
+  totalRecords = 0;
+  pageSize = 100;
+  private loadDataSub: Subscription;
   employeeID: number;
   row: FeedbackEmailMIS | null;
   SearchName: string = '';
@@ -102,6 +107,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     this.initDefaultDates();
     this.setupCustomerAutocomplete();
     this.SubscribeUpdateService();
+    this.loadData();
   }
 
   private initDefaultDates() {
@@ -153,6 +159,9 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopSendPolling();
+    if (this.loadDataSub) {
+      this.loadDataSub.unsubscribe();
+    }
     if (this.customerAutocompleteSub) {
       this.customerAutocompleteSub.unsubscribe();
     }
@@ -165,6 +174,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
   refresh() {
     this.SearchActivationStatus = true;
     this.PageNumber = 0;
+    this.totalRecords = 0;
     this.searchTerm = '';
     this.searchReservationID = '';
     this.searchDutySlipID = '';
@@ -237,6 +247,30 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     }
   }
 
+  onPageChange(event: { pageIndex: number; pageSize: number }) {
+    if (event?.pageSize && event.pageSize !== this.pageSize) {
+      this.pageSize = event.pageSize;
+    }
+    this.PageNumber = event?.pageIndex ?? 0;
+    this.loadData();
+  }
+
+  private parsePageResponse(data: any): { rows: FeedbackEmailMIS[]; totalCount: number } {
+    if (Array.isArray(data)) {
+      return {
+        rows: data.map((r) => new FeedbackEmailMIS(r)),
+        totalCount: data.length
+      };
+    }
+
+    const rows = data?.rows || data?.Rows || [];
+    const totalCount = Number(data?.totalCount ?? data?.TotalCount ?? rows.length ?? 0);
+    return {
+      rows: Array.isArray(rows) ? rows.map((r) => new FeedbackEmailMIS(r)) : [],
+      totalCount: Number.isFinite(totalCount) ? totalCount : 0
+    };
+  }
+
   public loadData() {
     const fromDate = this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchFromDate);
     const toDate = this.isDutySlipIdSearchActive() ? '' : this.formatSearchDate(this.searchToDate);
@@ -245,7 +279,14 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.feedbackEmailMISService.getTableData(
+    if (this.loadDataSub) {
+      this.loadDataSub.unsubscribe();
+    }
+
+    this.searchLoading = true;
+    this.hasSearched = true;
+
+    this.loadDataSub = this.feedbackEmailMISService.getTableData(
       this.searchReservationID,
       this.searchDutySlipID,
       this.getSelectedCustomerId(),
@@ -254,16 +295,50 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       fromDate,
       toDate,
       this.PageNumber
-    ).subscribe
-      (
-        data => {
-          this.dataSource = data;
-          if (!this.sendJobRunning) {
-            this.selection.clear();
+    ).pipe(
+      finalize(() => {
+        this.searchLoading = false;
+      })
+    ).subscribe(
+      (data) => {
+        const page = this.parsePageResponse(data);
+        this.dataSource = page.rows;
+        if (page.totalCount > 0 || this.PageNumber === 0) {
+          this.totalRecords = page.totalCount;
+        }
+        const debug = data?.debug ?? data?.Debug;
+        if (debug && (!page.rows?.length || debug.dataLastError || debug.countLastError)) {
+          // eslint-disable-next-line no-console
+          console.group('Feedback Email MIS SQL');
+          // eslint-disable-next-line no-console
+          console.log('Parameters:', debug.parameterSummary ?? debug.ParameterSummary);
+          // eslint-disable-next-line no-console
+          console.log('Count SQL:', debug.countSql ?? debug.CountSql);
+          // eslint-disable-next-line no-console
+          console.log('Data SQL:', debug.dataSql ?? debug.DataSql);
+          if (debug.countLastError || debug.CountLastError) {
+            console.error('Count error:', debug.countLastError ?? debug.CountLastError);
           }
-        },
-        (error: HttpErrorResponse) => { this.dataSource = null; }
-      );
+          if (debug.dataLastError || debug.DataLastError) {
+            console.error('Data error:', debug.dataLastError ?? debug.DataLastError);
+          }
+          // eslint-disable-next-line no-console
+          console.groupEnd();
+        }
+        if (!this.sendJobRunning) {
+          this.selection.clear();
+        }
+      },
+      (error: HttpErrorResponse) => {
+        this.dataSource = null;
+        this.totalRecords = 0;
+        const message = error?.error?.message
+          || (typeof error?.error === 'string' ? error.error : '')
+          || error?.message
+          || 'Unable to load Feedback Email MIS records.';
+        this.showNotification('snackbar-danger', message, 'bottom', 'center');
+      }
+    );
   }
 
   private formatSearchDate(value: any): string {
@@ -304,7 +379,18 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
   }
 
   getRecordCount(): number {
-    return Array.isArray(this.dataSource) ? this.dataSource.length : 0;
+    return this.totalRecords > 0
+      ? this.totalRecords
+      : (Array.isArray(this.dataSource) ? this.dataSource.length : 0);
+  }
+
+  getPageRangeLabel(): string {
+    if (!this.hasSearched || this.totalRecords <= 0 || !Array.isArray(this.dataSource)) {
+      return '';
+    }
+    const start = this.PageNumber * this.pageSize + 1;
+    const end = start + this.dataSource.length - 1;
+    return `Showing ${start}–${end} of ${this.totalRecords}`;
   }
 
   getBookingNo(row: any): string {
@@ -517,7 +603,9 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       this.PageNumber
     ).subscribe(
       (data) => {
-        this.dataSource = data;
+        const page = this.parsePageResponse(data);
+        this.dataSource = page.rows;
+        this.totalRecords = page.totalCount;
       },
       () => { }
     );
@@ -645,6 +733,7 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
       this.sortingData = 1;
       this.sortType = "Descending";
     }
+    this.PageNumber = 0;
     this.feedbackEmailMISService.getTableDataSort(
       this.searchReservationID,
       this.searchDutySlipID,
@@ -659,7 +748,9 @@ export class FeedbackEmailMISComponent implements OnInit, OnDestroy {
     ).subscribe
       (
         data => {
-          this.dataSource = data;
+          const page = this.parsePageResponse(data);
+          this.dataSource = page.rows;
+          this.totalRecords = page.totalCount;
         },
         (error: HttpErrorResponse) => { this.dataSource = null; }
       );

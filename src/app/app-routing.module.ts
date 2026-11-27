@@ -4430,6 +4430,13 @@ const routes: Routes = [
           )
       },
       {
+        path: 'debitVoucher/:debitId',
+        loadChildren: () =>
+          import('./debit/debit-voucher-page.module').then(
+            (m) => m.DebitVoucherPageModule
+          ),
+      },
+      {
         path: 'signupPage',
         loadChildren: () =>
           import('./signupPage/signupPage.module').then(

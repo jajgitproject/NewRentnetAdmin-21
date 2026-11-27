@@ -125,6 +125,10 @@
                                     </mat-table>
 
                                     <mat-menu #rowActionsMenu="matMenu">
+                                        <button mat-menu-item type="button" (click)="openDebitVoucher(actionRow)" [disabled]="!actionRow">
+                                            <mat-icon>receipt</mat-icon>
+                                            <span>Debit Voucher</span>
+                                        </button>
                                         <button mat-menu-item type="button" (click)="viewLogs(actionRow)" [disabled]="!actionRow">
                                             <mat-icon>history</mat-icon>
                                             <span>View logs</span>

@@ -160,6 +160,9 @@
                         <button mat-raised-button color="primary" *ngIf="saveDisabled && !readOnly"
                             [disabled]="!advanceTableForm.valid" type="button" (click)="confirmAdd()">Save</button>
                         <mat-spinner *ngIf="!saveDisabled" diameter="30"></mat-spinner>
+                        <button mat-stroked-button color="accent" type="button" *ngIf="voucherDebitId > 0" (click)="openVoucherLink()">
+                            Debit Voucher
+                        </button>
                         <button mat-raised-button color="warn" type="button" (click)="onNoClick()" tabindex="-1">Cancel</button>
                     </div>
                 </div>

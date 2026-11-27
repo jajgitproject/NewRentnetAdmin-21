@@ -289,14 +289,16 @@ export class FormDialogComponent implements OnInit {
     this.saveDisabled = false;
     const payload = {
       ...this.advanceTableForm.getRawValue(),
-      dateString: this.getDateString()
+      dateString: this.getDateString(),
     };
+    const existingId = Number(this.advanceTable?.debitID ?? this.advanceTableForm.get('debitID')?.value ?? 0);
     if (this.action === 'edit') {
       this.debitService.update(payload).subscribe(
-        () => {
-          this.dialogRef.close();
+        (res) => {
+          const debitId = Number(res?.debitID ?? res?.DebitID ?? payload.debitID ?? existingId);
           this._generalService.sendUpdate('DebitUpdate:DebitView:Success');
           this.saveDisabled = true;
+          this.dialogRef.close({ openVoucher: true, debitId });
         },
         () => {
           this._generalService.sendUpdate('DebitAll:DebitView:Failure');
@@ -305,16 +307,28 @@ export class FormDialogComponent implements OnInit {
       );
     } else {
       this.debitService.add(payload).subscribe(
-        () => {
-          this.dialogRef.close();
+        (res) => {
+          const debitId = Number(res?.debitID ?? res?.DebitID ?? 0);
           this._generalService.sendUpdate('DebitCreate:DebitView:Success');
           this.saveDisabled = true;
+          this.dialogRef.close({ openVoucher: true, debitId });
         },
         () => {
           this._generalService.sendUpdate('DebitAll:DebitView:Failure');
           this.saveDisabled = true;
         }
       );
+    }
+  }
+
+  get voucherDebitId(): number {
+    return Number(this.advanceTable?.debitID ?? this.advanceTableForm.get('debitID')?.value ?? 0);
+  }
+
+  openVoucherLink(): void {
+    const id = this.voucherDebitId;
+    if (id > 0) {
+      window.open(`${window.location.origin}/#/debitVoucher/${id}`, '_blank');
     }
   }
 
