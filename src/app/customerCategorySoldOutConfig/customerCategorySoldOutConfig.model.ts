@@ -9,6 +9,9 @@ export class CustomerCategorySoldOutConfigModel {
   packageType: string;
   vehicleID: number;
   vehicle: string;
+  cityIDs: number[];
+  packageTypeIDs: number[];
+  vehicleIDs: number[];
   fromDateTime: Date | string;
   toDateTime: Date | string;
   fromDateTimeString: string;
@@ -31,6 +34,9 @@ export class CustomerCategorySoldOutConfigModel {
     this.packageType = data.packageType || '';
     this.vehicleID = data.vehicleID || 0;
     this.vehicle = data.vehicle || '';
+    this.cityIDs = Array.isArray(data.cityIDs) ? data.cityIDs : [];
+    this.packageTypeIDs = Array.isArray(data.packageTypeIDs) ? data.packageTypeIDs : [];
+    this.vehicleIDs = Array.isArray(data.vehicleIDs) ? data.vehicleIDs : [];
     this.fromDateTime = data.fromDateTime || null;
     this.toDateTime = data.toDateTime || null;
     this.fromDateTimeString = data.fromDateTimeString || '';

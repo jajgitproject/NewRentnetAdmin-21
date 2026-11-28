@@ -45,11 +45,13 @@ export class CustomerCategorySoldOutConfigService {
   add(model: CustomerCategorySoldOutConfigModel) {
     model.customerCategorySoldOutConfigID = -1;
     model.userID = this.generalService.getUserID();
+    // CityIDs / PackageTypeIDs / VehicleIDs trigger server-side cartesian insert.
     return this.httpClient.post<any>(this.API_URL, model);
   }
 
   update(model: CustomerCategorySoldOutConfigModel) {
     model.userID = this.generalService.getUserID();
+    // Arrays: update current row to first combo, insert remaining combos.
     return this.httpClient.put<any>(this.API_URL, model);
   }
 

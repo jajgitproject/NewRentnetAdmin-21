@@ -14,6 +14,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatChipsModule } from '@angular/material/chips';
 import { CustomerCategorySoldOutConfigComponent } from './customerCategorySoldOutConfig.component';
 import { FormDialogComponent } from './dialogs/form-dialog/form-dialog.component';
 import { DeleteDialogComponent } from './dialogs/delete/delete.component';
@@ -42,6 +43,7 @@ import { CustomerCategorySoldOutConfigRoutingModule } from './customerCategorySo
     MatNativeDateModule,
     MatDialogModule,
     MatAutocompleteModule,
+    MatChipsModule,
     MatProgressSpinnerModule
   ],
   providers: [CustomerCategorySoldOutConfigService]

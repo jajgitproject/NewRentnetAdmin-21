@@ -317,7 +317,7 @@ export class DutyRegisterComponent implements OnInit, OnDestroy {
     this.InitCustomerPerson();
     this.InitPackageType();
     this.InitDispatchLocation();
-    //this.InitCustomerLocation();
+    this.InitCustomerLocation();
     this.InitPaymentMode();
     this.InitSupplierType();
     this.InitSupplier();
